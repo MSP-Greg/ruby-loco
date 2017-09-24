@@ -2,12 +2,11 @@
 
 failures = 0
 
-puts "--------------------------------------------------------------- Test Results"
+puts "---------------------------------------------------------------------- Test Results"
 
 logs = Dir.glob("#{ENV['R_NAME']}-*.log")
 
 results_str = String.new
-
 
 log = logs.grep(/test-all\.log\Z/)
 # 16538 tests, 2190218 assertions, 1 failures, 0 errors, 234 skips
@@ -67,9 +66,8 @@ results_str << "\n#{RUBY_DESCRIPTION}\n"
 
 File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-TEST_RESULTS.log"), results_str)
 
+puts "---------------------------------------------------------------------- Saving Artifacts"
 `attrib +r #{ENV['R_NAME']}-*.log`
-
-puts "--------------------------------------------------------------- Saving Artifacts"
 `#{ENV['7zip']} a zlogs_%R_BRANCH%_%R_DATE%_%R_SVN%.7z .\\*.log`
 puts "Saved zlogs_#{ENV['R_BRANCH']}_#{ENV['R_DATE']}_#{ENV['R_SVN']}.7z"
 
@@ -87,4 +85,3 @@ else
   `#{ENV['7zip']} a ruby_%R_BRANCH%_bad.7z #{z_files}`
   puts "Saved ruby_#{ENV['R_BRANCH']}_bad.7z\n"
 end
-exit 0

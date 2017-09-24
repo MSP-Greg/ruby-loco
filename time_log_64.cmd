@@ -1,7 +1,5 @@
 @ruby time_log.rb
 
-@echo --------------------------------------------------------------- Saving Logs
-
 @ren %R_NAME%-%R_VERS%-1-x86_64-build.log      %R_NAME%-build.log
 @ren %R_NAME%-%R_VERS%-1-x86_64-package.log    %R_NAME%-package.log
 @ren %R_NAME%-%R_VERS%-1-x86_64-prepare.log    %R_NAME%-prepare.log

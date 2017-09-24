@@ -42,7 +42,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @cd %DP0%src/build%SUFFIX%
 @echo.
 
-@echo --------------------------------------------------------------- Running Tests
+@echo ---------------------------------------------------------------------- Running Tests
 @echo test-all
 @rem make.exe "TESTOPTS=-v -j%M_JOBS% --job-status=normal --show-skip" test-all > %LOG_PATH_NAME%-test-all.log 2>&1
 @make.exe "TESTOPTS=-v --show-skip" test-all > %LOG_PATH_NAME%-test-all.log 2>&1
@@ -91,10 +91,11 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 
 @rem Parse spec files, add total time file, and zip
 @echo.
-@echo --------------------------------------------------------------- Build & Test Times
+@echo ---------------------------------------------------------------------- Build ^& Test Times
 @call time_log_64.cmd
 
 @rem --- rename readline.rb_ back to readline.rb_
-@ren %~dp0%R_PKG%\lib\ruby\site_ruby\readline.rb_ readline.rb
-
-exit 0
+@attrib -r %PKG_RUBY%/lib/ruby/site_ruby/readline.rb_
+@rem --- rename seems to only work with backslashes
+@ren %~dp0pkg\ruby%SUFFIX%\ruby%SUFFIX%\lib\ruby\site_ruby\readline.rb_ readline.rb
+@attrib +r %PKG_RUBY%/lib/ruby/site_ruby/readline.rb

@@ -1,6 +1,4 @@
-=begin
-ruby E:\GitHub\ruby-loco\time_log.rb
-=end
+# frozen_string_literal: true
 
 logs = Dir.glob("#{ENV['R_NAME']}-#{ENV['R_VERS']}*.log")
 
