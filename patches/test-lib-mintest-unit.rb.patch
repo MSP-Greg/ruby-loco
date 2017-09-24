@@ -1,0 +1,16 @@
+Patch by MSP-Greg
+keep going?
+diff --git a/test/lib/minitest/unit.rb b/test/lib/minitest/unit.rb
+index 89b6a8eaf4..62622c75b9 100644
+--- a/test/lib/minitest/unit.rb
++++ b/test/lib/minitest/unit.rb
+@@ -900,8 +900,7 @@ def _run_anything type
+         puts "Finished%s %ss in %.6fs, %.4f tests/s, %.4f assertions/s.\n" %
+              [(@repeat_count ? "(#{count}/#{@repeat_count}) " : ""), type,
+                t, @test_count.fdiv(t), @assertion_count.fdiv(t)]
+-      end while @repeat_count && count < @repeat_count &&
+-                report.empty? && failures.zero? && errors.zero?
++      end while @repeat_count && count < @repeat_count && report.empty?
+ 
+       output.sync = old_sync if sync
+ 

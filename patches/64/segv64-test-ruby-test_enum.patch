@@ -1,0 +1,11 @@
+--- a/test/ruby/test_enum.rb	Fri Mar 31 10:11:34 2017
++++ b/test/ruby/test_enum.rb	Fri Mar 31 10:14:59 2017
+@@ -589,7 +589,7 @@
+         end
+       end
+       [o, o].sort_by {|x| x }
+-      c.call
++      c.to_s ; c.call
+     end
+ 
+     assert_raise(RuntimeError) do

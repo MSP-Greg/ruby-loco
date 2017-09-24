@@ -1,0 +1,20 @@
+Patch by MSP-Greg
+use IO.copy_stream instead of two File.open blocks
+diff --git a/spec/mspec/lib/mspec/helpers/fs.rb b/spec/mspec/lib/mspec/helpers/fs.rb
+index fb2c0f702c..26dd821162 100644
+--- a/spec/mspec/lib/mspec/helpers/fs.rb
++++ b/spec/mspec/lib/mspec/helpers/fs.rb
+@@ -1,12 +1,6 @@
+ # Copies a file
+ def cp(source, dest)
+-  File.open(dest, "wb") do |d|
+-    File.open(source, "rb") do |s|
+-      while data = s.read(1024)
+-        d.write data
+-      end
+-    end
+-  end
++  IO.copy_stream source, dest
+ end
+ 
+ # Creates each directory in path that does not exist.

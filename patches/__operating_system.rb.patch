@@ -1,0 +1,32 @@
+diff --git a/operating_system.rb b/operating_system.rb
+index 65bd1e9..50301b9 100644
+--- a/operating_system.rb
++++ b/operating_system.rb
+@@ -6,10 +6,27 @@ Gem.pre_install do |gem_installer|
+   RubyInstaller::Runtime.enable_msys_apps(for_gem_install: true) unless gem_installer.spec.extensions.empty?
+ 
+   unless gem_installer.options && gem_installer.options[:ignore_dependencies]
++    pre = RubyInstaller::Runtime::Msys2Installation.new.mingw_package_prefix
++
+     [['msys2_dependencies'      , :install_packages      ],
+      ['msys2_mingw_dependencies', :install_mingw_packages]].each do |metakey, func|
+ 
+       if deps=gem_installer.spec.metadata[metakey]
++        if metakey == 'msys2_mingw_dependencies'
++          dep_ary = deps.split(" ")
++          dep_ary.each { |d|
++            pkg, vers = d.split('>=')
++            current = `pacman -Q #{pre}-#{pkg}`
++            if /\A#{pre}-#{pkg}/ =~ current
++              puts "Found current #{current}"
++              # need to check for version constraint
++              # below dummy to remove error message
++              current = vers
++              deps.sub!(d, '')
++            end
++          }
++        end
++        next if deps.strip.empty?
+         begin
+           RubyInstaller::Runtime.msys2_installation.send(func, deps.split(" "), verbose: Gem.configuration.verbose)
+         rescue RubyInstaller::Runtime::Msys2Installation::CommandError => err

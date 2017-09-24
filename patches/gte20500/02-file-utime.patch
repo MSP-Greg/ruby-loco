@@ -1,0 +1,195 @@
+Patch by kubo (Takehiro Kubo)
+See https://bugs.ruby-lang.org/issues/13726
+diff --git a/file.c b/file.c
+index 722c03e96e..94e82b73f4 100644
+--- a/file.c
++++ b/file.c
+@@ -113,8 +113,8 @@ int flock(int, int);
+ #define chown(p, o, g)	rb_w32_uchown((p), (o), (g))
+ #undef lchown
+ #define lchown(p, o, g)	rb_w32_ulchown((p), (o), (g))
+-#undef utime
+-#define utime(p, t)	rb_w32_uutime((p), (t))
++#undef utimensat
++#define utimensat(s, p, t, f)	rb_w32_uutimensat((s), (p), (t), (f))
+ #undef link
+ #define link(f, t)	rb_w32_ulink((f), (t))
+ #undef unlink
+diff --git a/include/ruby/win32.h b/include/ruby/win32.h
+index 5b3486c268..82613a866a 100644
+--- a/include/ruby/win32.h
++++ b/include/ruby/win32.h
+@@ -139,6 +139,13 @@ typedef int clockid_t;
+ #undef fstat
+ #ifdef RUBY_EXPORT
+ #define utime(_p, _t)		rb_w32_utime(_p, _t)
++#undef HAVE_UTIMES
++#define HAVE_UTIMES 1
++#define utimes(_p, _t)		rb_w32_utimes(_p, _t)
++#undef HAVE_UTIMENSAT
++#define HAVE_UTIMENSAT 1
++#define AT_FDCWD		-100
++#define utimensat(_d, _p, _t, _f)	rb_w32_utimensat(_d, _p, _t, _f)
+ #define lseek(_f, _o, _w)	_lseeki64(_f, _o, _w)
+ 
+ #define pipe(p)			rb_w32_pipe(p)
+@@ -742,6 +749,10 @@ ssize_t rb_w32_read(int, void *, size_t);
+ ssize_t rb_w32_write(int, const void *, size_t);
+ int  rb_w32_utime(const char *, const struct utimbuf *);
+ int  rb_w32_uutime(const char *, const struct utimbuf *);
++int  rb_w32_utimes(const char *, const struct timeval *);
++int  rb_w32_uutimes(const char *, const struct timeval *);
++int  rb_w32_utimensat(int /* must be AT_FDCWD */, const char *, const struct timespec *, int /* must be 0 */);
++int  rb_w32_uutimensat(int /* must be AT_FDCWD */, const char *, const struct timespec *, int /* must be 0 */);
+ long rb_w32_write_console(uintptr_t, int);	/* use uintptr_t instead of VALUE because it's not defined yet here */
+ int  WINAPI rb_w32_Sleep(unsigned long msec);
+ int  rb_w32_wait_events_blocking(HANDLE *events, int num, DWORD timeout);
+diff --git a/win32/win32.c b/win32/win32.c
+index a205dabfd3..c7204bc6a7 100644
+--- a/win32/win32.c
++++ b/win32/win32.c
+@@ -7280,6 +7280,7 @@ rb_w32_write_console(uintptr_t strarg, int fd)
+     return (long)reslen;
+ }
+ 
++#if RUBY_MSVCRT_VERSION < 80 && !defined(HAVE__GMTIME64_S)
+ /* License: Ruby's */
+ static int
+ unixtime_to_filetime(time_t time, FILETIME *ft)
+@@ -7291,25 +7292,50 @@ unixtime_to_filetime(time_t time, FILETIME *ft)
+     ft->dwHighDateTime = tmp.HighPart;
+     return 0;
+ }
++#endif
++
++/* License: Ruby's */
++static int
++timespec_to_filetime(const struct timespec *ts, FILETIME *ft)
++{
++    ULARGE_INTEGER tmp;
++
++    tmp.QuadPart = ((LONG_LONG)ts->tv_sec + (LONG_LONG)((1970-1601)*365.2425) * 24 * 60 * 60) * 10 * 1000 * 1000;
++    tmp.QuadPart += ts->tv_nsec / 100;
++    ft->dwLowDateTime = tmp.LowPart;
++    ft->dwHighDateTime = tmp.HighPart;
++    return 0;
++}
+ 
+ /* License: Ruby's */
+ static int
+-wutime(const WCHAR *path, const struct utimbuf *times)
++wutimensat(int dirfd, const WCHAR *path, const struct timespec *times, int flags)
+ {
+     HANDLE hFile;
+     FILETIME atime, mtime;
+     struct stati64ns stat;
+     int ret = 0;
+ 
++    /* TODO: When path is absolute, dirfd should be ignored. */
++    if (dirfd != AT_FDCWD) {
++	errno = ENOSYS;
++	return -1;
++    }
++
++    if (flags != 0) {
++	errno = EINVAL; /* AT_SYMLINK_NOFOLLOW isn't supported. */
++	return -1;
++    }
++
+     if (wstati64ns(path, &stat)) {
+ 	return -1;
+     }
+ 
+     if (times) {
+-	if (unixtime_to_filetime(times->actime, &atime)) {
++	if (timespec_to_filetime(&times[0], &atime)) {
+ 	    return -1;
+ 	}
+-	if (unixtime_to_filetime(times->modtime, &mtime)) {
++	if (timespec_to_filetime(&times[1], &mtime)) {
+ 	    return -1;
+ 	}
+     }
+@@ -7344,27 +7370,79 @@ wutime(const WCHAR *path, const struct utimbuf *times)
+ /* License: Ruby's */
+ int
+ rb_w32_uutime(const char *path, const struct utimbuf *times)
++{
++    struct timespec ts[2];
++
++    ts[0].tv_sec = times->actime;
++    ts[0].tv_nsec = 0;
++    ts[1].tv_sec = times->modtime;
++    ts[1].tv_nsec = 0;
++    return rb_w32_uutimensat(AT_FDCWD, path, ts, 0);
++}
++
++/* License: Ruby's */
++int
++rb_w32_utime(const char *path, const struct utimbuf *times)
++{
++    struct timespec ts[2];
++
++    ts[0].tv_sec = times->actime;
++    ts[0].tv_nsec = 0;
++    ts[1].tv_sec = times->modtime;
++    ts[1].tv_nsec = 0;
++    return rb_w32_utimensat(AT_FDCWD, path, ts, 0);
++}
++
++/* License: Ruby's */
++int
++rb_w32_uutimes(const char *path, const struct timeval *times)
++{
++    struct timespec ts[2];
++
++    ts[0].tv_sec = times[0].tv_sec;
++    ts[0].tv_nsec = times[0].tv_usec * 1000;
++    ts[1].tv_sec = times[1].tv_sec;
++    ts[1].tv_nsec = times[1].tv_usec * 1000;
++    return rb_w32_uutimensat(AT_FDCWD, path, ts, 0);
++}
++
++/* License: Ruby's */
++int
++rb_w32_utimes(const char *path, const struct timeval *times)
++{
++    struct timespec ts[2];
++
++    ts[0].tv_sec = times[0].tv_sec;
++    ts[0].tv_nsec = times[0].tv_usec * 1000;
++    ts[1].tv_sec = times[1].tv_sec;
++    ts[1].tv_nsec = times[1].tv_usec * 1000;
++    return rb_w32_utimensat(AT_FDCWD, path, ts, 0);
++}
++
++/* License: Ruby's */
++int
++rb_w32_uutimensat(int dirfd, const char *path, const struct timespec *times, int flags)
+ {
+     WCHAR *wpath;
+     int ret;
+ 
+     if (!(wpath = utf8_to_wstr(path, NULL)))
+ 	return -1;
+-    ret = wutime(wpath, times);
++    ret = wutimensat(dirfd, wpath, times, flags);
+     free(wpath);
+     return ret;
+ }
+ 
+ /* License: Ruby's */
+ int
+-rb_w32_utime(const char *path, const struct utimbuf *times)
++rb_w32_utimensat(int dirfd, const char *path, const struct timespec *times, int flags)
+ {
+     WCHAR *wpath;
+     int ret;
+ 
+     if (!(wpath = filecp_to_wstr(path, NULL)))
+ 	return -1;
+-    ret = wutime(wpath, times);
++    ret = wutimensat(dirfd, wpath, times, flags);
+     free(wpath);
+     return ret;
+ }

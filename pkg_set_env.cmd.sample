@@ -1,0 +1,55 @@
+@echo off
+
+set DP0=%~dp0
+set DP0=%DP0:\=/%
+
+set MSYS2_DIR=E:/msys64
+set MSYS2_DIR_U=/e/msys64
+
+set build_path=/e/GitHub/ruby-loco
+set RUBY=/c/ruby25_64/bin/ruby.exe
+set RUBY_OPATH=/c/ruby25_64/bin
+
+set GIT=%DP0%git/cmd/git.exe
+set GIT_PATH=%DP0%git/cmd
+set GIT_PATH_SH=/e/GitHub/ruby-loco/git/cmd
+
+set TEMP_DIR=E:/temp
+set TEMP=E:/temp
+set TMP=E:/temp
+set TMPDIR=E:/temp
+
+set REPO_RI2=E:/GitHub/rubyinstaller2
+set REPO_RB-RL=E:/GitHub/rb-readline
+set REPO_RUBY=E:/GitHub/ruby
+set REPO_SPEC=E:/GitHub/spec
+set REPO_MSPEC=E:/GitHub/mspec
+
+@rem below is shared by many cmd files, no changes required
+
+for /F "tokens=1-7 delims= " %%G in ('ruby prepare_pre.rb') do (
+@set R_VERS=%%G
+@set R_PATCH=%%H
+@set R_DATE=%%I
+@set R_SVN=%%J
+@set R_VERS_INT=%%K
+@set R_VERS_2=%%L
+@set R_BRANCH=%%M
+)
+
+@echo ---------------------------------- Ruby version ENV variables
+@echo R_VERS      %R_VERS%
+@echo R_PATCH     %R_PATCH%
+@echo R_DATE      %R_DATE%
+@echo R_SVN       %R_SVN%
+@echo R_VERS_INT  %R_VERS_INT%
+@echo R_VERS_2    %R_VERS_2%
+@echo R_BRANCH    %R_BRANCH%
+
+@echo GIT         %GIT%
+@echo GIT_PATH    %GIT_PATH%
+@echo GIT_PATH_SH %GIT_PATH_SH%
+
+
+rem set RUBYOPT=-EWindows-1252
+rem chcp 1252

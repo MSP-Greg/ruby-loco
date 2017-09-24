@@ -1,0 +1,323 @@
+Patch by MSP-Greg
+Add shared util.rb file with create_ssl_ctx method
+Removes duplicated code in ftp, imap, & smtp
+diff --git a/test/net/ftp/test_ftp.rb b/test/net/ftp/test_ftp.rb
+index 6f726e1090..76f136c152 100644
+--- a/test/net/ftp/test_ftp.rb
++++ b/test/net/ftp/test_ftp.rb
+@@ -5,6 +5,7 @@
+ require "ostruct"
+ require "stringio"
+ require "tempfile"
++require_relative '..\utils'
+ 
+ class FTPTest < Test::Unit::TestCase
+   SERVER_NAME = "localhost"
+@@ -14,9 +15,6 @@ class FTPTest < Test::Unit::TestCase
+     rescue SocketError
+       "127.0.0.1"
+     end
+-  CA_FILE = File.expand_path("../fixtures/cacert.pem", __dir__)
+-  SERVER_KEY = File.expand_path("../fixtures/server.key", __dir__)
+-  SERVER_CERT = File.expand_path("../fixtures/server.crt", __dir__)
+ 
+   def setup
+     @thread = nil
+@@ -1731,7 +1729,7 @@ def test_tls_with_ca_file
+           begin
+             Net::FTP.new(SERVER_NAME,
+                          :port => port,
+-                         :ssl => { :ca_file => CA_FILE })
++                         :ssl => { :ca_file => Net::TestUtils::CA_FILE })
+           rescue SystemCallError
+             skip $!
+           end
+@@ -1756,7 +1754,7 @@ def test_tls_post_connection_check
+           # so the following code should raise a SSLError.
+           Net::FTP.new(SERVER_ADDR,
+                        :port => port,
+-                       :ssl => { :ca_file => CA_FILE })
++                       :ssl => { :ca_file => Net::TestUtils::CA_FILE })
+         end
+       end
+     end
+@@ -1772,14 +1770,7 @@ def test_active_private_data_connection
+           sock.print("220 (test_ftp).\r\n")
+           commands.push(sock.gets)
+           sock.print("234 AUTH success.\r\n")
+-          ctx = OpenSSL::SSL::SSLContext.new
+-          ctx.ca_file = CA_FILE
+-          ctx.key = File.open(SERVER_KEY) { |f|
+-            OpenSSL::PKey::RSA.new(f)
+-          }
+-          ctx.cert = File.open(SERVER_CERT) { |f|
+-            OpenSSL::X509::Certificate.new(f)
+-          }
++          ctx = Net::TestUtils.create_ssl_ctx
+           sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+           sock.sync_close = true
+           begin
+@@ -1817,7 +1808,7 @@ def test_active_private_data_connection
+       end
+       ftp = Net::FTP.new(SERVER_NAME,
+                          port: port,
+-                         ssl: { ca_file: CA_FILE },
++                         ssl: { ca_file: Net::TestUtils::CA_FILE },
+                          passive: false)
+       begin
+         assert_equal("AUTH TLS\r\n", commands.shift)
+@@ -1849,14 +1840,7 @@ def test_passive_private_data_connection
+           sock.print("220 (test_ftp).\r\n")
+           commands.push(sock.gets)
+           sock.print("234 AUTH success.\r\n")
+-          ctx = OpenSSL::SSL::SSLContext.new
+-          ctx.ca_file = CA_FILE
+-          ctx.key = File.open(SERVER_KEY) { |f|
+-            OpenSSL::PKey::RSA.new(f)
+-          }
+-          ctx.cert = File.open(SERVER_CERT) { |f|
+-            OpenSSL::X509::Certificate.new(f)
+-          }
++          ctx = Net::TestUtils.create_ssl_ctx
+           sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+           sock.sync_close = true
+           begin
+@@ -1894,7 +1878,7 @@ def test_passive_private_data_connection
+       end
+       ftp = Net::FTP.new(SERVER_NAME,
+                          port: port,
+-                         ssl: { ca_file: CA_FILE },
++                         ssl: { ca_file: Net::TestUtils::CA_FILE },
+                          passive: true)
+       begin
+         assert_equal("AUTH TLS\r\n", commands.shift)
+@@ -1926,14 +1910,7 @@ def test_active_clear_data_connection
+           sock.print("220 (test_ftp).\r\n")
+           commands.push(sock.gets)
+           sock.print("234 AUTH success.\r\n")
+-          ctx = OpenSSL::SSL::SSLContext.new
+-          ctx.ca_file = CA_FILE
+-          ctx.key = File.open(SERVER_KEY) { |f|
+-            OpenSSL::PKey::RSA.new(f)
+-          }
+-          ctx.cert = File.open(SERVER_CERT) { |f|
+-            OpenSSL::X509::Certificate.new(f)
+-          }
++          ctx = Net::TestUtils.create_ssl_ctx
+           sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+           sock.sync_close = true
+           begin
+@@ -1964,7 +1941,7 @@ def test_active_clear_data_connection
+       end
+       ftp = Net::FTP.new(SERVER_NAME,
+                          port: port,
+-                         ssl: { ca_file: CA_FILE },
++                         ssl: { ca_file: Net::TestUtils::CA_FILE },
+                          private_data_connection: false,
+                          passive: false)
+       begin
+@@ -1995,14 +1972,7 @@ def test_passive_clear_data_connection
+           sock.print("220 (test_ftp).\r\n")
+           commands.push(sock.gets)
+           sock.print("234 AUTH success.\r\n")
+-          ctx = OpenSSL::SSL::SSLContext.new
+-          ctx.ca_file = CA_FILE
+-          ctx.key = File.open(SERVER_KEY) { |f|
+-            OpenSSL::PKey::RSA.new(f)
+-          }
+-          ctx.cert = File.open(SERVER_CERT) { |f|
+-            OpenSSL::X509::Certificate.new(f)
+-          }
++          ctx = Net::TestUtils.create_ssl_ctx
+           sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+           sock.sync_close = true
+           begin
+@@ -2033,7 +2003,7 @@ def test_passive_clear_data_connection
+       end
+       ftp = Net::FTP.new(SERVER_NAME,
+                          port: port,
+-                         ssl: { ca_file: CA_FILE },
++                         ssl: { ca_file: Net::TestUtils::CA_FILE },
+                          private_data_connection: false,
+                          passive: true)
+       begin
+@@ -2068,7 +2038,7 @@ def test_tls_connect_timeout
+         assert_raise(Net::OpenTimeout) do
+           Net::FTP.new(SERVER_NAME,
+                        port: port,
+-                       ssl: { ca_file: CA_FILE },
++                       ssl: { ca_file: Net::TestUtils::CA_FILE },
+                        ssl_handshake_timeout: 0.1)
+         end
+         @thread.join
+@@ -2087,14 +2057,7 @@ def test_abort_tls
+       sock.print("220 (test_ftp).\r\n")
+       commands.push(sock.gets)
+       sock.print("234 AUTH success.\r\n")
+-      ctx = OpenSSL::SSL::SSLContext.new
+-      ctx.ca_file = CA_FILE
+-      ctx.key = File.open(SERVER_KEY) { |f|
+-        OpenSSL::PKey::RSA.new(f)
+-      }
+-      ctx.cert = File.open(SERVER_CERT) { |f|
+-        OpenSSL::X509::Certificate.new(f)
+-      }
++      ctx = Net::TestUtils.create_ssl_ctx
+       sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+       sock.sync_close = true
+       sock.accept
+@@ -2115,7 +2078,7 @@ def test_abort_tls
+       begin
+         ftp = Net::FTP.new(SERVER_NAME,
+                            port: server.port,
+-                           ssl: { ca_file: CA_FILE })
++                           ssl: { ca_file: Net::TestUtils::CA_FILE })
+         assert_equal("AUTH TLS\r\n", commands.shift)
+         assert_equal("PBSZ 0\r\n", commands.shift)
+         assert_equal("PROT P\r\n", commands.shift)
+@@ -2170,14 +2133,7 @@ def tls_test
+         sock.print("220 (test_ftp).\r\n")
+         commands.push(sock.gets)
+         sock.print("234 AUTH success.\r\n")
+-        ctx = OpenSSL::SSL::SSLContext.new
+-        ctx.ca_file = CA_FILE
+-        ctx.key = File.open(SERVER_KEY) { |f|
+-          OpenSSL::PKey::RSA.new(f)
+-        }
+-        ctx.cert = File.open(SERVER_CERT) { |f|
+-          OpenSSL::X509::Certificate.new(f)
+-        }
++        ctx = Net::TestUtils.create_ssl_ctx
+         sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+         sock.sync_close = true
+         begin
+diff --git a/test/net/imap/test_imap.rb b/test/net/imap/test_imap.rb
+index 0f64e882cc..baa818db32 100644
+--- a/test/net/imap/test_imap.rb
++++ b/test/net/imap/test_imap.rb
+@@ -2,11 +2,9 @@
+ 
+ require "net/imap"
+ require "test/unit"
++require_relative '..\utils'
+ 
+ class IMAPTest < Test::Unit::TestCase
+-  CA_FILE = File.expand_path("../fixtures/cacert.pem", __dir__)
+-  SERVER_KEY = File.expand_path("../fixtures/server.key", __dir__)
+-  SERVER_CERT = File.expand_path("../fixtures/server.crt", __dir__)
+ 
+   def setup
+     @do_not_reverse_lookup = Socket.do_not_reverse_lookup
+@@ -81,7 +79,7 @@ def test_imaps_with_ca_file
+           begin
+             Net::IMAP.new("localhost",
+                           :port => port,
+-                          :ssl => { :ca_file => CA_FILE })
++                          :ssl => { :ca_file => Net::TestUtils::CA_FILE })
+           rescue SystemCallError
+             skip $!
+           end
+@@ -106,7 +104,7 @@ def test_imaps_post_connection_check
+           # so the following code should raise a SSLError.
+           Net::IMAP.new(server_addr,
+                         :port => port,
+-                        :ssl => { :ca_file => CA_FILE })
++                        :ssl => { :ca_file => Net::TestUtils::CA_FILE })
+         end
+       end
+     end
+@@ -117,7 +115,7 @@ def test_starttls
+       imap = nil
+       starttls_test do |port|
+         imap = Net::IMAP.new("localhost", :port => port)
+-        imap.starttls(:ca_file => CA_FILE)
++        imap.starttls(:ca_file => Net::TestUtils::CA_FILE)
+         imap
+       end
+     rescue SystemCallError
+@@ -650,14 +648,7 @@ def test_append_fail
+   def imaps_test
+     server = create_tcp_server
+     port = server.addr[1]
+-    ctx = OpenSSL::SSL::SSLContext.new
+-    ctx.ca_file = CA_FILE
+-    ctx.key = File.open(SERVER_KEY) { |f|
+-      OpenSSL::PKey::RSA.new(f)
+-    }
+-    ctx.cert = File.open(SERVER_CERT) { |f|
+-      OpenSSL::X509::Certificate.new(f)
+-    }
++    ctx = Net::TestUtils.create_ssl_ctx
+     ssl_server = OpenSSL::SSL::SSLServer.new(server, ctx)
+     ths = Thread.start do
+       begin
+@@ -695,14 +686,7 @@ def starttls_test
+         sock.print("* OK test server\r\n")
+         sock.gets
+         sock.print("RUBY0001 OK completed\r\n")
+-        ctx = OpenSSL::SSL::SSLContext.new
+-        ctx.ca_file = CA_FILE
+-        ctx.key = File.open(SERVER_KEY) { |f|
+-          OpenSSL::PKey::RSA.new(f)
+-        }
+-        ctx.cert = File.open(SERVER_CERT) { |f|
+-          OpenSSL::X509::Certificate.new(f)
+-        }
++        ctx = Net::TestUtils.create_ssl_ctx
+         sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+         sock.sync_close = true
+         sock.accept
+diff --git a/test/net/smtp/test_smtp.rb b/test/net/smtp/test_smtp.rb
+index 23e1542d8f..8906ff0b88 100644
+--- a/test/net/smtp/test_smtp.rb
++++ b/test/net/smtp/test_smtp.rb
+@@ -2,12 +2,10 @@
+ require 'net/smtp'
+ require 'stringio'
+ require 'test/unit'
++require_relative '..\utils'
+ 
+ module Net
+   class TestSMTP < Test::Unit::TestCase
+-    CA_FILE = File.expand_path("../fixtures/cacert.pem", __dir__)
+-    SERVER_KEY = File.expand_path("../fixtures/server.key", __dir__)
+-    SERVER_CERT = File.expand_path("../fixtures/server.crt", __dir__)
+ 
+     class FakeSocket
+       attr_reader :write_io
+@@ -105,14 +103,7 @@ def test_crlf_injection
+ 
+     def test_tls_connect
+       servers = Socket.tcp_server_sockets("localhost", 0)
+-      ctx = OpenSSL::SSL::SSLContext.new
+-      ctx.ca_file = CA_FILE
+-      ctx.key = File.open(SERVER_KEY) { |f|
+-        OpenSSL::PKey::RSA.new(f)
+-      }
+-      ctx.cert = File.open(SERVER_CERT) { |f|
+-        OpenSSL::X509::Certificate.new(f)
+-      }
++      ctx = Net::TestUtils.create_ssl_ctx
+       begin
+         sock = nil
+         Thread.start do
+diff --git a/test/net/utils.rb b/test/net/utils.rb
+index e69de29bb2..d026e7f172 100644
+--- a/test/net/utils.rb
++++ b/test/net/utils.rb
+@@ -0,0 +1,15 @@
++# frozen_string_literal: true
++
++module Net::TestUtils
++  CA_FILE     = File.join(__dir__, "fixtures/cacert.pem")
++  SERVER_KEY  = File.join(__dir__, "fixtures/server.key")
++  SERVER_CERT = File.join(__dir__, "fixtures/server.crt")
++
++  def self.create_ssl_ctx
++    ctx = OpenSSL::SSL::SSLContext.new
++    ctx.ca_file = CA_FILE
++    ctx.key  = OpenSSL::PKey::RSA.new( File.read(SERVER_KEY) )
++    ctx.cert = OpenSSL::X509::Certificate.new( File.read(SERVER_CERT) )
++    ctx
++  end
++end

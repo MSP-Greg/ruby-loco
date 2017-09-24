@@ -1,0 +1,37 @@
+Patch by MSP-Greg
+diff --git a/configure.in b/configure.in
+index 82c69993a3..2b18659808 100644
+--- a/configure.in
++++ b/configure.in
+@@ -1673,8 +1673,13 @@ AC_CACHE_CHECK([for printf prefix for $1], [rb_cv_pri_prefix_]AS_TR_SH($1),[
+             [@%:@include <stdio.h>
+ 	    @%:@include <stddef.h>
+             @%:@ifdef __GNUC__
++            @%:@ifdef __MINGW32__
++            @%:@define PRINTF_ARGS(decl, string_index, first_to_check) \
++              decl __attribute__((format(gnu_printf, string_index, first_to_check)))
++            @%:@else
+             @%:@define PRINTF_ARGS(decl, string_index, first_to_check) \
+               decl __attribute__((format(printf, string_index, first_to_check)))
++            @%:@endif
+             @%:@else
+             @%:@define PRINTF_ARGS(decl, string_index, first_to_check) decl
+             @%:@endif
+diff --git a/include/ruby/defines.h b/include/ruby/defines.h
+index a4da7ea014..6af474c8cd 100644
+--- a/include/ruby/defines.h
++++ b/include/ruby/defines.h
+@@ -83,8 +83,13 @@ extern "C" {
+ #endif /* __GNUC__ >= 3 */
+ 
+ #ifdef __GNUC__
++#ifdef __MINGW32__
++#define PRINTF_ARGS(decl, string_index, first_to_check) \
++  decl __attribute__((format(gnu_printf, string_index, first_to_check)))
++#else
+ #define PRINTF_ARGS(decl, string_index, first_to_check) \
+   decl __attribute__((format(printf, string_index, first_to_check)))
++#endif
+ #else
+ #define PRINTF_ARGS(decl, string_index, first_to_check) decl
+ #endif

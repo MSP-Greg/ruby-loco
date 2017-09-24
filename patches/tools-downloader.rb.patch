@@ -1,0 +1,30 @@
+diff --git a/tool/downloader.rb b/tool/downloader.rb
+index 335fe97762..4d99f8b975 100644
+--- a/tool/downloader.rb
++++ b/tool/downloader.rb
+@@ -13,6 +13,7 @@
+ 
+   # open-uri of ruby 2.2.0 accept an array of PEMs as ssl_ca_cert, but old
+   # versions are not.  so, patching OpenSSL::X509::Store#add_file instead.
++if RUBY_VERSION < '2.2'
+   class OpenSSL::X509::Store
+     alias orig_add_file add_file
+     def add_file(pems)
+@@ -25,6 +26,7 @@ def add_file(pems)
+       end
+     end
+   end
++end
+   # since open-uri internally checks ssl_ca_cert using File.directory?,
+   # allow to accept an array.
+   class <<File
+@@ -161,7 +163,9 @@ def self.download(url, name, dir = nil, since = true, options = {})
+       $stdout.flush
+     end
+     begin
++      options[:ssl_ca_cert] = OpenSSL::X509::DEFAULT_CERT_FILE if url.scheme == 'https' && File.exist?(OpenSSL::X509::DEFAULT_CERT_FILE)
+       data = url.read(options.merge(http_options(file, since.nil? ? true : since)))
++      puts "data #{data.length}   class #{data.class}  #{url.to_s}"
+     rescue OpenURI::HTTPError => http_error
+       if http_error.message =~ /^304 / # 304 Not Modified
+         if $VERBOSE
