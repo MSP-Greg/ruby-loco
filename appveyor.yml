@@ -29,15 +29,5 @@ build_script:
 test_script:
   - ruby test_script.rb
 
-artifacts:
-  - path: zlogs_$(R_BRANCH)_$(R_DATE)_$(R_SVN).7z
-    name: Build and test logs
-
-  - path: ruby_$(R_BRANCH).7z
-    name: Ruby Trunk Build
-
-  - path: ruby_$(R_BRANCH)_bad.7z
-    name: Ruby Trunk Build
-
 cache:
   - C:\projects\ruby-loco\bundled_gems

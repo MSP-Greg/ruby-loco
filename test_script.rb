@@ -67,9 +67,11 @@ results_str << "\n#{RUBY_DESCRIPTION}\n"
 File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-TEST_RESULTS.log"), results_str)
 
 puts "---------------------------------------------------------------------- Saving Artifacts"
+fn_log = "zlogs_#{ENV['R_BRANCH']}_#{ENV['R_DATE']}_#{ENV['R_SVN']}.7z"
+
 `attrib +r #{ENV['R_NAME']}-*.log`
-`#{ENV['7zip']} a zlogs_%R_BRANCH%_%R_DATE%_%R_SVN%.7z .\\*.log`
-puts "Saved zlogs_#{ENV['R_BRANCH']}_#{ENV['R_DATE']}_#{ENV['R_SVN']}.7z"
+`#{ENV['7zip']} a #{fn_log} .\\*.log`
+puts "Saved #{fn_log}"
 
 z_files = "#{ENV['PKG_RUBY']}\\* " \
           ".\\pkg\\#{ENV['R_NAME']}\\.BUILDINFO " \
@@ -85,3 +87,11 @@ else
   `#{ENV['7zip']} a ruby_%R_BRANCH%_bad.7z #{z_files}`
   puts "Saved ruby_#{ENV['R_BRANCH']}_bad.7z\n"
 end
+
+`appveyor PushArtifact #{fn_log} -DeploymentName \"Build and test logs\"`
+if failures == 0
+  `appveyor PushArtifact ruby_#{ENV['R_BRANCH']}.7z -DeploymentName \"Ruby Trunk Build\"`
+else
+  `appveyor PushArtifact ruby_#{ENV['R_BRANCH']}_bad.7z -DeploymentName \"Ruby Trunk Build (bad)\"`
+end
+exit failures
