@@ -88,10 +88,12 @@ else
   puts "Saved ruby_#{ENV['R_BRANCH']}_bad.7z\n"
 end
 
-`appveyor PushArtifact #{fn_log} -DeploymentName \"Build and test logs\"`
-if failures == 0
-  `appveyor PushArtifact ruby_#{ENV['R_BRANCH']}.7z -DeploymentName \"Ruby Trunk Build\"`
-else
-  `appveyor PushArtifact ruby_#{ENV['R_BRANCH']}_bad.7z -DeploymentName \"Ruby Trunk Build (bad)\"`
+if ENV['AV_BUILD'] == "true"
+  `appveyor PushArtifact #{fn_log} -DeploymentName \"Build and test logs\"`
+  if failures == 0
+    `appveyor PushArtifact ruby_#{ENV['R_BRANCH']}.7z -DeploymentName \"Ruby Trunk Build\"`
+  else
+    `appveyor PushArtifact ruby_#{ENV['R_BRANCH']}_bad.7z -DeploymentName \"Ruby Trunk Build (bad)\"`
+  end
 end
 exit failures
