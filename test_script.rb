@@ -32,7 +32,7 @@ if log.length == 1
   s = File.binread(log[0])
   results = s[-192,192][/^\d{4,} files, \d{4,} examples,[^\r\n]+/]
   failures += results[/expectations, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
-  results_str << "test-mspec #{results}\n\n"
+  results_str << "mspec      #{results}\n\n"
 end
 
 log = logs.grep(/test-basic\.log\Z/)
