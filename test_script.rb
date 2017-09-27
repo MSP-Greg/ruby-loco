@@ -12,8 +12,17 @@ log = logs.grep(/test-all\.log\Z/)
 # 16538 tests, 2190218 assertions, 1 failures, 0 errors, 234 skips
 if log.length == 1
   s = File.binread(log[0])
-  results = s[-256,256][/^\d{5,} tests[^\r\n]+/]
+  results = String.new(s[-256,256][/^\d{5,} tests[^\r\n]+/])
   failures += results[/assertions, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
+  
+  # find last skipped
+  if s.length > 2048
+    skips_str = s[-2048,2048]
+    skips_shown = ''
+    skips_str.scan(/^ +(\d+)\) Skipped:/) { |m| skips_shown = m[0] }
+    results << ", #{skips_shown} skips shown" unless skips_shown.empty?
+  end
+
   results_str << "test-all   #{results}\n\n"
 end
 
@@ -59,10 +68,13 @@ if log.length == 1
     failures += 1
   end
 end
-results_str << "\nTotal Failures/Errors #{failures}\n"
+
+results_str = "#{failures} Total Failures/Errors\n" \
+              "#{RUBY_DESCRIPTION}\n" \
+              "#{Time.now.getutc}\n\n" \
+              "#{results_str}"
 
 puts results_str
-results_str << "\n#{RUBY_DESCRIPTION}\n"
 
 File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-TEST_RESULTS.log"), results_str)
 
