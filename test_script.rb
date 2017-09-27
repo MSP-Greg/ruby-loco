@@ -16,12 +16,9 @@ if log.length == 1
   failures += results[/assertions, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
   
   # find last skipped
-  if s.length > 2048
-    skips_str = s[-2048,2048]
-    skips_shown = 0
-    skips_str.scan(/^ +(\d+)\) Skipped:/) { |m| skips_shown += 1 }
-    results << ", #{skips_shown} skips shown"
-  end
+  skips_shown = 0
+  s.scan(/^ +(\d+)\) Skipped:/) { |m| skips_shown += 1 }
+  results << ", #{skips_shown} skips shown"
 
   results_str << "test-all   #{results}\n\n"
 end
