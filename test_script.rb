@@ -18,9 +18,9 @@ if log.length == 1
   # find last skipped
   if s.length > 2048
     skips_str = s[-2048,2048]
-    skips_shown = ''
-    skips_str.scan(/^ +(\d+)\) Skipped:/) { |m| skips_shown = m[0] }
-    results << ", #{skips_shown} skips shown" unless skips_shown.empty?
+    skips_shown = 0
+    skips_str.scan(/^ +(\d+)\) Skipped:/) { |m| skips_shown += 1 }
+    results << ", #{skips_shown} skips shown"
   end
 
   results_str << "test-all   #{results}\n\n"
