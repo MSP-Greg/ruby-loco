@@ -107,5 +107,6 @@ if ENV['AV_BUILD'] == "true"
   else
     `appveyor PushArtifact ruby_#{ENV['R_BRANCH']}_bad.7z -DeploymentName \"Ruby Trunk Build (bad)\"`
   end
+  `appveyor AddMessage -Message \"#{RUBY_DESCRIPTION}\" -Details \"#{results_str}\"`
 end
 exit failures
