@@ -1,5 +1,5 @@
 Patch by MSP-Greg
-use IO.copy_stream instead of two File.open blocks
+use IO.copy_stream instead of two File.open blocks, suggested by Nobu
 diff --git a/spec/mspec/lib/mspec/helpers/fs.rb b/spec/mspec/lib/mspec/helpers/fs.rb
 index fb2c0f702c..26dd821162 100644
 --- a/spec/mspec/lib/mspec/helpers/fs.rb

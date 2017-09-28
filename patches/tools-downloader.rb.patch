@@ -1,3 +1,5 @@
+Patch by MSP-Greg
+May clear up some SSL verify issues, logs return length & class, URI
 diff --git a/tool/downloader.rb b/tool/downloader.rb
 index 335fe97762..4d99f8b975 100644
 --- a/tool/downloader.rb
