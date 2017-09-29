@@ -8,6 +8,11 @@ module InstallGemUpdate
 
   def self.run
     update_gems
+
+    # Change build name to ruby -v
+    if Dir.exist?('C:/Users/appveyor') && Dir.exist?('C:/Program Files/AppVeyor/BuildAgent')
+      `appveyor UpdateBuild -Message \"#{RUBY_DESCRIPTION}\"`
+    end
   end
 
   private
@@ -27,17 +32,6 @@ module InstallGemUpdate
       end
       Gem::GemRunner.new.run %w[cleanup]
       Gem::GemRunner.new.run(%w[install bundler] + suffix)
-=begin
-    else
-      # install all bundled gems as make install is broke
-      fn = File.join(__dir__, 'src', 'ruby', 'gems', 'bundled_gems')
-      ary_runner = ['install', '-lN']
-      # add all bundled gem names to ary_runner
-      File.open( fn, 'rb') { |f|
-        f.read.each_line { |l| ary_runner << File.join(__dir__, 'bundled_gems', "#{l.strip.sub(' ', '-')}.gem") }
-      }
-      Gem::GemRunner.new.run(ary_runner + suffix)
-=end
     end
   end
 
