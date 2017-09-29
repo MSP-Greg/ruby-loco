@@ -99,3 +99,5 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @rem --- rename seems to only work with backslashes
 @ren %~dp0pkg\ruby%SUFFIX%\ruby%SUFFIX%\lib\ruby\site_ruby\readline.rb_ readline.rb
 @attrib +r %PKG_RUBY%/lib/ruby/site_ruby/readline.rb
+
+@exit /b 0
