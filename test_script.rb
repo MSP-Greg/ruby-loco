@@ -66,7 +66,7 @@ if log.length == 1
   end
 end
 
-results_str = "#{failures} Total Failures/Errors\n" \
+results_str = "#{failures} Total Failures/Errors    Build No #{ENV['APPVEYOR_BUILD_NUMBER']}    Job Id #{ENV['APPVEYOR_JOB_ID']}\n" \
               "#{RUBY_DESCRIPTION}\n" \
               "#{Time.now.getutc}\n\n" \
               "#{results_str}"
