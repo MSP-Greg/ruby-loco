@@ -14,7 +14,7 @@ if log.length == 1
   s = File.binread(log[0])
   results = String.new(s[-256,256][/^\d{5,} tests[^\r\n]+/])
   failures += results[/assertions, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
-  
+
   # find last skipped
   skips_shown = 0
   s.scan(/^ +(\d+)\) Skipped:/) { |m| skips_shown += 1 }
@@ -66,7 +66,8 @@ if log.length == 1
   end
 end
 
-results_str = "#{failures} Total Failures/Errors    Build No #{ENV['APPVEYOR_BUILD_NUMBER']}    Job Id #{ENV['APPVEYOR_JOB_ID']}\n" \
+results_str = "#{failures} Total Failures/Errors                           " \
+              "Build No #{ENV['APPVEYOR_BUILD_NUMBER']}    Job Id #{ENV['APPVEYOR_JOB_ID']}\n" \
               "#{RUBY_DESCRIPTION}\n" \
               "#{Time.now.getutc}\n\n" \
               "#{results_str}"
