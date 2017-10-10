@@ -10,7 +10,7 @@
 @set openssl=mingw-w64-x86_64-openssl-1.1.0.f-1-any.pkg.tar.xz
 
 @echo --------------------------------------------------------------- Adding GPG key
-@bash -lc "pacman-key -r 77D8FA18 && pacman-key -f 77D8FA18 && pacman-key --lsign-key 77D8FA18"
+@bash -lc "pacman-key -r 77D8FA18 --keyserver na.pool.sks-keyservers.net && pacman-key -f 77D8FA18 && pacman-key --lsign-key 77D8FA18"
 
 @md C:\pkgs
 
