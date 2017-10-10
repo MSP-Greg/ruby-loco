@@ -8,7 +8,7 @@ SETLOCAL
 @set    r_fn=ruby_trunk.7z
 
 @echo --------------------------------------------------------------- Adding GPG key
-@bash -lc "pacman-key -r 77D8FA18 && pacman-key -f 77D8FA18 && pacman-key --lsign-key 77D8FA18"
+@bash -lc "pacman-key -r 77D8FA18 --keyserver na.pool.sks-keyservers.net && pacman-key -f 77D8FA18 && pacman-key --lsign-key 77D8FA18"
 
 @echo --------------------------------------------------------------- Verify %r_fn%
 appveyor DownloadFile https://dl.bintray.com/msp-greg/ruby_windows/%r_fn%.sig  -FileName C:\%r_fn%.sig
