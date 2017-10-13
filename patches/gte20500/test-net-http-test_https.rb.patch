@@ -1,0 +1,13 @@
+See https://bugs.ruby-lang.org/issues/14011
+diff --git a/test/net/http/test_https.rb b/test/net/http/test_https.rb
+index a863dc88fe..6a8e709e09 100644
+--- a/test/net/http/test_https.rb
++++ b/test/net/http/test_https.rb
+@@ -139,6 +139,7 @@ def test_verify_none
+   end
+ 
+   def test_certificate_verify_failure
++    skip "nonblock is not functioning on Windows"
+     http = Net::HTTP.new("localhost", config("port"))
+     http.use_ssl = true
+     ex = assert_raise(OpenSSL::SSL::SSLError){
