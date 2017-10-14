@@ -1,0 +1,53 @@
+diff --git a/lib/webrick/server.rb b/lib/webrick/server.rb
+index 52a09f5186..a8c86fbfee 100644
+--- a/lib/webrick/server.rb
++++ b/lib/webrick/server.rb
+@@ -295,7 +295,17 @@ def start_thread(sock, &block)
+           end
+           if sock.respond_to?(:sync_close=) && @config[:SSLStartImmediately]
+             WEBrick::Utils.timeout(@config[:RequestTimeout]) do
+-              sock.accept # OpenSSL::SSL::SSLSocket#accept
++              ret = sock.accept_nonblock(exception: false)
++              case ret
++              when :wait_readable
++                t = IO.select([sock.to_io])
++                t.is_a?(Array) ? t[0] : nil
++              when :wait_writeable
++                t = IO.select(nil, [sock.to_io])
++                t.is_a?(Array) ? t[0] : nil
++              else
++                ret
++              end
+             end
+           end
+           call_callback(:AcceptCallback, sock)
+diff --git a/test/net/http/test_https.rb b/test/net/http/test_https.rb
+index a863dc88fe..c1730061de 100644
+--- a/test/net/http/test_https.rb
++++ b/test/net/http/test_https.rb
+@@ -116,15 +116,16 @@ def test_session_reuse_but_expire
+     skip $!
+   end
+ 
+-  if ENV["RUBY_OPENSSL_TEST_ALL"]
+-    def test_verify
+-      http = Net::HTTP.new("ssl.netlab.jp", 443)
+-      http.use_ssl = true
+-      assert(
+-        (http.request_head("/"){|res| } rescue false),
+-        "The system may not have default CA certificate store."
+-      )
+-    end
++  def test_verify
++    skip("No cert file file found.") unless
++      File.exist?(OpenSSL::X509::DEFAULT_CERT_FILE) || 
++      File.exist?(ENV['SSL_CERT_FILE'])
++    http = Net::HTTP.new("ssl.netlab.jp", 443)
++    http.use_ssl = true
++    assert(
++      (http.request_head("/"){|res| } rescue false),
++      "The system may not have default CA certificate store."
++    )
+   end
+ 
+   def test_verify_none
