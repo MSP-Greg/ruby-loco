@@ -39,9 +39,9 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @ren %~dp0pkg\ruby%SUFFIX%\ruby%SUFFIX%\lib\ruby\site_ruby\readline.rb readline.rb_
 
 @rem ------------------------------------------------------------------ test-all
+@set SSL_CERT_FILE=%PKG_RUBY%/ssl/cert.pem
 @cd %DP0%src/build%SUFFIX%
 @echo.
-
 @echo ---------------------------------------------------------------------- Running Tests
 @echo test-all
 @rem make.exe "TESTOPTS=-v -j%M_JOBS% --job-status=normal --show-skip" test-all > %LOG_PATH_NAME%-test-all.log 2>&1
