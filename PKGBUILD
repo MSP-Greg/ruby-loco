@@ -84,10 +84,9 @@ build() {
   attrib.exe -r ${srcdir}/ruby/spec/ruby/\*\.\* //s //d
   attrib.exe -r ${srcdir}/build${SUFFIX}/\*\.\* //s //d
   if [[ ${R_VERS_2} > 24 ]]; then
-    make update-unicode
-    echo - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Done with update-unicode
-    make -j ${jobs} UNICODE_FILES=.
-#    make -j ${jobs}
+    # make -j ${jobs} UNICODE_FILES=.
+    # echo - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Done with update-unicode
+    make -j ${jobs}
   else
     jobs=1
     make after-update
