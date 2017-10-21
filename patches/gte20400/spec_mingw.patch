@@ -1,0 +1,227 @@
+diff --git a/spec/ruby/core/array/pack/l_spec.rb b/spec/ruby/core/array/pack/l_spec.rb
+index 5c1ad21d12..267fa176a8 100644
+--- a/spec/ruby/core/array/pack/l_spec.rb
++++ b/spec/ruby/core/array/pack/l_spec.rb
+@@ -29,7 +29,8 @@
+     it_behaves_like :array_pack_32bit_be, 'L>'
+   end
+ 
+-  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++#  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++  guard -> { platform_is wordsize: 32 } do
+     describe "with modifier '<' and '_'" do
+       it_behaves_like :array_pack_32bit_le, 'L<_'
+       it_behaves_like :array_pack_32bit_le, 'L_<'
+@@ -51,7 +52,8 @@
+     end
+   end
+ 
+-  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++#  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++  guard -> { platform_is wordsize: 64 } do
+     describe "with modifier '<' and '_'" do
+       it_behaves_like :array_pack_64bit_le, 'L<_'
+       it_behaves_like :array_pack_64bit_le, 'L_<'
+@@ -83,7 +85,8 @@
+     it_behaves_like :array_pack_32bit_be, 'l>'
+   end
+ 
+-  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++#  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++  guard -> { platform_is wordsize: 32 } do
+     describe "with modifier '<' and '_'" do
+       it_behaves_like :array_pack_32bit_le, 'l<_'
+       it_behaves_like :array_pack_32bit_le, 'l_<'
+@@ -105,7 +108,8 @@
+     end
+   end
+ 
+-  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++#  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++  guard -> { platform_is wordsize: 64 } do
+     describe "with modifier '<' and '_'" do
+       it_behaves_like :array_pack_64bit_le, 'l<_'
+       it_behaves_like :array_pack_64bit_le, 'l_<'
+@@ -137,7 +141,8 @@
+     it_behaves_like :array_pack_32bit_le, 'l'
+   end
+ 
+-  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++#  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++  guard -> { platform_is wordsize: 32 } do
+     describe "Array#pack with format 'L' with modifier '_'" do
+       it_behaves_like :array_pack_32bit_le, 'L_'
+     end
+@@ -155,7 +160,8 @@
+     end
+   end
+ 
+-  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++#  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++  guard -> { platform_is wordsize: 64 } do
+     describe "Array#pack with format 'L' with modifier '_'" do
+       it_behaves_like :array_pack_64bit_le, 'L_'
+     end
+@@ -183,7 +189,8 @@
+     it_behaves_like :array_pack_32bit_be, 'l'
+   end
+ 
+-  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++#  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++  guard -> { platform_is wordsize: 32 } do
+     describe "Array#pack with format 'L' with modifier '_'" do
+       it_behaves_like :array_pack_32bit_be, 'L_'
+     end
+@@ -201,7 +208,8 @@
+     end
+   end
+ 
+-  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++#  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++  guard -> { platform_is wordsize: 64 } do
+     describe "Array#pack with format 'L' with modifier '_'" do
+       it_behaves_like :array_pack_64bit_be, 'L_'
+     end
+diff --git a/spec/ruby/core/float/round_spec.rb b/spec/ruby/core/float/round_spec.rb
+index 46d23b36d0..59d0903347 100644
+--- a/spec/ruby/core/float/round_spec.rb
++++ b/spec/ruby/core/float/round_spec.rb
+@@ -10,12 +10,12 @@
+     0.0.round.should == 0
+   end
+ 
+-  platform_is_not :mingw32 do
++#  platform_is_not :mingw32 do
+     it "returns the nearest Integer for Float near the limit" do
+       0.49999999999999994.round.should == 0
+       -0.49999999999999994.round.should == 0
+     end
+-  end
++#  end
+ 
+   it "raises FloatDomainError for exceptional values" do
+     lambda { (+infinity_value).round }.should raise_error(FloatDomainError)
+diff --git a/spec/ruby/core/string/unpack/l_spec.rb b/spec/ruby/core/string/unpack/l_spec.rb
+index 11f0648fc7..a8192585e8 100644
+--- a/spec/ruby/core/string/unpack/l_spec.rb
++++ b/spec/ruby/core/string/unpack/l_spec.rb
+@@ -14,7 +14,8 @@
+     it_behaves_like :string_unpack_32bit_be_unsigned, 'L>'
+   end
+ 
+-  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++#  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++  guard -> { platform_is wordsize: 32 } do
+     describe "with modifier '<' and '_'" do
+       it_behaves_like :string_unpack_32bit_le, 'L<_'
+       it_behaves_like :string_unpack_32bit_le, 'L_<'
+@@ -44,7 +45,8 @@
+     end
+   end
+ 
+-  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++#  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++  guard -> { platform_is wordsize: 64 } do
+     describe "with modifier '<' and '_'" do
+       it_behaves_like :string_unpack_64bit_le, 'L<_'
+       it_behaves_like :string_unpack_64bit_le, 'L_<'
+@@ -86,7 +88,8 @@
+     it_behaves_like :string_unpack_32bit_be_signed, 'l>'
+   end
+ 
+-  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++#  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++  guard -> { platform_is wordsize: 32 } do
+     describe "with modifier '<' and '_'" do
+       it_behaves_like :string_unpack_32bit_le, 'l<_'
+       it_behaves_like :string_unpack_32bit_le, 'l_<'
+@@ -116,7 +119,8 @@
+     end
+   end
+ 
+-  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++#  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++  guard -> { platform_is wordsize: 64 } do
+     describe "with modifier '<' and '_'" do
+       it_behaves_like :string_unpack_64bit_le, 'l<_'
+       it_behaves_like :string_unpack_64bit_le, 'l_<'
+@@ -160,7 +164,8 @@
+     it_behaves_like :string_unpack_32bit_le_signed, 'l'
+   end
+ 
+-  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++#  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++  guard -> { platform_is wordsize: 32 } do
+     describe "String#unpack with format 'L' with modifier '_'" do
+       it_behaves_like :string_unpack_32bit_le, 'L_'
+       it_behaves_like :string_unpack_32bit_le_unsigned, 'L_'
+@@ -182,7 +187,8 @@
+     end
+   end
+ 
+-  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++#  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++  guard -> { platform_is wordsize: 64 } do
+     describe "String#unpack with format 'L' with modifier '_'" do
+       it_behaves_like :string_unpack_64bit_le, 'L_'
+       it_behaves_like :string_unpack_64bit_le_unsigned, 'L_'
+@@ -218,7 +224,8 @@
+     it_behaves_like :string_unpack_32bit_be_signed, 'l'
+   end
+ 
+-  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++#  guard -> { platform_is wordsize: 32 or platform_is :mingw32 } do
++  guard -> { platform_is wordsize: 32 } do
+     describe "String#unpack with format 'L' with modifier '_'" do
+       it_behaves_like :string_unpack_32bit_be, 'L_'
+       it_behaves_like :string_unpack_32bit_be_unsigned, 'L_'
+@@ -240,7 +247,8 @@
+     end
+   end
+ 
+-  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++#  guard -> { platform_is wordsize: 64 and platform_is_not :mingw32 } do
++  guard -> { platform_is wordsize: 64 } do
+     describe "String#unpack with format 'L' with modifier '_'" do
+       it_behaves_like :string_unpack_64bit_be, 'L_'
+       it_behaves_like :string_unpack_64bit_be_unsigned, 'L_'
+diff --git a/spec/ruby/optional/capi/time_spec.rb b/spec/ruby/optional/capi/time_spec.rb
+index c8f0d9d4e0..ca9d6d9f2e 100644
+--- a/spec/ruby/optional/capi/time_spec.rb
++++ b/spec/ruby/optional/capi/time_spec.rb
+@@ -165,7 +165,7 @@
+       usec.should == 500000
+     end
+ 
+-    platform_is_not :mingw32 do
++#    platform_is_not :mingw32 do
+       it "creates a timeval for a negative Fixnum" do
+         sec, usec = @s.rb_time_timeval(-1232141421)
+         sec.should be_kind_of(Integer)
+@@ -189,7 +189,7 @@
+         usec.should be_kind_of(Integer)
+         usec.should == 500000
+       end
+-    end
++#    end
+ 
+     it "creates a timeval from a Time object" do
+       t = Time.now
+@@ -224,7 +224,7 @@
+       nsec.should == 500000000
+     end
+ 
+-    platform_is_not :mingw32 do
++#    platform_is_not :mingw32 do
+       it "creates a timespec for a negative Fixnum" do
+         sec, nsec = @s.rb_time_timespec(-1232141421)
+         sec.should be_kind_of(Integer)
+@@ -248,7 +248,7 @@
+         nsec.should be_kind_of(Integer)
+         nsec.should == 500000000
+       end
+-    end
++#    end
+ 
+     it "creates a timespec from a Time object" do
+       t = Time.now

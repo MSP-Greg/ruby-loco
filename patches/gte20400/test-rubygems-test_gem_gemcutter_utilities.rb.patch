@@ -1,0 +1,24 @@
+diff --git a/test/rubygems/test_gem_gemcutter_utilities.rb b/test/rubygems/test_gem_gemcutter_utilities.rb
+index c3f9a7ea18..3b8f0134b6 100644
+--- a/test/rubygems/test_gem_gemcutter_utilities.rb
++++ b/test/rubygems/test_gem_gemcutter_utilities.rb
+@@ -177,7 +177,8 @@ def test_sign_in_with_other_credentials_doesnt_overwrite_other_keys
+   end
+ 
+   def test_sign_in_with_bad_credentials
+-    skip 'Always uses $stdin on windows' if Gem.win_platform?
++    skip 'Always uses $stdin on windows' if
++      Gem.win_platform? && RUBY_VERSION <= '1.9.2'
+ 
+     assert_raises Gem::MockGemUi::TermError do
+       util_sign_in ['Access Denied.', 403, 'Forbidden']
+@@ -188,7 +189,8 @@ def test_sign_in_with_bad_credentials
+   end
+ 
+   def util_sign_in response, host = nil, args = []
+-    skip 'Always uses $stdin on windows' if Gem.win_platform?
++    skip 'Always uses $stdin on windows' if
++      Gem.win_platform? && RUBY_VERSION <= '1.9.2'
+ 
+     email    = 'you@example.com'
+     password = 'secret'
