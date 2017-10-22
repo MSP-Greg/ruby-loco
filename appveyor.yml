@@ -17,7 +17,7 @@ init:
   - set PATH=%base_path%
 
 install:
-  - git clone -q --depth=10 --no-tags --branch=trunk  https://github.com/ruby/ruby.git                  C:\projects\ruby-loco\src\ruby
+  - git clone -q --depth=5  --no-tags --branch=trunk  https://github.com/ruby/ruby.git                  C:\projects\ruby-loco\src\ruby
   # below 3 lines just for special checkouts
   #- cd \projects\ruby-loco\src\ruby
   #- git checkout 72f88ebcc1
