@@ -4,7 +4,7 @@ diff --git a/io.c b/io.c
 index 0f6afb7bc4..3e8cdad75f 100644
 --- a/io.c
 +++ b/io.c
-@@ -639,7 +639,11 @@ void
+@@ -641,7 +641,11 @@ void
  rb_io_check_closed(rb_io_t *fptr)
  {
      rb_io_check_initialized(fptr);
