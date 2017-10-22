@@ -57,7 +57,7 @@ module Prepare
           f.read.each_line { |l|
             ary = l.strip.split(/\s+/)
             ary.pop if ary.length == 3
-            hsh[ary[0].join('-')] = ary
+            hsh[ary.join('-')] = ary
           }
         }
 
