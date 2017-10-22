@@ -2,7 +2,7 @@ diff --git a/dir.c b/dir.c
 index 7bc51eb0c7..15d4971780 100644
 --- a/dir.c
 +++ b/dir.c
-@@ -1303,9 +1303,9 @@ to_be_ignored(int e)
+@@ -1359,9 +1359,9 @@ to_be_ignored(int e)
  }
  
  #ifdef _WIN32

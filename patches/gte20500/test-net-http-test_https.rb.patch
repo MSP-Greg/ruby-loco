@@ -1,0 +1,14 @@
+diff --git a/test/net/http/test_https.rb b/test/net/http/test_https.rb
+index 5aaea40139..23631111b7 100644
+--- a/test/net/http/test_https.rb
++++ b/test/net/http/test_https.rb
+@@ -216,7 +216,8 @@ def test_max_version
+     ex = assert_raise(OpenSSL::SSL::SSLError){
+       http.request_get("/") {|res| }
+     }
+-    assert_match(/\ASSL_connect returned=1 errno=0 /, ex.message)
++    re_msg = /\ASSL_connect returned=1 errno=0 |SSL_CTX_set_max_proto_version/
++    assert_match(re_msg, ex.message)
+   end
+ 
+ end if defined?(OpenSSL::SSL)

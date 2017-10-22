@@ -1,0 +1,22 @@
+diff --git a/test/openssl/test_ssl.rb b/test/openssl/test_ssl.rb
+index f1c21d3940..126f34417e 100644
+--- a/test/openssl/test_ssl.rb
++++ b/test/openssl/test_ssl.rb
+@@ -812,6 +812,8 @@ def check_supported_protocol_versions
+   end
+ 
+   def test_min_version
++    skip("ctx.options issue on Windows & OpenSSL 1.1.0+") if
++      windows? && openssl?(1, 1, 0)
+     supported = check_supported_protocol_versions
+ 
+     ctx = OpenSSL::SSL::SSLContext.new
+@@ -827,6 +829,8 @@ def test_min_version
+   end
+ 
+   def test_max_version
++    skip("ctx.options issue on Windows & OpenSSL 1.1.0+") if
++      windows? && openssl?(1, 1, 0)
+     supported = check_supported_protocol_versions
+ 
+     ctx = OpenSSL::SSL::SSLContext.new
