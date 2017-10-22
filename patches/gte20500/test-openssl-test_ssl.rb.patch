@@ -1,0 +1,22 @@
+diff --git a/test/openssl/test_ssl.rb b/test/openssl/test_ssl.rb
+index f1c21d3940..64f5dac43d 100644
+--- a/test/openssl/test_ssl.rb
++++ b/test/openssl/test_ssl.rb
+@@ -810,7 +810,7 @@ def check_supported_protocol_versions
+ 
+     supported
+   end
+-
++if !openssl?(1, 1, 0)
+   def test_min_version
+     supported = check_supported_protocol_versions
+ 
+@@ -837,7 +837,7 @@ def test_max_version
+     assert_not_equal(0, ctx.options & OpenSSL::SSL::OP_NO_TLSv1_1)
+     assert_not_equal(0, ctx.options & OpenSSL::SSL::OP_NO_TLSv1_2)
+   end
+-
++end
+   def test_minmax_version
+     supported = check_supported_protocol_versions
+ 
