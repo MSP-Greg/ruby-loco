@@ -13,6 +13,8 @@ module PreparePre
     Dir.chdir( File.join(__dir__, 'src', 'ruby') ) { |d|
 
     branch = `git branch`[/^\* (.+)/, 1].sub(')', '')[/[^ \/]+\Z/]
+    # set branch to trunk if it's a commit
+    branch = "trunk" if /\A[0-9a-f]{7}\Z/ =~ branch
 
     # Get svn from commit info, write to revision.h
       svn = (`git log -1`)[/svn\+ssh:\S+?@(\d+)/, 1]
