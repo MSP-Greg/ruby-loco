@@ -56,7 +56,9 @@ module Prepare
         File.open( 'bundled_gems', 'rb') { |f|
           f.read.each_line { |l|
             ary = l.strip.split(/\s+/)
-            ary.pop if ary.length >= 3
+            if (len = ary.length) >= 3
+              ary.pop(len - 2)
+            end
             hsh[ary.join('-')] = ary
           }
         }
