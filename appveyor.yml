@@ -19,9 +19,9 @@ init:
 install:
   - git clone -q --depth=10 --no-tags --branch=trunk  https://github.com/ruby/ruby.git                  C:\projects\ruby-loco\src\ruby
   # below 3 lines just for special checkouts
-  - cd \projects\ruby-loco\src\ruby
-  - git checkout 72f88ebcc1
-  - cd \projects\ruby-loco
+  #- cd \projects\ruby-loco\src\ruby
+  #- git checkout 72f88ebcc1
+  #- cd \projects\ruby-loco
   # Update MSYS2 / MinGW and install OpenSSL 1.1.0 & GDBM 1.10
   - av_install\trunk_msys2.cmd
   # Tests are happier with a git path that doesn't contain a space
