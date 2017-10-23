@@ -19,7 +19,7 @@ module InstallRubyGemsUpdate
 
   private
 
-  # Updates Rubygems & bundled gems
+  # Updates Rubygems
   def self.update_rubygems
     gem_version = Gem::VERSION
 
