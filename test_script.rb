@@ -84,8 +84,8 @@ results_str = "#{failures} Total Failures/Errors                           " \
               "Build No #{ENV['APPVEYOR_BUILD_NUMBER']}    Job Id #{ENV['APPVEYOR_JOB_ID']}\n" \
               "#{RUBY_DESCRIPTION}\n" \
               "#{Time.now.getutc}\n\n" \
-              "#{results_str}\n\n" \
-              "#{bundle_v}\n" \
+              "#{results_str}\n" \
+              "#{bundle_v}" \
               "#{rake_v}\n"
 
 puts results_str
