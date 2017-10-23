@@ -66,11 +66,27 @@ if log.length == 1
   end
 end
 
+begin
+  bundle_v = "bundle version  #{`bundle version`}"
+rescue
+  bundle_v = "bundle version  NOT FOUND!"
+  failures += 1
+end
+
+begin
+  rake_v   = "rake -V         #{`rake -V`}"
+rescue
+  rake_v   = "rake -V         NOT FOUND!"
+  failures += 1
+end
+
 results_str = "#{failures} Total Failures/Errors                           " \
               "Build No #{ENV['APPVEYOR_BUILD_NUMBER']}    Job Id #{ENV['APPVEYOR_JOB_ID']}\n" \
               "#{RUBY_DESCRIPTION}\n" \
               "#{Time.now.getutc}\n\n" \
-              "#{results_str}"
+              "#{results_str}\n\n" \
+              "#{bundle_v}\n" \
+              "#{rake_v}\n"
 
 puts results_str
 
