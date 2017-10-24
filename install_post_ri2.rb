@@ -1,26 +1,21 @@
 # frozen_string_literal: true
+# encoding: UTF-8
 
 # Copies & processes files in RubyInstaller2 repo to install/package dir.
 # Also cleans files in bin directory of artifacts like #!/usr/bin/env.
 # Requires ENV['SUFFIX'] and ENV['REPO_RI2'], also assumes git is in path.
+# @note Must be run from newly built ruby
 #
 module InstallPostRI2
 
-  # ruby name like ruby25_64
-#  @@pkg_name = ARGV[0]
-  @@pkg_name = "ruby#{ENV['SUFFIX']}"
-  # 32 or 64
-  @@arch = @@pkg_name[-2,2]
+  # 32 or 64, maybe use RbConfig::CONFIG["target_cpu"] == 'x64' ? '64' : '32'
+  ARCH = ENV['SUFFIX'][-2,2]
 
   # rubyinstaller2 git dir
-  @@repo_ri2 = ENV['REPO_RI2']
+  REPO_RI2 = ENV['REPO_RI2']
 
   # internal version like 2.5.0
-  @@r_vers_int = "#{@@pkg_name[4..-4].sub(/\d/, '\0.')}.0"
-  # path to root ruby install dir
-  @@pkg_path = File.join(__dir__, 'pkg', @@pkg_name, @@pkg_name)
-  # path to site_ruby dir
-  @@site_ruby_rb = File.join(@@pkg_path, 'lib', 'ruby', 'site_ruby', @@r_vers_int)
+  R_VERS_INT = RbConfig::CONFIG["ruby_version"]
 
   REWRITE_MARK = /^( *)module Build.*Use for: Build, Runtime/
 
@@ -31,24 +26,23 @@ module InstallPostRI2
       resources\files\ridk.ps1
       resources\files\setrbvars.cmd | ],
 
-    ["lib\\ruby\\#{@@r_vers_int}\\rubygems\\defaults", %w|
+    ["lib\\ruby\\#{R_VERS_INT}\\rubygems\\defaults", %w|
       resources\files\operating_system.rb | ],
 
-    ["lib\\ruby\\site_ruby\\#{@@r_vers_int}", %w|
+    ["lib\\ruby\\site_ruby\\#{R_VERS_INT}", %w|
       resources\files\irbrc_predefiner.rb | ],
   ]
-
-  bin_frwd = Regexp.new(Regexp.escape("#{__dir__}/pkg/#{@@pkg_name}/#{@@pkg_name}/bin/"))
-  bin_back = Regexp.new(Regexp.escape("#{(__dir__).gsub(/\//, '\\')}\\pkg\\#{@@pkg_name}\\#{@@pkg_name}\\bin\\"))
+  BINDIR = RbConfig::CONFIG['bindir']
+  TOPDIR = RbConfig::TOPDIR
+  # path to site_ruby dir
+  SITE_RUBY = File.join(TOPDIR, 'lib', 'ruby', 'site_ruby', R_VERS_INT)
+  
   # Array of regex and strings for bin file cleanup
   CLEAN_INFO = [
-    [ Regexp.new("^" + Regexp.escape("#!/#{@@pkg_name}/bin/" )), '#!'],
-    [ Regexp.new("^" + Regexp.escape("#!/usr/bin/env"        )), '#!'],
-    [ Regexp.new("^" + Regexp.escape("#!/mingw#{@@arch}/bin/")), '#!'],
-    [ Regexp.new("^@" + Regexp.escape("\"\\#{@@pkg_name}\\bin\\ruby.exe\"")), 'ruby.exe'],
-    [ Regexp.new(Regexp.escape("\"#{__dir__}/pkg/#{@@pkg_name}/#{@@pkg_name}/bin/rake\"")), 'rake'],
-    [ bin_frwd, ''],
-    [ bin_back, '']
+    [ /^@"#{Regexp.escape(BINDIR.gsub("/", "\\"))}\\ruby\.exe"/u, '@%~dp0ruby.exe'],
+    [ /"#{Regexp.escape(BINDIR)}\/([^ "]+)"/u                   , '%~dp0\1'],
+    [ /^#!(\/usr\/bin\/env|\/mingw#{ARCH}\/bin\/)/u             , '#!'     ],
+    [ /\r/, '']
   ]
 
   def self.run
@@ -62,14 +56,14 @@ module InstallPostRI2
 
   # Add files defined in {RI2_FILES} from RI2
   def self.add_ri2
-    puts "installing RubyInstaller2:    From #{@@repo_ri2}"
-    Dir.chdir(@@pkg_path) { |d|
+    puts "installing RubyInstaller2:    From #{REPO_RI2}"
+    Dir.chdir(TOPDIR) { |d|
       RI2_FILES.each { |i|
         unless Dir.exist?(i[0])
           `mkdir #{i[0]}`
         end
         i[1].each { |fn|
-          fp = "#{@@repo_ri2}/#{fn}"
+          fp = "#{REPO_RI2}/#{fn}"
           if File.exist?(fp)
             puts "#{' ' * 30}#{fn}"
             `copy /b /y #{fp.gsub('/', '\\')} #{i[0]}`
@@ -78,7 +72,7 @@ module InstallPostRI2
           end
         }
       }
-      Dir.chdir("lib/ruby/#{@@r_vers_int}/rubygems/defaults") { |d|
+      Dir.chdir("lib/ruby/#{R_VERS_INT}/rubygems/defaults") { |d|
         patch = `patch -p1 -N --no-backup-if-mismatch -i #{__dir__}/patches/__operating_system.rb.patch`
         puts "#{' ' * 30}#{patch}"
       }
@@ -87,14 +81,14 @@ module InstallPostRI2
 
   # Adds files to ruby_installer/runtime dir
   def self.add_ri2_site_ruby
-    src = File.join(@@repo_ri2, 'lib').gsub('/', '\\') # + "\\"
-    site_ruby = @@site_ruby_rb.gsub('/', '\\')
+    src = File.join(REPO_RI2, 'lib').gsub('/', '\\') # + "\\"
+    site_ruby = SITE_RUBY.gsub('/', '\\')
     puts "installing RI2 runtime files: From #{src}"
     puts "                              To   #{site_ruby}"
     # copy everything over to pkg dir
     `xcopy /s /q /y #{src} #{site_ruby}`
     # now, loop thru build dir, and move to runtime
-    Dir.chdir( File.join(@@site_ruby_rb, 'ruby_installer') ) { |d|
+    Dir.chdir( File.join(SITE_RUBY, 'ruby_installer') ) { |d|
       Dir.glob('build/*.rb').each { |fn|
         f_str = File.binread(fn)
         if f_str.sub!(REWRITE_MARK, '\1module Runtime # Rewrite')
@@ -111,7 +105,7 @@ module InstallPostRI2
   def self.generate_version_file
     ri2_vers = ''
     commit = ''
-    Dir.chdir(@@repo_ri2) {
+    Dir.chdir(REPO_RI2) {
       ri2_vers = File.binread( File.join('packages', 'rubyinstaller', 'Rakefile') )[/^[ \t]*ruby_packages[ \t]*=[ \t]*%w\[([^\s\]]+)/,1]
       commit   = `#{ENV['GIT']} rev-parse HEAD`[0,7]
       ri2_vers = `#{ENV['GIT']} tag`[/^\S+\Z/] unless ri2_vers
@@ -127,22 +121,22 @@ module InstallPostRI2
       end
     end
     EOT
-    dest = File.join(@@site_ruby_rb, 'ruby_installer', 'runtime', 'package_version.rb')
+    dest = File.join(SITE_RUBY, 'ruby_installer', 'runtime', 'package_version.rb')
     File.binwrite(dest, f_str)
   end
 
   # Cleans files in bin dir of items like #!/usr/bin/env ruby
   def self.clean_bin_files
-    Dir.chdir(File.join(@@pkg_path, "bin")) { |d|
+    Dir.chdir(BINDIR) { |d|
       `attrib -r /s /d`
       files = Dir.glob("*").reject { |fn| fn.end_with?('.dll', '.exe') || Dir.exist?(fn) }
       files.each { |fn|
-        str = File.binread(fn)
-        CLEAN_INFO.each { |i| str.gsub!(i[0], i[1]) }
-        File.binwrite(fn, str)
+        str = File.read(fn, mode: 'rb').encode('UTF-8')
+        wr = nil
+        CLEAN_INFO.each { |i| wr = str.gsub!(i[0], i[1]) ? true : wr }
+        File.write(fn, str.encode('UTF-8'), mode: 'wb:UTF-8') if wr
       }
     }
-    pkg_path = @@pkg_path.gsub(/\//, "\\")      # to win style
   end
 
 end

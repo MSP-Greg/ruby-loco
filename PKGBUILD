@@ -114,5 +114,5 @@ package() {
   fi
   ${NEW_RUBY} install_gem_update.rb
   ${RUBY} install_post.rb ${r_inst_dir}
-  ${RUBY} install_post_ri2.rb ${r_inst_dir}
+  ${NEW_RUBY} install_post_ri2.rb ${r_inst_dir}
 }
