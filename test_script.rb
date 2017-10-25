@@ -33,8 +33,8 @@ end
 log = logs.grep(/test-spec\.log\Z/)
 # 3551 files, 26041 examples, 203539 expectations, 0 failures, 0 errors, 0 tagged
 if log.length == 1
-  if (s = File.binread(log[0])).length >= 192
-    results = s[-192,192][/^\d{4,} files, \d{4,} examples,[^\r\n]+/]
+  if (s = File.binread(log[0])).length >= 144
+    results = s[-144,144][/^\d{4,} files, \d{4,} examples,[^\r\n]+/]
     failures += results[/expectations?, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
     results_str << "test-spec  #{results}\n"
   else
@@ -46,8 +46,8 @@ end
 log = logs.grep(/test-mspec\.log\Z/)
 # 3551 files, 26041 examples, 203539 expectations, 0 failures, 0 errors, 0 tagged
 if log.length == 1
-  if (s = File.binread(log[0])).length >= 192
-    results = s[-192,192][/^\d{4,} files, \d{4,} examples,[^\r\n]+/]
+  if (s = File.binread(log[0])).length >= 144
+    results = s[-144,144][/^\d{4,} files, \d{4,} examples,[^\r\n]+/]
     failures += results[/expectations, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
     results_str << "mspec      #{results}\n\n"
   else
