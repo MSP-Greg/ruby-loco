@@ -11,61 +11,81 @@ results_str = String.new
 log = logs.grep(/test-all\.log\Z/)
 # 16538 tests, 2190218 assertions, 1 failures, 0 errors, 234 skips
 if log.length == 1
-  s = File.binread(log[0])
-  temp = s[-256,256][/^\d{5,} tests[^\r\n]+/]
-  results = String.new(temp || "CRASHED")
-  if temp
-    failures += results[/assertions, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
-    # find last skipped
-    skips_shown = 0
-    s.scan(/^ +(\d+)\) Skipped:/) { |m| skips_shown += 1 }
-    results << ", #{skips_shown} skips shown"
+  if (s = File.binread(log[0])).length >= 256
+    temp = s[-256,256][/^\d{5,} tests[^\r\n]+/]
+    results = String.new(temp || "CRASHED")
+    if temp
+      failures += results[/assertions, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
+      # find last skipped
+      skips_shown = 0
+      s.scan(/^ +(\d+)\) Skipped:/) { |m| skips_shown += 1 }
+      results << ", #{skips_shown} skips shown"
+    else
+      failures += 1
+    end
+    results_str << "test-all   #{results}\n\n"
   else
     failures += 1
+    results_str << "test-all   UNKNOWN\n\n"
   end
-  results_str << "test-all   #{results}\n\n"
 end
 
 log = logs.grep(/test-spec\.log\Z/)
 # 3551 files, 26041 examples, 203539 expectations, 0 failures, 0 errors, 0 tagged
 if log.length == 1
-  s = File.binread(log[0])
-  results = s[-192,192][/^\d{4,} files, \d{4,} examples,[^\r\n]+/]
-  failures += results[/expectations?, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
-  results_str << "test-spec  #{results}\n"
+  if (s = File.binread(log[0])).length >= 192
+    results = s[-192,192][/^\d{4,} files, \d{4,} examples,[^\r\n]+/]
+    failures += results[/expectations?, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
+    results_str << "test-spec  #{results}\n"
+  else
+    failures += 1
+    results_str << "test-spec  UNKNOWN\n"
+  end
 end
 
 log = logs.grep(/test-mspec\.log\Z/)
 # 3551 files, 26041 examples, 203539 expectations, 0 failures, 0 errors, 0 tagged
 if log.length == 1
-  s = File.binread(log[0])
-  results = s[-192,192][/^\d{4,} files, \d{4,} examples,[^\r\n]+/]
-  failures += results[/expectations, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
-  results_str << "mspec      #{results}\n\n"
+  if (s = File.binread(log[0])).length >= 192
+    results = s[-192,192][/^\d{4,} files, \d{4,} examples,[^\r\n]+/]
+    failures += results[/expectations, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
+    results_str << "mspec      #{results}\n\n"
+  else
+    failures += 1
+    results_str << "mspec      UNKNOWN\n\n"
+  end
 end
 
 log = logs.grep(/test-basic\.log\Z/)
 # test succeeded
 if log.length == 1
-  s = File.binread(log[0])
-  if /^test succeeded/ =~ s[-256,256]
-  results_str << "test-basic test succeeded\n"
-  else
-    results_str << "test-basic test failed\n"
+  if (s = File.binread(log[0])).length >= 192
+    if /^test succeeded/ =~ s[-192,192]
+    results_str << "test-basic test succeeded\n"
+    else
     failures += 1
+    results_str << "test-basic test failed\n"
+    end
+  else
+    failures += 1
+    results_str << "test-basic test UNKNOWN\n"
   end
 end
 
 log = logs.grep(/btest\.log\Z/)
 # PASS all 1194 tests
 if log.length == 1
-  s = File.binread(log[0])
-  results = s[-256,256][/^PASS all \d+ tests/]
-  if results
-    results_str << "btest      #{results}\n"
+  if (s = File.binread(log[0])).length >= 192
+    results = s[-192,192][/^PASS all \d+ tests/]
+    if results
+      results_str << "btest      #{results}\n"
+    else
+      failures += 1
+      results_str << "btest      FAILED\n"
+    end
   else
-    results_str << "btest      FAILED\n"
     failures += 1
+    results_str << "btest      UNKNOWN\n"
   end
 end
 

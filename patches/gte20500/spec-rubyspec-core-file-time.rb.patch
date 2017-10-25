@@ -64,10 +64,10 @@ index 73112420d1..f52561881b 100644
 -    File.mtime(@file1).to_i.should be_close(Time.now.to_i, 2)
 -    File.atime(@file2).to_i.should be_close(Time.now.to_i, 2)
 -    File.mtime(@file2).to_i.should be_close(Time.now.to_i, 2)
-+    File.atime(@file1).should be_close(tn, 0.010)
-+    File.mtime(@file1).should be_close(tn, 0.010)
-+    File.atime(@file2).should be_close(tn, 0.010)
-+    File.mtime(@file2).should be_close(tn, 0.010)
++    File.atime(@file1).should be_close(tn, 0.050)
++    File.mtime(@file1).should be_close(tn, 0.050)
++    File.atime(@file2).should be_close(tn, 0.050)
++    File.mtime(@file2).should be_close(tn, 0.050)
    end
  
    it "accepts an object that has a #to_path method" do

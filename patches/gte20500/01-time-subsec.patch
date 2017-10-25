@@ -2,7 +2,7 @@ diff --git a/dir.c b/dir.c
 index 7bc51eb0c7..15d4971780 100644
 --- a/dir.c
 +++ b/dir.c
-@@ -1359,9 +1359,9 @@ to_be_ignored(int e)
+@@ -1355,9 +1355,9 @@ to_be_ignored(int e)
  }
  
  #ifdef _WIN32
@@ -18,7 +18,7 @@ diff --git a/file.c b/file.c
 index ee2e87cfbc..e7f8220306 100644
 --- a/file.c
 +++ b/file.c
-@@ -101,9 +101,9 @@ int flock(int, int);
+@@ -91,9 +91,9 @@ int flock(int, int);
  /* define system APIs */
  #ifdef _WIN32
  #include "win32/file.h"
@@ -183,7 +183,7 @@ index 8f78b541dd..85f9595609 100644
  	return NULL;
      }
      if (!(sbuf.st_mode & S_IFDIR) &&
-@@ -5359,12 +5359,13 @@ isUNCRoot(const WCHAR *path)
+@@ -5362,12 +5362,13 @@ isUNCRoot(const WCHAR *path)
      } while (0)
  
  static time_t filetime_to_unixtime(const FILETIME *ft);
@@ -199,7 +199,7 @@ index 8f78b541dd..85f9595609 100644
  {
      /* struct stati64 layout
       *
-@@ -5391,19 +5392,6 @@ stati64_set_inode(BY_HANDLE_FILE_INFORMATION *pinfo, struct stati64 *st)
+@@ -5394,19 +5395,6 @@ stati64_set_inode(BY_HANDLE_FILE_INFORMATION *pinfo, struct stati64 *st)
      p4[5] = pinfo->nFileIndexLow;
  }
  
@@ -219,7 +219,7 @@ index 8f78b541dd..85f9595609 100644
  #undef fstat
  /* License: Ruby's */
  int
-@@ -5424,27 +5412,20 @@ rb_w32_fstat(int fd, struct stat *st)
+@@ -5427,27 +5415,20 @@ rb_w32_fstat(int fd, struct stat *st)
  
  /* License: Ruby's */
  int
@@ -251,7 +251,7 @@ index 8f78b541dd..85f9595609 100644
  {
      BY_HANDLE_FILE_INFORMATION info;
      DWORD attr = (DWORD)-1;
-@@ -5452,11 +5433,14 @@ stati64_handle(HANDLE h, struct stati64 *st)
+@@ -5455,11 +5436,14 @@ stati64_handle(HANDLE h, struct stati64 *st)
      if (GetFileInformationByHandle(h, &info)) {
  	st->st_size = ((__int64)info.nFileSizeHigh << 32) | info.nFileSizeLow;
  	st->st_atime = filetime_to_unixtime(&info.ftLastAccessTime);
@@ -267,7 +267,7 @@ index 8f78b541dd..85f9595609 100644
      }
      return attr;
  }
-@@ -5473,6 +5457,16 @@ filetime_to_unixtime(const FILETIME *ft)
+@@ -5476,6 +5460,16 @@ filetime_to_unixtime(const FILETIME *ft)
  	return tv.tv_sec;
  }
  
@@ -284,7 +284,7 @@ index 8f78b541dd..85f9595609 100644
  /* License: Ruby's */
  static unsigned
  fileattr_to_unixmode(DWORD attr, const WCHAR *path)
-@@ -5561,7 +5555,7 @@ check_valid_dir(const WCHAR *path)
+@@ -5564,7 +5558,7 @@ check_valid_dir(const WCHAR *path)
  
  /* License: Ruby's */
  static int
@@ -293,7 +293,7 @@ index 8f78b541dd..85f9595609 100644
  {
      HANDLE h;
      WIN32_FIND_DATAW wfd;
-@@ -5583,8 +5577,11 @@ stat_by_find(const WCHAR *path, struct stati64 *st)
+@@ -5586,8 +5580,11 @@ stat_by_find(const WCHAR *path, struct stati64 *st)
      FindClose(h);
      st->st_mode  = fileattr_to_unixmode(wfd.dwFileAttributes, path);
      st->st_atime = filetime_to_unixtime(&wfd.ftLastAccessTime);
@@ -305,7 +305,7 @@ index 8f78b541dd..85f9595609 100644
      st->st_size = ((__int64)wfd.nFileSizeHigh << 32) | wfd.nFileSizeLow;
      st->st_nlink = 1;
      return 0;
-@@ -5602,7 +5599,7 @@ static const WCHAR namespace_prefix[] = {L'\\', L'\\', L'?', L'\\'};
+@@ -5605,7 +5602,7 @@ static const WCHAR namespace_prefix[] = {L'\\', L'\\', L'?', L'\\'};
  
  /* License: Ruby's */
  static int
@@ -314,7 +314,7 @@ index 8f78b541dd..85f9595609 100644
  {
      HANDLE f;
      WCHAR finalname[PATH_MAX];
-@@ -5610,7 +5607,7 @@ winnt_stat(const WCHAR *path, struct stati64 *st)
+@@ -5613,7 +5610,7 @@ winnt_stat(const WCHAR *path, struct stati64 *st)
      memset(st, 0, sizeof(*st));
      f = open_special(path, 0, 0);
      if (f != INVALID_HANDLE_VALUE) {
@@ -323,7 +323,7 @@ index 8f78b541dd..85f9595609 100644
  	const DWORD len = get_final_path(f, finalname, numberof(finalname), 0);
  	CloseHandle(f);
  	if (attr & FILE_ATTRIBUTE_DIRECTORY) {
-@@ -5635,7 +5632,7 @@ winnt_stat(const WCHAR *path, struct stati64 *st)
+@@ -5638,7 +5635,7 @@ winnt_stat(const WCHAR *path, struct stati64 *st)
  
  /* License: Ruby's */
  static int
@@ -332,7 +332,7 @@ index 8f78b541dd..85f9595609 100644
  {
      WIN32_FILE_ATTRIBUTE_DATA wfa;
      const WCHAR *p = path;
-@@ -5666,8 +5663,11 @@ winnt_lstat(const WCHAR *path, struct stati64 *st)
+@@ -5669,8 +5666,11 @@ winnt_lstat(const WCHAR *path, struct stati64 *st)
  	}
  	st->st_mode  = fileattr_to_unixmode(wfa.dwFileAttributes, path);
  	st->st_atime = filetime_to_unixtime(&wfa.ftLastAccessTime);
@@ -344,7 +344,7 @@ index 8f78b541dd..85f9595609 100644
      }
      else {
  	if (stat_by_find(path, st)) return -1;
-@@ -5682,16 +5682,16 @@ winnt_lstat(const WCHAR *path, struct stati64 *st)
+@@ -5685,16 +5685,16 @@ winnt_lstat(const WCHAR *path, struct stati64 *st)
  int
  rb_w32_stat(const char *path, struct stat *st)
  {
@@ -364,7 +364,7 @@ index 8f78b541dd..85f9595609 100644
  {
      WCHAR *buf1;
      int ret, size;
-@@ -5714,7 +5714,7 @@ wstati64(const WCHAR *path, struct stati64 *st)
+@@ -5717,7 +5717,7 @@ wstati64(const WCHAR *path, struct stati64 *st)
  
  /* License: Ruby's */
  static int
@@ -373,7 +373,7 @@ index 8f78b541dd..85f9595609 100644
  {
      WCHAR *buf1;
      int ret, size;
-@@ -5771,56 +5771,56 @@ name_for_stat(WCHAR *buf1, const WCHAR *path)
+@@ -5774,56 +5774,56 @@ name_for_stat(WCHAR *buf1, const WCHAR *path)
  
  /* License: Ruby's */
  int
@@ -442,7 +442,7 @@ index 8f78b541dd..85f9595609 100644
      free(wpath);
      return ret;
  }
-@@ -5829,8 +5829,8 @@ w32_lstati64(const char *path, struct stati64 *st, UINT cp)
+@@ -5832,8 +5832,8 @@ w32_lstati64(const char *path, struct stati64 *st, UINT cp)
  int
  rb_w32_access(const char *path, int mode)
  {
@@ -453,7 +453,7 @@ index 8f78b541dd..85f9595609 100644
  	return -1;
      mode <<= 6;
      if ((stat.st_mode & mode) != mode) {
-@@ -5844,8 +5844,8 @@ rb_w32_access(const char *path, int mode)
+@@ -5847,8 +5847,8 @@ rb_w32_access(const char *path, int mode)
  int
  rb_w32_uaccess(const char *path, int mode)
  {
@@ -464,7 +464,7 @@ index 8f78b541dd..85f9595609 100644
  	return -1;
      mode <<= 6;
      if ((stat.st_mode & mode) != mode) {
-@@ -7313,10 +7313,10 @@ wutime(const WCHAR *path, const struct utimbuf *times)
+@@ -7316,10 +7316,10 @@ wutime(const WCHAR *path, const struct utimbuf *times)
  {
      HANDLE hFile;
      FILETIME atime, mtime;

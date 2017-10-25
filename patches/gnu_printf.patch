@@ -3,7 +3,7 @@ diff --git a/configure.ac b/configure.ac
 index 82c69993a3..2b18659808 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1669,8 +1669,13 @@ AC_CACHE_CHECK([for printf prefix for $1], [rb_cv_pri_prefix_]AS_TR_SH($1),[
+@@ -1541,8 +1541,13 @@ AC_CACHE_CHECK([for printf prefix for $1], [rb_cv_pri_prefix_]AS_TR_SH($1),[
              [@%:@include <stdio.h>
  	    @%:@include <stddef.h>
              @%:@ifdef __GNUC__
