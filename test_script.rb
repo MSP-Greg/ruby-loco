@@ -12,14 +12,17 @@ log = logs.grep(/test-all\.log\Z/)
 # 16538 tests, 2190218 assertions, 1 failures, 0 errors, 234 skips
 if log.length == 1
   s = File.binread(log[0])
-  results = String.new(s[-256,256][/^\d{5,} tests[^\r\n]+/])
-  failures += results[/assertions, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
-
-  # find last skipped
-  skips_shown = 0
-  s.scan(/^ +(\d+)\) Skipped:/) { |m| skips_shown += 1 }
-  results << ", #{skips_shown} skips shown"
-
+  temp = s[-256,256][/^\d{5,} tests[^\r\n]+/]
+  results = String.new(temp || "CRASHED")
+  if temp
+    failures += results[/assertions, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
+    # find last skipped
+    skips_shown = 0
+    s.scan(/^ +(\d+)\) Skipped:/) { |m| skips_shown += 1 }
+    results << ", #{skips_shown} skips shown"
+  else
+    failures += 1
+  end
   results_str << "test-all   #{results}\n\n"
 end
 

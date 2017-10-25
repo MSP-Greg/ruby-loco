@@ -1,6 +1,6 @@
 @if "%AV_BUILD%"=="true" (
   call pkg_set_env_av.cmd
-  set M_JOBS=2
+  set M_JOBS=%NUMBER_OF_PROCESSORS%
 ) else (
   call pkg_set_env.cmd
   set M_JOBS=3
@@ -45,7 +45,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @echo ---------------------------------------------------------------------- Running Tests
 @echo test-all
 @make.exe "TESTOPTS=-v -j%M_JOBS% --job-status=normal --show-skip" test-all > %LOG_PATH_NAME%-test-all.log 2>&1
-@ren make.exe "TESTOPTS=-v --show-skip" test-all > %LOG_PATH_NAME%-test-all.log 2>&1
+@rem make.exe "TESTOPTS=-v --show-skip" test-all > %LOG_PATH_NAME%-test-all.log 2>&1
 
 @rem --------------------------------------------------------- btest, test-basic
 @cd %DP0%src/build%SUFFIX%
@@ -67,7 +67,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 
 @if "%R_VERS_2%" GEQ "25" (
   @echo test-spec
-  make.exe test-spec     > %LOG_PATH_NAME%-test-spec.log 2>&1
+  make.exe "MSPECOPT=-j" test-spec > %LOG_PATH_NAME%-test-spec.log 2>&1
 ) else (
   @echo test-rubyspec
   make.exe test-rubyspec > %LOG_PATH_NAME%-test-spec.log 2>&1
@@ -81,7 +81,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 
 @cd %REPO_RUBY%/spec/ruby
 @echo mspec
-@call ..\mspec\bin\mspec -rdevkit > %LOG_PATH_NAME%-test-mspec.log 2>&1
+@call ..\mspec\bin\mspec -rdevkit -j > %LOG_PATH_NAME%-test-mspec.log 2>&1
 
 @PATH=%PKG_RUBY%/bin;%GIT_PATH%;%ORIG_PATH%
 
