@@ -38,10 +38,13 @@ module InstallPostRI2
   SITE_RUBY = File.join(TOPDIR, 'lib', 'ruby', 'site_ruby', R_VERS_INT)
   
   # Array of regex and strings for bin file cleanup
+  # 1st element for full path ruby
+  # 2nd element for odd path ruby seen in rake.bat
   CLEAN_INFO = [
     [ /^@"#{Regexp.escape(BINDIR.gsub("/", "\\"))}\\ruby\.exe"/u, '@%~dp0ruby.exe'],
-    [ /"#{Regexp.escape(BINDIR)}\/([^ "]+)"/u                   , '%~dp0\1'],
-    [ /^#!(\/usr\/bin\/env|\/mingw#{ARCH}\/bin\/)/u             , '#!'     ],
+    [ /^@"\\ruby#{ENV['SUFFIX']}\\bin\\ruby.exe"/u              , '@%~dp0ruby.exe'],
+    [ /"#{Regexp.escape(BINDIR)}\/([^ "]+)"/u      , '%~dp0\1'],
+    [ /^#!(\/usr\/bin\/env|\/mingw#{ARCH}\/bin\/)/u, '#!'     ],
     [ /\r/, '']
   ]
 
