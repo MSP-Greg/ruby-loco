@@ -44,8 +44,8 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @echo.
 @echo ---------------------------------------------------------------------- Running Tests
 @echo test-all
-@rem make.exe "TESTOPTS=-v -j%M_JOBS% --job-status=normal --show-skip" test-all > %LOG_PATH_NAME%-test-all.log 2>&1
-@make.exe "TESTOPTS=-v --show-skip" test-all > %LOG_PATH_NAME%-test-all.log 2>&1
+@make.exe "TESTOPTS=-v -j%M_JOBS% --job-status=normal --show-skip" test-all > %LOG_PATH_NAME%-test-all.log 2>&1
+@ren make.exe "TESTOPTS=-v --show-skip" test-all > %LOG_PATH_NAME%-test-all.log 2>&1
 
 @rem --------------------------------------------------------- btest, test-basic
 @cd %DP0%src/build%SUFFIX%
