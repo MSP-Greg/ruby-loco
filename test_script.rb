@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 failures = 0
-
-puts "---------------------------------------------------------------------- Test Results"
+puts "——————————————————————————————————————————————————————————————————————————————— Test Results"
 
 logs = Dir.glob("#{ENV['R_NAME']}-*.log")
 
@@ -115,7 +114,7 @@ puts results_str
 
 File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-TEST_RESULTS.log"), results_str)
 
-puts "---------------------------------------------------------------------- Saving Artifacts"
+puts "——————————————————————————————————————————————————————————————————————————————— Saving Artifacts"
 fn_log = "zlogs_#{ENV['R_BRANCH']}_#{ENV['R_DATE']}_#{ENV['R_SVN']}.7z"
 
 `attrib +r #{ENV['R_NAME']}-*.log`
