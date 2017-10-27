@@ -32,7 +32,7 @@ for /F "tokens=1-7 delims= " %%G in ('ruby prepare_pre.rb') do (
 @set R_BRANCH=%%M
 )
 
-@echo ---------------------------------- Ruby version ENV variables
+@echo —————————————————————————————————————————————————————————————————————— Ruby version ENV variables
 @echo R_VERS      %R_VERS%
 @echo R_PATCH     %R_PATCH%
 @echo R_DATE      %R_DATE%
@@ -40,10 +40,9 @@ for /F "tokens=1-7 delims= " %%G in ('ruby prepare_pre.rb') do (
 @echo R_VERS_INT  %R_VERS_INT%
 @echo R_VERS_2    %R_VERS_2%
 @echo R_BRANCH    %R_BRANCH%
-
+@echo.
 @echo GIT         %GIT%
 @echo GIT_PATH    %GIT_PATH%
 @echo GIT_PATH_SH %GIT_PATH_SH%
-
-rem set RUBYOPT=-EWindows-1252
-rem chcp 1252
+@echo JOBS        %NUMBER_OF_PROCESSORS%
+@echo.
