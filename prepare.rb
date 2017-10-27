@@ -124,7 +124,7 @@ module Prepare
         patches.concat(vers_patches)
         patches.sort_by! { |p| File.basename(p) }
         patches.each { |p|
-          puts "#{'- ' * 25} #{File.basename(p)}" 
+          puts "#{'—' * 55} #{File.basename(p)}" 
           puts `patch -p1 -N --no-backup-if-mismatch -i #{p}`
         }
         puts ''  # just for formatting of prepare.log

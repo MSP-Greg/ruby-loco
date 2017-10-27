@@ -77,23 +77,23 @@ build() {
     --disable-install-doc \
     --with-git=${GIT} \
     --with-out-ext=pty,syslog,tk
+  echo ——————————————————————————————————————————————————————————————————————————————— Done with configure
 
-  echo - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Done with configure
   mkdir -p "${dir}/pkg/${r_inst_dir}/${r_inst_dir}"
   attrib.exe -r ${srcdir}/ruby/\*\.\* //s //d
   attrib.exe -r ${srcdir}/ruby/spec/ruby/\*\.\* //s //d
   attrib.exe -r ${srcdir}/build${SUFFIX}/\*\.\* //s //d
   if [[ ${R_VERS_2} > 24 ]]; then
     # make -j ${jobs} UNICODE_FILES=.
-    # echo - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Done with update-unicode
+    # echo ——————————————————————————————————————————————————————————————————————————————— Done with update-unicode
     make -j ${jobs}
   else
     jobs=1
     make after-update
-    echo - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Done with after-update
+    echo ——————————————————————————————————————————————————————————————————————————————— Done with after-update
     make UNICODE_FILES=.
   fi
-  echo - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - Done with all, jobs = ${jobs}
+  echo ——————————————————————————————————————————————————————————————————————————————— Done with all, jobs = ${jobs}
 }
 
 package() {
