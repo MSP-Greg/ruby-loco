@@ -13,7 +13,7 @@ log = logs.grep(/test-all\.log\Z/)
 if log.length == 1
   if (s = File.binread(log[0])).length >= 256
     temp = s[-256,256][/^\d{5,} tests[^\r\n]+/]
-    results = String.new(temp || "CRASHED")
+    results = String.new(temp || "CRASHED?")
     if temp
       failures += results[/assertions, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
       # find last skipped
@@ -26,7 +26,7 @@ if log.length == 1
     results_str << "test-all   #{results}\n\n"
   else
     failures += 1
-    results_str << "test-all   UNKNOWN\n\n"
+    results_str << "test-all   UNKNOWN see log\n\n"
   end
 end
 
@@ -35,11 +35,17 @@ log = logs.grep(/test-spec\.log\Z/)
 if log.length == 1
   if (s = File.binread(log[0])).length >= 144
     results = s[-144,144][/^\d{4,} files, \d{4,} examples,[^\r\n]+/]
-    failures += results[/expectations?, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
-    results_str << "test-spec  #{results}\n"
+    if results
+      failures += results[/expectations, (\d+) failures?/,1].to_i +
+        result[/failures?, (\d+) errors?/,1].to_i
+      results_str << "test-spec  #{results}\n"
+    else
+      failures += 1
+      results_str << "test-spec  Crashed? see log\n"
+    end
   else
     failures += 1
-    results_str << "test-spec  UNKNOWN\n"
+    results_str << "test-spec  UNKNOWN see log\n"
   end
 end
 
@@ -48,11 +54,17 @@ log = logs.grep(/test-mspec\.log\Z/)
 if log.length == 1
   if (s = File.binread(log[0])).length >= 144
     results = s[-144,144][/^\d{4,} files, \d{4,} examples,[^\r\n]+/]
-    failures += results[/expectations, (\d+) failures?/,1].to_i + results[/failures?, (\d+) errors?/,1].to_i
-    results_str << "mspec      #{results}\n\n"
+    if results
+      failures += results[/expectations, (\d+) failures?/,1].to_i +
+        results[/failures?, (\d+) errors?/,1].to_i
+      results_str << "mspec      #{results}\n\n"
+    else
+      failures += 1
+      results_str << "mspec      Crashed? see log\n\n"
+    end
   else
     failures += 1
-    results_str << "mspec      UNKNOWN\n\n"
+    results_str << "mspec      UNKNOWN see log\n\n"
   end
 end
 
