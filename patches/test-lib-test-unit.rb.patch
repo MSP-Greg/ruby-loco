@@ -1,0 +1,33 @@
+Patch by MSP-Greg, helps with parallel test-all on MinGW
+diff --git a/test/lib/test/unit.rb b/test/lib/test/unit.rb
+index 761fe92df8..b82681d7f8 100644
+--- a/test/lib/test/unit.rb
++++ b/test/lib/test/unit.rb
+@@ -125,6 +125,8 @@ def filter.=~(other)    # :nodoc:
+     end
+ 
+     module Parallel # :nodoc: all
++      IS_MINGW = /mingw/ =~ RUBY_PLATFORM
++      
+       def process_args(args = [])
+         return @options if @options
+         options = super
+@@ -354,7 +356,7 @@ def quit_workers
+         return if @workers.empty?
+         @workers.reject! do |worker|
+           begin
+-            Timeout.timeout(1) do
++            Timeout.timeout(IS_MINGW ? 4 : 1) do
+               worker.quit
+             end
+           rescue Errno::EPIPE
+@@ -365,7 +367,8 @@ def quit_workers
+ 
+         return if @workers.empty?
+         begin
+-          Timeout.timeout(0.2 * @workers.size) do
++#          Timeout.timeout(0.2 * @workers.size) do
++          Timeout.timeout(IS_MINGW ? [0.2 * @workers.size, 4].max : 0.2 * @workers.size) do
+             Process.waitall
+           end
+         rescue Timeout::Error
