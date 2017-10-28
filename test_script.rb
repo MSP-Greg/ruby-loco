@@ -37,7 +37,7 @@ if log.length == 1
     results = s[-144,144][/^\d{4,} files, \d{4,} examples,[^\r\n]+/]
     if results
       failures += results[/expectations, (\d+) failures?/,1].to_i +
-        result[/failures?, (\d+) errors?/,1].to_i
+        results[/failures?, (\d+) errors?/,1].to_i
       results_str << "test-spec  #{results}\n"
     else
       failures += 1
