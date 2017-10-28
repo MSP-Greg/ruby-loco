@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# encoding: UTF-8
 
 failures = 0
 puts "——————————————————————————————————————————————————————————————————————————————— Test Results"
