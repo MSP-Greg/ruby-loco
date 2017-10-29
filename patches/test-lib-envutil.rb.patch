@@ -18,7 +18,7 @@ index 45b6eb47fb..3c0d530314 100644
                    **opt)
 -    timeout = apply_timeout_scale(timeout)
 -    reprieve = apply_timeout_scale(reprieve) if reprieve
-+    mult = (IS_MINGW && timeout <= 15) ? 2 : 1
++    mult = (IS_MINGW && timeout <= 20) ? 3 : 1
 +    timeout  = mult * apply_timeout_scale(timeout)
 +    reprieve = mult * apply_timeout_scale(reprieve) if reprieve
  
