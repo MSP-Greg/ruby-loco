@@ -1,0 +1,469 @@
+Patch by MSP-Greg - testing fixes for omitted tests
+diff --git a/test/fileutils/test_fileutils.rb b/test/fileutils/test_fileutils.rb
+index 2b3978a7e6..f88d6269f1 100644
+--- a/test/fileutils/test_fileutils.rb
++++ b/test/fileutils/test_fileutils.rb
+@@ -6,7 +6,7 @@
+ require_relative 'fileasserts'
+ require 'pathname'
+ require 'tmpdir'
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestFileUtils < Test::Unit::TestCase
+   include Test::Unit::FileAssertions
+diff --git a/test/ruby/test_alias.rb b/test/ruby/test_alias.rb
+index e81636fa43..b216891b98 100644
+--- a/test/ruby/test_alias.rb
++++ b/test/ruby/test_alias.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestAlias < Test::Unit::TestCase
+   class Alias0
+diff --git a/test/ruby/test_argf.rb b/test/ruby/test_argf.rb
+index 311469aad9..63df919480 100644
+--- a/test/ruby/test_argf.rb
++++ b/test/ruby/test_argf.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ require 'timeout'
+ require 'tmpdir'
+ require 'tempfile'
+diff --git a/test/ruby/test_arity.rb b/test/ruby/test_arity.rb
+index b98248f603..7a5875dd2e 100644
+--- a/test/ruby/test_arity.rb
++++ b/test/ruby/test_arity.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestArity < Test::Unit::TestCase
+   def err_mess(method_proc = nil, argc = 0)
+diff --git a/test/ruby/test_array.rb b/test/ruby/test_array.rb
+index 508312e4a2..243abd2582 100644
+--- a/test/ruby/test_array.rb
++++ b/test/ruby/test_array.rb
+@@ -1,6 +1,6 @@
+ # coding: US-ASCII
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ require "delegate"
+ require "rbconfig/sizeof"
+ 
+diff --git a/test/ruby/test_assignment.rb b/test/ruby/test_assignment.rb
+index 45c4d6e058..60871dbabc 100644
+--- a/test/ruby/test_assignment.rb
++++ b/test/ruby/test_assignment.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestAssignment < Test::Unit::TestCase
+   def test_assign
+diff --git a/test/ruby/test_autoload.rb b/test/ruby/test_autoload.rb
+index 9d16a45e23..21a3a1533d 100644
+--- a/test/ruby/test_autoload.rb
++++ b/test/ruby/test_autoload.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ require 'tempfile'
+ 
+ class TestAutoload < Test::Unit::TestCase
+diff --git a/test/ruby/test_backtrace.rb b/test/ruby/test_backtrace.rb
+index d38628cdb2..c529615058 100644
+--- a/test/ruby/test_backtrace.rb
++++ b/test/ruby/test_backtrace.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ require 'tempfile'
+ 
+ class TestBacktrace < Test::Unit::TestCase
+diff --git a/test/ruby/test_basicinstructions.rb b/test/ruby/test_basicinstructions.rb
+index dd3ca4dd22..9798c394e4 100644
+--- a/test/ruby/test_basicinstructions.rb
++++ b/test/ruby/test_basicinstructions.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ ConstTest = 3
+ class Class
+diff --git a/test/ruby/test_beginendblock.rb b/test/ruby/test_beginendblock.rb
+index 9238a53354..5a077f1d1b 100644
+--- a/test/ruby/test_beginendblock.rb
++++ b/test/ruby/test_beginendblock.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestBeginEndBlock < Test::Unit::TestCase
+   DIR = File.dirname(File.expand_path(__FILE__))
+diff --git a/test/ruby/test_bignum.rb b/test/ruby/test_bignum.rb
+index 3ead77766d..2fe1f2047b 100644
+--- a/test/ruby/test_bignum.rb
++++ b/test/ruby/test_bignum.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ begin
+   require '-test-/integer'
+ rescue LoadError
+diff --git a/test/ruby/test_call.rb b/test/ruby/test_call.rb
+index 2a1b671cac..96dbac84c3 100644
+--- a/test/ruby/test_call.rb
++++ b/test/ruby/test_call.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestCall < Test::Unit::TestCase
+   def aaa(a, b=100, *rest)
+diff --git a/test/ruby/test_case.rb b/test/ruby/test_case.rb
+index 77612a8945..83162d7106 100644
+--- a/test/ruby/test_case.rb
++++ b/test/ruby/test_case.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestCase < Test::Unit::TestCase
+   def test_case
+diff --git a/test/ruby/test_class.rb b/test/ruby/test_class.rb
+index f2e89c0f26..35b3bf2a57 100644
+--- a/test/ruby/test_class.rb
++++ b/test/ruby/test_class.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestClass < Test::Unit::TestCase
+   # ------------------
+diff --git a/test/ruby/test_clone.rb b/test/ruby/test_clone.rb
+index 93ef438461..48fb89995d 100644
+--- a/test/ruby/test_clone.rb
++++ b/test/ruby/test_clone.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestClone < Test::Unit::TestCase
+   module M001; end
+diff --git a/test/ruby/test_comparable.rb b/test/ruby/test_comparable.rb
+index 94c05d5f91..851df0b48e 100644
+--- a/test/ruby/test_comparable.rb
++++ b/test/ruby/test_comparable.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestComparable < Test::Unit::TestCase
+   def setup
+diff --git a/test/ruby/test_complex.rb b/test/ruby/test_complex.rb
+index ded316841a..bbb7a0ce18 100644
+--- a/test/ruby/test_complex.rb
++++ b/test/ruby/test_complex.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class ComplexSub < Complex; end
+ 
+diff --git a/test/ruby/test_complex2.rb b/test/ruby/test_complex2.rb
+index 594fc3f45a..4620fd09f1 100644
+--- a/test/ruby/test_complex2.rb
++++ b/test/ruby/test_complex2.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class Complex_Test2 < Test::Unit::TestCase
+ 
+diff --git a/test/ruby/test_complexrational.rb b/test/ruby/test_complexrational.rb
+index 0360f5ee42..1a0f54fa99 100644
+--- a/test/ruby/test_complexrational.rb
++++ b/test/ruby/test_complexrational.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class ComplexRational_Test < Test::Unit::TestCase
+ 
+diff --git a/test/ruby/test_condition.rb b/test/ruby/test_condition.rb
+index ab0ffc4b6a..e405b8ac14 100644
+--- a/test/ruby/test_condition.rb
++++ b/test/ruby/test_condition.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestCondition < Test::Unit::TestCase
+ 
+diff --git a/test/ruby/test_const.rb b/test/ruby/test_const.rb
+index 8784e0e988..f5ebc0aa3d 100644
+--- a/test/ruby/test_const.rb
++++ b/test/ruby/test_const.rb
+@@ -1,6 +1,6 @@
+ # -*- coding: us-ascii -*-
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestConst < Test::Unit::TestCase
+   TEST1 = 1
+diff --git a/test/ruby/test_continuation.rb b/test/ruby/test_continuation.rb
+index efc549b67a..26703974a5 100644
+--- a/test/ruby/test_continuation.rb
++++ b/test/ruby/test_continuation.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ EnvUtil.suppress_warning {require 'continuation'}
+ require 'fiber'
+ 
+diff --git a/test/ruby/test_defined.rb b/test/ruby/test_defined.rb
+index 54f461ff03..be2fe4ebe2 100644
+--- a/test/ruby/test_defined.rb
++++ b/test/ruby/test_defined.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestDefined < Test::Unit::TestCase
+   class Foo
+diff --git a/test/ruby/test_dir.rb b/test/ruby/test_dir.rb
+index cead4beb93..fc53c3e2b3 100644
+--- a/test/ruby/test_dir.rb
++++ b/test/ruby/test_dir.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ require 'tmpdir'
+ require 'fileutils'
+diff --git a/test/ruby/test_dir_m17n.rb b/test/ruby/test_dir_m17n.rb
+index 7584074c7e..1d99c21b58 100644
+--- a/test/ruby/test_dir_m17n.rb
++++ b/test/ruby/test_dir_m17n.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ require 'tmpdir'
+ require '-test-/file'
+ 
+diff --git a/test/ruby/test_econv.rb b/test/ruby/test_econv.rb
+index 6f098db454..75e6f38bad 100644
+--- a/test/ruby/test_econv.rb
++++ b/test/ruby/test_econv.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestEncodingConverter < Test::Unit::TestCase
+   def check_ec(edst, esrc, eres, dst, src, ec, off, len, opts=nil)
+diff --git a/test/ruby/test_encoding.rb b/test/ruby/test_encoding.rb
+index 8f73a8fce1..5f354d86e4 100644
+--- a/test/ruby/test_encoding.rb
++++ b/test/ruby/test_encoding.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestEncoding < Test::Unit::TestCase
+ 
+diff --git a/test/ruby/test_enum.rb b/test/ruby/test_enum.rb
+index ae119c73bf..c801d737fe 100644
+--- a/test/ruby/test_enum.rb
++++ b/test/ruby/test_enum.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ EnvUtil.suppress_warning {require 'continuation'}
+ require 'stringio'
+ 
+diff --git a/test/ruby/test_enumerator.rb b/test/ruby/test_enumerator.rb
+index bd6b7fa669..714ccca41d 100644
+--- a/test/ruby/test_enumerator.rb
++++ b/test/ruby/test_enumerator.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestEnumerator < Test::Unit::TestCase
+   def setup
+diff --git a/test/ruby/test_env.rb b/test/ruby/test_env.rb
+index 0ed88dd1d5..1e4c36448a 100644
+--- a/test/ruby/test_env.rb
++++ b/test/ruby/test_env.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestEnv < Test::Unit::TestCase
+   IGNORE_CASE = /bccwin|mswin|mingw/ =~ RUBY_PLATFORM
+diff --git a/test/ruby/test_eval.rb b/test/ruby/test_eval.rb
+index a2029bb9b5..b8146b4c9a 100644
+--- a/test/ruby/test_eval.rb
++++ b/test/ruby/test_eval.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestEval < Test::Unit::TestCase
+ 
+diff --git a/test/ruby/test_exception.rb b/test/ruby/test_exception.rb
+index 3622cae0d9..a1606f06c3 100644
+--- a/test/ruby/test_exception.rb
++++ b/test/ruby/test_exception.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ require 'tempfile'
+ 
+ class TestException < Test::Unit::TestCase
+diff --git a/test/ruby/test_fiber.rb b/test/ruby/test_fiber.rb
+index 92c9961259..4c07093b56 100644
+--- a/test/ruby/test_fiber.rb
++++ b/test/ruby/test_fiber.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ require 'fiber'
+ EnvUtil.suppress_warning {require 'continuation'}
+ require 'tmpdir'
+diff --git a/test/ruby/test_file.rb b/test/ruby/test_file.rb
+index 4be4e86131..66808de26a 100644
+--- a/test/ruby/test_file.rb
++++ b/test/ruby/test_file.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ require 'tempfile'
+ require "-test-/file"
+ require_relative 'ut_eof'
+diff --git a/test/ruby/test_fixnum.rb b/test/ruby/test_fixnum.rb
+index bd18067dda..9044075d72 100644
+--- a/test/ruby/test_fixnum.rb
++++ b/test/ruby/test_fixnum.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestFixnum < Test::Unit::TestCase
+   def setup
+diff --git a/test/ruby/test_flip.rb b/test/ruby/test_flip.rb
+index b8b05aed6d..d56c3bf2ca 100644
+--- a/test/ruby/test_flip.rb
++++ b/test/ruby/test_flip.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestFlip < Test::Unit::TestCase
+   def test_flip_flop
+diff --git a/test/ruby/test_float.rb b/test/ruby/test_float.rb
+index bddd10bf10..301540334e 100644
+--- a/test/ruby/test_float.rb
++++ b/test/ruby/test_float.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestFloat < Test::Unit::TestCase
+   include EnvUtil
+diff --git a/test/ruby/test_fnmatch.rb b/test/ruby/test_fnmatch.rb
+index ca01a28698..ab8e51ce36 100644
+--- a/test/ruby/test_fnmatch.rb
++++ b/test/ruby/test_fnmatch.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestFnmatch < Test::Unit::TestCase
+ 
+diff --git a/test/ruby/test_gc.rb b/test/ruby/test_gc.rb
+index 7a6309b6a3..2c5b2a1d7c 100644
+--- a/test/ruby/test_gc.rb
++++ b/test/ruby/test_gc.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestGc < Test::Unit::TestCase
+   class S
+diff --git a/test/ruby/test_hash.rb b/test/ruby/test_hash.rb
+index 813afaeee0..fc16331dad 100644
+--- a/test/ruby/test_hash.rb
++++ b/test/ruby/test_hash.rb
+@@ -1,6 +1,6 @@
+ # -*- coding: us-ascii -*-
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ EnvUtil.suppress_warning {require 'continuation'}
+ 
+ class TestHash < Test::Unit::TestCase
+diff --git a/test/ruby/test_method.rb b/test/ruby/test_method.rb
+index ce67aada2b..b152d2bc77 100644
+--- a/test/ruby/test_method.rb
++++ b/test/ruby/test_method.rb
+@@ -1,6 +1,6 @@
+ # -*- coding: us-ascii -*-
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestMethod < Test::Unit::TestCase
+   def setup
+diff --git a/test/ruby/test_proc.rb b/test/ruby/test_proc.rb
+index 68455c1bcc..67ed5aa75d 100644
+--- a/test/ruby/test_proc.rb
++++ b/test/ruby/test_proc.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ class TestProc < Test::Unit::TestCase
+   def setup
