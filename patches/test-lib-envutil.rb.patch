@@ -1,0 +1,26 @@
+Patch by MSP-Greg
+diff --git a/test/lib/envutil.rb b/test/lib/envutil.rb
+index 45b6eb47fb..3c0d530314 100644
+--- a/test/lib/envutil.rb
++++ b/test/lib/envutil.rb
+@@ -13,6 +13,8 @@
+ end
+ 
+ module EnvUtil
++  IS_MINGW = /mingw/ =~ RUBY_PLATFORM ? true : nil
++  
+   def rubybin
+     if ruby = ENV["RUBY"]
+       return ruby
+@@ -61,8 +63,9 @@ def invoke_ruby(args, stdin_data = "", capture_stdout = false, capture_stderr =
+                   signal: :TERM,
+                   rubybin: EnvUtil.rubybin, precommand: nil,
+                   **opt)
+-    timeout = apply_timeout_scale(timeout)
+-    reprieve = apply_timeout_scale(reprieve) if reprieve
++    mult = (IS_MINGW && timeout <= 15) ? 2 : 1
++    timeout  = mult * apply_timeout_scale(timeout)
++    reprieve = mult * apply_timeout_scale(reprieve) if reprieve
+ 
+     in_c, in_p = IO.pipe
+     out_p, out_c = IO.pipe if capture_stdout

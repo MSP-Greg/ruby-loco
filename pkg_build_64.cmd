@@ -38,11 +38,13 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @rem --- rename readline.rb so extension is used for tests (ren only works with backslashes)
 @ren %~dp0pkg\ruby%SUFFIX%\ruby%SUFFIX%\lib\ruby\site_ruby\readline.rb readline.rb_
 
-@rem ------------------------------------------------------------------ test-all
-@set SSL_CERT_FILE=%PKG_RUBY%/ssl/cert.pem
-@cd %DP0%src/build%SUFFIX%
 @echo.
 @echo ——————————————————————————————————————————————————————————————————————————————— Running Tests
+
+@set SSL_CERT_FILE=%PKG_RUBY%/ssl/cert.pem
+@cd %DP0%src/build%SUFFIX%
+
+@rem ------------------------------------------------------------------ test-all
 @echo test-all
 @make.exe test-all "TESTOPTS=-v -j%M_JOBS% --job-status=normal --show-skip --retry" > %LOG_PATH_NAME%-test-all.log 2>&1
 
