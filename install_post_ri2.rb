@@ -8,6 +8,9 @@
 #
 module InstallPostRI2
 
+  COL_WID = 36
+  COL_SPACE = COL_WID * ' '
+
   # 32 or 64, maybe use RbConfig::CONFIG["target_cpu"] == 'x64' ? '64' : '32'
   ARCH = ENV['SUFFIX'][-2,2]
 
@@ -70,16 +73,16 @@ module InstallPostRI2
         i[1].each { |fn|
           fp = "#{REPO_RI2}/#{fn}"
           if File.exist?(fp)
-            puts "#{' ' * 30}#{fn}"
+            puts "#{COL_SPACE}#{fn}"
             `copy /b /y #{fp.gsub('/', '\\')} #{i[0]}`
           else
-            puts "#{' ' * 30}#{fn} DOES NOT exist!"
+            puts "#{COL_SPACE}#{fn} DOES NOT exist!"
           end
         }
       }
       Dir.chdir("lib/ruby/#{R_VERS_INT}/rubygems/defaults") { |d|
         patch = `patch -p1 -N --no-backup-if-mismatch -i #{__dir__}/patches/__operating_system.rb.patch`
-        puts "#{' ' * 30}#{patch}"
+        puts "#{COL_SPACE}#{patch}"
       }
     }
   end
@@ -97,12 +100,12 @@ module InstallPostRI2
       Dir.glob('build/*.rb').each { |fn|
         f_str = File.binread(fn)
         if f_str.sub!(REWRITE_MARK, '\1module Runtime # Rewrite')
-          puts "#{' ' * 30}rewrite #{fn[6..-1]}"
+          puts "#{COL_SPACE}rewrite #{fn[6..-1]}"
           File.open( File.join( 'runtime', fn[6..-1]), 'wb') { |f| f << f_str }
         end
       }
       `rd /s /q build`
-      puts "#{' ' * 30}deleting build dir"
+      puts "#{COL_SPACE}deleting build dir"
     }
   end
 
@@ -116,7 +119,7 @@ module InstallPostRI2
       ri2_vers = `#{ENV['GIT']} tag`[/^\S+\Z/] unless ri2_vers
     }
     puts "creating package_version.rb:  #{ri2_vers}  commit #{commit}"
-    puts "#{' ' * 30}#{commit}"
+    puts "#{COL_SPACE}#{commit}"
 
     f_str = <<~EOT
     module RubyInstaller

@@ -7,6 +7,9 @@ require('open3')
 #
 module InstallPost
 
+  COL_WID = 36
+  COL_SPACE = COL_WID * ' '
+
   # ruby name like ruby25_64
 #  @@pkg_name = ARGV[0]
   @@pkg_name = "ruby#{ENV['SUFFIX']}"
@@ -47,10 +50,10 @@ module InstallPost
     dll_files.each { |fn|
       orig = File.join(msys2_dll_bin_path, fn).gsub('/', '\\')
       if File.exist?(orig)
-        puts "#{' ' * 30}#{fn}"
+        puts "#{COL_SPACE}#{fn}"
         `copy /b /y "#{orig}" #{dest}`
       else
-        puts "#{' ' * 30}ERROR: #{File.basename(orig)} does not exist"
+        puts "#{COL_SPACE}ERROR: #{File.basename(orig)} does not exist"
       end
     }
     dll_dirs = lib_files.map{ | fn| File.dirname(fn) }.uniq 
@@ -60,9 +63,9 @@ module InstallPost
         dest = File.join(__dir__, 'pkg', @@pkg_name, @@pkg_name, "lib", d)
         `mkdir #{dest.gsub('/', '\\')}` unless Dir.exist?(dest)
         `xcopy /s /q #{src.gsub('/', '\\')} #{dest.gsub('/', '\\')}`
-        puts "#{' ' * 30}Copy dir #{d}"
+        puts "#{COL_SPACE}Copy dir #{d}"
       else
-        puts "#{' ' * 30}ERROR: Dir #{src} does not exist"
+        puts "#{COL_SPACE}ERROR: Dir #{src} does not exist"
       end
     }
   end
@@ -72,7 +75,7 @@ module InstallPost
     repo_ri2_nix = ENV['REPO_RI2'].gsub(/\\/, '/')
     Dir.chdir(repo_ri2_nix) { |d|
       patch = `patch -p1 -N --no-backup-if-mismatch -i #{__dir__}/patches/__lib-ruby_installer-build-ca_cert_file.rb.patch`
-      puts "#{' ' * 30}#{patch}"
+      puts "#{COL_SPACE}#{patch}"
       require("#{repo_ri2_nix}/lib/ruby_installer/build/ca_cert_file.rb")
       require("#{repo_ri2_nix}/lib/ruby_installer/build/gem_version.rb")
       ca_file = RubyInstaller::Build::CaCertFile.new
@@ -86,15 +89,15 @@ module InstallPost
       src = File.join(ENV['MSYS2_DIR'].gsub('\\', "/"), "mingw#{@@arch}", "ssl", "openssl.cnf")
       if File.exist?(src)
         `copy /b /y #{src.gsub('/', '\\')} #{pkg_ruby}\\ssl\\openssl.cnf`
-        puts "#{' ' * 30}openssl.cnf"
+        puts "#{COL_SPACE}openssl.cnf"
       end
       if Dir.exist?("C:/SSL")
         `copy /b /y resources\\ssl\\cacert.pem    C:\\SSL\\cacert.pem`
       end
       `copy /b /y resources\\ssl\\README-SSL.md #{pkg_ruby}\\ssl\\README-SSL.md`
-      puts "#{' ' * 30}README-SSL.md"
+      puts "#{COL_SPACE}README-SSL.md"
       `copy /b /y resources\\ssl\\c_rehash.rb   #{pkg_ruby}\\ssl\\certs\\`
-      puts "#{' ' * 30}certs\\c_rehash.rb"
+      puts "#{COL_SPACE}certs\\c_rehash.rb"
       `copy /b /y #{ENV['%MSYS2_DIR']}\\mingw64\\openssl.cnf #{pkg_ruby}\\ssl\\`
     }
   end
@@ -173,7 +176,7 @@ EOT
         if    re_bin =~ dll ; bin_dlls << dll.sub(re_bin, '')
         elsif re_lib =~ dll ; lib_dlls << dll.sub(re_lib, '')
         else
-          puts "#{dll.ljust(30)} Unknown dll location!"
+          puts "#{dll.ljust(COL_WID)} Unknown dll location!"
         end
       }
       pkg_files_added += pkgs
