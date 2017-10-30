@@ -9,7 +9,7 @@
 module InstallPostRI2
 
   COL_WID = 36
-  COL_SPACE = COL_WID * ' '
+  COL_SPACE = ' ' * COL_WID
 
   # 32 or 64, maybe use RbConfig::CONFIG["target_cpu"] == 'x64' ? '64' : '32'
   ARCH = ENV['SUFFIX'][-2,2]

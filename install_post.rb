@@ -8,7 +8,7 @@ require('open3')
 module InstallPost
 
   COL_WID = 36
-  COL_SPACE = COL_WID * ' '
+  COL_SPACE = ' ' * COL_WID
 
   # ruby name like ruby25_64
 #  @@pkg_name = ARGV[0]
