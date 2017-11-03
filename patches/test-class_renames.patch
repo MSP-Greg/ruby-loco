@@ -1,4 +1,6 @@
 Patch by MSP-Greg
+Renames duplicate class names that cause intermittent loss of tests when
+test-all is run with a -j parameter
 diff --git a/test/-ext-/array/test_resize.rb b/test/-ext-/array/test_resize.rb
 index f6a368cb75..c7a57f3cf1 100644
 --- a/test/-ext-/array/test_resize.rb
@@ -156,7 +158,7 @@ index 2ba73c8d4c..cb8549e7c9 100644
      class A
        def foo0()
 diff --git a/test/-ext-/proc/test_bmethod.rb b/test/-ext-/proc/test_bmethod.rb
-index 344f975755..05ae8434d5 100644
+index 344f975755..403d99bfd1 100644
 --- a/test/-ext-/proc/test_bmethod.rb
 +++ b/test/-ext-/proc/test_bmethod.rb
 @@ -2,12 +2,12 @@
@@ -174,3 +176,89 @@ index 344f975755..05ae8434d5 100644
    class Base
      def foo(*a)
        a
+diff --git a/test/erb/test_erb_m17n.rb b/test/erb/test_erb_m17n.rb
+index a7840c9605..2fd9e700f3 100644
+--- a/test/erb/test_erb_m17n.rb
++++ b/test/erb/test_erb_m17n.rb
+@@ -3,7 +3,7 @@
+ require 'test/unit'
+ require 'erb'
+ 
+-class TestERB < Test::Unit::TestCase
++class TestERBEncoding < Test::Unit::TestCase
+   def test_result_encoding
+     erb = ERB.new("hello")
+     assert_equal __ENCODING__, erb.result.encoding
+diff --git a/test/fileutils/test_dryrun.rb b/test/fileutils/test_dryrun.rb
+index 97d72fcdf9..fd8a7805ec 100644
+--- a/test/fileutils/test_dryrun.rb
++++ b/test/fileutils/test_dryrun.rb
+@@ -8,7 +8,7 @@
+ class TestFileUtilsDryRun < Test::Unit::TestCase
+ 
+   include FileUtils::DryRun
+-  include TestFileUtils::Visibility
++  include TestFileUtilsInc::Visibility
+ 
+   def setup
+     super
+diff --git a/test/fileutils/test_nowrite.rb b/test/fileutils/test_nowrite.rb
+index b804498525..543fa39f5a 100644
+--- a/test/fileutils/test_nowrite.rb
++++ b/test/fileutils/test_nowrite.rb
+@@ -8,7 +8,7 @@
+ class TestFileUtilsNoWrite < Test::Unit::TestCase
+ 
+   include FileUtils::NoWrite
+-  include TestFileUtils::Visibility
++  include TestFileUtilsInc::Visibility
+ 
+   def setup
+     super
+diff --git a/test/fileutils/test_verbose.rb b/test/fileutils/test_verbose.rb
+index 0019946393..cf65be8e03 100644
+--- a/test/fileutils/test_verbose.rb
++++ b/test/fileutils/test_verbose.rb
+@@ -8,7 +8,7 @@
+ class TestFileUtilsVerbose < Test::Unit::TestCase
+ 
+   include FileUtils::Verbose
+-  include TestFileUtils::Visibility
++  include TestFileUtilsInc::Visibility
+ 
+   def setup
+     super
+diff --git a/test/fileutils/visibility_tests.rb b/test/fileutils/visibility_tests.rb
+index 0ce00d5f2c..4c02c9d207 100644
+--- a/test/fileutils/visibility_tests.rb
++++ b/test/fileutils/visibility_tests.rb
+@@ -2,14 +2,14 @@
+ require 'test/unit'
+ require 'fileutils'
+ 
+-class TestFileUtils < Test::Unit::TestCase
++class TestFileUtilsInc < Test::Unit::TestCase
+ end
+ 
+ ##
+ # These tests are reused in the FileUtils::Verbose, FileUtils::NoWrite and
+ # FileUtils::DryRun tests
+ 
+-module TestFileUtils::Visibility
++module TestFileUtilsInc::Visibility
+ 
+   FileUtils::METHODS.each do |m|
+     define_method "test_singleton_visibility_#{m}" do
+diff --git a/test/rexml/test_martin_fowler.rb b/test/rexml/test_martin_fowler.rb
+index da685a80ec..add3c82723 100644
+--- a/test/rexml/test_martin_fowler.rb
++++ b/test/rexml/test_martin_fowler.rb
+@@ -3,7 +3,7 @@
+ require 'rexml/document'
+ 
+ module REXMLTests
+-  class OrderTester < Test::Unit::TestCase
++  class OrderTesterMF < Test::Unit::TestCase
+     DOC = <<END
+ <paper>
+ <title>Remove this element and figs order differently</title>
