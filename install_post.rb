@@ -46,7 +46,7 @@ module InstallPost
     create_manifest(dll_files, dest)
 
     # copy bin/ dll's
-    puts "installing dll files:         FROM #{msys2_dll_bin_path}"
+    puts "#{'installing dll files:'.ljust(COL_WID)}FROM #{msys2_dll_bin_path}"
     dll_files.each { |fn|
       orig = File.join(msys2_dll_bin_path, fn).gsub('/', '\\')
       if File.exist?(orig)
@@ -85,7 +85,7 @@ module InstallPost
       `md #{pkg_ruby}\\ssl`
       `md #{pkg_ruby}\\ssl\\certs`
       `copy /b /y resources\\ssl\\cacert.pem    #{pkg_ruby}\\ssl\\cert.pem`
-      puts "installing ssl files:         cert.pem"
+      puts "#{'installing ssl files:'.ljust(COL_WID)}cert.pem"
       src = File.join(ENV['MSYS2_DIR'].gsub('\\', "/"), "mingw#{@@arch}", "ssl", "openssl.cnf")
       if File.exist?(src)
         `copy /b /y #{src.gsub('/', '\\')} #{pkg_ruby}\\ssl\\openssl.cnf`

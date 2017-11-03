@@ -64,7 +64,7 @@ module InstallPostRI2
 
   # Add files defined in {RI2_FILES} from RI2
   def self.add_ri2
-    puts "installing RubyInstaller2:    From #{REPO_RI2}"
+    puts "#{'installing RubyInstaller2:'.ljust(COL_WID)}From #{REPO_RI2}"
     Dir.chdir(TOPDIR) { |d|
       RI2_FILES.each { |i|
         unless Dir.exist?(i[0])
@@ -91,8 +91,8 @@ module InstallPostRI2
   def self.add_ri2_site_ruby
     src = File.join(REPO_RI2, 'lib').gsub('/', '\\') # + "\\"
     site_ruby = SITE_RUBY.gsub('/', '\\')
-    puts "installing RI2 runtime files: From #{src}"
-    puts "                              To   #{site_ruby}"
+    puts "#{'installing RI2 runtime files:'.ljust(COL_WID)}From #{src}"
+    puts "#{COL_SPACE}To   #{site_ruby}"
     # copy everything over to pkg dir
     `xcopy /s /q /y #{src} #{site_ruby}`
     # now, loop thru build dir, and move to runtime
@@ -118,7 +118,7 @@ module InstallPostRI2
       commit   = `#{ENV['GIT']} rev-parse HEAD`[0,7]
       ri2_vers = `#{ENV['GIT']} tag`[/^\S+\Z/] unless ri2_vers
     }
-    puts "creating package_version.rb:  #{ri2_vers}  commit #{commit}"
+    puts "#{'creating package_version.rb:'.ljust(COL_WID)}#{ri2_vers}  commit #{commit}"
     puts "#{COL_SPACE}#{commit}"
 
     f_str = <<~EOT

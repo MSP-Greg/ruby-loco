@@ -1,33 +1,38 @@
-Patch by MSP-Greg, helps with parallel test-all on MinGW
+Patch by MSP-Greg
 diff --git a/test/lib/test/unit.rb b/test/lib/test/unit.rb
-index 761fe92df8..b82681d7f8 100644
+index 761fe92df8..8bd43b0d11 100644
 --- a/test/lib/test/unit.rb
 +++ b/test/lib/test/unit.rb
-@@ -125,6 +125,8 @@ def filter.=~(other)    # :nodoc:
+@@ -521,7 +521,7 @@ def _run_parallel suites, type, result
+             if @options[:retry]
+               @errors   += rep.map{|x| x[:result][0] }.inject(:+)
+               @failures += rep.map{|x| x[:result][1] }.inject(:+)
+-              @skips    += rep.map{|x| x[:result][2] }.inject(:+)
++              @skips    += rep.map{|x| x[:result][2] }.inject(:+) unless @options[:parallel] # MSP-Greg
+             end
+           end
+           unless @warnings.empty?
+@@ -1085,13 +1085,17 @@ def puke klass, meth, e
+         # TODO:
+         #   this overriding is for minitest feature that skip messages are
+         #   hidden when not verbose (-v), note this is temporally.
+-        n = report.size
+-        rep = super
+-        if MiniTest::Skip === e and /no message given\z/ =~ e.message
+-          report.slice!(n..-1)
+-          rep = "."
++        if options[:hide_skip] == false
++          super
++        else
++          n = report.size
++          rep = super
++          if MiniTest::Skip === e and /no message given\z/ =~ e.message
++            report.slice!(n..-1)
++            rep = "."
++          end
++          rep
+         end
+-        rep
+       end
      end
  
-     module Parallel # :nodoc: all
-+      IS_MINGW = /mingw/ =~ RUBY_PLATFORM
-+      
-       def process_args(args = [])
-         return @options if @options
-         options = super
-@@ -354,7 +356,7 @@ def quit_workers
-         return if @workers.empty?
-         @workers.reject! do |worker|
-           begin
--            Timeout.timeout(1) do
-+            Timeout.timeout(IS_MINGW ? 4 : 1) do
-               worker.quit
-             end
-           rescue Errno::EPIPE
-@@ -365,7 +367,8 @@ def quit_workers
- 
-         return if @workers.empty?
-         begin
--          Timeout.timeout(0.2 * @workers.size) do
-+#          Timeout.timeout(0.2 * @workers.size) do
-+          Timeout.timeout(IS_MINGW ? [0.2 * @workers.size, 4].max : 0.2 * @workers.size) do
-             Process.waitall
-           end
-         rescue Timeout::Error

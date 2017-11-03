@@ -1,0 +1,61 @@
+Patch by MSP-Greg
+diff --git a/test/fileutils/test_dryrun.rb b/test/fileutils/test_dryrun.rb
+index 97d72fcdf9..fd8a7805ec 100644
+--- a/test/fileutils/test_dryrun.rb
++++ b/test/fileutils/test_dryrun.rb
+@@ -8,7 +8,7 @@
+ class TestFileUtilsDryRun < Test::Unit::TestCase
+ 
+   include FileUtils::DryRun
+-  include TestFileUtils::Visibility
++  include TestFileUtilsInc::Visibility
+ 
+   def setup
+     super
+diff --git a/test/fileutils/test_nowrite.rb b/test/fileutils/test_nowrite.rb
+index b804498525..543fa39f5a 100644
+--- a/test/fileutils/test_nowrite.rb
++++ b/test/fileutils/test_nowrite.rb
+@@ -8,7 +8,7 @@
+ class TestFileUtilsNoWrite < Test::Unit::TestCase
+ 
+   include FileUtils::NoWrite
+-  include TestFileUtils::Visibility
++  include TestFileUtilsInc::Visibility
+ 
+   def setup
+     super
+diff --git a/test/fileutils/test_verbose.rb b/test/fileutils/test_verbose.rb
+index 0019946393..cf65be8e03 100644
+--- a/test/fileutils/test_verbose.rb
++++ b/test/fileutils/test_verbose.rb
+@@ -8,7 +8,7 @@
+ class TestFileUtilsVerbose < Test::Unit::TestCase
+ 
+   include FileUtils::Verbose
+-  include TestFileUtils::Visibility
++  include TestFileUtilsInc::Visibility
+ 
+   def setup
+     super
+diff --git a/test/fileutils/visibility_tests.rb b/test/fileutils/visibility_tests.rb
+index 0ce00d5f2c..4c02c9d207 100644
+--- a/test/fileutils/visibility_tests.rb
++++ b/test/fileutils/visibility_tests.rb
+@@ -2,14 +2,14 @@
+ require 'test/unit'
+ require 'fileutils'
+ 
+-class TestFileUtils < Test::Unit::TestCase
++class TestFileUtilsInc < Test::Unit::TestCase
+ end
+ 
+ ##
+ # These tests are reused in the FileUtils::Verbose, FileUtils::NoWrite and
+ # FileUtils::DryRun tests
+ 
+-module TestFileUtils::Visibility
++module TestFileUtilsInc::Visibility
+ 
+   FileUtils::METHODS.each do |m|
+     define_method "test_singleton_visibility_#{m}" do
