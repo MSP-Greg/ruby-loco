@@ -176,6 +176,19 @@ index 344f975755..403d99bfd1 100644
    class Base
      def foo(*a)
        a
+diff --git a/test/-ext-/test_notimplement.rb b/test/-ext-/test_notimplement.rb
+index 0eba7bdaf8..80757313ca 100644
+--- a/test/-ext-/test_notimplement.rb
++++ b/test/-ext-/test_notimplement.rb
+@@ -1,7 +1,7 @@
+ # frozen_string_literal: false
+ require '-test-/notimplement'
+ 
+-class TestNotImplement < Test::Unit::TestCase
++class Test_NotImplement < Test::Unit::TestCase
+   def test_funcall_notimplement
+     bug3662 = '[ruby-dev:41953]'
+     assert_raise(NotImplementedError, bug3662) {
 diff --git a/test/erb/test_erb_m17n.rb b/test/erb/test_erb_m17n.rb
 index a7840c9605..2fd9e700f3 100644
 --- a/test/erb/test_erb_m17n.rb
