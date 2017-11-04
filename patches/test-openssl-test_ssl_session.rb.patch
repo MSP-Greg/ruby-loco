@@ -1,9 +1,29 @@
 Patch by MSP-Greg
 diff --git a/test/openssl/test_ssl_session.rb b/test/openssl/test_ssl_session.rb
-index 2cb46cd2c3..b07d494b25 100644
+index 2cb46cd2c3..43d6bd73f7 100644
 --- a/test/openssl/test_ssl_session.rb
 +++ b/test/openssl/test_ssl_session.rb
-@@ -330,12 +330,13 @@ def test_ctx_server_session_cb
+@@ -202,13 +202,14 @@ def test_server_session_cache
+           ssl.puts("abc"); assert_equal "abc\n", ssl.gets
+           first_session ||= ssl.session
+ 
++          reused = ssl.session_reused?
+           case connections
+           when 0;
+-          when 1; assert_equal true, ssl.session_reused?
+-          when 2; assert_equal false, ssl.session_reused?
+-          when 3; assert_equal true, ssl.session_reused?
+-          when 4; assert_equal false, ssl.session_reused?
+-          when 5..9; assert_equal true, ssl.session_reused?
++          when 1   ; assert_equal true  , reused
++          when 2   ; assert_equal false , reused
++          when 3   ; assert_equal true  , reused
++          when 4   ; assert_equal false , reused
++          when 5..9; assert_equal true  , reused
+           end
+         }
+       end
+@@ -330,12 +331,14 @@ def test_ctx_server_session_cb
        connections = 2
        sess2 = server_connect_with_session(port, nil, sess0.dup) { |ssl|
          ssl.puts("abc"); assert_equal "abc\n", ssl.gets
@@ -12,10 +32,12 @@ index 2cb46cd2c3..b07d494b25 100644
 +        if !reused && openssl?(1, 1, 0) && !openssl?(1, 1, 0, 7)
            # OpenSSL >= 1.1.0, < 1.1.0g
            pend "External session cache is not working; " \
-             "see https://github.com/openssl/openssl/pull/4014"
+-            "see https://github.com/openssl/openssl/pull/4014"
++            "see https://github.com/openssl/openssl/pull/4014 session_reused? is #{reused ? 'true' : 'false'}"
          end
 -        assert_equal true, ssl.session_reused?
-+        assert reused
++        pend('Issue with 1.1.0g on Appveyor') if openssl?(1, 1, 0, 7) && ENV['AV_BUILD'] == 'true'
++        assert_equal true, reused
          ssl.session
        }
        assert_equal sess0.id, sess2.id
