@@ -5,6 +5,8 @@
   call pkg_set_env.cmd
   set M_JOBS=3
 )
+%MSYS2_DIR%/mingw64/bin/openssl version
+@echo.
 
 @TITLE pkg_build_64 %R_DATE% %R_SVN% %R_VERS%
 
@@ -48,9 +50,9 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @rem ------------------------------------------------------------------ test-all
 @echo test-all
 
-@rem make.exe test-all "TESTOPTS=-v -j%M_JOBS% --job-status=normal --show-skip --retry" > %LOG_PATH_NAME%-test-all.log 2>&1
+@make.exe test-all "TESTOPTS=-v -j%M_JOBS% --job-status=normal --show-skip --retry" > %LOG_PATH_NAME%-test-all.log 2>&1
 
-@make.exe test-all "TESTOPTS=-v --show-skip" > %LOG_PATH_NAME%-test-all.log 2>&1
+@rem make.exe test-all "TESTOPTS=-v --show-skip" > %LOG_PATH_NAME%-test-all.log 2>&1
 
 @rem --------------------------------------------------------- btest, test-basic
 @cd %DP0%src/build%SUFFIX%

@@ -1,0 +1,21 @@
+Patch by MSP-Greg
+diff --git a/test/openssl/test_ssl_session.rb b/test/openssl/test_ssl_session.rb
+index 2cb46cd2c3..b07d494b25 100644
+--- a/test/openssl/test_ssl_session.rb
++++ b/test/openssl/test_ssl_session.rb
+@@ -330,12 +330,13 @@ def test_ctx_server_session_cb
+       connections = 2
+       sess2 = server_connect_with_session(port, nil, sess0.dup) { |ssl|
+         ssl.puts("abc"); assert_equal "abc\n", ssl.gets
+-        if !ssl.session_reused? && openssl?(1, 1, 0) && !openssl?(1, 1, 0, 7)
++        reused = ssl.session_reused?
++        if !reused && openssl?(1, 1, 0) && !openssl?(1, 1, 0, 7)
+           # OpenSSL >= 1.1.0, < 1.1.0g
+           pend "External session cache is not working; " \
+             "see https://github.com/openssl/openssl/pull/4014"
+         end
+-        assert_equal true, ssl.session_reused?
++        assert reused
+         ssl.session
+       }
+       assert_equal sess0.id, sess2.id
