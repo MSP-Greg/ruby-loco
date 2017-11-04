@@ -131,32 +131,12 @@ module Prepare
       }
     end
 
-    # Checks mingw openssl version.  If needed, swaps to correct version
+    # Checks mingw openssl version.
     def check_openssl
-      puts "OpenSSL - checking  package version..."
+      puts "\n——————————————————————————————————————————————————————— OpenSSL Info"
       arch = (@@arch == '32' ? 'i686' : 'x86_64')
-      t = `pacman -Qs mingw-w64-#{arch}-openssl`.strip
-      if t && !t.empty?
-        vers = vers_str_2_int(t.strip.split(' ')[1])
-        vers_old = "#{ENV['MSYS2_DIR_U']}/var/cache/pacman/pkg/mingw-w64-#{arch}-openssl-#{ENV['OPENSSL_102']}-any.pkg.tar.xz"
-        vers_new = "#{ENV['MSYS2_DIR_U']}/var/cache/pacman/pkg/mingw-w64-#{arch}-openssl-#{ENV['OPENSSL_110']}-any.pkg.tar.xz"
-        if @@r_vers_int >= 20400 && vers < 10100
-          # swap to 1.1.0
-          puts `pacman -Rdd --noconfirm mingw-w64-#{arch}-openssl`
-          puts `pacman -Udd --noconfirm --force #{vers_new}`
-        elsif @@r_vers_int < 20400 && vers >= 10100
-          # swap to 1.0.2
-          puts `pacman -Rdd --noconfirm mingw-w64-#{arch}-openssl`
-          puts `pacman -Udd --noconfirm --force #{vers_old}`
-        end
-      else
-        if @@r_vers_int >= 20400
-          puts `pacman -Udd --noconfirm --force #{vers_new}`
-        else
-          puts `pacman -Udd --noconfirm --force #{vers_old}`
-        end
-      end
-      puts "OpenSSL - done"
+      puts `pacman -Qs mingw-w64-#{arch}-openssl`.strip
+      puts `#{ENV['MSYS2_DIR']}/mingw#{@@arch}/bin/openssl version`
     end
 
     # Cleans previous build artifacts from ruby repo, all are accounted for in

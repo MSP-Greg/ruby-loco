@@ -5,8 +5,6 @@
   call pkg_set_env.cmd
   set M_JOBS=3
 )
-%MSYS2_DIR%/mingw64/bin/openssl version
-@echo.
 
 @TITLE pkg_build_64 %R_DATE% %R_SVN% %R_VERS%
 
