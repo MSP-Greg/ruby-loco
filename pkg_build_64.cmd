@@ -45,6 +45,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 
 @set SSL_CERT_FILE=%PKG_RUBY%/ssl/cert.pem
 @set TEST_SSL=TRUE
+@set OSSL_TEST_ALL=1
 @cd %DP0%src/build%SUFFIX%
 
 @rem ------------------------------------------------------------------ test-all
