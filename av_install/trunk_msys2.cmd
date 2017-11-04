@@ -18,14 +18,14 @@
 @echo ——————————————————————————————————————————————————————————————— Installing gdbm-1.10
 appveyor DownloadFile %dl_uri%/%gdbm%     -FileName C:\pkgs\%gdbm%
 appveyor DownloadFile %dl_uri%/%gdbm%.sig -FileName C:\pkgs\%gdbm%.sig
-@pacman -Rdd --noconfirm mingw-w64-x86_64-gdbm > nul
-@pacman -Udd --noconfirm --force  /c/pkgs/%gdbm%    > nul
+@pacman -Rdd --noconfirm mingw-w64-x86_64-gdbm   > nul
+@pacman -Udd --noconfirm --force  /c/pkgs/%gdbm% > nul
 
 @echo ——————————————————————————————————————————————————————————————— Installing openssl-1.1.0
 appveyor DownloadFile %dl_uri%/%openssl%     -FileName C:\pkgs\%openssl%
 appveyor DownloadFile %dl_uri%/%openssl%.sig -FileName C:\pkgs\%openssl%.sig
-@pacman -Rdd --noconfirm mingw-w64-x86_64-openssl > nul
-@pacman -Udd --noconfirm --force /c/pkgs/%openssl%     > nul
+@pacman -Rdd --noconfirm mingw-w64-x86_64-openssl  > nul
+@pacman -Udd --noconfirm --force /c/pkgs/%openssl% > nul
 
 @echo ——————————————————————————————————————————————————————————————— MinGW Package Check
 @bash -lc "pacman -Qs x86_64\.\+\(gcc\|gdbm\|openssl\) | sed -n '/^local/p' | sed 's/^local\///' | sed 's/ (.\+$//'"
