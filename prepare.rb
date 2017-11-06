@@ -38,7 +38,8 @@ module Prepare
       copy_spec if @@r_vers_int < 20500
       `attrib -r %REPO_RUBY%\\spec\\*.* /s /d`
       apply_patches
-      clean_repo
+      clean_repo unless ENV['AV_BUILD'] == 'true'
+      unicode_file("CaseFolding.txt")
       add_gems
     end
 
@@ -211,12 +212,38 @@ module Prepare
       t.split('.').map.with_index { |e, i| e.to_i * 100 ** (2 - i) }.sum
     end
 
+    # Copies unicode files from cache to src, downloads if needed
+    def unicode_file(fn)
+      av_cache = "C:/projects/ruby-loco/bundled_gems"
+
+      uc_vers = nil
+      base = File.join(__dir__, 'src', 'ruby', 'enc', 'unicode')
+      Dir.foreach(base) { |c|
+        if /\A\d{2}\.\d/ =~ c && Dir.exist?(File.join(base, c))
+          uc_vers = c
+          break
+        end
+      }
+      return unless uc_vers
+      t = File.join(__dir__, "bundled_gems", uc_vers)
+      begin
+        unless File.exist?(File.join(t, fn))
+          t_back = t.gsub(/\//, "\\")
+          `md #{t_back}` unless Dir.exist?(t)
+          `appveyor DownloadFile https://unicode.org/Public/#{uc_vers}/ucd/#{fn} -FileName #{t_back}\\#{fn}`
+          puts "Downloaded #{fn} to Appveyor cache"
+        end
+        if File.exist?("#{t}/#{fn}")
+          dest = "#{base}/data/#{uc_vers}"
+          `md #{dest.gsub(/\//, "\\")}` unless Dir.exist?(dest)
+          IO.copy_stream("#{t}/#{fn}", "#{base}/data/#{uc_vers}/CaseFolding.txt")
+          puts "Added file #{fn} to #{dest}"
+        end
+      rescue => e
+        puts e.message
+      end
+    end
+
   end
 end
 Prepare.run
-
-# ENV['OPENSSL_102'] = '/e/msys64/var/cache/pacman/pkg/mingw-w64-x86_64-ruby-openssl-1.0.2.l-1-any.pkg.tar.xz'
-# ENV['OPENSSL_110'] = '/e/msys64/var/cache/pacman/pkg/mingw-w64-x86_64-ruby-openssl-1.1.0.f-1-any.pkg.tar.xz'
-# ENV['R_VERS'] = '2.3.4'
-
-#Prepare.check_openssl
