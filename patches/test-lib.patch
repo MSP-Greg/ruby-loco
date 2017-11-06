@@ -1,0 +1,164 @@
+diff --git a/test/lib/minitest/unit.rb b/test/lib/minitest/unit.rb
+index 89b6a8eaf4..8254f7a6ed 100644
+--- a/test/lib/minitest/unit.rb
++++ b/test/lib/minitest/unit.rb
+@@ -3,7 +3,7 @@
+ 
+ require "optparse"
+ require "rbconfig"
+-require "leakchecker"
++require_relative "../leakchecker"
+ 
+ ##
+ # Minimal (mostly drop-in) replacement for test-unit.
+@@ -887,8 +887,8 @@ def _run_anything type
+ 
+         results = _run_suites suites, type
+ 
+-        @test_count      = results.inject(0) { |sum, (tc, _)| sum + tc }
+-        @assertion_count = results.inject(0) { |sum, (_, ac)| sum + ac }
++        @test_count      = results.sum { |i| i[0] }
++        @assertion_count = results.sum { |i| i[1] }
+         test_count      += @test_count
+         assertion_count += @assertion_count
+         t = Time.now - start
+@@ -958,10 +958,10 @@ def _run_suite suite, type
+ 
+         leakchecker.check("#{inst.class}\##{inst.__name__}")
+ 
+-        inst._assertions
++        inst._assertions - inst.zombie - inst.tracepnt
+       }
+ 
+-      return assertions.size, assertions.inject(0) { |sum, n| sum + n }
++      return assertions.size, assertions.sum
+     end
+ 
+     ##
+@@ -1001,7 +1001,7 @@ def puke klass, meth, e
+       e = case e
+           when MiniTest::Skip then
+             @skips += 1
+-            return "S" unless @verbose
++            return "S" unless @verbose || options[:hide_skip] == false
+             "Skipped:\n#{klass}##{meth} [#{location e}]:\n#{e.message}\n"
+           when MiniTest::Assertion then
+             @failures += 1
+@@ -1251,6 +1251,7 @@ class TestCase
+       include Guard
+       extend Guard
+ 
++      attr_reader :tracepnt, :zombie   # used to lower assertions count
+       attr_reader :__name__ # :nodoc:
+ 
+       PASSTHROUGH_EXCEPTIONS = [NoMemoryError, SignalException,
+@@ -1314,6 +1315,8 @@ def initialize name # :nodoc:
+         @__io__ = nil
+         @passed = nil
+         @@current = self # FIX: make thread local
++        @zombie   = defined?(ZombieHunter)      && Module === ZombieHunter      ? 2 : 0
++        @tracepnt = defined?(TracePointChecker) && Module === TracePointChecker ? 1 : 0
+       end
+ 
+       def self.current # :nodoc:
+diff --git a/test/lib/test/unit.rb b/test/lib/test/unit.rb
+index 761fe92df8..f465db5f9a 100644
+--- a/test/lib/test/unit.rb
++++ b/test/lib/test/unit.rb
+@@ -3,10 +3,10 @@
+   gem 'minitest', '< 5.0.0' if defined? Gem
+ rescue Gem::LoadError
+ end
+-require 'minitest/unit'
+-require 'test/unit/assertions'
++require_relative '../minitest/unit'
++require_relative 'unit/assertions'
+ require_relative '../envutil'
+-require 'test/unit/testcase'
++require_relative 'unit/testcase'
+ require 'optparse'
+ 
+ # See Test::Unit
+@@ -521,7 +521,7 @@ def _run_parallel suites, type, result
+             if @options[:retry]
+               @errors   += rep.map{|x| x[:result][0] }.inject(:+)
+               @failures += rep.map{|x| x[:result][1] }.inject(:+)
+-              @skips    += rep.map{|x| x[:result][2] }.inject(:+)
++              @skips    += rep.map{|x| x[:result][2] }.inject(:+) unless @options[:parallel]
+             end
+           end
+           unless @warnings.empty?
+@@ -582,7 +582,7 @@ def setup_options(opts, options)
+       private
+       def _run_suites(suites, type)
+         result = super
+-        report.reject!{|r| r.start_with? "Skipped:" } if @options[:hide_skip]
++        report.reject! {|r| r.start_with? "Skipped:" } if @options[:hide_skip]
+         report.sort_by!{|r| r.start_with?("Skipped:") ? 0 : \
+                            (r.start_with?("Failure:") ? 1 : 2) }
+         failed(nil)
+@@ -1085,13 +1085,17 @@ def puke klass, meth, e
+         # TODO:
+         #   this overriding is for minitest feature that skip messages are
+         #   hidden when not verbose (-v), note this is temporally.
+-        n = report.size
+-        rep = super
+-        if MiniTest::Skip === e and /no message given\z/ =~ e.message
+-          report.slice!(n..-1)
+-          rep = "."
++        if options[:hide_skip] == false
++          super
++        else
++          n = report.size
++          rep = super
++          if MiniTest::Skip === e and /no message given\z/ =~ e.message
++            report.slice!(n..-1)
++            rep = "."
++          end
++          rep
+         end
+-        rep
+       end
+     end
+ 
+diff --git a/test/lib/tracepointchecker.rb b/test/lib/tracepointchecker.rb
+index 447a63bc1e..4dc812aa71 100644
+--- a/test/lib/tracepointchecker.rb
++++ b/test/lib/tracepointchecker.rb
+@@ -1,4 +1,9 @@
+ # frozen_string_literal: true
++
++# The assertions called in after_teardown are offset in minitest/unit.rb
++# so that assertions counts with and with this are the same.  If the count
++# changes, please adjust the code in unit.rb, search for tracepnt
++
+ module TracePointChecker
+   STATE = {
+     count: 0,
+diff --git a/test/lib/zombie_hunter.rb b/test/lib/zombie_hunter.rb
+index 2b81e396ac..cb15acb95c 100644
+--- a/test/lib/zombie_hunter.rb
++++ b/test/lib/zombie_hunter.rb
+@@ -1,4 +1,9 @@
+ # frozen_string_literal: true
++
++# The assertions called in after_teardown are offset in minitest/unit.rb
++# so that assertions counts with and with this are the same.  If the count
++# changes, please adjust the code in unit.rb, search for zombie
++
+ module ZombieHunter
+   def after_teardown
+     super
+diff --git a/test/runner.rb b/test/runner.rb
+index d8b44644f7..5e29db7f1a 100644
+--- a/test/runner.rb
++++ b/test/runner.rb
+@@ -10,7 +10,7 @@
+   .reject {|f| f =~ /minitest|test-unit|power_assert/ }
+   .map {|f| $LOAD_PATH.unshift File.join(File.dirname(f), "lib") }
+ 
+-require 'test/unit'
++require_relative 'lib/test/unit'
+ 
+ module Gem
+ end
