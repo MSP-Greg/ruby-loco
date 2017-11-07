@@ -189,6 +189,26 @@ index 0eba7bdaf8..80757313ca 100644
    def test_funcall_notimplement
      bug3662 = '[ruby-dev:41953]'
      assert_raise(NotImplementedError, bug3662) {
+diff --git a/test/erb/test_erb.rb b/test/erb/test_erb.rb
+index 6a6ce3d129..665d1e2933 100644
+--- a/test/erb/test_erb.rb
++++ b/test/erb/test_erb.rb
+@@ -2,6 +2,7 @@
+ # frozen_string_literal: false
+ require 'test/unit'
+ require 'erb'
++require 'stringio'
+ 
+ class TestERB < Test::Unit::TestCase
+   class MyError < RuntimeError ; end
+@@ -235,6 +236,7 @@ def test_run
+     $stdout = orig
+     out.rewind
+     assert_equal('9', out.read)
++    return unless num               # to remove warning
+   end
+ 
+   class Foo; end
 diff --git a/test/erb/test_erb_m17n.rb b/test/erb/test_erb_m17n.rb
 index a7840c9605..2fd9e700f3 100644
 --- a/test/erb/test_erb_m17n.rb
@@ -262,6 +282,19 @@ index 0ce00d5f2c..4c02c9d207 100644
  
    FileUtils::METHODS.each do |m|
      define_method "test_singleton_visibility_#{m}" do
+diff --git a/test/optparse/test_zsh_completion.rb b/test/optparse/test_zsh_completion.rb
+index 1bc6c7f0bb..8411bc41d4 100644
+--- a/test/optparse/test_zsh_completion.rb
++++ b/test/optparse/test_zsh_completion.rb
+@@ -4,7 +4,7 @@
+ 
+ class TestOptionParser < Test::Unit::TestCase
+ end
+-class TestOptionParser::BashCompletion < Test::Unit::TestCase
++class TestOptionParser::BashCompletionZSH < Test::Unit::TestCase
+   def setup
+     @opt = OptionParser.new
+     @opt.define("-z", "zzz") {}
 diff --git a/test/rexml/test_martin_fowler.rb b/test/rexml/test_martin_fowler.rb
 index da685a80ec..add3c82723 100644
 --- a/test/rexml/test_martin_fowler.rb
@@ -275,3 +308,42 @@ index da685a80ec..add3c82723 100644
      DOC = <<END
  <paper>
  <title>Remove this element and figs order differently</title>
+diff --git a/test/ruby/test_ifunless.rb b/test/ruby/test_ifunless.rb
+index d533e155bc..f68e5154a2 100644
+--- a/test/ruby/test_ifunless.rb
++++ b/test/ruby/test_ifunless.rb
+@@ -1,7 +1,7 @@
+ # frozen_string_literal: false
+ require 'test/unit'
+ 
+-class TestIfunless < Test::Unit::TestCase
++class TestIfUnless < Test::Unit::TestCase
+   def test_if_unless
+     x = 'test';
+     assert(if x == x then true else false end)
+diff --git a/test/ruby/test_not.rb b/test/ruby/test_not.rb
+index 721f868a5a..12e4c4b696 100644
+--- a/test/ruby/test_not.rb
++++ b/test/ruby/test_not.rb
+@@ -1,7 +1,7 @@
+ # frozen_string_literal: false
+ require 'test/unit'
+ 
+-class TestIfunless < Test::Unit::TestCase
++class TestNot < Test::Unit::TestCase
+   def test_not_with_grouped_expression
+     assert_equal(false, (not (true)))
+     assert_equal(true, (not (false)))
+diff --git a/test/ruby/test_weakmap.rb b/test/ruby/test_weakmap.rb
+index cde186c5f3..35025c8201 100644
+--- a/test/ruby/test_weakmap.rb
++++ b/test/ruby/test_weakmap.rb
+@@ -39,7 +39,7 @@ def test_include?
+       x = nil
+     end
+     GC.start
+-    skip # TODO: failure introduced from r60440
++    # skip('TODO: failure introduced from r60440')
+     assert_not_send([@wm, m, k])
+   end
+   alias test_member? test_include?
