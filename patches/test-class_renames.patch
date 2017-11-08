@@ -347,3 +347,16 @@ index cde186c5f3..35025c8201 100644
      assert_not_send([@wm, m, k])
    end
    alias test_member? test_include?
+diff --git a/test/win32ole/test_thread.rb b/test/win32ole/test_thread.rb
+index f1cdfe32b0..cb34693064 100644
+--- a/test/win32ole/test_thread.rb
++++ b/test/win32ole/test_thread.rb
+@@ -6,7 +6,7 @@
+ require 'test/unit'
+ 
+ if defined?(WIN32OLE)
+-  class TestThread < Test::Unit::TestCase
++  class TestWIN32OLE_THREAD < Test::Unit::TestCase
+     #
+     # test for Bug #2618(ruby-core:27634)
+     #
