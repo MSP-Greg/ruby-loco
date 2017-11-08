@@ -58,6 +58,7 @@ module InstallPostRI2
     add_ri2_site_ruby
     generate_version_file
     clean_bin_files
+    strip_test_so
   end
 
   private
@@ -145,6 +146,16 @@ module InstallPostRI2
         File.write(fn, str.encode('UTF-8'), mode: 'wb:UTF-8') if wr
       }
     }
+  end
+
+  # Strips *.so files compiled for testing, 16 MB to 1 MB
+  def self.strip_test_so
+    t_st = Time.now
+    strip = "#{ENV['MSYS2_DIR']}/mingw#{ENV['BITS']}/bin/strip --strip-unneeded -p "
+    files = Dir.glob("#{__dir__}/src/build#{ENV['SUFFIX']}/.ext/#{RbConfig::CONFIG['arch']}/**/*.so")
+    files.each { |fn| `#{strip} #{fn}` }
+    str = "#{files.length} Files in #{(Time.now - t_st).to_s[0,4]} seconds"
+    puts "#{'Stripped *.so files for testing:'.ljust(COL_WID)}#{str}"
   end
 
 end

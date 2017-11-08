@@ -11,6 +11,7 @@
 @set ORIG_PATH=%PATH%
 
 @set SUFFIX=%R_VERS_2%_64
+@set BITS=64
 @set LOG_PATH_NAME=%DP0%ruby%SUFFIX%-%R_VERS%-1-x86_64
 @set PKG_RUBY=%DP0%pkg/ruby%SUFFIX%/ruby%SUFFIX%
 
