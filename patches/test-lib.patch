@@ -1,3 +1,5 @@
+Patch by MSP-Greg
+Adjusts assertions count so that tests, regardless of manner run, show similar results
 diff --git a/test/lib/minitest/unit.rb b/test/lib/minitest/unit.rb
 index 89b6a8eaf4..8254f7a6ed 100644
 --- a/test/lib/minitest/unit.rb
