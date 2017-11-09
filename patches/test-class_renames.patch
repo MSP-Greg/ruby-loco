@@ -93,13 +93,11 @@ index c14811d9c4..6886e4a968 100644
  
      SIZEOF_BDIGIT = Integer::SIZEOF_BDIGIT
 diff --git a/test/-ext-/exception/test_data_error.rb b/test/-ext-/exception/test_data_error.rb
-index d33d8ca43f..1b33bbd33c 100644
+index d33d8ca43f..0fec4ac1ec 100644
 --- a/test/-ext-/exception/test_data_error.rb
 +++ b/test/-ext-/exception/test_data_error.rb
-@@ -1,8 +1,8 @@
- # frozen_string_literal: false
--require 'test/unit'
-+require_relative '../lib/test/unit'
+@@ -2,7 +2,7 @@
+ require 'test/unit'
  
  module Bug
 -  class TestException < Test::Unit::TestCase
@@ -108,13 +106,10 @@ index d33d8ca43f..1b33bbd33c 100644
        bug9167 = '[ruby-core:58643] [Bug #9167]'
        assert_normal_exit(<<-'end;', bug9167) # do
 diff --git a/test/-ext-/exception/test_enc_raise.rb b/test/-ext-/exception/test_enc_raise.rb
-index 2bc7f02413..d4d9f2439b 100644
+index 2bc7f02413..706f0e2772 100644
 --- a/test/-ext-/exception/test_enc_raise.rb
 +++ b/test/-ext-/exception/test_enc_raise.rb
-@@ -1,9 +1,9 @@
- # frozen_string_literal: false
--require 'test/unit'
-+require_relative '../lib/test/unit'
+@@ -3,7 +3,7 @@
  require '-test-/exception'
  
  module Bug
@@ -124,15 +119,10 @@ index 2bc7f02413..d4d9f2439b 100644
        feature5650 = '[ruby-core:41160]'
        Encoding.list.each do |enc|
 diff --git a/test/-ext-/exception/test_ensured.rb b/test/-ext-/exception/test_ensured.rb
-index 858245868b..0533240c74 100644
+index 858245868b..c250e46bab 100644
 --- a/test/-ext-/exception/test_ensured.rb
 +++ b/test/-ext-/exception/test_ensured.rb
-@@ -1,11 +1,11 @@
- # frozen_string_literal: false
--require 'test/unit'
-+require_relative '../lib/test/unit'
- 
- module Bug
+@@ -5,7 +5,7 @@ module Bug
    class Bug7802 < RuntimeError
    end
  
@@ -142,13 +132,11 @@ index 858245868b..0533240c74 100644
        assert_separately([], <<-'end;') # do
  
 diff --git a/test/-ext-/exception/test_exception_at_throwing.rb b/test/-ext-/exception/test_exception_at_throwing.rb
-index aba26079eb..6c1269b88f 100644
+index aba26079eb..4bce348a25 100644
 --- a/test/-ext-/exception/test_exception_at_throwing.rb
 +++ b/test/-ext-/exception/test_exception_at_throwing.rb
-@@ -1,8 +1,8 @@
- # frozen_string_literal: true
--require 'test/unit'
-+require_relative '../lib/test/unit'
+@@ -2,7 +2,7 @@
+ require 'test/unit'
  
  module Bug
 -  class TestException < Test::Unit::TestCase
