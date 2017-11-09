@@ -92,19 +92,70 @@ index c14811d9c4..6886e4a968 100644
    class TestStr2big < Test::Unit::TestCase
  
      SIZEOF_BDIGIT = Integer::SIZEOF_BDIGIT
+diff --git a/test/-ext-/exception/test_data_error.rb b/test/-ext-/exception/test_data_error.rb
+index d33d8ca43f..1b33bbd33c 100644
+--- a/test/-ext-/exception/test_data_error.rb
++++ b/test/-ext-/exception/test_data_error.rb
+@@ -1,8 +1,8 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ module Bug
+-  class TestException < Test::Unit::TestCase
++  class Test_ExceptionDE < Test::Unit::TestCase
+     def test_cleanup_data_error
+       bug9167 = '[ruby-core:58643] [Bug #9167]'
+       assert_normal_exit(<<-'end;', bug9167) # do
 diff --git a/test/-ext-/exception/test_enc_raise.rb b/test/-ext-/exception/test_enc_raise.rb
-index 2bc7f02413..1faa500b25 100644
+index 2bc7f02413..d4d9f2439b 100644
 --- a/test/-ext-/exception/test_enc_raise.rb
 +++ b/test/-ext-/exception/test_enc_raise.rb
-@@ -3,7 +3,7 @@
+@@ -1,9 +1,9 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
  require '-test-/exception'
  
  module Bug
 -  class TestException < Test::Unit::TestCase
-+  class Test_Exception < Test::Unit::TestCase
++  class Test_ExceptionER < Test::Unit::TestCase
      def test_enc_raise
        feature5650 = '[ruby-core:41160]'
        Encoding.list.each do |enc|
+diff --git a/test/-ext-/exception/test_ensured.rb b/test/-ext-/exception/test_ensured.rb
+index 858245868b..0533240c74 100644
+--- a/test/-ext-/exception/test_ensured.rb
++++ b/test/-ext-/exception/test_ensured.rb
+@@ -1,11 +1,11 @@
+ # frozen_string_literal: false
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ module Bug
+   class Bug7802 < RuntimeError
+   end
+ 
+-  class TestException < Test::Unit::TestCase
++  class Test_ExceptionE < Test::Unit::TestCase
+     def test_ensured
+       assert_separately([], <<-'end;') # do
+ 
+diff --git a/test/-ext-/exception/test_exception_at_throwing.rb b/test/-ext-/exception/test_exception_at_throwing.rb
+index aba26079eb..6c1269b88f 100644
+--- a/test/-ext-/exception/test_exception_at_throwing.rb
++++ b/test/-ext-/exception/test_exception_at_throwing.rb
+@@ -1,8 +1,8 @@
+ # frozen_string_literal: true
+-require 'test/unit'
++require_relative '../lib/test/unit'
+ 
+ module Bug
+-  class TestException < Test::Unit::TestCase
++  class Test_ExceptionAT < Test::Unit::TestCase
+     def test_exception_at_throwing
+       assert_separately(%w[-r-test-/exception], "#{<<-"begin;"}\n#{<<-"end;"}")
+       begin;
 diff --git a/test/-ext-/hash/test_delete.rb b/test/-ext-/hash/test_delete.rb
 index e2ad3cbdbc..91e6ff67cb 100644
 --- a/test/-ext-/hash/test_delete.rb
