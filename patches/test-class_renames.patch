@@ -321,19 +321,6 @@ index 0ce00d5f2c..4c02c9d207 100644
  
    FileUtils::METHODS.each do |m|
      define_method "test_singleton_visibility_#{m}" do
-diff --git a/test/optparse/test_zsh_completion.rb b/test/optparse/test_zsh_completion.rb
-index 1bc6c7f0bb..8411bc41d4 100644
---- a/test/optparse/test_zsh_completion.rb
-+++ b/test/optparse/test_zsh_completion.rb
-@@ -4,7 +4,7 @@
- 
- class TestOptionParser < Test::Unit::TestCase
- end
--class TestOptionParser::BashCompletion < Test::Unit::TestCase
-+class TestOptionParser::BashCompletionZSH < Test::Unit::TestCase
-   def setup
-     @opt = OptionParser.new
-     @opt.define("-z", "zzz") {}
 diff --git a/test/rexml/test_martin_fowler.rb b/test/rexml/test_martin_fowler.rb
 index da685a80ec..add3c82723 100644
 --- a/test/rexml/test_martin_fowler.rb
