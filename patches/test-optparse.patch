@@ -1,3 +1,93 @@
+diff --git a/test/optparse/optparse_setup.rb b/test/optparse/optparse_setup.rb
+index e69de29bb2..32a1494c30 100644
+--- a/test/optparse/optparse_setup.rb
++++ b/test/optparse/optparse_setup.rb
+@@ -0,0 +1,85 @@
++# frozen_string_literal: true
++require 'test/unit'
++require 'optparse'
++
++module TestOptionParser ; end
++
++module OptionParserDummy
++  class DummyOutput < String
++    alias write concat
++  end
++  def assert_no_error(*args)
++    $stderr, stderr = DummyOutput.new, $stderr
++    assert_nothing_raised(*args) {return yield}
++  ensure
++    stderr, $stderr = $stderr, stderr
++    $!.backtrace.delete_if {|e| /\A#{Regexp.quote(__FILE__)}:#{__LINE__-2}/o =~ e} if $!
++    assert_empty(stderr)
++  end
++  alias no_error assert_no_error
++end
++
++module OptionParserSetup
++
++  include OptionParserDummy
++
++  def setup
++    @opt = OptionParser.new
++    @flag = self.class		# cannot set by option
++  end
++
++  def test_permute
++    assert_equal(%w"", no_error {@opt.permute!(%w"")})
++    assert_equal(self.class, @flag)
++    assert_equal(%w"foo bar", no_error {@opt.permute!(%w"foo bar")})
++    assert_equal(self.class, @flag)
++    assert_equal(%w"- foo bar", no_error {@opt.permute!(%w"- foo bar")})
++    assert_equal(self.class, @flag)
++    assert_equal(%w"foo bar", no_error {@opt.permute!(%w"-- foo bar")})
++    assert_equal(self.class, @flag)
++    assert_equal(%w"foo - bar", no_error {@opt.permute!(%w"foo - bar")})
++    assert_equal(self.class, @flag)
++    assert_equal(%w"foo bar", no_error {@opt.permute!(%w"foo -- bar")})
++    assert_equal(self.class, @flag)
++    assert_equal(%w"foo --help bar", no_error {@opt.permute!(%w"foo -- --help bar")})
++    assert_equal(self.class, @flag)
++  end
++
++  def test_order
++    assert_equal(%w"", no_error {@opt.order!(%w"")})
++    assert_equal(self.class, @flag)
++    assert_equal(%w"foo bar", no_error {@opt.order!(%w"foo bar")})
++    assert_equal(self.class, @flag)
++    assert_equal(%w"- foo bar", no_error {@opt.order!(%w"- foo bar")})
++    assert_equal(self.class, @flag)
++    assert_equal(%w"foo bar", no_error {@opt.permute!(%w"-- foo bar")})
++    assert_equal(self.class, @flag)
++    assert_equal(%w"foo - bar", no_error {@opt.order!(%w"foo - bar")})
++    assert_equal(self.class, @flag)
++    assert_equal(%w"foo -- bar", no_error {@opt.order!(%w"foo -- bar")})
++    assert_equal(self.class, @flag)
++    assert_equal(%w"foo -- --help bar", no_error {@opt.order!(%w"foo -- --help bar")})
++    assert_equal(self.class, @flag)
++  end
++
++  def test_regexp
++    return unless defined?(@reopt)
++    assert_equal(%w"", no_error {@opt.parse!(%w"--regexp=/foo/")})
++    assert_equal(/foo/, @reopt)
++    assert_equal(%w"", no_error {@opt.parse!(%w"--regexp=/foo/i")})
++    assert_equal(/foo/i, @reopt)
++    assert_equal(%w"", no_error {@opt.parse!(%w"--regexp=/foo/n")})
++    assert_equal(/foo/n, @reopt)
++  end
++
++  def test_into
++    @opt.def_option "-h", "--host=HOST", "hostname"
++    @opt.def_option "-p", "--port=PORT", "port", Integer
++    @opt.def_option "-v", "--verbose" do @verbose = true end
++    @opt.def_option "-q", "--quiet" do @quiet = true end
++    result = {}
++    @opt.parse %w(--host localhost --port 8000 -v), into: result
++    assert_equal({host: "localhost", port: 8000, verbose: true}, result)
++    assert_equal(true, @verbose)
++  end
++end
 diff --git a/test/optparse/test_acceptable.rb b/test/optparse/test_acceptable.rb
 index 5c3fbdb10c..802482302d 100644
 --- a/test/optparse/test_acceptable.rb
@@ -55,22 +145,21 @@ index 3be4a4c598..d720606329 100644
      @opt.parse!(%w"--enable-foo")
      assert_equal(true, @foo)
 diff --git a/test/optparse/test_bash_completion.rb b/test/optparse/test_bash_completion.rb
-index 513e986f66..0bb6023bc4 100644
+index 513e986f66..8f6ff6f93a 100644
 --- a/test/optparse/test_bash_completion.rb
 +++ b/test/optparse/test_bash_completion.rb
-@@ -1,10 +1,8 @@
+@@ -1,9 +1,6 @@
 -# frozen_string_literal: false
+-require 'test/unit'
+-require 'optparse'
 +# frozen_string_literal: true
- require 'test/unit'
- require 'optparse'
++require_relative 'optparse_setup'
  
 -class TestOptionParser < Test::Unit::TestCase
 -end
--class TestOptionParser::BashCompletion < Test::Unit::TestCase
-+class TestOptionParserBashCompletion < Test::Unit::TestCase
+ class TestOptionParser::BashCompletion < Test::Unit::TestCase
    def setup
      @opt = OptionParser.new
-     @opt.define("-z", "zzz") {}
 diff --git a/test/optparse/test_cclass.rb b/test/optparse/test_cclass.rb
 index ac46f46bb2..7abe3e1d14 100644
 --- a/test/optparse/test_cclass.rb
@@ -90,22 +179,21 @@ index ac46f46bb2..7abe3e1d14 100644
      flags = []
      @opt.def_option("-[a-z]") {|x| flags << x}
 diff --git a/test/optparse/test_getopts.rb b/test/optparse/test_getopts.rb
-index 3711e6f269..190b8ccb36 100644
+index 3711e6f269..41627597cf 100644
 --- a/test/optparse/test_getopts.rb
 +++ b/test/optparse/test_getopts.rb
-@@ -1,10 +1,8 @@
+@@ -1,9 +1,6 @@
 -# frozen_string_literal: false
+-require 'test/unit'
+-require 'optparse'
 +# frozen_string_literal: true
- require 'test/unit'
- require 'optparse'
++require_relative 'optparse_setup'
  
 -class TestOptionParser < Test::Unit::TestCase
 -end
--class TestOptionParser::Getopts < Test::Unit::TestCase
-+class TestOptionParserGetopts < Test::Unit::TestCase
+ class TestOptionParser::Getopts < Test::Unit::TestCase
    def setup
      @opt = OptionParser.new
-   end
 diff --git a/test/optparse/test_kwargs.rb b/test/optparse/test_kwargs.rb
 index 78d7e2ee9c..555caa991a 100644
 --- a/test/optparse/test_kwargs.rb
@@ -397,23 +485,24 @@ index b743aa00c1..35a2eb0a3e 100644
      r = nil
      o = OptionParser.new do |opts|
 diff --git a/test/optparse/test_zsh_completion.rb b/test/optparse/test_zsh_completion.rb
-index 1bc6c7f0bb..b673a72422 100644
+index 1bc6c7f0bb..8f098d22ed 100644
 --- a/test/optparse/test_zsh_completion.rb
 +++ b/test/optparse/test_zsh_completion.rb
-@@ -1,10 +1,8 @@
+@@ -1,10 +1,7 @@
 -# frozen_string_literal: false
+-require 'test/unit'
+-require 'optparse'
 +# frozen_string_literal: true
- require 'test/unit'
- require 'optparse'
++require_relative 'optparse_setup'
  
 -class TestOptionParser < Test::Unit::TestCase
 -end
 -class TestOptionParser::BashCompletion < Test::Unit::TestCase
-+class TestOptionParserBashCompletionZSH < Test::Unit::TestCase
++class TestOptionParser::BashCompletionZSH < Test::Unit::TestCase
    def setup
      @opt = OptionParser.new
      @opt.define("-z", "zzz") {}
-@@ -14,7 +12,7 @@ def setup
+@@ -14,7 +11,7 @@ def setup
    end
  
    def test_compsys
