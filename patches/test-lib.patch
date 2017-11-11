@@ -3,7 +3,7 @@ Adjusts assertions count so that tests, regardless of manner run, show similar
 results.
 Added listing of assertions by test
 diff --git a/test/lib/minitest/unit.rb b/test/lib/minitest/unit.rb
-index 89b6a8eaf4..5f39b59b13 100644
+index 89b6a8eaf4..857fc2c94e 100644
 --- a/test/lib/minitest/unit.rb
 +++ b/test/lib/minitest/unit.rb
 @@ -3,7 +3,7 @@
@@ -32,20 +32,21 @@ index 89b6a8eaf4..5f39b59b13 100644
  
 -        print "#{suite}##{method} = " if @verbose
 -
-         start_time = Time.now if @verbose
+-        start_time = Time.now if @verbose
++        start_time = @verbose ? Time.now : nil
          result = inst.run self
  
 -        print "%.2f s = " % (Time.now - start_time) if @verbose
 -        print result
 -        puts if @verbose
-+        if @verbose
-+          print "#{inst._assertions.to_s.rjust(6)} #{suite}##{method}" \
-+            "= %.2f s = #{result}" % (Time.now - start_time)
++        if start_time
++          ttl = " = %.2f s = " % (Time.now - start_time)
++          print "#{inst._assertions.to_s.rjust(6)} #{suite}##{method}#{ttl}"
++          print result
 +          puts
 +        else
 +          print result
 +        end
-+        
          $stdout.flush
  
          leakchecker.check("#{inst.class}\##{inst.__name__}")
