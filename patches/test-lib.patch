@@ -3,7 +3,7 @@ Adjusts assertions count so that tests, regardless of manner run, show similar
 results.
 Added listing of assertions by test
 diff --git a/test/lib/minitest/unit.rb b/test/lib/minitest/unit.rb
-index 89b6a8eaf4..857fc2c94e 100644
+index 89b6a8eaf4..6fe1193276 100644
 --- a/test/lib/minitest/unit.rb
 +++ b/test/lib/minitest/unit.rb
 @@ -3,7 +3,7 @@
@@ -15,7 +15,15 @@ index 89b6a8eaf4..857fc2c94e 100644
  
  ##
  # Minimal (mostly drop-in) replacement for test-unit.
-@@ -887,8 +887,8 @@ def _run_anything type
+@@ -747,6 +747,7 @@ class Unit # :nodoc:
+     attr_accessor :start_time                         # :nodoc:
+     attr_accessor :help                               # :nodoc:
+     attr_accessor :verbose                            # :nodoc:
++    attr_accessor :assert                             # :nodoc:
+     attr_writer   :options                            # :nodoc:
+ 
+     ##
+@@ -887,8 +888,8 @@ def _run_anything type
  
          results = _run_suites suites, type
  
@@ -26,9 +34,30 @@ index 89b6a8eaf4..857fc2c94e 100644
          test_count      += @test_count
          assertion_count += @assertion_count
          t = Time.now - start
-@@ -946,22 +946,25 @@ def _run_suite suite, type
+@@ -921,6 +922,7 @@ def _run_anything type
+     #
+ 
+     def _run_suites suites, type
++      @assert = @options[:assert]
+       suites.map { |suite| _run_suite suite, type }
+     end
+ 
+@@ -942,18 +944,32 @@ def _run_suite suite, type
+ 
+       leakchecker = LeakChecker.new
+ 
++      if self.assert
++        zombie   = defined?(ZombieHunter)      && Module === ZombieHunter      ? 2 : 0
++        tracepnt = defined?(TracePointChecker) && Module === TracePointChecker ? 1 : 0
++        assert_offset = zombie + tracepnt
++      else
++        assert_offset = 0
++      end
++
+       assertions = filtered_test_methods.map { |method|
          inst = suite.new method
-         inst._assertions = 0
+-        inst._assertions = 0
++        inst._assertions = -assert_offset
  
 -        print "#{suite}##{method} = " if @verbose
 -
@@ -41,18 +70,20 @@ index 89b6a8eaf4..857fc2c94e 100644
 -        puts if @verbose
 +        if start_time
 +          ttl = " = %.2f s = " % (Time.now - start_time)
-+          print "#{inst._assertions.to_s.rjust(6)} #{suite}##{method}#{ttl}"
-+          print result
-+          puts
++          if !self.assert # || MetaMetaMetaTestCase === inst.class.superclass
++            print "#{suite}##{method}#{ttl}#{result}"
++          else
++            print "#{inst._assertions.to_s.rjust(6)} #{suite}##{method}#{ttl}#{result}"
++          end
++          print "\n"
 +        else
 +          print result
 +        end
          $stdout.flush
  
          leakchecker.check("#{inst.class}\##{inst.__name__}")
- 
--        inst._assertions
-+        inst._assertions - inst.zombie - inst.tracepnt
+@@ -961,7 +977,7 @@ def _run_suite suite, type
+         inst._assertions
        }
  
 -      return assertions.size, assertions.inject(0) { |sum, n| sum + n }
@@ -60,7 +91,7 @@ index 89b6a8eaf4..857fc2c94e 100644
      end
  
      ##
-@@ -1001,7 +1004,7 @@ def puke klass, meth, e
+@@ -1001,7 +1017,7 @@ def puke klass, meth, e
        e = case e
            when MiniTest::Skip then
              @skips += 1
@@ -69,25 +100,36 @@ index 89b6a8eaf4..857fc2c94e 100644
              "Skipped:\n#{klass}##{meth} [#{location e}]:\n#{e.message}\n"
            when MiniTest::Assertion then
              @failures += 1
-@@ -1251,6 +1254,7 @@ class TestCase
-       include Guard
-       extend Guard
+@@ -1019,6 +1035,7 @@ def initialize # :nodoc:
+       @report = []
+       @errors = @failures = @skips = 0
+       @verbose = false
++      @assert = false
+       @mutex = Thread::Mutex.new
+       @info_signal = Signal.list['INFO']
+       @repeat_count = nil
+@@ -1053,6 +1070,10 @@ def process_args args = [] # :nodoc:
+           options[:verbose] = true
+         end
  
-+      attr_reader :tracepnt, :zombie   # used to lower assertions count
-       attr_reader :__name__ # :nodoc:
++        opts.on '-a', '--assert', "Adjust & show assertions numbers" do
++          options[:assert] = true
++        end
++
+         opts.on '-n', '--name PATTERN', "Filter test names on pattern (e.g. /foo/)" do |a|
+           options[:filter] = a
+         end
+@@ -1070,6 +1091,8 @@ def process_args args = [] # :nodoc:
+       srand options[:seed]
  
-       PASSTHROUGH_EXCEPTIONS = [NoMemoryError, SignalException,
-@@ -1314,6 +1318,8 @@ def initialize name # :nodoc:
-         @__io__ = nil
-         @passed = nil
-         @@current = self # FIX: make thread local
-+        @zombie   = defined?(ZombieHunter)      && Module === ZombieHunter      ? 2 : 0
-+        @tracepnt = defined?(TracePointChecker) && Module === TracePointChecker ? 1 : 0
-       end
+       self.verbose = options[:verbose]
++      self.assert  = options[:assert]
++
+       @help = orig_args.map { |s| s =~ /[\s|&<>$()]/ ? s.inspect : s }.join " "
  
-       def self.current # :nodoc:
+       options
 diff --git a/test/lib/test/unit.rb b/test/lib/test/unit.rb
-index 761fe92df8..f465db5f9a 100644
+index 761fe92df8..a804a7b67b 100644
 --- a/test/lib/test/unit.rb
 +++ b/test/lib/test/unit.rb
 @@ -3,10 +3,10 @@
@@ -104,7 +146,27 @@ index 761fe92df8..f465db5f9a 100644
  require 'optparse'
  
  # See Test::Unit
-@@ -521,7 +521,7 @@ def _run_parallel suites, type, result
+@@ -86,6 +86,11 @@ def setup_options(opts, options)
+           self.verbose = options[:verbose]
+         end
+ 
++        opts.on '-a', '--assert', "Adjust & show assertions numbers" do
++          options[:assert] = true
++          self.assert = options[:assert]
++        end
++
+         opts.on '-n', '--name PATTERN', "Filter test method names on pattern: /REGEXP/, !/REGEXP/ or STRING" do |a|
+           (options[:filter] ||= []) << a
+         end
+@@ -451,7 +456,6 @@ def _run_parallel suites, type, result
+           warn "Error: parameter of -j option should be greater than 0."
+           return
+         end
+-
+         # Require needed thing for parallel running
+         require 'timeout'
+         @tasks = @files.dup # Array of filenames.
+@@ -521,7 +525,7 @@ def _run_parallel suites, type, result
              if @options[:retry]
                @errors   += rep.map{|x| x[:result][0] }.inject(:+)
                @failures += rep.map{|x| x[:result][1] }.inject(:+)
@@ -113,7 +175,7 @@ index 761fe92df8..f465db5f9a 100644
              end
            end
            unless @warnings.empty?
-@@ -582,7 +582,7 @@ def setup_options(opts, options)
+@@ -582,7 +586,7 @@ def setup_options(opts, options)
        private
        def _run_suites(suites, type)
          result = super
@@ -122,7 +184,15 @@ index 761fe92df8..f465db5f9a 100644
          report.sort_by!{|r| r.start_with?("Skipped:") ? 0 : \
                             (r.start_with?("Failure:") ? 1 : 2) }
          failed(nil)
-@@ -1085,13 +1085,17 @@ def puke klass, meth, e
+@@ -696,6 +700,7 @@ def output
+       end
+ 
+       def _prepare_run(suites, type)
++        @assert = options[:assert]
+         options[:job_status] ||= :replace if @tty && !@verbose
+         case options[:color]
+         when :always
+@@ -1085,13 +1090,17 @@ def puke klass, meth, e
          # TODO:
          #   this overriding is for minitest feature that skip messages are
          #   hidden when not verbose (-v), note this is temporally.
