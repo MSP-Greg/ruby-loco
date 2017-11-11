@@ -1,7 +1,9 @@
 Patch by MSP-Greg
-Adjusts assertions count so that tests, regardless of manner run, show similar results
+Adjusts assertions count so that tests, regardless of manner run, show similar
+results.
+Added listing of assertions by test
 diff --git a/test/lib/minitest/unit.rb b/test/lib/minitest/unit.rb
-index 89b6a8eaf4..8254f7a6ed 100644
+index 89b6a8eaf4..5f39b59b13 100644
 --- a/test/lib/minitest/unit.rb
 +++ b/test/lib/minitest/unit.rb
 @@ -3,7 +3,7 @@
@@ -24,7 +26,27 @@ index 89b6a8eaf4..8254f7a6ed 100644
          test_count      += @test_count
          assertion_count += @assertion_count
          t = Time.now - start
-@@ -958,10 +958,10 @@ def _run_suite suite, type
+@@ -946,22 +946,25 @@ def _run_suite suite, type
+         inst = suite.new method
+         inst._assertions = 0
+ 
+-        print "#{suite}##{method} = " if @verbose
+-
+         start_time = Time.now if @verbose
+         result = inst.run self
+ 
+-        print "%.2f s = " % (Time.now - start_time) if @verbose
+-        print result
+-        puts if @verbose
++        if @verbose
++          print "#{inst._assertions.to_s.rjust(6)} #{suite}##{method}" \
++            "= %.2f s = #{result}" % (Time.now - start_time)
++          puts
++        else
++          print result
++        end
++        
+         $stdout.flush
  
          leakchecker.check("#{inst.class}\##{inst.__name__}")
  
@@ -37,7 +59,7 @@ index 89b6a8eaf4..8254f7a6ed 100644
      end
  
      ##
-@@ -1001,7 +1001,7 @@ def puke klass, meth, e
+@@ -1001,7 +1004,7 @@ def puke klass, meth, e
        e = case e
            when MiniTest::Skip then
              @skips += 1
@@ -46,7 +68,7 @@ index 89b6a8eaf4..8254f7a6ed 100644
              "Skipped:\n#{klass}##{meth} [#{location e}]:\n#{e.message}\n"
            when MiniTest::Assertion then
              @failures += 1
-@@ -1251,6 +1251,7 @@ class TestCase
+@@ -1251,6 +1254,7 @@ class TestCase
        include Guard
        extend Guard
  
@@ -54,7 +76,7 @@ index 89b6a8eaf4..8254f7a6ed 100644
        attr_reader :__name__ # :nodoc:
  
        PASSTHROUGH_EXCEPTIONS = [NoMemoryError, SignalException,
-@@ -1314,6 +1315,8 @@ def initialize name # :nodoc:
+@@ -1314,6 +1318,8 @@ def initialize name # :nodoc:
          @__io__ = nil
          @passed = nil
          @@current = self # FIX: make thread local
