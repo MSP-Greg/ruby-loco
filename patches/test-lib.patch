@@ -1,9 +1,10 @@
 Patch by MSP-Greg
-Adjusts assertions count so that tests, regardless of manner run, show similar
-results.
-Added listing of assertions by test
+Added -a --assert parameter for test-all
+a) turns on verbose
+b) adjusts assertions count so that tests, regardless of manner run, show similar results.
+c) adds assertion total by test to each line of output
 diff --git a/test/lib/minitest/unit.rb b/test/lib/minitest/unit.rb
-index 89b6a8eaf4..6fe1193276 100644
+index 89b6a8eaf4..7b8c8ba669 100644
 --- a/test/lib/minitest/unit.rb
 +++ b/test/lib/minitest/unit.rb
 @@ -3,7 +3,7 @@
@@ -34,7 +35,17 @@ index 89b6a8eaf4..6fe1193276 100644
          test_count      += @test_count
          assertion_count += @assertion_count
          t = Time.now - start
-@@ -921,6 +922,7 @@ def _run_anything type
+@@ -897,7 +898,8 @@ def _run_anything type
+           puts
+           puts
+         end
+-        puts "Finished%s %ss in %.6fs, %.4f tests/s, %.4f assertions/s.\n" %
++        ret = options[:assert] ? "\n" : "\n"
++        puts "#{ret}Finished%s %ss in %.6fs, %.4f tests/s, %.4f assertions/s.\n" %
+              [(@repeat_count ? "(#{count}/#{@repeat_count}) " : ""), type,
+                t, @test_count.fdiv(t), @assertion_count.fdiv(t)]
+       end while @repeat_count && count < @repeat_count &&
+@@ -921,6 +923,7 @@ def _run_anything type
      #
  
      def _run_suites suites, type
@@ -42,27 +53,30 @@ index 89b6a8eaf4..6fe1193276 100644
        suites.map { |suite| _run_suite suite, type }
      end
  
-@@ -942,18 +944,32 @@ def _run_suite suite, type
+@@ -942,18 +945,39 @@ def _run_suite suite, type
  
        leakchecker = LeakChecker.new
  
-+      if self.assert
-+        zombie   = defined?(ZombieHunter)      && Module === ZombieHunter      ? 2 : 0
-+        tracepnt = defined?(TracePointChecker) && Module === TracePointChecker ? 1 : 0
++      verbose = options[:verbose]
++      retry_run = options[:retry_run]
++      retry_len = retry_run.to_s.length if retry_run
++      assert_offset = 0
++
++      if self.assert # && options[:retry_run]
++        zombie   = (defined?(ZombieHunter)      && ZombieHunter.is_a?(Module)     )  ? -2 : 0
++        tracepnt = (defined?(TracePointChecker) && TracePointChecker.is_a?(Module)) ? -1 : 0
 +        assert_offset = zombie + tracepnt
-+      else
-+        assert_offset = 0
 +      end
 +
        assertions = filtered_test_methods.map { |method|
          inst = suite.new method
 -        inst._assertions = 0
-+        inst._assertions = -assert_offset
++        inst._assertions = assert_offset
  
 -        print "#{suite}##{method} = " if @verbose
 -
 -        start_time = Time.now if @verbose
-+        start_time = @verbose ? Time.now : nil
++        start_time = verbose ? Time.now : nil
          result = inst.run self
  
 -        print "%.2f s = " % (Time.now - start_time) if @verbose
@@ -72,6 +86,10 @@ index 89b6a8eaf4..6fe1193276 100644
 +          ttl = " = %.2f s = " % (Time.now - start_time)
 +          if !self.assert # || MetaMetaMetaTestCase === inst.class.superclass
 +            print "#{suite}##{method}#{ttl}#{result}"
++          elsif retry_run
++            @cntr ||= 0
++            @cntr += 1
++            print "[#{@cntr.to_s.rjust(retry_len)}/#{retry_run}] #{inst._assertions.to_s.rjust(6)} #{suite}##{method}#{ttl}#{result}"
 +          else
 +            print "#{inst._assertions.to_s.rjust(6)} #{suite}##{method}#{ttl}#{result}"
 +          end
@@ -82,7 +100,7 @@ index 89b6a8eaf4..6fe1193276 100644
          $stdout.flush
  
          leakchecker.check("#{inst.class}\##{inst.__name__}")
-@@ -961,7 +977,7 @@ def _run_suite suite, type
+@@ -961,7 +985,7 @@ def _run_suite suite, type
          inst._assertions
        }
  
@@ -91,7 +109,7 @@ index 89b6a8eaf4..6fe1193276 100644
      end
  
      ##
-@@ -1001,7 +1017,7 @@ def puke klass, meth, e
+@@ -1001,7 +1025,7 @@ def puke klass, meth, e
        e = case e
            when MiniTest::Skip then
              @skips += 1
@@ -100,7 +118,7 @@ index 89b6a8eaf4..6fe1193276 100644
              "Skipped:\n#{klass}##{meth} [#{location e}]:\n#{e.message}\n"
            when MiniTest::Assertion then
              @failures += 1
-@@ -1019,6 +1035,7 @@ def initialize # :nodoc:
+@@ -1019,6 +1043,7 @@ def initialize # :nodoc:
        @report = []
        @errors = @failures = @skips = 0
        @verbose = false
@@ -108,18 +126,19 @@ index 89b6a8eaf4..6fe1193276 100644
        @mutex = Thread::Mutex.new
        @info_signal = Signal.list['INFO']
        @repeat_count = nil
-@@ -1053,6 +1070,10 @@ def process_args args = [] # :nodoc:
+@@ -1053,6 +1078,11 @@ def process_args args = [] # :nodoc:
            options[:verbose] = true
          end
  
 +        opts.on '-a', '--assert', "Adjust & show assertions numbers" do
-+          options[:assert] = true
++          options[:verbose] = true
++          options[:assert]  = true
 +        end
 +
          opts.on '-n', '--name PATTERN', "Filter test names on pattern (e.g. /foo/)" do |a|
            options[:filter] = a
          end
-@@ -1070,6 +1091,8 @@ def process_args args = [] # :nodoc:
+@@ -1070,6 +1100,8 @@ def process_args args = [] # :nodoc:
        srand options[:seed]
  
        self.verbose = options[:verbose]
@@ -129,7 +148,7 @@ index 89b6a8eaf4..6fe1193276 100644
  
        options
 diff --git a/test/lib/test/unit.rb b/test/lib/test/unit.rb
-index 761fe92df8..a804a7b67b 100644
+index 761fe92df8..f2336637f2 100644
 --- a/test/lib/test/unit.rb
 +++ b/test/lib/test/unit.rb
 @@ -3,10 +3,10 @@
@@ -146,19 +165,23 @@ index 761fe92df8..a804a7b67b 100644
  require 'optparse'
  
  # See Test::Unit
-@@ -86,6 +86,11 @@ def setup_options(opts, options)
-           self.verbose = options[:verbose]
-         end
+@@ -83,7 +83,14 @@ def setup_options(opts, options)
  
-+        opts.on '-a', '--assert', "Adjust & show assertions numbers" do
-+          options[:assert] = true
-+          self.assert = options[:assert]
+         opts.on '-v', '--verbose', "Verbose. Show progress processing files." do
+           options[:verbose] = true
+-          self.verbose = options[:verbose]
++          self.verbose = true
 +        end
 +
-         opts.on '-n', '--name PATTERN', "Filter test method names on pattern: /REGEXP/, !/REGEXP/ or STRING" do |a|
-           (options[:filter] ||= []) << a
++        opts.on '-a', '--assert', "Adjust & show assertions numbers" do
++          options[:verbose] = true
++          options[:assert]  = true
++          self.verbose = true
++          self.assert  = true
          end
-@@ -451,7 +456,6 @@ def _run_parallel suites, type, result
+ 
+         opts.on '-n', '--name PATTERN', "Filter test method names on pattern: /REGEXP/, !/REGEXP/ or STRING" do |a|
+@@ -451,7 +458,6 @@ def _run_parallel suites, type, result
            warn "Error: parameter of -j option should be greater than 0."
            return
          end
@@ -166,7 +189,21 @@ index 761fe92df8..a804a7b67b 100644
          # Require needed thing for parallel running
          require 'timeout'
          @tasks = @files.dup # Array of filenames.
-@@ -521,7 +525,7 @@ def _run_parallel suites, type, result
+@@ -504,7 +510,12 @@ def _run_parallel suites, type, result
+             suites.map! {|r| eval("::"+r[:testcase])}
+             del_status_line or puts
+             unless suites.empty?
+-              puts "\n""Retrying..."
++              puts "\nRetrying..."
++              if @options[:retry]
++                ttl_count = 0
++                suites.each { |s| ttl_count += s.public_instance_methods(true).grep(/^test/).length }
++                @options[:retry_run] = ttl_count
++              end
+               _run_suites(suites, type)
+             end
+             @options[:parallel] = parallel
+@@ -521,7 +532,7 @@ def _run_parallel suites, type, result
              if @options[:retry]
                @errors   += rep.map{|x| x[:result][0] }.inject(:+)
                @failures += rep.map{|x| x[:result][1] }.inject(:+)
@@ -175,7 +212,7 @@ index 761fe92df8..a804a7b67b 100644
              end
            end
            unless @warnings.empty?
-@@ -582,7 +586,7 @@ def setup_options(opts, options)
+@@ -582,7 +593,7 @@ def setup_options(opts, options)
        private
        def _run_suites(suites, type)
          result = super
@@ -184,7 +221,7 @@ index 761fe92df8..a804a7b67b 100644
          report.sort_by!{|r| r.start_with?("Skipped:") ? 0 : \
                             (r.start_with?("Failure:") ? 1 : 2) }
          failed(nil)
-@@ -696,6 +700,7 @@ def output
+@@ -696,6 +707,7 @@ def output
        end
  
        def _prepare_run(suites, type)
@@ -192,7 +229,7 @@ index 761fe92df8..a804a7b67b 100644
          options[:job_status] ||= :replace if @tty && !@verbose
          case options[:color]
          when :always
-@@ -1085,13 +1090,17 @@ def puke klass, meth, e
+@@ -1085,13 +1097,17 @@ def puke klass, meth, e
          # TODO:
          #   this overriding is for minitest feature that skip messages are
          #   hidden when not verbose (-v), note this is temporally.
@@ -253,7 +290,7 @@ index d8b44644f7..5e29db7f1a 100644
    .map {|f| $LOAD_PATH.unshift File.join(File.dirname(f), "lib") }
  
 -require 'test/unit'
-+require_relative 'lib/test/unit'
++require_relative './lib/test/unit'
  
  module Gem
  end
