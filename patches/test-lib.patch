@@ -40,7 +40,7 @@ index 89b6a8eaf4..7b8c8ba669 100644
            puts
          end
 -        puts "Finished%s %ss in %.6fs, %.4f tests/s, %.4f assertions/s.\n" %
-+        ret = options[:assert] ? "\n" : "\n"
++        ret = options[:assert] ? "\n" : ""
 +        puts "#{ret}Finished%s %ss in %.6fs, %.4f tests/s, %.4f assertions/s.\n" %
               [(@repeat_count ? "(#{count}/#{@repeat_count}) " : ""), type,
                 t, @test_count.fdiv(t), @assertion_count.fdiv(t)]
