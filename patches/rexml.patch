@@ -474,6 +474,8 @@ index cf03b42b0b..eaf4394c63 100644
 -
 +-->
  </tests>
+ 
+ 
 diff --git a/test/rexml/test_jaxen.rb b/test/rexml/test_jaxen.rb
 index 9cd7bee8c2..c8e582728f 100644
 --- a/test/rexml/test_jaxen.rb
@@ -665,4 +667,46 @@ index 9cd7bee8c2..c8e582728f 100644
 +      # STDERR.puts "--- Found namespace: #{prefix}"
        namespaces[prefix] = ctx.namespaces[prefix]
      end
+ 
+diff --git a/test/rexml/test_listener.rb b/test/rexml/test_listener.rb
+index 322d368be8..829c308ae4 100644
+--- a/test/rexml/test_listener.rb
++++ b/test/rexml/test_listener.rb
+@@ -7,8 +7,18 @@
+ require 'rexml/streamlistener'
+ 
+ module REXMLTests
+-  class BaseTester < Test::Unit::TestCase
++  class REXMLTester < Test::Unit::TestCase
+     include REXMLTestUtils
++
++    def setup
++      @listener = MyREXMLListener.new
++    end
++
++    def test_character_reference_2
++      t6 = %Q{<string>&#xd;</string>}
++      assert_equal( t6.strip, REXML::Document.new(t6).to_s )
++    end
++
+     def test_empty
+       return unless defined? @listener
+       # Empty.
+@@ -117,15 +127,4 @@ def text( text )
+       @text << text
+     end
+   end
+-
+-  class REXMLTester < BaseTester
+-    def setup
+-      @listener = MyREXMLListener.new
+-    end
+-
+-    def test_character_reference_2
+-      t6 = %Q{<string>&#xd;</string>}
+-      assert_equal( t6.strip, REXML::Document.new(t6).to_s )
+-    end
+-  end
+ end
+ 
  
