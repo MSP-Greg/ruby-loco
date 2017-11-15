@@ -230,6 +230,7 @@ module TestScript
     `attrib +r #{ENV['R_NAME']}-*.log`
     `#{ENV['7zip']} a #{fn_log} .\\*.log`
     puts "Saved #{fn_log}"
+    `appveyor PushArtifact #{fn_log} -DeploymentName \"Build and test logs\"`
   end
   
   def self.push_artifacts
@@ -243,15 +244,10 @@ module TestScript
     if @@failures == 0
       `#{ENV['7zip']} a ruby_%R_BRANCH%.7z     #{z_files}`
       puts "Saved ruby_#{ENV['R_BRANCH']}.7z\n"
+      `appveyor PushArtifact ruby_#{ENV['R_BRANCH']}.7z -DeploymentName \"Ruby Trunk Build\"`
     else
       `#{ENV['7zip']} a ruby_%R_BRANCH%_bad.7z #{z_files}`
       puts "Saved ruby_#{ENV['R_BRANCH']}_bad.7z\n"
-    end
-
-    `appveyor PushArtifact #{fn_log} -DeploymentName \"Build and test logs\"`
-    if @@failures == 0
-      `appveyor PushArtifact ruby_#{ENV['R_BRANCH']}.7z -DeploymentName \"Ruby Trunk Build\"`
-    else
       `appveyor PushArtifact ruby_#{ENV['R_BRANCH']}_bad.7z -DeploymentName \"Ruby Trunk Build (bad)\"`
     end
   end
