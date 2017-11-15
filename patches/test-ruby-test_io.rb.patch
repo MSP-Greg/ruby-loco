@@ -1,5 +1,8 @@
+Patch by MSP-Greg
+first hunk adjusts timeout for long disk write
+second hunk may lower false failures from test_write_no_garbage when run parallel
 diff --git a/test/ruby/test_io.rb b/test/ruby/test_io.rb
-index a0a574e69d..980d228797 100644
+index a0a574e69d..778e15dda4 100644
 --- a/test/ruby/test_io.rb
 +++ b/test/ruby/test_io.rb
 @@ -3359,9 +3359,9 @@ def t.close(unlink_now = false)
@@ -14,3 +17,51 @@ index a0a574e69d..980d228797 100644
            msg = ARGV.shift
            f = open(ARGV[0], "wb")
            f.seek(0xffff_ffff)
+@@ -3646,27 +3646,38 @@ def test_closed_stream_in_rescue
+       end;
+     end
+ 
++    # move asserts outside of loop for more consistent parallel results
+     def test_write_no_garbage
+       res = {}
++      before = []
++      after = []
++      freeze = []
++      a_n = []
++      a_s = []
++      a_buf = []
+       ObjectSpace.count_objects(res) # creates strings on first call
+       [ 'foo'.b, '*' * 24 ].each do |buf|
+         with_pipe do |r, w|
+           GC.disable
+           begin
+-            before = ObjectSpace.count_objects(res)[:T_STRING]
+-            n = w.write(buf)
+-            s = w.syswrite(buf)
+-            after = ObjectSpace.count_objects(res)[:T_STRING]
++            before << ObjectSpace.count_objects(res)[:T_STRING]
++            a_n    << w.write(buf)
++            a_s    << w.syswrite(buf)
++            after  << ObjectSpace.count_objects(res)[:T_STRING]
+           ensure
+             GC.enable
+           end
+-          assert_equal before, after,
+-            "no strings left over after write [ruby-core:78898] [Bug #13085]: #{ before } strings before write -> #{ after } strings after write"
+-          assert_not_predicate buf, :frozen?, 'no inadvertent freeze'
+-          assert_equal buf.bytesize, n, 'IO#write wrote expected size'
+-          assert_equal s, n, 'IO#syswrite wrote expected size'
++          a_buf  << buf.bytesize          
++          freeze << buf.frozen?
+         end
+       end
++      0.upto(before.length() -1) { |i|
++        assert_equal before[i], after[i],
++          "no strings left over after write [ruby-core:78898] [Bug #13085]: #{ before[i] } strings before write -> #{ after[i] } strings after write"
++        assert !freeze[i], 'no inadvertent freeze'
++        assert_equal a_buf[i], a_n[i], 'IO#write wrote expected size'
++        assert_equal a_s[i]  , a_n[i], 'IO#syswrite wrote expected size'
++      }
+     end
+ 
+     def test_pread
