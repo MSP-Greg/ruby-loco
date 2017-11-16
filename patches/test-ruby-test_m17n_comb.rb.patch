@@ -1,0 +1,430 @@
+Patch by MSP-Greg
+Added frozen_string_literal: true
+Changed some loops to quicken code up and less GC issues
+diff --git a/test/ruby/test_m17n_comb.rb b/test/ruby/test_m17n_comb.rb
+index 99c162a92f..e6a467d0f5 100644
+--- a/test/ruby/test_m17n_comb.rb
++++ b/test/ruby/test_m17n_comb.rb
+@@ -1,4 +1,4 @@
+-# frozen_string_literal: false
++# frozen_string_literal: true
+ require 'test/unit'
+ require 'etc'
+ require_relative 'allpairs'
+@@ -56,9 +56,9 @@ def assert_strenc(bytes, enc, actual, message=nil)
+   ]
+ 
+   WSTRINGS = [
+-    "aa".force_encoding("utf-16be"),
+-    "aaaa".force_encoding("utf-32be"),
+-    "aaa".force_encoding("utf-32be"),
++    "aa".dup.force_encoding("utf-16be"),
++    "aaaa".dup.force_encoding("utf-32be"),
++    "aaa".dup.force_encoding("utf-32be"),
+   ]
+ 
+   def combination(*args, &b)
+@@ -71,12 +71,12 @@ def encdump(str)
+     if /\.force_encoding\("[A-Za-z0-9.:_+-]*"\)\z/ =~ d
+       d
+     else
+-      "#{d}.force_encoding(#{str.encoding.name.dump})"
++      "#{d}.dup.force_encoding(#{str.encoding.name.dump})"
+     end
+   end
+ 
+   def encdumpargs(args)
+-    r = '('
++    r = '('.dup
+     args.each_with_index {|a, i|
+       r << ',' if 0 < i
+       if String === a
+@@ -90,7 +90,7 @@ def encdumpargs(args)
+   end
+ 
+   def encdumpcall(recv, meth, *args, &block)
+-    desc = ''
++    desc = ''.dup
+     if String === recv
+       desc << encdump(recv)
+     else
+@@ -115,6 +115,10 @@ def encdumpcall(recv, meth, *args, &block)
+     desc
+   end
+ 
++  def strings_strings
++    STRINGS.each { |s1| STRINGS.each { |s2| yield s1, s2 } }
++  end
++  
+   def assert_enccall(recv, meth, *args, &block)
+     desc = encdumpcall(recv, meth, *args, &block)
+     result = nil
+@@ -156,18 +160,18 @@ def each_slice_call
+     combination(STRINGS, -2..2, 0..2) {|s, nth, len|
+       yield s, nth, len
+     }
+-    combination(STRINGS, STRINGS) {|s, substr|
+-      yield s, substr
+-    }
++    strings_strings {|s, substr| yield s, substr }
++#    strings_strings {|s, substr|
++#      yield s, substr
++#    }
+     combination(STRINGS, -2..2, 0..2) {|s, first, last|
+       yield s, first..last
+       yield s, first...last
+     }
+-    combination(STRINGS, STRINGS) {|s1, s2|
+-      if !s2.valid_encoding?
+-        next
+-      end
+-      yield s1, Regexp.new(Regexp.escape(s2))
++    STRINGS.each { |s2|
++      next unless s2.valid_encoding?
++      re = Regexp.new(Regexp.escape(s2))
++      STRINGS.each { |s1| yield s1, re }
+     }
+     combination(STRINGS, STRINGS, 0..2) {|s1, s2, nth|
+       if !s2.valid_encoding?
+@@ -213,7 +217,7 @@ def test_str_new
+   end
+ 
+   def test_str_plus
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       if s1.encoding != s2.encoding && !s1.ascii_only? && !s2.ascii_only?
+         assert_raise(Encoding::CompatibilityError) { s1 + s2 }
+       else
+@@ -237,7 +241,7 @@ def test_str_times
+ 
+   def test_sprintf_s
+     STRINGS.each {|s|
+-      assert_strenc(b(s), s.encoding, "%s".force_encoding(s.encoding) % s)
++      assert_strenc(b(s), s.encoding, "%s".dup.force_encoding(s.encoding) % s)
+       if !s.empty? # xxx
+         t = enccall(b("%s"), :%, s)
+         assert_strenc(b(s), (b('')+s).encoding, t)
+@@ -252,7 +256,7 @@ def test_str_eq_reflexive
+   end
+ 
+   def test_str_eq_symmetric
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       if s1 == s2
+         assert_equal(s2, s1, "#{encdump s2} == #{encdump s1}")
+       else
+@@ -270,7 +274,7 @@ def test_str_eq_transitive
+   end
+ 
+   def test_str_eq
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       desc_eq = "#{encdump s1} == #{encdump s2}"
+       if b(s1) == b(s2) and
+           (s1.ascii_only? && s2.ascii_only? or
+@@ -289,7 +293,7 @@ def test_str_eq
+   end
+ 
+   def test_str_concat
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       s = s1.dup
+       if s1.ascii_only? || s2.ascii_only? || s1.encoding == s2.encoding
+         s << s2
+@@ -304,7 +308,7 @@ def test_str_concat
+ 
+   def test_str_aref
+     STRINGS.each {|s|
+-      t = ''.force_encoding(s.encoding)
++      t = ''.dup.force_encoding(s.encoding)
+       0.upto(s.length-1) {|i|
+         u = s[i]
+         assert_predicate(u, :valid_encoding?) if s.valid_encoding?
+@@ -316,7 +320,7 @@ def test_str_aref
+ 
+   def test_str_aref_len
+     STRINGS.each {|s|
+-      t = ''.force_encoding(s.encoding)
++      t = ''.dup.force_encoding(s.encoding)
+       0.upto(s.length-1) {|i|
+         u = s[i,1]
+         assert_predicate(u, :valid_encoding?) if s.valid_encoding?
+@@ -326,7 +330,7 @@ def test_str_aref_len
+     }
+ 
+     STRINGS.each {|s|
+-      t = ''.force_encoding(s.encoding)
++      t = ''.dup.force_encoding(s.encoding)
+       0.step(s.length-1, 2) {|i|
+         u = s[i,2]
+         assert_predicate(u, :valid_encoding?) if s.valid_encoding?
+@@ -337,7 +341,7 @@ def test_str_aref_len
+   end
+ 
+   def test_str_aref_substr
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       if s1.ascii_only? || s2.ascii_only? || s1.encoding == s2.encoding
+         t = enccall(s1, :[], s2)
+         if t != nil
+@@ -373,7 +377,7 @@ def test_str_aref_range2
+       if last < 0
+         last += s.length
+       end
+-      t2 = ''
++      t2 = ''.dup
+       first.upto(last) {|i|
+         c = s[i]
+         t2 << c if c
+@@ -401,7 +405,7 @@ def test_str_aref_range3
+         last += s.length
+       end
+       assert_predicate(t, :valid_encoding?) if s.valid_encoding?
+-      t2 = ''
++      t2 = ''.dup
+       first.upto(last-1) {|i|
+         c = s[i]
+         t2 << c if c
+@@ -411,7 +415,7 @@ def test_str_aref_range3
+   end
+ 
+   def test_str_assign
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       (-2).upto(2) {|i|
+         t = s1.dup
+         if s1.ascii_only? || s2.ascii_only? || s1.encoding == s2.encoding
+@@ -554,7 +558,7 @@ def test_str_assign_range3
+   end
+ 
+   def test_str_cmp
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       desc = "#{encdump s1} <=> #{encdump s2}"
+       r = s1 <=> s2
+       if s1 == s2
+@@ -585,7 +589,7 @@ def test_str_capitalize
+   end
+ 
+   def test_str_casecmp
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       #puts "#{encdump(s1)}.casecmp(#{encdump(s2)})"
+       next unless s1.valid_encoding? && s2.valid_encoding? && Encoding.compatible?(s1, s2)
+       r = s1.casecmp(s2)
+@@ -657,7 +661,7 @@ def test_str_rjust
+   end
+ 
+   def test_str_chomp
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       if !s1.ascii_only? && !s2.ascii_only? && !Encoding.compatible?(s1,s2)
+         if s1.bytesize > s2.bytesize
+           assert_raise(Encoding::CompatibilityError, "#{encdump(s1)}.chomp(#{encdump(s2)})") do
+@@ -677,13 +681,20 @@ def test_str_chomp
+ 
+   def test_str_smart_chomp
+     bug10893 = '[ruby-core:68258] [Bug #10893]'
+-    encodings = Encoding.list.select {|enc| !enc.dummy?}
+-    combination(encodings, encodings) do |e1, e2|
++    encodings = Encoding.list.reject {|enc| enc.dummy?}.uniq
++    ary_test = [ ["abc\n", ""], ["abc\n", "\n"], ["abc\r\n", ""], ["abc\r\n", "\n"] ]
++    encodings.each { |e1|
++      ary_test[0][0] = "abc\n".encode(e1)
++      ary_test[1][0] = "abc\n".encode(e1)
++      ary_test[2][0] = "abc\r\n".encode(e1)
++      ary_test[3][0] = "abc\r\n".encode(e1)
+       expected = "abc".encode(e1)
+-      combination(["abc\n", "abc\r\n"], ["", "\n"]) do |str, rs|
+-        assert_equal(expected, str.encode(e1).chomp(rs.encode(e2)), bug10893)
+-      end
+-    end
++      encodings.each { |e2|
++        ary_test.each do |str, rs|
++          assert_equal(expected, str.chomp(rs.encode(e2)), bug10893)
++        end
++      }
++    }
+   end
+ 
+   def test_str_chop
+@@ -728,7 +739,7 @@ def test_str_dup
+   end
+ 
+   def test_str_count
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       desc = proc {encdumpcall(s1, :count, s2)}
+       if !s1.valid_encoding? || !s2.valid_encoding?
+         assert_raise(ArgumentError, Encoding::CompatibilityError, desc) { s1.count(s2) }
+@@ -752,21 +763,19 @@ def test_str_count
+   end
+ 
+   def test_str_crypt
+-    combination(STRINGS, STRINGS) {|str, salt|
++    STRINGS.each { |salt|
+       # skip input other than [0-9A-Za-z./] to confirm strict behavior
+       next unless salt.ascii_only? && /\A[0-9a-zA-Z.\/]+\z/ =~ salt
+-
+-      confirm_crypt_result(str, salt)
++      STRINGS.each { |str| confirm_crypt_result(str, salt) }
+     }
+   end
+ 
+   if !strict_crypt
+     def test_str_crypt_nonstrict
+-      combination(STRINGS, STRINGS) {|str, salt|
++      STRINGS.each { |salt|
+         # only test input other than [0-9A-Za-z./] to confirm non-strict behavior
+         next if salt.ascii_only? && /\A[0-9a-zA-Z.\/]+\z/ =~ salt
+-
+-        confirm_crypt_result(str, salt)
++        STRINGS.each { |str| confirm_crypt_result(str, salt) }
+       }
+     end
+   end
+@@ -782,7 +791,7 @@ def test_str_crypt_nonstrict
+   end
+ 
+   def test_str_delete
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       if s1.empty?
+         assert_equal(s1, s1.delete(s2))
+         next
+@@ -832,7 +841,7 @@ def test_str_dump
+   end
+ 
+   def test_str_each_line
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       if !s1.ascii_only? && !s2.ascii_only? && s1.encoding != s2.encoding
+         assert_raise(Encoding::CompatibilityError) { s1.each_line(s2) {} }
+         next
+@@ -880,7 +889,7 @@ def test_str_hex
+   end
+ 
+   def test_str_include?
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       if !s1.ascii_only? && !s2.ascii_only? && s1.encoding != s2.encoding
+         assert_raise(Encoding::CompatibilityError) { s1.include?(s2) }
+         assert_raise(Encoding::CompatibilityError) { s1.index(s2) }
+@@ -1049,7 +1058,7 @@ def test_str_oct
+   end
+ 
+   def test_str_replace
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       t = s1.dup
+       t.replace s2
+       assert_equal(s2, t)
+@@ -1070,7 +1079,7 @@ def test_str_reverse
+   end
+ 
+   def test_str_scan
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       desc = proc {"#{s1.dump}.scan(#{s2.dump})"}
+       if !s2.valid_encoding?
+         assert_raise(RegexpError, desc) { s1.scan(s2) }
+@@ -1137,7 +1146,7 @@ def test_str_slice!
+   end
+ 
+   def test_str_split
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       if !s2.valid_encoding?
+         assert_raise(ArgumentError, RegexpError) { s1.split(s2) }
+         next
+@@ -1165,7 +1174,7 @@ def test_str_split
+   end
+ 
+   def test_str_squeeze
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       if !s1.valid_encoding? || !s2.valid_encoding?
+         assert_raise(ArgumentError, Encoding::CompatibilityError, "#{encdump s1}.squeeze(#{encdump s2})") { s1.squeeze(s2) }
+         next
+@@ -1283,16 +1292,16 @@ def test_tr
+   end
+ 
+   def test_tr_sjis
+-    expected = "\x83}\x83~\x83\x80\x83\x81\x83\x82".force_encoding(Encoding::SJIS)
+-    source = "\xCF\xD0\xD1\xD2\xD3".force_encoding(Encoding::SJIS)
+-    from = "\xCF-\xD3".force_encoding(Encoding::SJIS)
+-    to = "\x83}-\x83\x82".force_encoding(Encoding::SJIS)
++    expected = "\x83}\x83~\x83\x80\x83\x81\x83\x82".dup.force_encoding(Encoding::SJIS)
++    source = "\xCF\xD0\xD1\xD2\xD3".dup.force_encoding(Encoding::SJIS)
++    from = "\xCF-\xD3".dup.force_encoding(Encoding::SJIS)
++    to = "\x83}-\x83\x82".dup.force_encoding(Encoding::SJIS)
+     assert_equal(expected, source.tr(from, to))
+ 
+-    expected = "\x84}\x84~\x84\x80\x84\x81\x84\x82".force_encoding(Encoding::SJIS)
+-    source = "\x84M\x84N\x84O\x84P\x84Q".force_encoding(Encoding::SJIS)
+-    from = "\x84@-\x84`".force_encoding(Encoding::SJIS)
+-    to = "\x84p-\x84\x91".force_encoding(Encoding::SJIS)
++    expected = "\x84}\x84~\x84\x80\x84\x81\x84\x82".dup.force_encoding(Encoding::SJIS)
++    source = "\x84M\x84N\x84O\x84P\x84Q".dup.force_encoding(Encoding::SJIS)
++    from = "\x84@-\x84`".dup.force_encoding(Encoding::SJIS)
++    to = "\x84p-\x84\x91".dup.force_encoding(Encoding::SJIS)
+     assert_equal(expected, source.tr(from, to))
+   end
+ 
+@@ -1362,9 +1371,8 @@ def test_str_succ
+         s = t
+       }
+     }
+-
+-    Encoding.list.each do |enc|
+-      next if enc.dummy?
++    encodings = Encoding.list.reject {|enc| enc.dummy?}.uniq
++    encodings.each do |enc|
+       {"A"=>"B", "A1"=>"A2", "A9"=>"B0", "9"=>"10", "Z"=>"AA"}.each do |orig, expected|
+         s = orig.encode(enc)
+         assert_strenc(expected.encode(enc), enc, s.succ, proc {"#{orig.dump}.encode(#{enc}).succ"})
+@@ -1378,7 +1386,7 @@ def test_str_succ2
+   end
+ 
+   def test_str_hash
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       if s1.eql?(s2)
+         assert_equal(s1.hash, s2.hash, "#{encdump s1}.hash == #{encdump s2}.dump")
+       end
+@@ -1551,7 +1559,7 @@ def test_str_chr
+   end
+ 
+   def test_str_end_with?
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       desc = "#{encdump s1}.end_with?(#{encdump s2})"
+       if !str_enc_compatible?(s1, s2)
+         assert_raise(Encoding::CompatibilityError, desc) { s1.end_with?(s2) }
+@@ -1570,7 +1578,7 @@ def test_str_end_with?
+   end
+ 
+   def test_str_start_with?
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       desc = "#{encdump s1}.start_with?(#{encdump s2})"
+       if !str_enc_compatible?(s1, s2)
+         assert_raise(Encoding::CompatibilityError, desc) { s1.start_with?(s2) }
+@@ -1605,7 +1613,7 @@ def test_str_ord
+   end
+ 
+   def test_str_partition
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       desc = "#{encdump s1}.partition(#{encdump s2})"
+       if !str_enc_compatible?(s1, s2)
+         assert_raise(Encoding::CompatibilityError, desc) { s1.partition(s2) }
+@@ -1621,7 +1629,7 @@ def test_str_partition
+   end
+ 
+   def test_str_rpartition
+-    combination(STRINGS, STRINGS) {|s1, s2|
++    strings_strings {|s1, s2|
+       desc = "#{encdump s1}.rpartition(#{encdump s2})"
+       if !str_enc_compatible?(s1, s2)
+         assert_raise(Encoding::CompatibilityError, desc) { s1.rpartition(s2) }

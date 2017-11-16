@@ -200,7 +200,6 @@ module TestScript
   end
   
   def self.faults_final(log, type)
-    # 'fail' used for variable names, type defines whether failure or error
     str = ''.dup
     faults = []
     log.scan(/^ *\d+\) #{type}:\n([^\n]+?) \[([^\n]+?):(\d+)\]:\n(.+?)\n\n/m) { |test, file, line, msg|
