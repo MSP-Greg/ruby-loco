@@ -56,8 +56,8 @@ index a0a574e69d..778e15dda4 100644
          end
        end
 +      0.upto(before.length() -1) { |i|
-+        assert_equal before[i], after[i],
-+          "no strings left over after write [ruby-core:78898] [Bug #13085]: #{ before[i] } strings before write -> #{ after[i] } strings after write"
++        assert(before[i] >= after[i],
++          "no strings left over after write [ruby-core:78898] [Bug #13085]: #{ before[i] } strings before write -> #{ after[i] } strings after write")
 +        assert !freeze[i], 'no inadvertent freeze'
 +        assert_equal a_buf[i], a_n[i], 'IO#write wrote expected size'
 +        assert_equal a_s[i]  , a_n[i], 'IO#syswrite wrote expected size'
