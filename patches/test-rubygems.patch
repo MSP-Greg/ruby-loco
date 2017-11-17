@@ -95,10 +95,20 @@ index fa444fa32f..2433637e6e 100644
  
  end
 diff --git a/test/rubygems/test_gem_gemcutter_utilities.rb b/test/rubygems/test_gem_gemcutter_utilities.rb
-index c3f9a7ea18..3b8f0134b6 100644
+index c3f9a7ea18..eaf1261d23 100644
 --- a/test/rubygems/test_gem_gemcutter_utilities.rb
 +++ b/test/rubygems/test_gem_gemcutter_utilities.rb
-@@ -177,7 +177,8 @@ def test_sign_in_with_other_credentials_doesnt_overwrite_other_keys
+@@ -11,6 +11,9 @@ def setup
+ 
+     ENV['RUBYGEMS_HOST'] = nil
+     Gem.configuration.rubygems_api_key = nil
++    # two below statements cleanup up intermittent failures/errors when run parallel
++    Gem.configuration.disable_default_gem_server = nil
++    Gem.host = nil
+ 
+     @cmd = Gem::Command.new '', 'summary'
+     @cmd.extend Gem::GemcutterUtilities
+@@ -177,7 +180,8 @@ def test_sign_in_with_other_credentials_doesnt_overwrite_other_keys
    end
  
    def test_sign_in_with_bad_credentials
@@ -108,7 +118,7 @@ index c3f9a7ea18..3b8f0134b6 100644
  
      assert_raises Gem::MockGemUi::TermError do
        util_sign_in ['Access Denied.', 403, 'Forbidden']
-@@ -188,7 +189,8 @@ def test_sign_in_with_bad_credentials
+@@ -188,7 +192,8 @@ def test_sign_in_with_bad_credentials
    end
  
    def util_sign_in response, host = nil, args = []
