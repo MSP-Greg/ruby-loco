@@ -195,7 +195,7 @@ module TestScript
     bundle_v + rake_v
   end
 
-  def self.generate_test_all(s)
+  def self.generate_test_all(s, results)
     s.gsub!("\r", '')
     str = ''.dup
 
