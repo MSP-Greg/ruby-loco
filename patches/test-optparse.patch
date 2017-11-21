@@ -1,3 +1,6 @@
+Patch by MSP-Greg
+changed from class inheritance to include
+frozen_string_literal: true
 diff --git a/test/optparse/optparse_setup.rb b/test/optparse/optparse_setup.rb
 index e69de29bb2..32a1494c30 100644
 --- a/test/optparse/optparse_setup.rb
