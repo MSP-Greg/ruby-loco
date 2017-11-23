@@ -1,17 +1,10 @@
 Patch by MSP-Greg
-Changes to allow tests to pass when run parallel on Appveyor.
-Changes often involve setting timeouts longer to allow disk I/O
+lengtens timeouts for Appveyor parallel testing
 diff --git a/test/ruby/test_file_exhaustive.rb b/test/ruby/test_file_exhaustive.rb
-index 4c5540eb4c..767a0c16b6 100644
+index 4c5540eb4c..e3b59bc34b 100644
 --- a/test/ruby/test_file_exhaustive.rb
 +++ b/test/ruby/test_file_exhaustive.rb
-@@ -1311,12 +1311,14 @@ def test_truncate
-   end
- 
-   def test_flock_exclusive
-+    time_out = !(/mingw|mswin|bccwin/ !~ RUBY_PLATFORM) ? 0.5 : 0.1
-     File.open(regular_file, "r+") do |f|
-       f.flock(File::LOCK_EX)
+@@ -1316,7 +1316,8 @@ def test_flock_exclusive
        assert_separately(["-rtimeout", "-", regular_file], "#{<<~begin}#{<<~"end;"}")
        begin
          open(ARGV[0], "r") do |f|
@@ -21,7 +14,7 @@ index 4c5540eb4c..767a0c16b6 100644
              assert(!f.flock(File::LOCK_SH|File::LOCK_NB))
            end
          end
-@@ -1324,8 +1326,9 @@ def test_flock_exclusive
+@@ -1324,8 +1325,9 @@ def test_flock_exclusive
        assert_separately(["-rtimeout", "-", regular_file], "#{<<~begin}#{<<~"end;"}")
        begin
          open(ARGV[0], "r") do |f|
@@ -32,7 +25,7 @@ index 4c5540eb4c..767a0c16b6 100644
                f.flock(File::LOCK_SH)
              end
            end
-@@ -1342,7 +1345,8 @@ def test_flock_shared
+@@ -1342,7 +1344,8 @@ def test_flock_shared
        assert_separately(["-rtimeout", "-", regular_file], "#{<<~begin}#{<<~"end;"}")
        begin
          open(ARGV[0], "r") do |f|
@@ -42,7 +35,7 @@ index 4c5540eb4c..767a0c16b6 100644
              assert(f.flock(File::LOCK_SH))
            end
          end
-@@ -1351,7 +1355,8 @@ def test_flock_shared
+@@ -1351,7 +1354,8 @@ def test_flock_shared
        begin
          open(ARGV[0], "r+") do |f|
            assert_raise(Timeout::Error) do
