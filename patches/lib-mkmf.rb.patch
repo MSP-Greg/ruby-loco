@@ -1,10 +1,10 @@
 Patch by MSP-Greg
 seemed to help with some parallel build issues
 diff --git a/lib/mkmf.rb b/lib/mkmf.rb
-index 7e40c2d193..5121120f2a 100644
+index 7f53bb4b97..5c7d750612 100644
 --- a/lib/mkmf.rb
 +++ b/lib/mkmf.rb
-@@ -305,16 +305,30 @@ module Logging
+@@ -304,16 +304,30 @@ module Logging
      @postpone = 0
      @quiet = $extmk
  
@@ -39,7 +39,7 @@ index 7e40c2d193..5121120f2a 100644
        log_open
        $stderr.reopen(@log)
        $stdout.reopen(@log)
-@@ -324,17 +338,17 @@ def self::open
+@@ -323,17 +337,17 @@ def self::open
        $stdout.reopen(@orgout)
      end
  
@@ -60,7 +60,7 @@ index 7e40c2d193..5121120f2a 100644
        if @log and not @log.closed?
          @log.flush
          @log.close
-@@ -342,16 +356,28 @@ def self::log_close
+@@ -341,16 +355,28 @@ def self::log_close
        end
      end
  

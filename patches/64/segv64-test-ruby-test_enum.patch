@@ -1,6 +1,9 @@
---- a/test/ruby/test_enum.rb	Fri Mar 31 10:11:34 2017
-+++ b/test/ruby/test_enum.rb	Fri Mar 31 10:14:59 2017
-@@ -589,7 +589,7 @@
+Patch by MSP-Greg
+diff --git a/test/ruby/test_enum.rb b/test/ruby/test_enum.rb
+index 12fc2ee66a..ca22518d2e 100644
+--- a/test/ruby/test_enum.rb
++++ b/test/ruby/test_enum.rb
+@@ -607,7 +607,7 @@ class << o; self; end.class_eval do
          end
        end
        [o, o].sort_by {|x| x }

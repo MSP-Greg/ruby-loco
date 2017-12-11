@@ -2,7 +2,7 @@ Patch by MSP-Greg
 Add shared util.rb file with create_ssl_ctx method
 Removes duplicated code in ftp, imap, & smtp
 diff --git a/test/net/ftp/test_ftp.rb b/test/net/ftp/test_ftp.rb
-index 6f726e1090..76f136c152 100644
+index e044cd4f40..d2760a4865 100644
 --- a/test/net/ftp/test_ftp.rb
 +++ b/test/net/ftp/test_ftp.rb
 @@ -5,6 +5,7 @@
@@ -23,7 +23,7 @@ index 6f726e1090..76f136c152 100644
  
    def setup
      @thread = nil
-@@ -1731,7 +1729,7 @@ def test_tls_with_ca_file
+@@ -1720,7 +1718,7 @@ def test_tls_with_ca_file
            begin
              Net::FTP.new(SERVER_NAME,
                           :port => port,
@@ -32,7 +32,7 @@ index 6f726e1090..76f136c152 100644
            rescue SystemCallError
              skip $!
            end
-@@ -1756,7 +1754,7 @@ def test_tls_post_connection_check
+@@ -1745,7 +1743,7 @@ def test_tls_post_connection_check
            # so the following code should raise a SSLError.
            Net::FTP.new(SERVER_ADDR,
                         :port => port,
@@ -41,7 +41,7 @@ index 6f726e1090..76f136c152 100644
          end
        end
      end
-@@ -1772,14 +1770,7 @@ def test_active_private_data_connection
+@@ -1761,14 +1759,7 @@ def test_active_private_data_connection
            sock.print("220 (test_ftp).\r\n")
            commands.push(sock.gets)
            sock.print("234 AUTH success.\r\n")
@@ -57,7 +57,7 @@ index 6f726e1090..76f136c152 100644
            sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
            sock.sync_close = true
            begin
-@@ -1817,7 +1808,7 @@ def test_active_private_data_connection
+@@ -1806,7 +1797,7 @@ def test_active_private_data_connection
        end
        ftp = Net::FTP.new(SERVER_NAME,
                           port: port,
@@ -66,7 +66,7 @@ index 6f726e1090..76f136c152 100644
                           passive: false)
        begin
          assert_equal("AUTH TLS\r\n", commands.shift)
-@@ -1849,14 +1840,7 @@ def test_passive_private_data_connection
+@@ -1838,14 +1829,7 @@ def test_passive_private_data_connection
            sock.print("220 (test_ftp).\r\n")
            commands.push(sock.gets)
            sock.print("234 AUTH success.\r\n")
@@ -82,7 +82,7 @@ index 6f726e1090..76f136c152 100644
            sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
            sock.sync_close = true
            begin
-@@ -1894,7 +1878,7 @@ def test_passive_private_data_connection
+@@ -1883,7 +1867,7 @@ def test_passive_private_data_connection
        end
        ftp = Net::FTP.new(SERVER_NAME,
                           port: port,
@@ -91,7 +91,7 @@ index 6f726e1090..76f136c152 100644
                           passive: true)
        begin
          assert_equal("AUTH TLS\r\n", commands.shift)
-@@ -1926,14 +1910,7 @@ def test_active_clear_data_connection
+@@ -1915,14 +1899,7 @@ def test_active_clear_data_connection
            sock.print("220 (test_ftp).\r\n")
            commands.push(sock.gets)
            sock.print("234 AUTH success.\r\n")
@@ -107,7 +107,7 @@ index 6f726e1090..76f136c152 100644
            sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
            sock.sync_close = true
            begin
-@@ -1964,7 +1941,7 @@ def test_active_clear_data_connection
+@@ -1953,7 +1930,7 @@ def test_active_clear_data_connection
        end
        ftp = Net::FTP.new(SERVER_NAME,
                           port: port,
@@ -116,7 +116,7 @@ index 6f726e1090..76f136c152 100644
                           private_data_connection: false,
                           passive: false)
        begin
-@@ -1995,14 +1972,7 @@ def test_passive_clear_data_connection
+@@ -1984,14 +1961,7 @@ def test_passive_clear_data_connection
            sock.print("220 (test_ftp).\r\n")
            commands.push(sock.gets)
            sock.print("234 AUTH success.\r\n")
@@ -132,7 +132,7 @@ index 6f726e1090..76f136c152 100644
            sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
            sock.sync_close = true
            begin
-@@ -2033,7 +2003,7 @@ def test_passive_clear_data_connection
+@@ -2022,7 +1992,7 @@ def test_passive_clear_data_connection
        end
        ftp = Net::FTP.new(SERVER_NAME,
                           port: port,
@@ -141,7 +141,7 @@ index 6f726e1090..76f136c152 100644
                           private_data_connection: false,
                           passive: true)
        begin
-@@ -2068,7 +2038,7 @@ def test_tls_connect_timeout
+@@ -2057,7 +2027,7 @@ def test_tls_connect_timeout
          assert_raise(Net::OpenTimeout) do
            Net::FTP.new(SERVER_NAME,
                         port: port,
@@ -150,7 +150,7 @@ index 6f726e1090..76f136c152 100644
                         ssl_handshake_timeout: 0.1)
          end
          @thread.join
-@@ -2087,14 +2057,7 @@ def test_abort_tls
+@@ -2076,14 +2046,7 @@ def test_abort_tls
        sock.print("220 (test_ftp).\r\n")
        commands.push(sock.gets)
        sock.print("234 AUTH success.\r\n")
@@ -166,7 +166,7 @@ index 6f726e1090..76f136c152 100644
        sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
        sock.sync_close = true
        sock.accept
-@@ -2115,7 +2078,7 @@ def test_abort_tls
+@@ -2104,7 +2067,7 @@ def test_abort_tls
        begin
          ftp = Net::FTP.new(SERVER_NAME,
                             port: server.port,
@@ -175,7 +175,7 @@ index 6f726e1090..76f136c152 100644
          assert_equal("AUTH TLS\r\n", commands.shift)
          assert_equal("PBSZ 0\r\n", commands.shift)
          assert_equal("PROT P\r\n", commands.shift)
-@@ -2170,14 +2133,7 @@ def tls_test
+@@ -2159,14 +2122,7 @@ def tls_test
          sock.print("220 (test_ftp).\r\n")
          commands.push(sock.gets)
          sock.print("234 AUTH success.\r\n")
