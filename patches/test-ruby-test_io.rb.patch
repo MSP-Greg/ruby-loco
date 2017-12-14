@@ -2,10 +2,10 @@ Patch by MSP-Greg
 first hunk adjusts timeout for long disk write
 second hunk may lower false failures from test_write_no_garbage when run parallel
 diff --git a/test/ruby/test_io.rb b/test/ruby/test_io.rb
-index a0a574e69d..778e15dda4 100644
+index 009afc3297..f4bd604f88 100644
 --- a/test/ruby/test_io.rb
 +++ b/test/ruby/test_io.rb
-@@ -3359,9 +3359,9 @@ def t.close(unlink_now = false)
+@@ -3363,9 +3363,9 @@ def t.close(unlink_now = false)
          end
          ret
        end
@@ -17,7 +17,7 @@ index a0a574e69d..778e15dda4 100644
            msg = ARGV.shift
            f = open(ARGV[0], "wb")
            f.seek(0xffff_ffff)
-@@ -3646,27 +3646,38 @@ def test_closed_stream_in_rescue
+@@ -3662,27 +3662,38 @@ def test_closed_stream_in_rescue
        end;
      end
  
