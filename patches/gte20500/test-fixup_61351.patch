@@ -1,0 +1,27 @@
+Patch by MSP-Greg
+diff --git a/test/resolv/test_addr.rb b/test/resolv/test_addr.rb
+index 78a28c9633..14ec2651ab 100644
+--- a/test/resolv/test_addr.rb
++++ b/test/resolv/test_addr.rb
+@@ -32,7 +32,7 @@ def test_hosts_by_command
+     Dir.mktmpdir do |dir|
+       Dir.chdir(dir) do
+         hosts = Resolv::Hosts.new("|echo error")
+-        assert_raise(Errno::ENOENT) do
++        assert_raise(Errno::ENOENT, Errno::EINVAL) do
+           hosts.each_name("") {}
+         end
+       end
+diff --git a/test/resolv/test_dns.rb b/test/resolv/test_dns.rb
+index 8236078374..1b44f32807 100644
+--- a/test/resolv/test_dns.rb
++++ b/test/resolv/test_dns.rb
+@@ -182,7 +182,7 @@ def test_invalid_byte_comment
+   def test_resolv_conf_by_command
+     Dir.mktmpdir do |dir|
+       Dir.chdir(dir) do
+-        assert_raise(Errno::ENOENT) do
++        assert_raise(Errno::ENOENT, Errno::EINVAL) do
+           Resolv::DNS::Config.parse_resolv_conf("|echo foo")
+         end
+       end
