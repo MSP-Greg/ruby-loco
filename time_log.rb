@@ -12,7 +12,7 @@ logs.each { |fn|
 }
 sort = ['prepare', 'build', 'package']
 ary.sort_by! { |i| [sort.index(i[0]) || 3, i[0]] }
-file_body = String.new("#{RUBY_DESCRIPTION}\n")
+file_body = +"#{RUBY_DESCRIPTION}\n"
 ary.each { |i|
   file_body << "#{Time.at(i[1]).strftime("%M:%S")} #{i[0]}\n"
 }

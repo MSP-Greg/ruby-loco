@@ -106,9 +106,9 @@ module InstallPost
   # @param dlls [Array<String>] file list
   # @param dest [Array<String>] dest dir for manifest file
   def self.create_manifest(dlls, dest)
-    manifest = String.new("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\n" \
+    manifest = +"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\n" \
                "<assembly xmlns='urn:schemas-microsoft-com:asm.v1' manifestVersion='1.0'>\n" \
-               "  <assemblyIdentity type='win32' name='ruby_builtin_dlls' version='1.0.0.0'/>\n")
+               "  <assemblyIdentity type='win32' name='ruby_builtin_dlls' version='1.0.0.0'/>\n"
     dlls.each { |fn| manifest << "  <file name='#{File.basename(fn)}'/>\n" }
     manifest << "</assembly>\n"
     File.open( File.join(dest, 'ruby_builtin_dlls.manifest'), 'wb') { |f| f << manifest }

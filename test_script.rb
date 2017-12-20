@@ -10,10 +10,10 @@ module TestScript
   def self.run
     logs = Dir.glob("#{ENV['R_NAME']}-*.log")
 
-    warnings_str = String.new
+    warnings_str = +''
     warnings_str << log_warnings( logs.grep(/build\.log\Z/)   )
 
-    results_str = String.new
+    results_str = +''
     t1, sum_test_all = log_test_all( logs.grep(/test-all\.log\Z/)   )
     results_str << t1
     results_str << log_spec(     logs.grep(/test-spec\.log\Z/)  )
@@ -63,7 +63,7 @@ module TestScript
 
   def self.log_warnings(log)
     s = File.binread(log[0]).gsub(/\r/, '')
-    str = String.new
+    str = +''
     s.scan(/^\.\.[^\n]+\n[^\n].+?:\d+:\d+: warning: .+?\^\n/m) { |w|
       str << "#{w}\n"
     }
@@ -197,7 +197,7 @@ module TestScript
 
   def self.generate_test_all(s, results)
     s.gsub!("\r", '')
-    str = ''.dup
+    str = +''
 
     # Find and log parallel failures ands errors
     str << faults_parallel(s, "Failure", "F")
@@ -214,7 +214,7 @@ module TestScript
   end
 
   def self.faults_parallel(log, type, abbrev)
-    str = ''.dup
+    str = +''
     faults = []
     faults = log.scan(/^( *\d+ )([A-Z][^#\n]+#test_[^\n]+? = #{abbrev})/)
     unless  faults.empty?
@@ -228,7 +228,7 @@ module TestScript
   end
   
   def self.faults_final(log, type)
-    str = ''.dup
+    str = +''
     faults = []
     log.scan(/^ *\d+\) #{type}:\n([^\n]+?) \[([^\n]+?):(\d+)\]:\n(.+?)\n\n/m) { |test, file, line, msg|
       file.sub!(/[\S]+?\/test\//, '')
