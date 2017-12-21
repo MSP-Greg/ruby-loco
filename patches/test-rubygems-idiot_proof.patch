@@ -1,0 +1,31 @@
+Patch by MSP-Greg
+diff --git a/lib/rubygems/command.rb b/lib/rubygems/command.rb
+index 3bdca656..c701a359 100644
+--- a/lib/rubygems/command.rb
++++ b/lib/rubygems/command.rb
+@@ -376,7 +376,7 @@ class Gem::Command
+ 
+   def handle_options(args)
+     args = add_extra_args(args)
+-    @options = Marshal.load Marshal.dump @defaults # deep copy
++    @options = @defaults.empty? ? {} : (Marshal.load Marshal.dump @defaults)
+     parser.parse!(args)
+     @options[:args] = args
+   end
+diff --git a/test/rubygems/test_gem_local_remote_options.rb b/test/rubygems/test_gem_local_remote_options.rb
+index 272623be..118f6dc4 100644
+--- a/test/rubygems/test_gem_local_remote_options.rb
++++ b/test/rubygems/test_gem_local_remote_options.rb
+@@ -42,10 +42,10 @@ class TestGemLocalRemoteOptions < Gem::TestCase
+ 
+   def test_clear_sources_option_idiot_proof
+     spec_fetcher
+-
+     @cmd.add_local_remote_options
+     @cmd.handle_options %W[--clear-sources]
+-    assert_equal Gem.default_sources, Gem.sources
++    ary = Gem.sources.dup
++    assert_equal Gem.default_sources, ary
+   end
+ 
+   def test_local_eh
