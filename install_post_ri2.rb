@@ -45,10 +45,10 @@ module InstallPostRI2
   # 2nd element for odd path ruby seen in rake.bat
   # 3rd element for generic "ruby.exe" (e.g. RubyGems update --system)
   CLEAN_INFO = [
-    [ /^@"#{Regexp.escape(BINDIR.gsub("/", "\\"))}\\ruby\.exe"/u, '@%~dp0ruby.exe'],
-    [ /^@"\\ruby#{ENV['SUFFIX']}\\bin\\ruby.exe"/u              , '@%~dp0ruby.exe'],
-    [ /^@"ruby.exe"/u                                           , '@%~dp0ruby.exe'],
-    [ /"#{Regexp.escape(BINDIR)}\/([^ "]+)"/u      , '%~dp0\1'],
+    [ /^@"#{Regexp.escape(BINDIR.gsub("/", "\\"))}\\ruby\.exe"/u, '@"%~dp0ruby.exe"'],
+    [ /^@"\\ruby#{ENV['SUFFIX']}\\bin\\ruby.exe"/u              , '@"%~dp0ruby.exe"'],
+    [ /^@"ruby.exe"/u                                           , '@"%~dp0ruby.exe"'],
+    [ /"#{Regexp.escape(BINDIR)}\/([^ "]+)"/u      , '"%~dp0\1"'],
     [ /^#!(\/usr\/bin\/env|\/mingw#{ARCH}\/bin\/)/u, '#!'     ],
     [ /\r/, '']
   ]
