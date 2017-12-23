@@ -31,8 +31,9 @@ module InstallGemUpdate
         Gem::GemRunner.new.run(%w[install did_you_mean:1.0.3] + suffix)
       end
       Gem::GemRunner.new.run %w[cleanup]
-      Gem::GemRunner.new.run(%w[install bundler] + suffix)
+#      Gem::GemRunner.new.run(%w[install bundler] + suffix)
     end
+    Gem::GemRunner.new.run(%w[install bundler] + suffix)
   end
 
 end
