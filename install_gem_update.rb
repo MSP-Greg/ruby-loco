@@ -7,9 +7,12 @@
 module InstallGemUpdate
 
   def self.run
-    update_gems
     # Change build name to ruby -v
-    `appveyor UpdateBuild -Message \"#{RUBY_DESCRIPTION}\"` if ENV['APPVEYOR']
+    if ENV['APPVEYOR']
+      puts "appveyor UpdateBuild -Message \"#{RUBY_DESCRIPTION}\""
+      `appveyor UpdateBuild -Message \"#{RUBY_DESCRIPTION}\"`
+    end
+    update_gems
   end
 
   private

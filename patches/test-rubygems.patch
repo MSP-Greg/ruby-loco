@@ -5,7 +5,7 @@ diff --git a/lib/rubygems/test_case.rb b/lib/rubygems/test_case.rb
 index 82afb8a068..16804c62ca 100644
 --- a/lib/rubygems/test_case.rb
 +++ b/lib/rubygems/test_case.rb
-@@ -1254,8 +1254,14 @@ def self.rubybin
+@@ -1260,8 +1260,14 @@ def self.rubybin
    end
  
    @@ruby = rubybin
