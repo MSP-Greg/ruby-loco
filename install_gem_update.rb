@@ -8,11 +8,8 @@ module InstallGemUpdate
 
   def self.run
     update_gems
-
     # Change build name to ruby -v
-    if Dir.exist?('C:/Users/appveyor') && Dir.exist?('C:/Program Files/AppVeyor/BuildAgent')
-      `appveyor UpdateBuild -Message \"#{RUBY_DESCRIPTION}\"`
-    end
+    `appveyor UpdateBuild -Message \"#{RUBY_DESCRIPTION}\"` if ENV['APPVEYOR']
   end
 
   private
@@ -31,9 +28,11 @@ module InstallGemUpdate
         Gem::GemRunner.new.run(%w[install did_you_mean:1.0.3] + suffix)
       end
       Gem::GemRunner.new.run %w[cleanup]
-#      Gem::GemRunner.new.run(%w[install bundler] + suffix)
+      Gem::GemRunner.new.run(%w[install bundler] + suffix)
+    else
+      Gem::GemRunner.new.run(%w[install bundler] + suffix)
     end
-    Gem::GemRunner.new.run(%w[install bundler] + suffix)
+
   end
 
 end
