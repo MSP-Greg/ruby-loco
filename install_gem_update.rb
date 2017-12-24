@@ -6,10 +6,12 @@
 #
 module InstallGemUpdate
 
+  COL_WID = 36
+  COL_SPACE = ' ' * COL_WID
+
   def self.run
     # Change build name to ruby -v
     if ENV['APPVEYOR']
-      puts "appveyor UpdateBuild -Message \"#{RUBY_DESCRIPTION}\""
       `appveyor UpdateBuild -Message \"#{RUBY_DESCRIPTION}\"`
     end
     update_gems
