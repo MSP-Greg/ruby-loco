@@ -38,7 +38,7 @@ module Prepare
       copy_spec if @@r_vers_int < 20500
       `attrib -r %REPO_RUBY%\\spec\\*.* /s /d`
       apply_patches
-      clean_repo unless ENV['AV_BUILD'] == 'true'
+      clean_repo unless ENV['AV_BUILD'] == 'yes'
       unicode_file("CaseFolding.txt")
       add_gems
     end
@@ -121,7 +121,6 @@ module Prepare
       Dir.chdir('src/ruby') { |dir|
         # collect patches and apply
         patches = Dir["#{__dir__}/patches/{[^_],#{@@arch}/[^_]}*.patch"]
-        # 
         patches.concat(vers_patches)
         patches.sort_by! { |p| File.basename(p) }
         patches.each { |p|

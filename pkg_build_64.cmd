@@ -102,6 +102,8 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @echo ——————————————————————————————————————————————————————————————————————————————— Build ^& Test Times
 @call time_log_64.cmd
 
+@if "%AV_BUILD%" NEQ "true" ( ruby test_script.rb )
+
 @rem --- rename readline.rb_ back to readline.rb_
 @attrib -r %PKG_RUBY%/lib/ruby/site_ruby/readline.rb_
 @rem --- rename seems to only work with backslashes

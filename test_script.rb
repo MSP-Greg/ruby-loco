@@ -6,8 +6,11 @@ module TestScript
   @@stripe_len = 65
   @@puts_len   = 79
   @@failures   = 0
+  @@is_av      = ( ENV['AV_BUILD'] == 'true' )     # Appveyor build vs local
   
-  def self.run
+  class << self
+  
+  def run
     logs = Dir.glob("#{ENV['R_NAME']}-*.log")
 
     warnings_str = +''
@@ -31,9 +34,18 @@ module TestScript
 
     puts "#{'—' * @@puts_len} Test Results"
     puts results_str
-    File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-TEST_RESULTS.log"), results_str)
+    File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-Summary - Test Results.log"), results_str)
+
+    unless sum_test_all.empty?
+      File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-Summary - test-all.log"), sum_test_all)
+    end
+    unless warnings_str.empty?
+      File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-Summary - Build Warnings.log"), sum_test_all)
+    end
+
     zip_save
-    if ENV['AV_BUILD'] == "true"
+
+    if @@is_av
       `appveyor AddMessage -Message \"Summary - All Tests\" -Details \"#{results_str}\"`
 
       unless sum_test_all.empty?
@@ -43,17 +55,6 @@ module TestScript
       unless warnings_str.empty?
       `appveyor AddMessage -Message \"Build Warnings\" -Details \"#{warnings_str}\"`
       end
-      push_artifacts
-    else
-      # Below is for local testing
-      puts "\nappveyor AddMessage -Message \"Summary - All Tests\" -Details\n#{results_str}"
-
-      unless sum_test_all.empty?
-        puts "appveyor AddMessage -Message \"Summary - test-all\" -Details\n#{sum_test_all}"
-      end
-      unless warnings_str.empty?
-        puts "appveyor AddMessage -Message \"Build Warnings\" -Details\n#{warnings_str}"
-      end
     end
 
     exit @@failures
@@ -61,8 +62,8 @@ module TestScript
 
   private
 
-  def self.log_warnings(log)
-    s = File.binread(log[0]).gsub(/\r/, '')
+  def log_warnings(log)
+    s = File.binread(log[0]).gsub(/\r/, '') unless log.empty?
     str = +''
     s.scan(/^\.\.[^\n]+\n[^\n].+?:\d+:\d+: warning: .+?\^\n/m) { |w|
       str << "#{w}\n"
@@ -70,7 +71,7 @@ module TestScript
     str
   end
 
-  def self.log_test_all(log)
+  def log_test_all(log)
     # 16538 tests, 2190218 assertions, 1 failures, 0 errors, 234 skips
     if log.length == 1
       if (s = File.binread(log[0])).length >= 256
@@ -91,11 +92,12 @@ module TestScript
         ["test-all   UNKNOWN see log\n\n", '']
       end
     else
-      ['', '']
+      @@failures += 1
+      ["test-all   log not found\n\n", '']
     end
   end
 
-  def self.log_spec(log)
+  def log_spec(log)
     # 3551 files, 26041 examples, 203539 expectations, 0 failures, 0 errors, 0 tagged
     if log.length == 1
       if (s = File.binread(log[0])).length >= 144
@@ -113,11 +115,12 @@ module TestScript
         "test-spec  UNKNOWN see log\n"
       end
     else
-      ''
+      @@failures += 1
+      "test-spec  log not found\n"
     end
   end
 
-  def self.log_mspec(log)
+  def log_mspec(log)
     # 3551 files, 26041 examples, 203539 expectations, 0 failures, 0 errors, 0 tagged
     if log.length == 1
       if (s = File.binread(log[0])).length >= 144
@@ -135,11 +138,12 @@ module TestScript
         "mspec      UNKNOWN see log\n\n"
       end
     else
-      ''
+      @@failures += 1
+      "mspec      log not found\n\n"
     end
   end
 
-  def self.log_basic(log)
+  def log_basic(log)
     # test succeeded
     if log.length == 1
       if (s = File.binread(log[0])).length >= 192
@@ -154,11 +158,12 @@ module TestScript
         "test-basic test UNKNOWN\n"
       end
     else
-      ''
+      @@failures += 1
+      "test-basic test log not found\n"
     end
   end
 
-  def self.log_btest(log)
+  def log_btest(log)
     # PASS all 1194 tests
     if log.length == 1
       if (s = File.binread(log[0])).length >= 192
@@ -174,11 +179,12 @@ module TestScript
         "btest      UNKNOWN\n"
       end
     else
-      ''
+      @@failures += 1
+      "btest      log not found\n"
     end
   end
 
-  def self.command_line
+  def command_line
     begin
       bundle_v = "bundle version  #{`bundle version`}"
     rescue
@@ -195,7 +201,7 @@ module TestScript
     bundle_v + rake_v
   end
 
-  def self.generate_test_all(s, results)
+  def generate_test_all(s, results)
     s.gsub!("\r", '')
     str = +''
 
@@ -213,7 +219,7 @@ module TestScript
     str
   end
 
-  def self.faults_parallel(log, type, abbrev)
+  def faults_parallel(log, type, abbrev)
     str = +''
     faults = []
     faults = log.scan(/^( *\d+ )([A-Z][^#\n]+#test_[^\n]+? = #{abbrev})/)
@@ -227,7 +233,7 @@ module TestScript
     str
   end
   
-  def self.faults_final(log, type)
+  def faults_final(log, type)
     str = +''
     faults = []
     log.scan(/^ *\d+\) #{type}:\n([^\n]+?) \[([^\n]+?):(\d+)\]:\n(.+?)\n\n/m) { |test, file, line, msg|
@@ -250,19 +256,23 @@ module TestScript
     str
   end
   
-  def self.zip_save
+  def zip_save
     puts "#{'—' * @@puts_len} Saving Artifacts"
+    
+    push_artifacts if @@is_av
+    
     fn_log = "zlogs_#{ENV['R_BRANCH']}_#{ENV['R_DATE']}_#{ENV['R_SVN']}.7z"
 
     `attrib +r #{ENV['R_NAME']}-*.log`
     `#{ENV['7zip']} a #{fn_log} .\\*.log`
     puts "Saved #{fn_log}"
-    if ENV['AV_BUILD'] == "true"
+    puts
+    if @@is_av
       `appveyor PushArtifact #{fn_log} -DeploymentName \"Build and test logs\"`
     end
   end
   
-  def self.push_artifacts
+  def push_artifacts
     z_files = "#{ENV['PKG_RUBY']}\\* " \
               ".\\pkg\\#{ENV['R_NAME']}\\.BUILDINFO " \
               ".\\pkg\\#{ENV['R_NAME']}\\.PKGINFO " \
@@ -280,6 +290,8 @@ module TestScript
       `appveyor PushArtifact ruby_#{ENV['R_BRANCH']}_bad.7z -DeploymentName \"Ruby Trunk Build (bad)\"`
     end
   end
+  
+  end #  class << self
 end
 
 TestScript.run
