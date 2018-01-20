@@ -1,6 +1,6 @@
 # Patch by MSP-Greg, MinGW fix for 61950
 diff --git a/spec/ruby/core/file/chmod_spec.rb b/spec/ruby/core/file/chmod_spec.rb
-index f42dea6585..a51b6e5ccd 100644
+index f42dea6585..c4bbf667c0 100644
 --- a/spec/ruby/core/file/chmod_spec.rb
 +++ b/spec/ruby/core/file/chmod_spec.rb
 @@ -1,5 +1,19 @@
@@ -10,14 +10,14 @@ index f42dea6585..a51b6e5ccd 100644
 +FILE_VALS = 
 +  if PlatformGuard.new(:netbsd).match?
 +    # -256, -2 and -1 raise Errno::EFTYPE on NetBSD
-+    [-2**30, -2**16,               -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 2**8, 2**16, 2**30]
++    [-2**30, -2**16,              -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 256, 2**16, 2**30]
 +  elsif PlatformGuard.new(:freebsd, :openbsd, :darwin).match?
 +    # -256, -2 and -1 raise Errno::EINVAL on OpenBSD
-+    [                              -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 2**8]
++    [                             -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 256]
 +  elsif PlatformGuard.new(:mingw).match?
-+    [        -2**15, -2**8, -2, -1,-0.5, 0, 1, 2, 5.555575, 16, 32, 64, 2**8, 2**15]
++    [        -2**15, -256, -2, -1,-0.5, 0, 1, 2, 5.555575, 16, 32, 64, 256, 2**15]
 +  else
-+    [-2**30, -2**16, -2**8, -2, -1,-0.5, 0, 1, 2, 5.555575, 16, 32, 64, 2**8, 2**16, 2**30]
++    [-2**30, -2**16, -256, -2, -1,-0.5, 0, 1, 2, 5.555575, 16, 32, 64, 256, 2**16, 2**30]
 +  end
 +
  describe "File#chmod" do
@@ -29,8 +29,8 @@ index f42dea6585..a51b6e5ccd 100644
  
 -  platform_is_not :freebsd, :netbsd, :openbsd, :darwin do
 -    it "always succeeds with any numeric values" do
--      vals = [-2**30, -2**16, -2**8, -2, -1,
--        -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 2**8, 2**16, 2**30]
+-      vals = [-2**30, -2**16, -256, -2, -1,
+-        -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 256, 2**16, 2**30]
 -      vals.each { |v|
 -        lambda { @file.chmod(v) }.should_not raise_error
 -      }
@@ -40,8 +40,8 @@ index f42dea6585..a51b6e5ccd 100644
 -  # -256, -2 and -1 raise Errno::EFTYPE on NetBSD
 -  platform_is :netbsd do
 -    it "always succeeds with any numeric values" do
--      vals = [-2**30, -2**16, #-2**8, -2, -1,
--        -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 2**8, 2**16, 2**30]
+-      vals = [-2**30, -2**16, #-256, -2, -1,
+-        -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 256, 2**16, 2**30]
 -      vals.each { |v|
 -        lambda { @file.chmod(v) }.should_not raise_error
 -      }
@@ -51,8 +51,8 @@ index f42dea6585..a51b6e5ccd 100644
 -  # -256, -2 and -1 raise Errno::EINVAL on OpenBSD
 -  platform_is :freebsd, :openbsd, :darwin do
 -    it "always succeeds with any numeric values" do
--      vals = [#-2**30, -2**16, -2**8, -2, -1,
--        -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 2**8]#, 2**16, 2**30
+-      vals = [#-2**30, -2**16, -256, -2, -1,
+-        -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 256]#, 2**16, 2**30
 -      vals.each { |v|
 -        lambda { @file.chmod(v) }.should_not raise_error
 -      }
@@ -70,8 +70,8 @@ index f42dea6585..a51b6e5ccd 100644
  
 -  platform_is_not :freebsd, :netbsd, :openbsd, :darwin do
 -    it "always succeeds with any numeric values" do
--      vals = [-2**30, -2**16, -2**8, -2, -1,
--        -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 2**8, 2**16, 2**30]
+-      vals = [-2**30, -2**16, -256, -2, -1,
+-        -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 256, 2**16, 2**30]
 -      vals.each { |v|
 -        lambda { File.chmod(v, @file) }.should_not raise_error
 -      }
@@ -81,8 +81,8 @@ index f42dea6585..a51b6e5ccd 100644
 -  # -256, -2 and -1 raise Errno::EFTYPE on NetBSD
 -  platform_is :netbsd do
 -    it "always succeeds with any numeric values" do
--      vals = [-2**30, -2**16, #-2**8, -2, -1,
--        -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 2**8, 2**16, 2**30]
+-      vals = [-2**30, -2**16, #-256, -2, -1,
+-        -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 256, 2**16, 2**30]
 -      vals.each { |v|
 -        lambda { File.chmod(v, @file) }.should_not raise_error
 -      }
@@ -95,7 +95,7 @@ index f42dea6585..a51b6e5ccd 100644
  
    platform_is :darwin do
 diff --git a/spec/ruby/core/file/umask_spec.rb b/spec/ruby/core/file/umask_spec.rb
-index 53a07b6a54..07678b0717 100644
+index 53a07b6a54..4dbd36e2fa 100644
 --- a/spec/ruby/core/file/umask_spec.rb
 +++ b/spec/ruby/core/file/umask_spec.rb
 @@ -1,5 +1,19 @@
@@ -105,46 +105,29 @@ index 53a07b6a54..07678b0717 100644
 +FILE_VALS = 
 +  if PlatformGuard.new(:netbsd).match?
 +    # -256, -2 and -1 raise Errno::EFTYPE on NetBSD
-+    [-2**30, -2**16,               -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 2**8, 2**16, 2**30]
++    [-2**30, -2**16,              -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 256, 2**16, 2**30]
 +  elsif PlatformGuard.new(:freebsd, :openbsd, :darwin).match?
 +    # -256, -2 and -1 raise Errno::EINVAL on OpenBSD
-+    [                              -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 2**8]
++    [                             -0.5, 0, 1, 2, 5.555575, 16, 32, 64, 256]
 +  elsif PlatformGuard.new(:mingw).match?
-+    [        -2**15, -2**8, -2, -1,-0.5, 0, 1, 2, 5.555575, 16, 32, 64, 2**8, 2**15]
++    [        -2**15, -256, -2, -1,-0.5, 0, 1, 2, 5.555575, 16, 32, 64, 256, 2**15]
 +  else
-+    [-2**30, -2**16, -2**8, -2, -1,-0.5, 0, 1, 2, 5.555575, 16, 32, 64, 2**8, 2**16, 2**30]
++    [-2**30, -2**16, -256, -2, -1,-0.5, 0, 1, 2, 5.555575, 16, 32, 64, 256, 2**16, 2**30]
 +  end
 +
  describe "File.umask" do
    before :each do
      @orig_umask = File.umask
-@@ -30,31 +44,10 @@
+@@ -30,25 +44,13 @@
      end
    end
  
 -  platform_is_not :freebsd, :darwin do
 -    it "always succeeds with any integer values" do
--      vals = [-2**30, -2**16, -2**8, -2,
--              -1.5, -1, 0.5, 0, 1, 2, 7.77777, 16, 32, 64, 2**8, 2**16, 2**30]
+-      vals = [-2**30, -2**16, -256, -2,
+-              -1.5, -1, 0.5, 0, 1, 2, 7.77777, 16, 32, 64, 256, 2**16, 2**30]
 -      vals.each { |v|
 -        lambda { File.umask(v) }.should_not raise_error
--      }
--    end
--  end
--
--  platform_is :freebsd, :darwin do
--    it "always succeeds with any integer values" do
--      vals = [-2**8, -2,
--              -1.5, -1, 0.5, 0, 1, 2, 7.77777, 16, 32, 64, 2**8]
--      vals.each { |v|
--        lambda { File.umask(v) }.should_not raise_error
--      }
--    end
--
--    it "fails with invalid values" do
--      vals = [-2**30, -2**16, 2**16, 2**30]
--      vals.each { |v|
--        lambda { File.chmod(v, @file) }.should raise_error(RangeError)
 -      }
 -    end
 +  it "always succeeds with any integer values" do
@@ -153,4 +136,15 @@ index 53a07b6a54..07678b0717 100644
 +    }
    end
  
-   it "raises ArgumentError when more than one argument is provided" do
+   platform_is :freebsd, :darwin do
+-    it "always succeeds with any integer values" do
+-      vals = [-256, -2,
+-              -1.5, -1, 0.5, 0, 1, 2, 7.77777, 16, 32, 64, 256]
+-      vals.each { |v|
+-        lambda { File.umask(v) }.should_not raise_error
+-      }
+-    end
+-
+     it "fails with invalid values" do
+       vals = [-2**30, -2**16, 2**16, 2**30]
+       vals.each { |v|
