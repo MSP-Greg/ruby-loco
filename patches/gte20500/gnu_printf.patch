@@ -1,5 +1,5 @@
 Patch by MSP-Greg
-diff --git a/configure.ac b/configure.ac
+diff --git a/configure.in b/configure.in
 index 82c69993a3..2b18659808 100644
 --- a/configure.ac
 +++ b/configure.ac
