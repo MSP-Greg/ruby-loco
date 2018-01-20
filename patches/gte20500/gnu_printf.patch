@@ -21,7 +21,7 @@ diff --git a/include/ruby/defines.h b/include/ruby/defines.h
 index a4da7ea014..6af474c8cd 100644
 --- a/include/ruby/defines.h
 +++ b/include/ruby/defines.h
-@@ -94,8 +94,13 @@ extern "C" {
+@@ -90,8 +90,13 @@ extern "C" {
  #endif /* __GNUC__ >= 3 */
  
  #ifdef __GNUC__
