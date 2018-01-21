@@ -212,11 +212,7 @@ module TestScript
     # Find and log final failures ands errors
     str << faults_final(s, "Failure")
     str << faults_final(s, "Error")
-    unless str.empty?
-      str = "#{RUBY_DESCRIPTION}\n#{results}\n\n#{str}" unless str.empty?
-      File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-TEST_ALL_SUMMARY.log"), str)
-    end
-    str
+    str.empty? ? str : "#{RUBY_DESCRIPTION}\n#{results}\n\n#{str}"
   end
 
   def faults_parallel(log, type, abbrev)
