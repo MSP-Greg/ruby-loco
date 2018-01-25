@@ -14,6 +14,7 @@ temp/**
 **/*.xz
 **/*.7z
 **/*.7z.sig
+**/*.7z.zip
 
 pkg_set_env.cmd
 pkg_test*.cmd

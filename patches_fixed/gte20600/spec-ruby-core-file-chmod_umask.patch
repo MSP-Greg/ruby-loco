@@ -1,4 +1,4 @@
-# Patch by MSP-Greg, MinGW fix for 61950
+# Patch by MSP-Greg, MinGW fix for 61950, not needed after 62037
 diff --git a/spec/ruby/core/file/chmod_spec.rb b/spec/ruby/core/file/chmod_spec.rb
 index f42dea6585..93c64e6b23 100644
 --- a/spec/ruby/core/file/chmod_spec.rb
