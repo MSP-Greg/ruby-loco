@@ -180,8 +180,8 @@ module Prepare
       #`xcopy /s /q /y %REPO_SPEC%   %REPO_RUBY%\\spec\\ruby\\`
       #puts "copying mspec folder..."
       #`xcopy /s /q /y %REPO_MSPEC%  %REPO_RUBY%\\spec\\mspec\\`
-      puts "xcopy /s /q /y #{__dir__.gsub(/\//, '\\')}\\spec  #{__dir__.gsub(/\//, '\\')}\\src\ruby\\spec\\"
-      `xcopy /s /q /y #{__dir__.gsub(/\//, '\\')}\\spec  #{__dir__.gsub(/\//, '\\')}\\src\ruby\\spec\\`
+      puts "xcopy /s /q /y #{__dir__.gsub(/\//, '\\')}\\spec  #{__dir__.gsub(/\//, '\\')}\\src\\ruby\\spec\\"
+      `xcopy /s /q /y #{__dir__.gsub(/\//, '\\')}\\spec  #{__dir__.gsub(/\//, '\\')}\\src\\ruby\\spec\\`
     end
 
     # Adds version specific patches to patches array
