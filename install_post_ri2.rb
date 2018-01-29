@@ -115,9 +115,9 @@ module InstallPostRI2
     ri2_vers = ''
     commit = ''
     Dir.chdir(REPO_RI2) {
-      ri2_vers = File.binread( File.join('packages', 'rubyinstaller', 'Rakefile') )[/^[ \t]*ruby_packages[ \t]*=[ \t]*%w\[([^\s\]]+)/,1]
       commit   = `#{ENV['GIT']} rev-parse HEAD`[0,7]
-      ri2_vers = `#{ENV['GIT']} tag --list "rubyinstaller-[0-9]*"`[/^rubyinstaller-(\S+)\Z/, 1] unless ri2_vers
+      ri2_vers = `#{ENV['GIT']} tag --list "rubyinstaller-[0-9]*"`[/^rubyinstaller-(\S+)\Z/, 1] ||
+        File.binread( File.join('packages', 'rubyinstaller', 'Rakefile') )[/^[ \t]*ruby_packages[ \t]*=[ \t]*%w\[([^\s\]]+)/,1]
     }
     puts "#{'creating package_version.rb:'.ljust(COL_WID)}#{ri2_vers}  commit #{commit}"
     puts "#{COL_SPACE}#{commit}"
