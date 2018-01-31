@@ -12,7 +12,7 @@ init:
   # Minimize path so bash conflicts don't arise
   - set base_path=C:\ruby24-x64\bin;C:\Program Files\7-Zip;C:\Program Files\AppVeyor\BuildAgent;C:\Program Files\Git\cmd;C:\Windows\system32;C:\Program Files;C:\Windows
 
-  - git clone -q --depth=5  --no-tags --branch=master https://github.com/oneclick/rubyinstaller2.git    C:\ri2
+  - git clone -q --depth=5  --branch=master https://github.com/oneclick/rubyinstaller2.git    C:\ri2
   - git clone -q --depth=5  --no-tags --branch=master https://github.com/ConnorAtherton/rb-readline.git C:\rb-readline
   - set PATH=%base_path%
 
