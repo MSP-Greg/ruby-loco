@@ -13,8 +13,16 @@ module TestScript
   def run
     logs = Dir.glob("#{ENV['R_NAME']}-*.log")
 
-    warnings_str = +''
-    warnings_str << log_warnings( logs.grep(/build\.log\Z/)   )
+    # build did not start
+    t = logs.grep(/build\.log\Z/)
+    return if t.empty?
+
+    warnings_str = +''    
+    warnings_str << log_warnings(t)
+
+    # package did not start
+    t = logs.grep(/package\.log\Z/)
+    return if t.empty?
 
     results_str = +''
     t1, sum_test_all = log_test_all( logs.grep(/test-all\.log\Z/)   )
