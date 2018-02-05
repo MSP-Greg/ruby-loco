@@ -64,7 +64,7 @@ module TestScript
 
   def log_warnings(log)
     str = +''
-    if (s = File.binread(log[0]))
+    if !log.empty? && (s = File.binread(log[0]))
       s.gsub!(/\r/, '')
       s.scan(/^\.\.[^\n]+\n[^\n].+?:\d+:\d+: warning: .+?\^\n/m) { |w|
         str << "#{w}\n"
