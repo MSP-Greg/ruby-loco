@@ -51,7 +51,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @echo test-all
 
 @if "%R_VERS_2%" GEQ "25" (
-  set RUBY_FORCE_TEST_JIT=1
+  rem set RUBY_FORCE_TEST_JIT=1
   make.exe test-all "TESTOPTS=-a -j%M_JOBS% --job-status=normal --show-skip --retry --subprocess-timeout-scale=1.5" > %LOG_PATH_NAME%-test-all.log 2>&1
 ) else (
   make.exe test-all "TESTOPTS=-v --show-skip --retry" > %LOG_PATH_NAME%-test-all.log 2>&1
