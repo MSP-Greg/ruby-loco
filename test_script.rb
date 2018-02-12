@@ -244,7 +244,7 @@ module TestScript
     faults = []
     log.scan(/^ *\d+\) #{type}:\n([^\n]+?) \[([^\n]+?):(\d+)\]:\n(.+?)\n\n/m) { |test, file, line, msg|
       file.sub!(/[\S]+?\/test\//, '')
-      faults << [test, file, line, msg]
+      faults << [test, file, line.to_i, msg]
     }
     unless faults.empty?
       hsh_faults = faults.group_by { |f| f[1] } # group by file
