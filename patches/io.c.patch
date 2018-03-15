@@ -1,18 +1,23 @@
-Patch from Issue 13546
+Patch by MSP-Greg
+From Issue 13546
 See https://bugs.ruby-lang.org/issues/13546
 diff --git a/io.c b/io.c
-index 0f6afb7bc4..3e8cdad75f 100644
+index 4e071c93b6..3151bce5ce 100644
 --- a/io.c
 +++ b/io.c
-@@ -635,7 +635,11 @@ void
- rb_io_check_closed(rb_io_t *fptr)
+@@ -613,9 +613,15 @@ static const char closed_stream[] = "closed stream";
+ static void
+ io_fd_check_closed(int fd)
  {
-     rb_io_check_initialized(fptr);
 +#ifdef WIN32
-+    if ((fptr->fd < 0) && (fptr->fd != -2) ) {
++    if ((fd < 0) && (fd != -2)) {
++	rb_raise(rb_eIOError, closed_stream);
++    }
 +#else
-     if (fptr->fd < 0) {
-+#endif
+     if (fd < 0) {
  	rb_raise(rb_eIOError, closed_stream);
      }
++#endif
  }
+ 
+ void
