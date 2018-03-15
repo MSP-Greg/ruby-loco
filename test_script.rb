@@ -17,14 +17,14 @@ module TestScript
     t = logs.grep(/build\.log\Z/)
     return if t.empty?
 
-    warnings_str = +''    
+    warnings_str = ''.dup
     warnings_str << log_warnings(t)
 
     # package did not start
     t = logs.grep(/package\.log\Z/)
     return if t.empty?
 
-    results_str = +''
+    results_str = ''.dup
     t1, sum_test_all = log_test_all( logs.grep(/test-all\.log\Z/)   )
     results_str << t1
     results_str << log_spec(     logs.grep(/test-spec\.log\Z/)  )
