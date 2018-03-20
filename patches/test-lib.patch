@@ -4,7 +4,7 @@ a) turns on verbose
 b) adjusts assertions count so that tests, regardless of manner run, show similar results.
 c) adds assertion total by test to each line of output
 diff --git a/test/lib/minitest/unit.rb b/test/lib/minitest/unit.rb
-index 89b6a8eaf4..7b8c8ba669 100644
+index aa9a09f049..243052dc3a 100644
 --- a/test/lib/minitest/unit.rb
 +++ b/test/lib/minitest/unit.rb
 @@ -3,7 +3,7 @@
@@ -99,8 +99,8 @@ index 89b6a8eaf4..7b8c8ba669 100644
 +        end
          $stdout.flush
  
-         leakchecker.check("#{inst.class}\##{inst.__name__}")
-@@ -961,7 +985,7 @@ def _run_suite suite, type
+         unless RubyVM::MJIT.enabled? # compiler process is wrongly considered as leaked
+@@ -963,7 +987,7 @@ def _run_suite suite, type
          inst._assertions
        }
  
@@ -109,7 +109,7 @@ index 89b6a8eaf4..7b8c8ba669 100644
      end
  
      ##
-@@ -1001,7 +1025,7 @@ def puke klass, meth, e
+@@ -1003,7 +1027,7 @@ def puke klass, meth, e
        e = case e
            when MiniTest::Skip then
              @skips += 1
@@ -118,7 +118,7 @@ index 89b6a8eaf4..7b8c8ba669 100644
              "Skipped:\n#{klass}##{meth} [#{location e}]:\n#{e.message}\n"
            when MiniTest::Assertion then
              @failures += 1
-@@ -1019,6 +1043,7 @@ def initialize # :nodoc:
+@@ -1021,6 +1045,7 @@ def initialize # :nodoc:
        @report = []
        @errors = @failures = @skips = 0
        @verbose = false
@@ -126,7 +126,7 @@ index 89b6a8eaf4..7b8c8ba669 100644
        @mutex = Thread::Mutex.new
        @info_signal = Signal.list['INFO']
        @repeat_count = nil
-@@ -1053,6 +1078,11 @@ def process_args args = [] # :nodoc:
+@@ -1055,6 +1080,11 @@ def process_args args = [] # :nodoc:
            options[:verbose] = true
          end
  
@@ -138,7 +138,7 @@ index 89b6a8eaf4..7b8c8ba669 100644
          opts.on '-n', '--name PATTERN', "Filter test names on pattern (e.g. /foo/)" do |a|
            options[:filter] = a
          end
-@@ -1070,6 +1100,8 @@ def process_args args = [] # :nodoc:
+@@ -1072,6 +1102,8 @@ def process_args args = [] # :nodoc:
        srand options[:seed]
  
        self.verbose = options[:verbose]
@@ -148,7 +148,7 @@ index 89b6a8eaf4..7b8c8ba669 100644
  
        options
 diff --git a/test/lib/test/unit.rb b/test/lib/test/unit.rb
-index 761fe92df8..f2336637f2 100644
+index 51c8960c52..498293d126 100644
 --- a/test/lib/test/unit.rb
 +++ b/test/lib/test/unit.rb
 @@ -3,10 +3,10 @@
@@ -212,8 +212,8 @@ index 761fe92df8..f2336637f2 100644
              end
            end
            unless @warnings.empty?
-@@ -582,7 +593,7 @@ def setup_options(opts, options)
-       private
+@@ -581,7 +592,7 @@ def setup_options(opts, options)
+ 
        def _run_suites(suites, type)
          result = super
 -        report.reject!{|r| r.start_with? "Skipped:" } if @options[:hide_skip]
@@ -221,7 +221,7 @@ index 761fe92df8..f2336637f2 100644
          report.sort_by!{|r| r.start_with?("Skipped:") ? 0 : \
                             (r.start_with?("Failure:") ? 1 : 2) }
          failed(nil)
-@@ -696,6 +707,7 @@ def output
+@@ -695,6 +706,7 @@ def output
        end
  
        def _prepare_run(suites, type)
@@ -229,7 +229,7 @@ index 761fe92df8..f2336637f2 100644
          options[:job_status] ||= :replace if @tty && !@verbose
          case options[:color]
          when :always
-@@ -1085,13 +1097,17 @@ def puke klass, meth, e
+@@ -1084,13 +1096,17 @@ def puke klass, meth, e
          # TODO:
          #   this overriding is for minitest feature that skip messages are
          #   hidden when not verbose (-v), note this is temporally.
@@ -254,7 +254,7 @@ index 761fe92df8..f2336637f2 100644
      end
  
 diff --git a/test/lib/tracepointchecker.rb b/test/lib/tracepointchecker.rb
-index 447a63bc1e..4dc812aa71 100644
+index 47822ecef5..a3ec586103 100644
 --- a/test/lib/tracepointchecker.rb
 +++ b/test/lib/tracepointchecker.rb
 @@ -1,4 +1,9 @@
@@ -268,12 +268,13 @@ index 447a63bc1e..4dc812aa71 100644
    STATE = {
      count: 0,
 diff --git a/test/lib/zombie_hunter.rb b/test/lib/zombie_hunter.rb
-index 2b81e396ac..cb15acb95c 100644
+index ea94844b53..79b2eb26df 100644
 --- a/test/lib/zombie_hunter.rb
 +++ b/test/lib/zombie_hunter.rb
-@@ -1,4 +1,9 @@
- # frozen_string_literal: true
-+
+@@ -3,6 +3,10 @@
+ # There might be compiler processes executed by MJIT
+ return if RubyVM::MJIT.enabled?
+ 
 +# The assertions called in after_teardown are offset in minitest/unit.rb
 +# so that assertions counts with and with this are the same.  If the count
 +# changes, please adjust the code in unit.rb, search for zombie
@@ -282,7 +283,7 @@ index 2b81e396ac..cb15acb95c 100644
    def after_teardown
      super
 diff --git a/test/runner.rb b/test/runner.rb
-index d8b44644f7..5e29db7f1a 100644
+index d8b44644f7..a233e68e09 100644
 --- a/test/runner.rb
 +++ b/test/runner.rb
 @@ -10,7 +10,7 @@
