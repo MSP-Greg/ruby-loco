@@ -4,7 +4,7 @@ SETLOCAL
 @PATH=C:\msys64\usr\bin;C:\ruby24-x64\bin;C:\Program Files\7-Zip;C:\Program Files\AppVeyor\BuildAgent;C:\Program Files\Git\cmd;C:\Windows\system32;C:\Program Files;C:\Windows
 
 @set    gdbm=mingw-w64-x86_64-gdbm-1.10-2-any.pkg.tar.xz
-@set openssl=mingw-w64-x86_64-openssl-1.1.0.g-1-any.pkg.tar.xz
+@set openssl=mingw-w64-x86_64-openssl-1.1.0.h-1-any.pkg.tar.xz
 @set  dl_uri=https://dl.bintray.com/msp-greg/ruby_trunk
 
 @echo --------------------------------------------------------------- Adding GPG key

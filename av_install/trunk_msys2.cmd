@@ -7,7 +7,7 @@
 @pacman -Sy --noconfirm --needed mingw-w64-x86_64-toolchain mingw-w64-x86_64-gcc-libs mingw-w64-x86_64-gmp mingw-w64-x86_64-libffi mingw-w64-x86_64-zlib
 
 @set    gdbm=mingw-w64-x86_64-gdbm-1.10-2-any.pkg.tar.xz
-@set openssl=mingw-w64-x86_64-openssl-1.1.0.g-1-any.pkg.tar.xz
+@set openssl=mingw-w64-x86_64-openssl-1.1.0.h-1-any.pkg.tar.xz
 @set  dl_uri=https://dl.bintray.com/msp-greg/ruby_trunk
 
 @echo ——————————————————————————————————————————————————————————————— Adding GPG key
