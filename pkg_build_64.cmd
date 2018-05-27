@@ -22,7 +22,7 @@
 
 @attrib -r %DP0%src/*.* /s /d
 
-@rem --------------------------------------------------------------------- Build
+@rem ————————————————————————————————————————————————————————————————————— Build
 bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck --skippgpcheck -dLf -p PKGBUILD"
 @if ERRORLEVEL 1 exit
 @set /a ERROR_BLD=ERRORLEVEL
@@ -47,17 +47,17 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @set TEST_SSL=TRUE
 @cd %DP0%src/build%SUFFIX%
 
-@rem ------------------------------------------------------------------ test-all
+@rem —————————————————————————————————————————————————————————————————— test-all
 @echo test-all
 
 @if "%R_VERS_2%" GEQ "25" (
-  rem set RUBY_FORCE_TEST_JIT=1
+  set RUBY_FORCE_TEST_JIT=1
   make.exe test-all "TESTOPTS=-a -j%M_JOBS% --job-status=normal --show-skip --retry --subprocess-timeout-scale=1.5" > %LOG_PATH_NAME%-test-all.log 2>&1
 ) else (
   make.exe test-all "TESTOPTS=-v --show-skip --retry" > %LOG_PATH_NAME%-test-all.log 2>&1
 )
 
-@rem --------------------------------------------------------- btest, test-basic
+@rem ————————————————————————————————————————————————————————— btest, test-basic
 @cd %DP0%src/build%SUFFIX%
 @if "%R_VERS_2%" GEQ "24" (
   @echo btest
@@ -69,7 +69,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
   make.exe -j 1 "TESTOPTS=-v -j%M_JOBS%" test       > %LOG_PATH_NAME%-test.log 2>&1
 )
 
-@rem ---------------------------------------------------------------------- spec
+@rem —————————————————————————————————————————————————————————————————————— spec
 @attrib -r %DP0%src/build%SUFFIX%/*.* /s /d
 
 @rem just in case...
@@ -83,7 +83,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
   make.exe test-rubyspec > %LOG_PATH_NAME%-test-spec.log 2>&1
 )
 
-@rem --------------------------------------------------------------------- mspec
+@rem ————————————————————————————————————————————————————————————————————— mspec
 @attrib -r %DP0%src/ruby/spec/*.* /s /d
 @attrib -r %DP0%src/ruby/spec/ruby/*.* /s /d
 
