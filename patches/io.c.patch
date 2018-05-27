@@ -5,7 +5,7 @@ diff --git a/io.c b/io.c
 index 4e071c93b6..3151bce5ce 100644
 --- a/io.c
 +++ b/io.c
-@@ -613,9 +613,15 @@ static const char closed_stream[] = "closed stream";
+@@ -614,9 +614,15 @@ static const char closed_stream[] = "closed stream";
  static void
  io_fd_check_closed(int fd)
  {

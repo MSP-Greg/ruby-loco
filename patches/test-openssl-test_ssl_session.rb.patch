@@ -3,7 +3,7 @@ diff --git a/test/openssl/test_ssl_session.rb b/test/openssl/test_ssl_session.rb
 index 2cb46cd2c3..43d6bd73f7 100644
 --- a/test/openssl/test_ssl_session.rb
 +++ b/test/openssl/test_ssl_session.rb
-@@ -202,13 +202,14 @@ def test_server_session_cache
+@@ -204,13 +204,14 @@ def test_server_session_cache
            ssl.puts("abc"); assert_equal "abc\n", ssl.gets
            first_session ||= ssl.session
  
@@ -23,7 +23,7 @@ index 2cb46cd2c3..43d6bd73f7 100644
            end
          }
        end
-@@ -330,12 +331,14 @@ def test_ctx_server_session_cb
+@@ -334,12 +335,14 @@ def test_ctx_server_session_cb
        connections = 2
        sess2 = server_connect_with_session(port, nil, sess0.dup) { |ssl|
          ssl.puts("abc"); assert_equal "abc\n", ssl.gets

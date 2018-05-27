@@ -4,7 +4,7 @@ diff --git a/lib/mkmf.rb b/lib/mkmf.rb
 index 7f53bb4b97..5c7d750612 100644
 --- a/lib/mkmf.rb
 +++ b/lib/mkmf.rb
-@@ -304,16 +304,30 @@ module Logging
+@@ -309,16 +309,30 @@ module Logging
      @postpone = 0
      @quiet = $extmk
  
@@ -39,7 +39,7 @@ index 7f53bb4b97..5c7d750612 100644
        log_open
        $stderr.reopen(@log)
        $stdout.reopen(@log)
-@@ -323,17 +337,17 @@ def self::open
+@@ -328,17 +342,17 @@ def self::open
        $stdout.reopen(@orgout)
      end
  
@@ -60,7 +60,7 @@ index 7f53bb4b97..5c7d750612 100644
        if @log and not @log.closed?
          @log.flush
          @log.close
-@@ -341,16 +355,28 @@ def self::log_close
+@@ -346,16 +360,28 @@ def self::log_close
        end
      end
  

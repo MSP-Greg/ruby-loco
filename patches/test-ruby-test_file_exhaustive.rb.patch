@@ -4,7 +4,7 @@ diff --git a/test/ruby/test_file_exhaustive.rb b/test/ruby/test_file_exhaustive.
 index 9e8000f41a..45d3133fa6 100644
 --- a/test/ruby/test_file_exhaustive.rb
 +++ b/test/ruby/test_file_exhaustive.rb
-@@ -1344,7 +1344,8 @@ def test_flock_exclusive
+@@ -1346,7 +1346,8 @@ def test_flock_exclusive
        assert_separately(["-rtimeout", "-", regular_file], "#{<<~begin}#{<<~"end;"}")
        begin
          open(ARGV[0], "r") do |f|
@@ -14,7 +14,7 @@ index 9e8000f41a..45d3133fa6 100644
              assert(!f.flock(File::LOCK_SH|File::LOCK_NB))
            end
          end
-@@ -1352,8 +1353,9 @@ def test_flock_exclusive
+@@ -1354,8 +1355,9 @@ def test_flock_exclusive
        assert_separately(["-rtimeout", "-", regular_file], "#{<<~begin}#{<<~"end;"}")
        begin
          open(ARGV[0], "r") do |f|
@@ -25,7 +25,7 @@ index 9e8000f41a..45d3133fa6 100644
                f.flock(File::LOCK_SH)
              end
            end
-@@ -1370,7 +1372,8 @@ def test_flock_shared
+@@ -1372,7 +1374,8 @@ def test_flock_shared
        assert_separately(["-rtimeout", "-", regular_file], "#{<<~begin}#{<<~"end;"}")
        begin
          open(ARGV[0], "r") do |f|
@@ -35,7 +35,7 @@ index 9e8000f41a..45d3133fa6 100644
              assert(f.flock(File::LOCK_SH))
            end
          end
-@@ -1379,7 +1382,8 @@ def test_flock_shared
+@@ -1381,7 +1384,8 @@ def test_flock_shared
        begin
          open(ARGV[0], "r+") do |f|
            assert_raise(Timeout::Error) do
