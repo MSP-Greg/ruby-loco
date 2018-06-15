@@ -11,7 +11,7 @@ module TestScript
   class << self
   
   def run
-    logs = Dir.glob("#{ENV['R_NAME']}-*.log")
+    logs = Dir.glob("#{ENV['R_NAME']}-[^0-9]*.log")
 
     # build did not start
     t = logs.grep(/build\.log\Z/)
