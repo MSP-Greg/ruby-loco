@@ -16,6 +16,7 @@ file_body = +"#{RUBY_DESCRIPTION}\n"
 ary.each { |i|
   file_body << "#{Time.at(i[1]).strftime("%M:%S")} #{i[0]}\n"
 }
+file_body << "\n"
 file_body << "#{Time.at(t_ttl).strftime("%M:%S")} Total Time"
 File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-TOTAL_TIME.log"), file_body)
 puts file_body

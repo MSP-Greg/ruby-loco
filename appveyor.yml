@@ -28,14 +28,18 @@ install:
   - mklink /d C:\projects\ruby-loco\git "C:\Program Files\Git"
 
 build_script:
-  # pkg_build_64.cmd builds, installs and tests
+  # builds, installs and tests
   - pkg_build_64.cmd
+  - echo DONE WITH pkg_build_64.cmd
 
 test_script:
-  - set TEST_SCRIPT=done
+  # processes test logs, outputs 'Test Results', saves artifacts
+  - echo IN test_script
   - ruby test_script.rb
+  - set TEST_SCRIPT=done
 
 on_finish:
+  - echo IN on_finish
   # Run test_script if tests (in pkg_build_64.cmd) timed out and test_script.rb didn't run
   - if "%TEST_SCRIPT%" NEQ "done" ( ruby test_script.rb )
 

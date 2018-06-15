@@ -11,8 +11,10 @@ module TestScript
   class << self
   
   def run
-    logs = Dir.glob("#{ENV['R_NAME']}-[^0-9]*.log")
+    logs = Dir["#{ENV['R_NAME']}-[^0-9]*.log"]
 
+puts "Running TestScript.run, logs count #{logs.length}"
+    
     # build did not start
     t = logs.grep(/build\.log\Z/)
     return if t.empty?

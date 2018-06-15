@@ -106,7 +106,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 
 @if "%AV_BUILD%" NEQ "true" ( ruby test_script.rb )
 
-@rem --- rename readline.rb_ back to readline.rb_
+@rem --- rename readline.rb_ back to readline.rb
 @attrib -r %PKG_RUBY%/lib/ruby/site_ruby/readline.rb_
 @rem --- rename seems to only work with backslashes
 @ren %~dp0pkg\ruby%SUFFIX%\ruby%SUFFIX%\lib\ruby\site_ruby\readline.rb_ readline.rb
