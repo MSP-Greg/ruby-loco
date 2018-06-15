@@ -2,10 +2,10 @@ Patch by MSP-Greg
 test_gem_gemcutter_utilities.rb - remove some skips
 several patches allow 'ruby runner.rb rubygems' to pass all tests
 diff --git a/lib/rubygems/test_case.rb b/lib/rubygems/test_case.rb
-index 82afb8a068..16804c62ca 100644
+index f1cd3d274c..3a98851849 100644
 --- a/lib/rubygems/test_case.rb
 +++ b/lib/rubygems/test_case.rb
-@@ -1278,8 +1278,14 @@ def self.rubybin
+@@ -1302,8 +1302,14 @@ def self.rubybin
    end
  
    @@ruby = rubybin
@@ -23,10 +23,10 @@ index 82afb8a068..16804c62ca 100644
    ##
    # Construct a new Gem::Dependency.
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index 3225a05c6b..f007500cb6 100644
+index f383d5af58..b6f657889d 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
-@@ -753,7 +753,7 @@ def test_self_platforms
+@@ -818,7 +818,7 @@ def test_self_platforms
    end
  
    def test_self_prefix
@@ -36,7 +36,7 @@ index 3225a05c6b..f007500cb6 100644
  
    def test_self_prefix_libdir
 diff --git a/test/rubygems/test_gem_commands_environment_command.rb b/test/rubygems/test_gem_commands_environment_command.rb
-index 040e5c4c39..e473529d62 100644
+index 1451f03982..55fbf06ce0 100644
 --- a/test/rubygems/test_gem_commands_environment_command.rb
 +++ b/test/rubygems/test_gem_commands_environment_command.rb
 @@ -26,7 +26,7 @@ def test_execute
@@ -47,12 +47,12 @@ index 040e5c4c39..e473529d62 100644
 +    assert_match(%r|RUBYGEMS PREFIX: |, @ui.output) unless __dir__.start_with?(@@project_dir)
      assert_match %r|RUBY EXECUTABLE:.*#{RbConfig::CONFIG['ruby_install_name']}|,
                   @ui.output
-     assert_match %r|SYSTEM CONFIGURATION DIRECTORY:|, @ui.output
+     assert_match %r|GIT EXECUTABLE: #{@cmd.send(:git_path)}|, @ui.output
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
-index fa444fa32f..2433637e6e 100644
+index 549e34c218..64fd892cad 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
-@@ -483,13 +483,15 @@ def test_update_rubygems_arguments
+@@ -482,13 +482,15 @@ def test_update_rubygems_arguments
  
      arguments = @cmd.update_rubygems_arguments
  
@@ -75,7 +75,7 @@ index fa444fa32f..2433637e6e 100644
    end
  
    def test_update_rubygems_arguments_1_8_x
-@@ -497,11 +499,13 @@ def test_update_rubygems_arguments_1_8_x
+@@ -496,11 +498,13 @@ def test_update_rubygems_arguments_1_8_x
  
      arguments = @cmd.update_rubygems_arguments
  
@@ -93,12 +93,12 @@ index fa444fa32f..2433637e6e 100644
 +    assert_equal(Gem.prefix ? 4 : 2, arguments.length)
    end
  
- end
+   def test_explain
 diff --git a/test/rubygems/test_gem_gemcutter_utilities.rb b/test/rubygems/test_gem_gemcutter_utilities.rb
-index c3f9a7ea18..eaf1261d23 100644
+index 7b3e273957..155ebf0101 100644
 --- a/test/rubygems/test_gem_gemcutter_utilities.rb
 +++ b/test/rubygems/test_gem_gemcutter_utilities.rb
-@@ -11,6 +11,9 @@ def setup
+@@ -13,6 +13,9 @@ def setup
  
      ENV['RUBYGEMS_HOST'] = nil
      Gem.configuration.rubygems_api_key = nil
@@ -108,7 +108,7 @@ index c3f9a7ea18..eaf1261d23 100644
  
      @cmd = Gem::Command.new '', 'summary'
      @cmd.extend Gem::GemcutterUtilities
-@@ -177,7 +180,8 @@ def test_sign_in_with_other_credentials_doesnt_overwrite_other_keys
+@@ -179,7 +182,8 @@ def test_sign_in_with_other_credentials_doesnt_overwrite_other_keys
    end
  
    def test_sign_in_with_bad_credentials
@@ -118,7 +118,7 @@ index c3f9a7ea18..eaf1261d23 100644
  
      assert_raises Gem::MockGemUi::TermError do
        util_sign_in ['Access Denied.', 403, 'Forbidden']
-@@ -188,7 +192,8 @@ def test_sign_in_with_bad_credentials
+@@ -190,7 +194,8 @@ def test_sign_in_with_bad_credentials
    end
  
    def util_sign_in response, host = nil, args = []
@@ -129,29 +129,10 @@ index c3f9a7ea18..eaf1261d23 100644
      email    = 'you@example.com'
      password = 'secret'
 diff --git a/test/rubygems/test_gem_local_remote_options.rb b/test/rubygems/test_gem_local_remote_options.rb
-index 272623be..df33737f 100644
+index a51182b11c..ef0070840f 100644
 --- a/test/rubygems/test_gem_local_remote_options.rb
 +++ b/test/rubygems/test_gem_local_remote_options.rb
-@@ -37,15 +37,16 @@ class TestGemLocalRemoteOptions < Gem::TestCase
-     s = URI.parse "http://only-gems.example.com/"
- 
-     @cmd.handle_options %W[--clear-sources --source #{s}]
--    assert_equal [s.to_s], Gem.sources
-+    assert_equal [s.to_s], Gem.sources.to_a
-   end
- 
-   def test_clear_sources_option_idiot_proof
-     spec_fetcher
- 
-     @cmd.add_local_remote_options
-+    Gem.configuration.sources = nil
-     @cmd.handle_options %W[--clear-sources]
--    assert_equal Gem.default_sources, Gem.sources
-+    assert_equal Gem.default_sources, Gem.sources.to_a
-   end
- 
-   def test_local_eh
-@@ -88,7 +89,7 @@ class TestGemLocalRemoteOptions < Gem::TestCase
+@@ -89,7 +89,7 @@ def test_source_option
      original_sources << s2.to_s
      original_sources << "#{s3}/"
  
@@ -160,7 +141,7 @@ index 272623be..df33737f 100644
    end
  
    def test_short_source_option
-@@ -101,7 +102,7 @@ class TestGemLocalRemoteOptions < Gem::TestCase
+@@ -102,7 +102,7 @@ def test_short_source_option
  
      original_sources << source
  
@@ -169,7 +150,7 @@ index 272623be..df33737f 100644
    end
  
    def test_update_sources_option
-@@ -127,7 +128,7 @@ class TestGemLocalRemoteOptions < Gem::TestCase
+@@ -128,7 +128,7 @@ def test_source_option_bad
        @cmd.handle_options %W[--source #{s1}]
      end
  

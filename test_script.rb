@@ -12,8 +12,6 @@ module TestScript
   
   def run
     logs = Dir["#{ENV['R_NAME']}-[^0-9]*.log"]
-
-puts "Running TestScript.run, logs count #{logs.length}"
     
     # build did not start
     t = logs.grep(/build\.log\Z/)
