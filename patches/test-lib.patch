@@ -63,7 +63,7 @@ index aa9a09f049..243052dc3a 100644
 +      assert_offset = 0
 +
 +      if self.assert # && options[:retry_run]
-+        zombie   = (defined?(ZombieHunter)      && ZombieHunter.is_a?(Module)     )  ? -2 : 0
++        zombie   = (defined?(ZombieHunter)      && ZombieHunter.is_a?(Module)     ) ? -2 : 0
 +        tracepnt = (defined?(TracePointChecker) && TracePointChecker.is_a?(Module)) ? -1 : 0
 +        assert_offset = zombie + tracepnt
 +      end

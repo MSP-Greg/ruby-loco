@@ -30,14 +30,17 @@ install:
 build_script:
   # builds, installs and tests
   - pkg_build_64.cmd
+  - echo Done with pkg_build
 
 test_script:
   # processes test logs, outputs 'Test Results', saves artifacts
+  - echo In test_script
   - ruby test_script.rb
   - set TEST_SCRIPT=done
 
 on_finish:
   # Run test_script if tests (in pkg_build_64.cmd) timed out and test_script.rb didn't run
+  - echo In on_finish
   - if "%TEST_SCRIPT%" NEQ "done" ( ruby test_script.rb )
 
 cache:
