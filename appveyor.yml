@@ -23,7 +23,7 @@ install:
   #- git checkout 72f88ebcc1
   #- cd \projects\ruby-loco
   # Update MSYS2 / MinGW and install OpenSSL 1.1.0 & GDBM 1.10
-  - av_install\trunk_msys2.cmd
+  - ps: .\av_install\trunk_msys2.ps1
   # Tests are happier with a git path that doesn't contain a space
   - mklink /d C:\projects\ruby-loco\git "C:\Program Files\Git"
 
