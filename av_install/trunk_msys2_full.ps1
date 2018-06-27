@@ -4,7 +4,7 @@ $dash  = "$([char]0x2015)"
 $msys2 = 'C:\msys64'
 
 $key = '77D8FA18'
-$ks1 = 'hkp://na.pool.sks-keyservers.net'
+$ks1 = 'hkp://pool.sks-keyservers.net'
 $ks2 = 'hkp://pgp.mit.edu/'
 
 $gdbm    = 'mingw-w64-x86_64-gdbm-1.10-2-any.pkg.tar.xz'
