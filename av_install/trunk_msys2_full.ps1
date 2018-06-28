@@ -48,13 +48,13 @@ Write-Host "$($dash * 63) Adding GPG key" -ForegroundColor Yellow
 Write-Host "try retrieving & signing key" -ForegroundColor Yellow
 
 $t1 = "pacman-key -r $key --keyserver $ks1 && pacman-key -f $key && pacman-key --lsign-key $key"
-bash.exe -lc $t1 2> $null
+Appveyor-Retry bash.exe -lc $t1 2> $null
 # below is for occasional key retrieve failure on Appveyor
 if ($LastExitCode -and $LastExitCode -gt 0) {
   Write-Host GPG Key Lookup failed from $ks1 -ForegroundColor Yellow
   # try another keyserver
   $t1 = "pacman-key -r $key --keyserver $ks2 && pacman-key -f $key && pacman-key --lsign-key $key"
-  bash.exe -lc $t1 1> $null
+  Appveyor-Retry bash.exe -lc $t1 1> $null
   if ($LastExitCode -and $LastExitCode -gt 0) {
     Write-Host GPG Key Lookup failed from $ks2 -ForegroundColor Yellow
     Update-AppveyorBuild -Message "keyserver retrieval failed"
