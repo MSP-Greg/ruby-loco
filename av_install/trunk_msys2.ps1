@@ -27,22 +27,22 @@ iex "pacman.exe -Sy --noconfirm --needed $tools" 2> $null
 
 #—————————————————————————————————————————————————————————————————————————————— Add GPG key
 Write-Host "$($dash * 63) Adding GPG key" -ForegroundColor Yellow
+Write-Host "try retrieving & signing key" -ForegroundColor Yellow
+
 $t1 = "pacman-key -r $key --keyserver $ks1 && pacman-key -f $key && pacman-key --lsign-key $key"
 bash.exe -lc $t1 2> $null
-$exit_code = $LastExitCode
 # below is for occasional key retrieve failure on Appveyor
-if ($exit_code) {
-  Write-Host GPG Key Lookup failed from $ks1
+if ($LastExitCode -and $LastExitCode -gt 0) {
+  Write-Host GPG Key Lookup failed from $ks1 -ForegroundColor Yellow
   # try another keyserver
   $t1 = "pacman-key -r $key --keyserver $ks2 && pacman-key -f $key && pacman-key --lsign-key $key"
-  bash.exe -lc $t1 2> $null
-  $exit_code = $LastExitCode
-  if ($exit_code) {
-    Write-Host GPG Key Lookup failed from $ks2
-    exit $exit_code
-  }
-  Write-Host "Added key $key"
-}
+  bash.exe -lc $t1 1> $null
+  if ($LastExitCode -and $LastExitCode -gt 0) {
+    Write-Host GPG Key Lookup failed from $ks2 -ForegroundColor Yellow
+    Update-AppveyorBuild -Message "keyserver retrieval failed"
+    exit $LastExitCode
+  } else { Write-Host GPG Key Lookup succeeded from $ks2 }
+}   else { Write-Host GPG Key Lookup succeeded from $ks1 }
 
 if ( !(Test-Path -Path $pkgs -PathType Container) ) {
   New-Item -Path $pkgs -ItemType Directory 1> $null

@@ -57,6 +57,7 @@ if ($LastExitCode -and $LastExitCode -gt 0) {
   bash.exe -lc $t1 1> $null
   if ($LastExitCode -and $LastExitCode -gt 0) {
     Write-Host GPG Key Lookup failed from $ks2 -ForegroundColor Yellow
+    Update-AppveyorBuild -Message "keyserver retrieval failed"
     exit $LastExitCode
   } else { Write-Host GPG Key Lookup succeeded from $ks2 }
 }   else { Write-Host GPG Key Lookup succeeded from $ks1 }
