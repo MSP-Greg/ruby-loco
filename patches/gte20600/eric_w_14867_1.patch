@@ -1,0 +1,111 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <e@80x24.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on dcvr.yhbt.net
+X-Spam-Level: 
+X-Spam-ASN: AS63949 64.71.152.0/24
+X-Spam-Status: No, score=-2.2 required=3.0 tests=BAYES_00,RCVD_IN_DNSWL_NONE,
+	RDNS_NONE,SPF_HELO_PASS,SPF_PASS shortcircuit=no autolearn=no
+	autolearn_force=no version=3.4.1
+Received: from 80x24.org (unknown [64.71.152.64])
+	by dcvr.yhbt.net (Postfix) with ESMTP id 67CCB1F516
+	for <spew@80x24.org>; Fri, 29 Jun 2018 22:40:58 +0000 (UTC)
+From: Eric Wong <e@80x24.org>
+To: spew@80x24.org
+Subject: [PATCH] use SIGCHLD_LOSSY to enable waitpid polling mode
+Date: Fri, 29 Jun 2018 22:40:58 +0000
+Message-Id: <20180629224058.20652-1-e@80x24.org>
+List-Id: <spew.80x24.org>
+Archived-At: <https://80x24.org/spew/20180629224058.20652-1-e@80x24.org/>
+List-Archive: <https://80x24.org/spew/>
+List-Post: <mailto:spew@80x24.org>
+
+Some systems lack SIGCHLD or have incomplete SIGCHLD
+implementations.  So enable polling mode for them.
+---
+ mjit.c           |  2 +-
+ process.c        |  2 +-
+ signal.c         |  2 +-
+ thread_pthread.c | 10 ++++++++++
+ vm_core.h        |  7 +++++++
+ 5 files changed, 20 insertions(+), 3 deletions(-)
+
+diff --git a/mjit.c b/mjit.c
+index e166a066bf..fb4b153cc3 100644
+--- a/mjit.c
++++ b/mjit.c
+@@ -408,7 +408,7 @@ exec_process(const char *path, char *const argv[])
+ {
+     int stat, exit_code = -2;
+     pid_t pid;
+-    rb_vm_t *vm = RUBY_SIGCHLD ? GET_VM() : 0;
++    rb_vm_t *vm = (RUBY_SIGCHLD || SIGCHLD_LOSSY) ? GET_VM() : 0;
+     rb_nativethread_cond_t cond;
+ 
+     if (vm) {
+diff --git a/process.c b/process.c
+index 08986f9ede..ef0523165e 100644
+--- a/process.c
++++ b/process.c
+@@ -1126,7 +1126,7 @@ rb_waitpid(rb_pid_t pid, int *st, int flags)
+     waitpid_state_init(&w, pid, flags);
+     w.ec = GET_EC();
+ 
+-    if (RUBY_SIGCHLD) {
++    if (RUBY_SIGCHLD || SIGCHLD_LOSSY) {
+         waitpid_wait(&w);
+     }
+     else {
+diff --git a/signal.c b/signal.c
+index a817cb336a..7b725d8268 100644
+--- a/signal.c
++++ b/signal.c
+@@ -1066,7 +1066,7 @@ void ruby_waitpid_all(rb_vm_t *); /* process.c */
+ void
+ ruby_sigchld_handler(rb_vm_t *vm)
+ {
+-    if (ATOMIC_EXCHANGE(sigchld_hit, 0)) {
++    if (SIGCHLD_LOSSY || ATOMIC_EXCHANGE(sigchld_hit, 0)) {
+         ruby_waitpid_all(vm);
+     }
+ }
+diff --git a/thread_pthread.c b/thread_pthread.c
+index 6ac7728ad9..401fc0c774 100644
+--- a/thread_pthread.c
++++ b/thread_pthread.c
+@@ -1375,6 +1375,16 @@ timer_thread_sleep(rb_global_vm_lock_t* gvl)
+ 
+     need_polling = !ubf_threads_empty();
+ 
++    if (SIGCHLD_LOSSY && !need_polling) {
++        rb_vm_t *vm = container_of(gvl, rb_vm_t, gvl);
++
++        rb_native_mutex_lock(&vm->waitpid_lock);
++        if (!list_empty(&vm->waiting_pids) || !list_empty(&vm->waiting_grps)) {
++            need_polling = 1;
++        }
++        rb_native_mutex_unlock(&vm->waitpid_lock);
++    }
++
+     if (gvl->waiting > 0 || need_polling) {
+ 	/* polling (TIME_QUANTUM_USEC usec) */
+ 	result = poll(pollfds, 1, TIME_QUANTUM_USEC/1000);
+diff --git a/vm_core.h b/vm_core.h
+index bdbe87287b..9db99fe03b 100644
+--- a/vm_core.h
++++ b/vm_core.h
+@@ -100,6 +100,13 @@
+ #  define RUBY_SIGCHLD    (0)
+ #endif
+ 
++/* platforms with broken or non-existent SIGCHLD work by polling */
++#if defined(__APPLE__) || defined(__WIN32__)
++#  define SIGCHLD_LOSSY (1)
++#else
++#  define SIGCHLD_LOSSY (0)
++#endif
++
+ #ifdef HAVE_STDARG_PROTOTYPES
+ #include <stdarg.h>
+ #define va_init_list(a,b) va_start((a),(b))
+-- 
+EW
