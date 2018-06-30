@@ -38,8 +38,8 @@ build_script:
 test_script:
   # processes test logs, outputs 'Test Results', saves artifacts
   - echo In test_script
-  - ruby test_script.rb
   - set TEST_SCRIPT=done
+  - ruby test_script.rb
 
 on_finish:
   # Run test_script if tests (in pkg_build_64.cmd) timed out and test_script.rb didn't run
