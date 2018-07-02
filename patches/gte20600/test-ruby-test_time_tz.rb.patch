@@ -1,0 +1,24 @@
+diff --git a/test/ruby/test_time_tz.rb b/test/ruby/test_time_tz.rb
+index f14800a1ad..446d6e0034 100644
+--- a/test/ruby/test_time_tz.rb
++++ b/test/ruby/test_time_tz.rb
+@@ -1,4 +1,5 @@
+ # frozen_string_literal: false
++# class not created on Windows
+ require 'test/unit'
+ 
+ class TestTimeTZ < Test::Unit::TestCase
+@@ -113,6 +114,7 @@ def test_localtime_zone
+     z2 = with_tz(tz="Asia/Singapore") {
+       t.localtime.zone
+     }
++    
+     assert_equal(z2, z1)
+   end
+ 
+@@ -447,4 +449,4 @@ def self.gen_variational_zdump_test(hint, data)
+ Europe/Lisbon  Mon Jan  1 00:36:44 1912 UT = Sun Dec 31 23:59:59 1911 LMT isdst=0 gmtoff=-2205
+ Europe/Lisbon  Sun Dec 31 23:59:59 1911 UT = Sun Dec 31 23:23:14 1911 LMT isdst=0 gmtoff=-2205
+ End
+-end
++end unless Test::Unit::TestCase.windows?
