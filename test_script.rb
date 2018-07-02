@@ -12,7 +12,7 @@ module TestScript
   
   def run
     logs = Dir["#{ENV['R_NAME']}-[^0-9]*.log"]
-    
+
     # build did not start
     t = logs.grep(/build\.log\Z/)
     return if t.empty?
@@ -42,9 +42,12 @@ module TestScript
 
     puts "#{'—' * @@puts_len} Test Results"
     puts results_str
+
     File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-Summary - Test Results.log"), results_str)
 
     unless sum_test_all.empty?
+      puts "\n#{'—' * @@puts_len} Summary test-all"
+      puts sum_test_all
       File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-Summary - test-all.log"), sum_test_all)
     end
     unless warnings_str.empty?
@@ -52,7 +55,7 @@ module TestScript
     end
 
     zip_save
-
+  
     if @@is_av
       `appveyor AddMessage -Message \"Summary - All Tests\" -Details \"#{results_str}\"`
 
@@ -84,7 +87,7 @@ module TestScript
   def log_test_all(log)
     # 16538 tests, 2190218 assertions, 1 failures, 0 errors, 234 skips
     if log.length == 1
-      if (s = File.binread(log[0])).length >= 256
+      if (s = File.binread(log[0]).gsub("\r", '')).length >= 256
         temp = s[-256,256][/^\d{5,} tests[^\r\n]+/]
         results = String.new(temp || "CRASHED?")
         if temp
@@ -169,7 +172,7 @@ module TestScript
       end
     else
       @@failures += 1
-      "test-basic test log not found\n"
+      "test-basic log not found\n"
     end
   end
 
@@ -212,20 +215,19 @@ module TestScript
   end
 
   def generate_test_all(s, results)
-    s.gsub!("\r", '')
     str = +''
 
     # Find and log parallel failures ands errors
-    str << faults_parallel(s, "Failure", "F")
-    str << faults_parallel(s, "Error"  , "E")
+    str << errors_faults_parallel(s, 'Failure', 'F')
+    str << errors_faults_parallel(s, 'Error'  , 'E')
 
     # Find and log final failures ands errors
-    str << faults_final(s, "Failure")
-    str << faults_final(s, "Error")
+    str << faults_final(s)
+    str << errors_final(s)
     str.empty? ? str : "#{RUBY_DESCRIPTION}\n#{results}\n\n#{str}"
   end
 
-  def faults_parallel(log, type, abbrev)
+  def errors_faults_parallel(log, type, abbrev)
     str = +''
     faults = []
     faults = log.scan(/^( *\d+ )([A-Z][^#\n]+#test_[^\n]+? = #{abbrev})/)
@@ -238,11 +240,41 @@ module TestScript
     end
     str
   end
+
+  def errors_final(log)
+    str = ''.dup
+    errors = []
+    log.scan(/^ *\d+\) Error:\n([^\n:]+):\n(.+?)\n([^\n]+?):(\d+):/m) { |test, msg, file, line|
+      file.sub!(/[\S]+?\/test\//, '')
+      errors << [test, file.strip, line.to_i, msg]
+    }
+    unless errors.empty?
+      hsh_errors = errors.group_by { |f| f[1] } # group by file
+
+      # Temp fix to remove TestJIT errors
+      if hsh_errors.key? 'ruby/test_jit.rb'
+        @@failures -= hsh_errors['ruby/test_jit.rb'].length
+      end
+
+      ary_errors = hsh_errors.sort
+      ary_errors.each { |file, errors| errors.sort_by! { |f| f[2] } }
+      ary_errors.each { |file, errors|
+        t1 = errors.length
+        msg = t1 == 1 ? "1 Error" : "#{t1} Errors"
+        wid = @@stripe_len + t1.to_s.length
+        str << "#{'—' * @@stripe_len} #{msg}\n#{' ' * wid}  #{file}\n\n"
+        errors.each { |test, file, line, msg|
+          str << "#{test.ljust wid+1} Line: #{line.to_s.ljust(5)}\n#{msg}\n\n"
+        }
+      }
+    end
+    str
+  end
   
-  def faults_final(log, type)
+  def faults_final(log)
     str = +''
     faults = []
-    log.scan(/^ *\d+\) #{type}:\n([^\n]+?) \[([^\n]+?):(\d+)\]:\n(.+?)\n\n/m) { |test, file, line, msg|
+    log.scan(/^ *\d+\) Failure:\n([^\n]+?) \[([^\n]+?):(\d+)\]:\n(.+?)\n\n/m) { |test, file, line, msg|
       file.sub!(/[\S]+?\/test\//, '')
       faults << [test, file, line.to_i, msg]
     }
@@ -258,10 +290,11 @@ module TestScript
       ary_faults.each { |file, faults| faults.sort_by! { |f| f[2] } }
       ary_faults.each { |file, faults|
         t1 = faults.length
-        msg = t1 == 1 ? "1 #{type}" : "#{t1} #{type}s"
-        str << "#{'—' * @@stripe_len} #{msg}\n#{' ' * (@@stripe_len + t1.to_s.length)}  #{file}\n\n"
+        msg = t1 == 1 ? "1 Failure" : "#{t1} Failures"
+        wid = @@stripe_len + t1.to_s.length
+        str << "#{'—' * @@stripe_len} #{msg}\n#{' ' * wid}  #{file}\n\n"
         faults.each { |test, file, line, msg|
-          str << "—————————————————————— Line: #{line.to_s.ljust(5)}  #{test}\n#{msg}\n\n"
+          str << "#{test.ljust wid+1} Line: #{line.to_s.ljust(5)}\n#{msg}\n\n"
         }
       }
     end
