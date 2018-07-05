@@ -1,0 +1,12 @@
+Lower timeout time
+diff --git a/test/lib/jit_support.rb b/test/lib/jit_support.rb
+index b3fe3efbcb..43bb84d938 100644
+--- a/test/lib/jit_support.rb
++++ b/test/lib/jit_support.rb
+@@ -1,5 +1,5 @@
+ module JITSupport
+-  JIT_TIMEOUT = 600 # 10min for each...
++  JIT_TIMEOUT = 20 # 10min for each...
+   JIT_SUCCESS_PREFIX = 'JIT success \(\d+\.\dms\)'
+   SUPPORTED_COMPILERS = [
+     'gcc',
