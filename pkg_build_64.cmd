@@ -88,7 +88,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @cd %DP0%src/build%SUFFIX%
 
 @rem just in case...
-@@PATH=%MSYS2_DIR%/mingw64/bin;%MSYS2_DIR%/usr/bin;%GIT_PATH%;%ORIG_PATH%
+@PATH=%MSYS2_DIR%/mingw64/bin;%MSYS2_DIR%/usr/bin;%GIT_PATH%;%ORIG_PATH%
 
 @echo test-all
 
