@@ -251,7 +251,7 @@ index 38ea84cc21..4fbbe0b384 100644
      ssl_server = OpenSSL::SSL::SSLServer.new(server, ctx)
      ths = Thread.start do
        Thread.current.report_on_exception = false # always join-ed
-@@ -633,14 +624,7 @@ def starttls_test
+@@ -733,14 +724,7 @@ def starttls_test
          sock.print("* OK test server\r\n")
          sock.gets
          sock.print("RUBY0001 OK completed\r\n")

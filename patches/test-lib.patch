@@ -99,7 +99,7 @@ index aa9a09f049..243052dc3a 100644
 +        end
          $stdout.flush
  
-         unless RubyVM::MJIT.enabled? # compiler process is wrongly considered as leaked
+         unless defined?(RubyVM::MJIT) && RubyVM::MJIT.enabled? # compiler process is wrongly considered as leaked
 @@ -963,7 +987,7 @@ def _run_suite suite, type
          inst._assertions
        }
