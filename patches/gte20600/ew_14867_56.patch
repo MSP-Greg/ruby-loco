@@ -1,0 +1,84 @@
+https://bugs.ruby-lang.org/issues/14867#note-56
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <e@80x24.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on dcvr.yhbt.net
+X-Spam-Level: 
+X-Spam-ASN: AS63949 64.71.152.0/24
+X-Spam-Status: No, score=-3.1 required=3.0 tests=AWL,BAYES_00,
+	RCVD_IN_DNSWL_NONE,RDNS_NONE,SPF_HELO_PASS,SPF_PASS shortcircuit=no
+	autolearn=no autolearn_force=no version=3.4.1
+Received: from 80x24.org (unknown [64.71.152.64])
+	by dcvr.yhbt.net (Postfix) with ESMTP id DD0F81F62D
+	for <spew@80x24.org>; Thu,  5 Jul 2018 20:48:05 +0000 (UTC)
+From: Eric Wong <e@80x24.org>
+To: spew@80x24.org
+Subject: [PATCH] debug output for Greg
+Date: Thu,  5 Jul 2018 20:48:05 +0000
+Message-Id: <20180705204805.7670-1-e@80x24.org>
+List-Id: <spew.80x24.org>
+Archived-At: <https://80x24.org/spew/20180705204805.7670-1-e@80x24.org/>
+List-Archive: <https://80x24.org/spew/>
+List-Post: <mailto:spew@80x24.org>
+
+Usage: ./ruby --jit -e exit
+
+Output (on GNU/Linux):
+
+	process.c: sigchld=17 getpid.size=4 rb_pid_t.size=4
+	mjit.c: sigchld=17 getpid.size=4 pid_t.size=4
+	mjit.c: !_WIN32 !__MINGW32__ !__MINGW64__ !__CYGWIN__
+---
+ mjit.c    | 25 +++++++++++++++++++++++++
+ process.c |  3 +++
+ 2 files changed, 28 insertions(+)
+
+diff --git a/mjit.c b/mjit.c
+index 232424fa5d..07221fc714 100644
+--- a/mjit.c
++++ b/mjit.c
+@@ -1503,6 +1503,31 @@ mjit_init(struct mjit_options *opts)
+         rb_id_table_foreach(RCLASS_CONST_TBL(rb_cObject), valid_class_serials_add_i, NULL);
+     }
+ 
++    fprintf(stderr, "mjit.c: sigchld=%d getpid.size=%"PRIuSIZE" pid_t.size=%"PRIuSIZE"\n",
++            RUBY_SIGCHLD, sizeof(getpid()), sizeof(pid_t));
++    fprintf(stderr, "mjit.c: %s %s %s %s\n",
++#if defined(_WIN32)
++            "_WIN32",
++#else
++            "!_WIN32",
++#endif
++#if defined(__MINGW32__)
++            "__MINGW32__",
++#else
++            "!__MINGW32__",
++#endif
++#if defined(__MINGW64__)
++            "__MINGW64__",
++#else
++            "!__MINGW64__",
++#endif
++#if defined(__CYGWIN__)
++            "__CYGWIN__"
++#else
++            "!__CYGWIN__"
++#endif
++        ); /* fprintf */
++
+     /* Overwrites RUBY_DESCRIPTION constant */
+     rb_const_remove(rb_cObject, rb_intern("RUBY_DESCRIPTION"));
+     rb_description = rb_usascii_str_new_static(ruby_description_with_jit, strlen(ruby_description_with_jit));
+diff --git a/process.c b/process.c
+index 12cceba934..9c98c20b3e 100644
+--- a/process.c
++++ b/process.c
+@@ -8318,4 +8318,7 @@ Init_process(void)
+     id_exception = rb_intern("exception");
+ 
+     InitVM(process);
++
++    fprintf(stderr, "process.c: sigchld=%d getpid.size=%"PRIuSIZE" rb_pid_t.size=%"PRIuSIZE"\n",
++            RUBY_SIGCHLD, sizeof(getpid()), sizeof(rb_pid_t));
+ }
+-- 
+EW
