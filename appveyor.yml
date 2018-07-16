@@ -11,17 +11,10 @@ init:
   - set AV_BUILD=true
   # Minimize path so bash conflicts don't arise
   - set base_path=C:\ruby25-x64\bin;C:\Program Files\7-Zip;C:\Program Files\AppVeyor\BuildAgent;C:\Program Files\Git\cmd;C:\Windows\system32;C:\Program Files;C:\Windows
-
-  - git clone -q --depth=5  --branch=master https://github.com/oneclick/rubyinstaller2.git    C:\ri2
-  - git clone -q --depth=5  --no-tags --branch=master https://github.com/ConnorAtherton/rb-readline.git C:\rb-readline
   - set PATH=%base_path%
 
 install:
   - git clone -q --depth=5  --no-tags --branch=trunk  https://github.com/ruby/ruby.git                  C:\projects\ruby-loco\src\ruby
-  # below 3 lines just for special checkouts
-  #- cd \projects\ruby-loco\src\ruby
-  #- git checkout 72f88ebcc1
-  #- cd \projects\ruby-loco
 
   # Update MSYS2 / MinGW and install OpenSSL 1.1.0 & GDBM 1.10
   #- ps: .\av_install\trunk_msys2.ps1
@@ -30,6 +23,14 @@ install:
   # Tests are happier with a git path that doesn't contain a space
   - mklink /d C:\projects\ruby-loco\git "C:\Program Files\Git"
 
+  - git clone -q --depth=5 --branch=master https://github.com/oneclick/rubyinstaller2.git    C:\ri2
+  - git clone -q --depth=5 --branch=master --no-tags https://github.com/ConnorAtherton/rb-readline.git C:\rb-readline
+
+  # below 3 lines just for special checkouts
+  #- cd \projects\ruby-loco\src\ruby
+  #- git checkout 72f88ebcc1
+  #- cd \projects\ruby-loco
+  
 build_script:
   # builds, installs and tests
   - pkg_build_64.cmd
