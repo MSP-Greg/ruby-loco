@@ -22,24 +22,16 @@ $env:path = "$msys2\usr\bin;C:\ruby25-x64\bin;C:\Program Files\7-Zip;C:\Program 
 #—————————————————————————————————————————————————————————————————————————————— Update MSYS2
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW" -ForegroundColor Yellow
 
-Write-Host "pacman.exe -Syu --noconfirm --noprogressbar" -ForegroundColor Yellow
+Write-Host "Update #1 - pacman.exe -Syu --noconfirm --noprogressbar" -ForegroundColor Yellow
 pacman.exe -Syu --noconfirm --noprogressbar
 
-Write-Host "`npacman.exe -Su --noconfirm --noprogressbar" -ForegroundColor Yellow
-pacman.exe -Su --noconfirm --noprogressbar
+Write-Host "`nUpdate #2 - pacman.exe -Syu --noconfirm --noprogressbar" -ForegroundColor Yellow
+pacman.exe -Syu --noconfirm --noprogressbar
 
-Write-Host "`nThe following two commands may not be needed, but I had issues" -ForegroundColor Yellow
-Write-Host "retrieving a new key without them..." -ForegroundColor Yellow
+Write-Host "`nInstall gdbm" -ForegroundColor Yellow
+pacman.exe -S --noconfirm --noprogressbar mingw-w64-x86_64-gdbm
 
-$t1 = "pacman-key --init"
-Write-Host "`nbash.exe -lc $t1" -ForegroundColor Yellow
-bash.exe -lc $t1
-
-$t1 = "pacman-key -l"
-Write-Host "bash.exe -lc $t1" -ForegroundColor Yellow
-bash.exe -lc $t1
-
-Write-Host "Clean cache & database" -ForegroundColor Yellow
+Write-Host "`nClean cache & database" -ForegroundColor Yellow
 Write-Host "pacman.exe -Sc  --noconfirm" -ForegroundColor Yellow
 pacman.exe -Sc  --noconfirm
 
@@ -66,26 +58,24 @@ if ( !(Test-Path -Path $pkgs -PathType Container) ) {
   New-Item -Path $pkgs -ItemType Directory 1> $null
 }
 
-#—————————————————————————————————————————————————————————————————————————————— Add gdbm & openssl
-Write-Host "$($dash * 63) Try installing gdbm & openssl" -ForegroundColor Yellow
+#—————————————————————————————————————————————————————————————————————————————— Add custom openssl
+Write-Host "$($dash * 63) Try installing custom openssl" -ForegroundColor Yellow
+<#
 Write-Host "Installing $gdbm"
 $wc.DownloadFile("$dl_uri/$gdbm", "$pkgs\$gdbm")
 $wc.DownloadFile("$dl_uri/$gdbm" + ".sig", "$pkgs\$gdbm" + ".sig")
 
-#pacman.exe -Rdd --noconfirm mingw-w64-x86_64-gdbm  1> $null
-pacman.exe -Udd --noconfirm $pkgs_u/$gdbm            1> $null
-if ($LastExitCode -and $LastExitCode -gt 0) {
-  Write-Host "Error installing gdbm" -ForegroundColor Yellow
-  exit 
-} else { Write-Host "Finished" }
+pacman.exe -Rdd --noconfirm mingw-w64-x86_64-gdbm  1> $null
+pacman.exe -Udd --noconfirm $pkgs_u/$gdbm          1> $null
+#>
 
 Write-Host "Installing $openssl"
 $wc.DownloadFile("$dl_uri/$openssl", "$pkgs\$openssl")
 $wc.DownloadFile("$dl_uri/$openssl" + ".sig", "$pkgs\$openssl" + ".sig")
 
-pacman.exe -Rdd --noconfirm mingw-w64-x86_64-openssl 1> $null
-pacman.exe -Udd --noconfirm $pkgs_u/$openssl         1> $null
-if ($LastExitCode -and $LastExitCode -gt 0) {
+pacman.exe -Rdd --noconfirm  --noprogressbar mingw-w64-x86_64-openssl 1> $null
+pacman.exe -Udd --noconfirm  --noprogressbar $pkgs_u/$openssl         1> $null
+if ($LastExitCode -and $LastExitCode -ne 0) {
   Write-Host "Error installing openssl" -ForegroundColor Yellow
   exit $LastExitCode
 } else { Write-Host "Finished" }
