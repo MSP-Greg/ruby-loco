@@ -29,7 +29,7 @@ Write-Host "`nUpdate #2 - pacman.exe -Syu --noconfirm --noprogressbar" -Foregrou
 pacman.exe -Syu --noconfirm --noprogressbar
 
 Write-Host "`nInstall gdbm" -ForegroundColor Yellow
-pacman.exe -S --noconfirm --noprogressbar mingw-w64-x86_64-gdbm
+pacman.exe -S --noconfirm --noprogressbar mingw-w64-i686-gdbm mingw-w64-x86_64-gdbm
 
 Write-Host "`nClean cache & database" -ForegroundColor Yellow
 Write-Host "pacman.exe -Sc  --noconfirm" -ForegroundColor Yellow

@@ -1,28 +1,26 @@
 Patch by MSP-Greg
-first hunk adjusts timeout for long disk write
-second hunk may lower false failures from test_write_no_garbage when run parallel
-diff --git a/test/ruby/test_io.rb b/test/ruby/test_io.rb
-index 009afc3297..f4bd604f88 100644
+1st hunk adjusts timeout for long disk write
+2nd hunk may lower false failures from test_write_no_garbage when run parallel
+3rd hunk test_select_leak often is just over 30 seconds on Appveyor r64007
+diff --git a/testdiff --git a/test/ruby/test_io.rb b/test/ruby/test_io.rb
+index 1c45787648..12f14e81ef 100644
 --- a/test/ruby/test_io.rb
 +++ b/test/ruby/test_io.rb
-@@ -3401,9 +3401,9 @@ def t.close(unlink_now = false)
+@@ -3403,9 +3403,9 @@ def t.close(unlink_now = false)
          end
          ret
        end
 -
-+      time_out = /mingw|mswin/ =~ RUBY_PLATFORM ? 70 : 30  # Appveyor 2017-11
++      time_out = /mingw/ =~ RUBY_PLATFORM ? 50 : 30  # Appveyor 2017-11
        begin
 -        assert_separately(["-", bug8431, t.path], <<-"end;", timeout: 30)
 +        assert_separately(["-", bug8431, t.path], <<-"end;", timeout: time_out)
            msg = ARGV.shift
            f = open(ARGV[0], "wb")
            f.seek(0xffff_ffff)
-@@ -3700,27 +3700,38 @@ def test_closed_stream_in_rescue
-       end;
-     end
- 
-+    # move asserts outside of loop for more consistent parallel results
+@@ -3705,25 +3705,43 @@ def test_closed_stream_in_rescue
      def test_write_no_garbage
+       skip "multiple threads already active" if Thread.list.size > 1
        res = {}
 +      before = []
 +      after = []
@@ -62,6 +60,24 @@ index 009afc3297..f4bd604f88 100644
 +        assert_equal a_buf[i], a_n[i], 'IO#write wrote expected size'
 +        assert_equal a_s[i]  , a_n[i], 'IO#syswrite wrote expected size'
 +      }
++      # clear for good measure
++      res = {}
++      before = []
++      after = []
++      freeze = []
++      a_n = []
++      a_s = []
++      a_buf = []
      end
  
      def test_pread
+@@ -3802,7 +3820,8 @@ def test_recycled_fd_close
+   end
+ 
+   def test_select_leak
+-    assert_no_memory_leak([], <<-"end;", <<-"end;", rss: true, timeout: 30)
++    time_out = /mingw/ =~ RUBY_PLATFORM ? 40 : 30  # Appveyor 2018-07
++    assert_no_memory_leak([], <<-"end;", <<-"end;", limit: 4, rss: true, timeout: time_out)
+       r, w = IO.pipe
+       rset = [r]
+       wset = [w]
