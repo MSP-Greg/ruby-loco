@@ -1,7 +1,6 @@
 Patch by MSP-Greg
 1st hunk adjusts timeout for long disk write
 2nd hunk may lower false failures from test_write_no_garbage when run parallel
-3rd hunk test_select_leak often is just over 30 seconds on Appveyor r64007
 diff --git a/testdiff --git a/test/ruby/test_io.rb b/test/ruby/test_io.rb
 index 1c45787648..12f14e81ef 100644
 --- a/test/ruby/test_io.rb
@@ -71,13 +70,3 @@ index 1c45787648..12f14e81ef 100644
      end
  
      def test_pread
-@@ -3802,7 +3820,8 @@ def test_recycled_fd_close
-   end
- 
-   def test_select_leak
--    assert_no_memory_leak([], <<-"end;", <<-"end;", rss: true, timeout: 30)
-+    time_out = /mingw/ =~ RUBY_PLATFORM ? 40 : 30  # Appveyor 2018-07
-+    assert_no_memory_leak([], <<-"end;", <<-"end;", limit: 4, rss: true, timeout: time_out)
-       r, w = IO.pipe
-       rset = [r]
-       wset = [w]
