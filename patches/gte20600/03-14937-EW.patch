@@ -1,0 +1,90 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <e@80x24.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on dcvr.yhbt.net
+X-Spam-Level: 
+X-Spam-ASN:  
+X-Spam-Status: No, score=-4.0 required=3.0 tests=ALL_TRUSTED,BAYES_00
+	shortcircuit=no autolearn=ham autolearn_force=no version=3.4.1
+Received: from localhost (dcvr.yhbt.net [127.0.0.1])
+	by dcvr.yhbt.net (Postfix) with ESMTP id BCFE41F597;
+	Wed, 25 Jul 2018 00:31:01 +0000 (UTC)
+Date: Wed, 25 Jul 2018 00:31:01 +0000
+From: Eric Wong <e@80x24.org>
+To: spew@80x24.org
+Subject: [PATCH 3/1] SQUASH: fixup FD draining
+Message-ID: <20180725003101.ey2mmcu7mauvmfew@whir>
+References: <20180724234104.19419-1-e@80x24.org>
+ <20180725001947.77uutfvtkn3cq235@whir>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20180725001947.77uutfvtkn3cq235@whir>
+List-Id: <spew.80x24.org>
+Archived-At: <https://80x24.org/spew/20180725003101.ey2mmcu7mauvmfew@whir/>
+List-Archive: <https://80x24.org/spew/>
+List-Post: <mailto:spew@80x24.org>
+
+We need exclusive access on sigwait_fd to drain, otherwise
+we risk starving other threads.
+---
+ thread.c         | 10 ++++++++--
+ thread_pthread.c |  8 --------
+ thread_win32.c   |  6 ------
+ 3 files changed, 8 insertions(+), 16 deletions(-)
+
+diff --git a/thread.c b/thread.c
+index 9b3ac83f8c..41f1383c76 100644
+--- a/thread.c
++++ b/thread.c
+@@ -2167,9 +2167,15 @@ rb_threadptr_execute_interrupts(rb_thread_t *th, int blocking_timing)
+ 	/* signal handling */
+ 	if (trap_interrupt && (th == th->vm->main_thread)) {
+ 	    enum rb_thread_status prev_status = th->status;
++	    int sigwait_fd = rb_sigwait_fd_get(th);
++
++	    if (sigwait_fd >= 0) {
++		consume_communication_pipe(sigwait_fd);
++		ruby_sigchld_handler(th->vm);
++		rb_sigwait_fd_put(th, sigwait_fd);
++		rb_sigwait_fd_migrate(th->vm);
++	    }
+ 	    th->status = THREAD_RUNNABLE;
+-	    rb_sigwait_fd_drain();
+-	    ruby_sigchld_handler(th->vm);
+ 	    while ((sig = rb_get_next_signal()) != 0) {
+ 		rb_signal_exec(th, sig);
+ 	    }
+diff --git a/thread_pthread.c b/thread_pthread.c
+index 402cd12fd0..a41411cf39 100644
+--- a/thread_pthread.c
++++ b/thread_pthread.c
+@@ -1766,12 +1766,4 @@ native_sleep(rb_thread_t *th, struct timespec *timeout_rel)
+         native_cond_sleep(th, timeout_rel);
+     }
+ }
+-
+-static void
+-rb_sigwait_fd_drain(void)
+-{
+-    if (timer_thread_pipe.normal[0] >= 0) {
+-        consume_communication_pipe(timer_thread_pipe.normal[0]);
+-    }
+-}
+ #endif /* THREAD_SYSTEM_DEPENDENT_IMPLEMENTATION */
+diff --git a/thread_win32.c b/thread_win32.c
+index e21dca807e..0b04ce62b6 100644
+--- a/thread_win32.c
++++ b/thread_win32.c
+@@ -821,10 +821,4 @@ rb_thread_create_mjit_thread(void (*worker_func)(void))
+     w32_resume_thread(thread_id);
+     return TRUE;
+ }
+-
+-static void
+-rb_sigwait_fd_drain(void)
+-{
+-    /* noop */
+-}
+ #endif /* THREAD_SYSTEM_DEPENDENT_IMPLEMENTATION */
+-- 
+EW
