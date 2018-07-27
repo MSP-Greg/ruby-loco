@@ -83,5 +83,8 @@ if ($LastExitCode -and $LastExitCode -ne 0) {
 Write-Host "$($dash * 63) MinGW Package Check" -ForegroundColor Yellow
 bash -lc "pacman -Qs x86_64\.\+\(gcc\|gdbm\|openssl\) | sed -n '/^local/p' | sed 's/^local\///' | sed 's/ (.\+$//'"
 
+gpgconf.exe --kill all
+dirmngr.exe --shutdown
+
 Write-Host "`n$($dash * 80)`n" -ForegroundColor Yellow
 $orig_path = $env:path
