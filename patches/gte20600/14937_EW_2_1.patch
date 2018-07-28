@@ -1,0 +1,1609 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <e@80x24.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on dcvr.yhbt.net
+X-Spam-Level: 
+X-Spam-ASN:  
+X-Spam-Status: No, score=-4.0 required=3.0 tests=ALL_TRUSTED,BAYES_00
+	shortcircuit=no autolearn=ham autolearn_force=no version=3.4.1
+Received: from localhost (dcvr.yhbt.net [127.0.0.1])
+	by dcvr.yhbt.net (Postfix) with ESMTP id 5A94C1F597
+	for <spew@80x24.org>; Sat, 28 Jul 2018 20:17:23 +0000 (UTC)
+From: Eric Wong <e@80x24.org>
+To: spew@80x24.org
+Subject: [PATCH] thread_pthread: remove timer-thread by restructuring GVL
+Date: Sat, 28 Jul 2018 20:17:23 +0000
+Message-Id: <20180728201723.20279-1-e@80x24.org>
+List-Id: <spew.80x24.org>
+Archived-At: <https://80x24.org/spew/20180728201723.20279-1-e@80x24.org/>
+List-Archive: <https://80x24.org/spew/>
+List-Post: <mailto:spew@80x24.org>
+
+To reduce resource use and reduce CI failure; remove
+timer-thread.  Single-threaded Ruby processes (including forked
+children) will never see extra thread overhead.  This prevents
+glibc and jemalloc from going into multi-threaded mode and
+initializing locks or causing fragmentation via arena explosion.
+
+The GVL is implements its own wait-queue as a ccan/list to
+permit controlling wakeup order.  Timeslice under contention is
+handled by a designated timer thread (similar to choosing a
+"patrol_thread" for current deadlock checking).
+
+There is only one self-pipe, now, as wakeups for timeslice are
+done independently using condition variables.  This reduces FD
+pressure slightly.
+
+Signal handling is handled directly by a Ruby Thread (instead
+of timer-thread) by exposing signal self-pipe to callers of
+rb_thread_fd_select, native_sleep, rb_wait_for_single_fd, etc...
+Acquiring, using, and releasing the self-pipe is exposed via 4
+new internal functions:
+
+1) rb_sigwait_fd_get - exclusively acquire timer_thread_pipe.normal[0]
+
+2) rb_sigwait_fd_sleep - sleep and wait for signal (and no other FDs)
+
+3) rb_sigwait_fd_put - release acquired result from rb_sigwait_fd_get
+
+4) rb_sigwait_fd_migrate - migrate signal handling to another thread
+                           after calling rb_sigwait_fd_put.
+
+rb_sigwait_fd_migrate is necessary for waitpid callers because
+only one thread can wait on self-pipe at a time, otherwise a
+deadlock will occur if threads fight over the self-pipe.
+
+TRAP_INTERRUPT_MASK is now set for the main thread directly in
+signal handler via rb_thread_wakeup_timer_thread.
+
+Originally, I wanted to use POSIX timers
+(timer_create/timer_settime) for this.  Unfortunately, this
+proved unfeasible as Mutex#sleep resumes on spurious wakeups and
+test/thread/test_cv.rb::test_condvar_timed_wait failed.  Using
+pthread_sigmask to mask out SIGVTALRM fixed that test,  but
+test/fiddle/test_function.rb::test_nogvl_poll proved there'd be
+some unavoidable (and frequent) incompatibilities from that
+approach.
+---
+ internal.h                |   3 +
+ process.c                 | 103 ++++++-
+ signal.c                  |   7 +-
+ test/ruby/test_process.rb |   2 +-
+ thread.c                  | 303 ++++++++++++++------
+ thread_pthread.c          | 587 ++++++++++++--------------------------
+ thread_pthread.h          |   6 +-
+ thread_win32.c            |  22 +-
+ vm_core.h                 |   2 +-
+ 9 files changed, 524 insertions(+), 511 deletions(-)
+
+diff --git a/internal.h b/internal.h
+index 9075d16360..0d5c952158 100644
+--- a/internal.h
++++ b/internal.h
+@@ -77,6 +77,9 @@ extern "C" {
+ # define __has_extension __has_feature
+ #endif
+ 
++/* Prevent compiler from reordering access */
++#define ACCESS_ONCE(type,x) (*((volatile type *)&(x)))
++
+ #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+ # define STATIC_ASSERT(name, expr) _Static_assert(expr, #name ": " #expr)
+ #elif GCC_VERSION_SINCE(4, 6, 0) || __has_extension(c_static_assert)
+diff --git a/process.c b/process.c
+index dd70c7104c..57ad802631 100644
+--- a/process.c
++++ b/process.c
+@@ -936,13 +936,51 @@ void rb_native_cond_signal(rb_nativethread_cond_t *);
+ void rb_native_cond_wait(rb_nativethread_cond_t *, rb_nativethread_lock_t *);
+ rb_nativethread_cond_t *rb_sleep_cond_get(const rb_execution_context_t *);
+ void rb_sleep_cond_put(rb_nativethread_cond_t *);
++int rb_sigwait_fd_get(const rb_thread_t *);
++void rb_sigwait_sleep(const rb_thread_t *, int fd, const struct timespec *);
++void rb_sigwait_fd_put(const rb_thread_t *, int fd);
++
++/*
++ * When a thread is done using sigwait_fd and there are other threads
++ * sleeping on waitpid, we must kick one of the threads out of
++ * rb_native_cond_wait so it can switch to rb_sigwait_sleep
++ */
++static void
++sigwait_fd_migrate_sleeper(rb_vm_t *vm)
++{
++    struct waitpid_state *w = 0;
++
++    list_for_each(&vm->waiting_pids, w, wnode) {
++        if (!w->cond) continue; /* somebody else already got sigwait_fd */
++        rb_native_cond_signal(w->cond);
++        return;
++    }
++    list_for_each(&vm->waiting_grps, w, wnode) {
++        if (!w->cond) continue; /* somebody else already got sigwait_fd */
++        rb_native_cond_signal(w->cond);
++        return;
++    }
++}
++
++void
++rb_sigwait_fd_migrate(rb_vm_t *vm)
++{
++    rb_native_mutex_lock(&vm->waitpid_lock);
++    sigwait_fd_migrate_sleeper(vm);
++    rb_native_mutex_unlock(&vm->waitpid_lock);
++}
+ 
+ static void
+ waitpid_notify(struct waitpid_state *w, rb_pid_t ret)
+ {
+     w->ret = ret;
+     list_del_init(&w->wnode);
+-    rb_native_cond_signal(w->cond);
++    if (w->cond) {
++        rb_native_cond_signal(w->cond);
++    }
++    else {
++        /* w is owned by this thread */
++    }
+ }
+ 
+ #ifdef _WIN32 /* for spawnvp result from mjit.c */
+@@ -954,7 +992,7 @@ waitpid_notify(struct waitpid_state *w, rb_pid_t ret)
+ #endif
+ 
+ extern volatile unsigned int ruby_nocldwait; /* signal.c */
+-/* called by timer thread */
++/* called by timer thread or thread which acquired sigwait_fd */
+ static void
+ waitpid_each(struct list_head *head)
+ {
+@@ -1008,6 +1046,17 @@ waitpid_state_init(struct waitpid_state *w, rb_pid_t pid, int options)
+     w->options = options;
+ }
+ 
++static const struct timespec *
++sigwait_sleep_time(void)
++{
++    if (SIGCHLD_LOSSY) {
++        static const struct timespec busy_wait = { 0, 100000000 };
++
++        return &busy_wait;
++    }
++    return 0;
++}
++
+ /*
+  * must be called with vm->waitpid_lock held, this is not interruptible
+  */
+@@ -1026,13 +1075,30 @@ ruby_waitpid_locked(rb_vm_t *vm, rb_pid_t pid, int *status, int options,
+         if (w.ret == -1) w.errnum = errno;
+     }
+     else {
+-        w.cond = cond;
++        int sigwait_fd;
++
+         w.ec = 0;
+         list_add(w.pid > 0 ? &vm->waiting_pids : &vm->waiting_grps, &w.wnode);
+         do {
+-            rb_native_cond_wait(w.cond, &vm->waitpid_lock);
++            sigwait_fd = rb_sigwait_fd_get(0);
++
++            if (sigwait_fd >= 0) {
++                w.cond = 0;
++                rb_native_mutex_unlock(&vm->waitpid_lock);
++                rb_sigwait_sleep(0, sigwait_fd, sigwait_sleep_time());
++                rb_native_mutex_lock(&vm->waitpid_lock);
++                rb_sigwait_fd_put(0, sigwait_fd);
++            }
++            else {
++                w.cond = cond;
++                rb_native_cond_wait(w.cond, &vm->waitpid_lock);
++            }
+         } while (!w.ret);
+         list_del(&w.wnode);
++
++        /* we're done, maybe other waitpid callers are not: */
++        if (sigwait_fd >= 0)
++            sigwait_fd_migrate_sleeper(vm);
+     }
+     if (status) {
+         *status = w.status;
+@@ -1047,7 +1113,10 @@ waitpid_wake(void *x)
+     struct waitpid_state *w = x;
+ 
+     /* th->interrupt_lock is already held by rb_threadptr_interrupt_common */
+-    rb_native_cond_signal(w->cond);
++    if (w->cond)
++        rb_native_cond_signal(w->cond);
++    else
++        rb_thread_wakeup_timer_thread(0); /* kick sigwait_fd */
+ }
+ 
+ static void *
+@@ -1055,6 +1124,7 @@ waitpid_nogvl(void *x)
+ {
+     struct waitpid_state *w = x;
+     rb_thread_t *th = rb_ec_thread_ptr(w->ec);
++    int sigwait_fd = -1;
+ 
+     rb_native_mutex_lock(&th->interrupt_lock);
+     /*
+@@ -1062,13 +1132,30 @@ waitpid_nogvl(void *x)
+      * by the time we enter this.  And we may also be interrupted.
+      */
+     if (!w->ret && !RUBY_VM_INTERRUPTED_ANY(w->ec)) {
+-        if (SIGCHLD_LOSSY) {
+-            rb_thread_wakeup_timer_thread();
++        sigwait_fd = rb_sigwait_fd_get(th);
++        if (sigwait_fd >= 0) {
++            rb_nativethread_cond_t *cond = w->cond;
++
++            w->cond = 0;
++            rb_native_mutex_unlock(&th->interrupt_lock);
++            rb_sigwait_sleep(th, sigwait_fd, sigwait_sleep_time());
++            rb_native_mutex_lock(&th->interrupt_lock);
++            w->cond = cond;
++            rb_sigwait_fd_put(th, sigwait_fd);
++        }
++        else {
++            /* another thread calling rb_sigwait_sleep will process
++             * signals for us */
++            if (SIGCHLD_LOSSY) {
++                rb_thread_wakeup_timer_thread(0);
++            }
++            rb_native_cond_wait(w->cond, &th->interrupt_lock);
+         }
+-        rb_native_cond_wait(w->cond, &th->interrupt_lock);
+     }
+     rb_native_mutex_unlock(&th->interrupt_lock);
+ 
++    if (sigwait_fd >= 0)
++        rb_sigwait_fd_migrate(th->vm);
+     return 0;
+ }
+ 
+diff --git a/signal.c b/signal.c
+index 6393273adf..65b45cf6bd 100644
+--- a/signal.c
++++ b/signal.c
+@@ -709,9 +709,6 @@ signal_enque(int sig)
+ 
+ static rb_atomic_t sigchld_hit;
+ 
+-/* Prevent compiler from reordering access */
+-#define ACCESS_ONCE(type,x) (*((volatile type *)&(x)))
+-
+ static RETSIGTYPE
+ sighandler(int sig)
+ {
+@@ -730,7 +727,7 @@ sighandler(int sig)
+     else {
+         signal_enque(sig);
+     }
+-    rb_thread_wakeup_timer_thread();
++    rb_thread_wakeup_timer_thread(sig);
+ #if !defined(BSD_SIGNAL) && !defined(POSIX_SIGNAL)
+     ruby_signal(sig, sighandler);
+ #endif
+@@ -764,7 +761,6 @@ rb_enable_interrupt(void)
+ #ifdef HAVE_PTHREAD_SIGMASK
+     sigset_t mask;
+     sigemptyset(&mask);
+-    sigaddset(&mask, RUBY_SIGCHLD); /* timer-thread handles this */
+     pthread_sigmask(SIG_SETMASK, &mask, NULL);
+ #endif
+ }
+@@ -1077,7 +1073,6 @@ rb_trap_exit(void)
+ 
+ void ruby_waitpid_all(rb_vm_t *); /* process.c */
+ 
+-/* only runs in the timer-thread */
+ void
+ ruby_sigchld_handler(rb_vm_t *vm)
+ {
+diff --git a/test/ruby/test_process.rb b/test/ruby/test_process.rb
+index 6a32702b03..2614f4ec8a 100644
+--- a/test/ruby/test_process.rb
++++ b/test/ruby/test_process.rb
+@@ -1761,7 +1761,7 @@ def test_daemon_no_threads
+           puts Dir.entries("/proc/self/task") - %W[. ..]
+         end
+         bug4920 = '[ruby-dev:43873]'
+-        assert_equal(2, data.size, bug4920)
++        assert_include(1..2, data.size, bug4920)
+         assert_not_include(data.map(&:to_i), pid)
+       end
+     else # darwin
+diff --git a/thread.c b/thread.c
+index a7d48a464f..f52e338859 100644
+--- a/thread.c
++++ b/thread.c
+@@ -108,6 +108,10 @@ static void timespec_add(struct timespec *, const struct timespec *);
+ static void timespec_sub(struct timespec *, const struct timespec *);
+ static int timespec_update_expire(struct timespec *, const struct timespec *);
+ static void getclockofday(struct timespec *);
++NORETURN(static void async_bug_fd(const char *mesg, int errno_arg, int fd));
++static void consume_communication_pipe(int fd);
++static void check_signals_nogvl(rb_thread_t *, int sigwait_fd);
++void rb_sigwait_fd_migrate(rb_vm_t *); /* process.c */
+ 
+ #define eKillSignal INT2FIX(0)
+ #define eTerminateSignal INT2FIX(1)
+@@ -348,7 +352,15 @@ rb_thread_s_debug_set(VALUE self, VALUE val)
+ #endif
+ NOINLINE(static int thread_start_func_2(rb_thread_t *th, VALUE *stack_start,
+ 					VALUE *register_stack_start));
++#ifndef HAVE_PTHREAD_H
+ static void timer_thread_function(void *);
++#endif
++
++static void
++ubf_sigwait(void *ignore)
++{
++    rb_thread_wakeup_timer_thread(0);
++}
+ 
+ #if   defined(_WIN32)
+ #include "thread_win32.c"
+@@ -2137,6 +2149,9 @@ threadptr_get_interrupts(rb_thread_t *th)
+     return interrupt & (rb_atomic_t)~ec->interrupt_mask;
+ }
+ 
++/* signal.c */
++void ruby_sigchld_handler(rb_vm_t *);
++
+ MJIT_FUNC_EXPORTED void
+ rb_threadptr_execute_interrupts(rb_thread_t *th, int blocking_timing)
+ {
+@@ -2163,6 +2178,14 @@ rb_threadptr_execute_interrupts(rb_thread_t *th, int blocking_timing)
+ 	/* signal handling */
+ 	if (trap_interrupt && (th == th->vm->main_thread)) {
+ 	    enum rb_thread_status prev_status = th->status;
++	    int sigwait_fd = rb_sigwait_fd_get(th);
++
++	    if (sigwait_fd >= 0) {
++		consume_communication_pipe(sigwait_fd);
++		ruby_sigchld_handler(th->vm);
++		rb_sigwait_fd_put(th, sigwait_fd);
++		rb_sigwait_fd_migrate(th->vm);
++	    }
+ 	    th->status = THREAD_RUNNABLE;
+ 	    while ((sig = rb_get_next_signal()) != 0) {
+ 		rb_signal_exec(th, sig);
+@@ -3840,86 +3863,75 @@ wait_retryable(int *result, int errnum, struct timespec *timeout,
+     return FALSE;
+ }
+ 
+-#define restore_fdset(fds1, fds2) \
+-    ((fds1) ? rb_fd_dup(fds1, fds2) : (void)0)
+-
+ struct select_set {
+-    rb_fdset_t read;
+-    rb_fdset_t write;
+-    rb_fdset_t except;
++    int max;
++    int sigwait_fd;
++    rb_thread_t *th;
++    rb_fdset_t *rset;
++    rb_fdset_t *wset;
++    rb_fdset_t *eset;
++    rb_fdset_t orig_rset;
++    rb_fdset_t orig_wset;
++    rb_fdset_t orig_eset;
++    struct timeval *timeout;
+ };
+ 
+-static size_t
+-select_set_memsize(const void *p)
++static VALUE
++select_set_free(VALUE p)
+ {
+-    return sizeof(struct select_set);
+-}
++    struct select_set *set = (struct select_set *)p;
+ 
+-static void
+-select_set_free(void *p)
+-{
+-    struct select_set *orig = p;
++    if (set->sigwait_fd >= 0) {
++        rb_sigwait_fd_put(set->th, set->sigwait_fd);
++        rb_sigwait_fd_migrate(set->th->vm);
++    }
+ 
+-    rb_fd_term(&orig->read);
+-    rb_fd_term(&orig->write);
+-    rb_fd_term(&orig->except);
+-    xfree(orig);
+-}
++    rb_fd_term(&set->orig_rset);
++    rb_fd_term(&set->orig_wset);
++    rb_fd_term(&set->orig_eset);
+ 
+-static const rb_data_type_t select_set_type = {
+-    "select_set",
+-    {NULL, select_set_free, select_set_memsize,},
+-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY
+-};
++    return Qfalse;
++}
+ 
+-static int
+-do_select(int n, rb_fdset_t *const readfds, rb_fdset_t *const writefds,
+-	  rb_fdset_t *const exceptfds, struct timeval *timeout)
++static VALUE
++do_select(VALUE p)
+ {
++    struct select_set *set = (struct select_set *)p;
+     int MAYBE_UNUSED(result);
+     int lerrno;
+     struct timespec ts, end, *tsp;
+-    rb_thread_t *th = GET_THREAD();
+-    VALUE o;
+-    struct select_set *orig;
+ 
+-    o = TypedData_Make_Struct(0, struct select_set, &select_set_type, orig);
+-
+-    timeout_prepare(&tsp, &ts, &end, timeout);
++    timeout_prepare(&tsp, &ts, &end, set->timeout);
++#define restore_fdset(dst, src) \
++    ((dst) ? rb_fd_dup(dst, src) : (void)0)
+ #define do_select_update() \
+-    (restore_fdset(readfds, &orig->read), \
+-     restore_fdset(writefds, &orig->write), \
+-     restore_fdset(exceptfds, &orig->except), \
++    (restore_fdset(set->rset, &set->orig_rset), \
++     restore_fdset(set->wset, &set->orig_wset), \
++     restore_fdset(set->eset, &set->orig_eset), \
+      TRUE)
+ 
+-#define fd_init_copy(f) \
+-    (f##fds) ? rb_fd_init_copy(&orig->f, f##fds) : rb_fd_no_init(&orig->f)
+-    fd_init_copy(read);
+-    fd_init_copy(write);
+-    fd_init_copy(except);
+-#undef fd_init_copy
+-
+     do {
+ 	lerrno = 0;
+ 
+-	BLOCKING_REGION(th, {
+-	    result = native_fd_select(n, readfds, writefds, exceptfds,
+-				      timeval_for(timeout, tsp), th);
++	BLOCKING_REGION(set->th, {
++	    result = native_fd_select(set->max, set->rset, set->wset, set->eset,
++				      timeval_for(set->timeout, tsp), set->th);
+ 	    if (result < 0) lerrno = errno;
+-	}, ubf_select, th, FALSE);
++	}, set->sigwait_fd >= 0 ? ubf_sigwait : ubf_select, set->th, FALSE);
+ 
+-	RUBY_VM_CHECK_INTS_BLOCKING(th->ec); /* may raise */
+-    } while (wait_retryable(&result, lerrno, tsp, &end) && do_select_update());
++        if (set->sigwait_fd >= 0 && rb_fd_isset(set->sigwait_fd, set->rset)) {
++            result--;
++            check_signals_nogvl(set->th, set->sigwait_fd);
++        }
+ 
+-    /* didn't raise, perform cleanup ourselves */
+-    select_set_free(orig);
+-    rb_gc_force_recycle(o);
++        RUBY_VM_CHECK_INTS_BLOCKING(set->th->ec); /* may raise */
++    } while (wait_retryable(&result, lerrno, tsp, &end) && do_select_update());
+ 
+     if (result < 0) {
+ 	errno = lerrno;
+     }
+ 
+-    return result;
++    return (VALUE)result;
+ }
+ 
+ static void
+@@ -3955,11 +3967,42 @@ rb_thread_fd_writable(int fd)
+     return TRUE;
+ }
+ 
++static rb_fdset_t *
++init_set_fd(int fd, rb_fdset_t *fds)
++{
++    if (fd < 0) {
++	return 0;
++    }
++    rb_fd_init(fds);
++    rb_fd_set(fd, fds);
++
++    return fds;
++}
++
+ int
+ rb_thread_fd_select(int max, rb_fdset_t * read, rb_fdset_t * write, rb_fdset_t * except,
+ 		    struct timeval *timeout)
+ {
+-    if (!read && !write && !except) {
++    struct select_set set;
++
++    set.th = GET_THREAD();
++    set.max = max;
++    set.sigwait_fd = rb_sigwait_fd_get(set.th);
++    set.rset = read;
++    set.wset = write;
++    set.eset = except;
++    set.timeout = timeout;
++
++    if (set.sigwait_fd >= 0) {
++        if (set.rset)
++            rb_fd_set(set.sigwait_fd, set.rset);
++        else
++            set.rset = init_set_fd(set.sigwait_fd, &set.orig_rset);
++        if (set.sigwait_fd > set.max) {
++            set.max = set.sigwait_fd + 1;
++        }
++    }
++    if (!set.rset && !set.wset && !set.eset) {
+ 	if (!timeout) {
+ 	    rb_thread_sleep_forever();
+ 	    return 0;
+@@ -3968,16 +4011,23 @@ rb_thread_fd_select(int max, rb_fdset_t * read, rb_fdset_t * write, rb_fdset_t *
+ 	return 0;
+     }
+ 
+-    if (read) {
+-	rb_fd_resize(max - 1, read);
+-    }
+-    if (write) {
+-	rb_fd_resize(max - 1, write);
+-    }
+-    if (except) {
+-	rb_fd_resize(max - 1, except);
+-    }
+-    return do_select(max, read, write, except, timeout);
++#define fd_init_copy(f) do { \
++        if (set.f) { \
++            rb_fd_resize(set.max - 1, set.f); \
++            if (&set.orig_##f != set.f) { /* sigwait_fd */ \
++                rb_fd_init_copy(&set.orig_##f, set.f); \
++            } \
++        } \
++        else { \
++            rb_fd_no_init(&set.orig_##f); \
++        } \
++    } while (0)
++    fd_init_copy(rset);
++    fd_init_copy(wset);
++    fd_init_copy(eset);
++#undef fd_init_copy
++
++    return (int)rb_ensure(do_select, (VALUE)&set, select_set_free, (VALUE)&set);
+ }
+ 
+ #ifdef USE_POLL
+@@ -4028,31 +4078,55 @@ ruby_ppoll(struct pollfd *fds, nfds_t nfds,
+ int
+ rb_wait_for_single_fd(int fd, int events, struct timeval *timeout)
+ {
+-    struct pollfd fds;
++    struct pollfd fds[2];
+     int result = 0, lerrno;
+     struct timespec ts, end, *tsp;
+     rb_thread_t *th = GET_THREAD();
++    nfds_t nfds;
++    rb_unblock_function_t *ubf;
+ 
+     timeout_prepare(&tsp, &ts, &end, timeout);
+-    fds.fd = fd;
+-    fds.events = (short)events;
+-
++    fds[0].fd = fd;
++    fds[0].events = (short)events;
+     do {
+-        fds.revents = 0;
++        fds[0].revents = 0;
++        fds[1].fd = rb_sigwait_fd_get(th);
++
++        if (fds[1].fd >= 0) {
++            fds[1].events = POLLIN;
++            fds[1].revents = 0;
++            nfds = 2;
++            ubf = ubf_sigwait;
++        }
++        else {
++            nfds = 1;
++            ubf = ubf_select;
++        }
++
+         lerrno = 0;
+         BLOCKING_REGION(th, {
+-            result = ppoll(&fds, 1, tsp, NULL);
++            result = ppoll(fds, nfds, tsp, NULL);
+             if (result < 0) lerrno = errno;
+-        }, ubf_select, th, FALSE);
++        }, ubf, th, FALSE);
+ 
++        if (fds[1].fd >= 0) {
++            if (fds[1].revents) {
++                result--;
++                check_signals_nogvl(th, fds[1].fd);
++                fds[1].revents = 0;
++            }
++            rb_sigwait_fd_put(th, fds[1].fd);
++            rb_sigwait_fd_migrate(th->vm);
++        }
+         RUBY_VM_CHECK_INTS_BLOCKING(th->ec);
+     } while (wait_retryable(&result, lerrno, tsp, &end));
++
+     if (result < 0) {
+ 	errno = lerrno;
+ 	return -1;
+     }
+ 
+-    if (fds.revents & POLLNVAL) {
++    if (fds[0].revents & POLLNVAL) {
+ 	errno = EBADF;
+ 	return -1;
+     }
+@@ -4062,32 +4136,20 @@ rb_wait_for_single_fd(int fd, int events, struct timeval *timeout)
+      * Therefore we need to fix it up.
+      */
+     result = 0;
+-    if (fds.revents & POLLIN_SET)
++    if (fds[0].revents & POLLIN_SET)
+ 	result |= RB_WAITFD_IN;
+-    if (fds.revents & POLLOUT_SET)
++    if (fds[0].revents & POLLOUT_SET)
+ 	result |= RB_WAITFD_OUT;
+-    if (fds.revents & POLLEX_SET)
++    if (fds[0].revents & POLLEX_SET)
+ 	result |= RB_WAITFD_PRI;
+ 
+     /* all requested events are ready if there is an error */
+-    if (fds.revents & POLLERR_SET)
++    if (fds[0].revents & POLLERR_SET)
+ 	result |= events;
+ 
+     return result;
+ }
+ #else /* ! USE_POLL - implement rb_io_poll_fd() using select() */
+-static rb_fdset_t *
+-init_set_fd(int fd, rb_fdset_t *fds)
+-{
+-    if (fd < 0) {
+-	return 0;
+-    }
+-    rb_fd_init(fds);
+-    rb_fd_set(fd, fds);
+-
+-    return fds;
+-}
+-
+ struct select_args {
+     union {
+ 	int fd;
+@@ -4168,10 +4230,6 @@ rb_gc_set_stack_end(VALUE **stack_end_p)
+ }
+ #endif
+ 
+-
+-/* signal.c */
+-void ruby_sigchld_handler(rb_vm_t *);
+-
+ /*
+  *
+  */
+@@ -4186,6 +4244,7 @@ rb_threadptr_check_signal(rb_thread_t *mth)
+     }
+ }
+ 
++#ifndef HAVE_PTHREAD_H
+ static void
+ timer_thread_function(void *arg)
+ {
+@@ -4218,6 +4277,66 @@ timer_thread_function(void *arg)
+     }
+ #endif
+ }
++#endif
++
++static void
++async_bug_fd(const char *mesg, int errno_arg, int fd)
++{
++    char buff[64];
++    size_t n = strlcpy(buff, mesg, sizeof(buff));
++    if (n < sizeof(buff)-3) {
++	ruby_snprintf(buff+n, sizeof(buff)-n, "(%d)", fd);
++    }
++    rb_async_bug_errno(buff, errno_arg);
++}
++
++/* VM-dependent API is not available for this function */
++static void
++consume_communication_pipe(int fd)
++{
++#define CCP_READ_BUFF_SIZE 1024
++    /* buffer can be shared because no one refers to them. */
++    static char buff[CCP_READ_BUFF_SIZE];
++    ssize_t result;
++
++    while (1) {
++	result = read(fd, buff, sizeof(buff));
++	if (result == 0) {
++	    return;
++	}
++	else if (result < 0) {
++	    int e = errno;
++	    switch (e) {
++	      case EINTR:
++		continue; /* retry */
++	      case EAGAIN:
++#if defined(EWOULDBLOCK) && EWOULDBLOCK != EAGAIN
++	      case EWOULDBLOCK:
++#endif
++		return;
++	      default:
++		async_bug_fd("consume_communication_pipe: read", e, fd);
++	    }
++	}
++    }
++}
++
++static void
++check_signals_nogvl(rb_thread_t *th, int sigwait_fd)
++{
++    rb_vm_t *vm = GET_VM(); /* th may be 0 */
++
++    consume_communication_pipe(sigwait_fd);
++    ubf_wakeup_all_threads();
++    ruby_sigchld_handler(vm);
++    if (rb_signal_buff_size()) {
++        if (th == vm->main_thread)
++            /* no need to lock + wakeup if already in main thread */
++            RUBY_VM_SET_TRAP_INTERRUPT(th->ec);
++        else
++            threadptr_trap_interrupt(vm->main_thread);
++    }
++}
+ 
+ void
+ rb_thread_stop_timer_thread(void)
+diff --git a/thread_pthread.c b/thread_pthread.c
+index 6420314577..019ef5d62c 100644
+--- a/thread_pthread.c
++++ b/thread_pthread.c
+@@ -45,26 +45,15 @@ void rb_native_cond_broadcast(rb_nativethread_cond_t *cond);
+ void rb_native_cond_wait(rb_nativethread_cond_t *cond, rb_nativethread_lock_t *mutex);
+ void rb_native_cond_initialize(rb_nativethread_cond_t *cond);
+ void rb_native_cond_destroy(rb_nativethread_cond_t *cond);
+-static void rb_thread_wakeup_timer_thread_low(void);
++static void ubf_wakeup_all_threads(void);
++static int ubf_threads_empty(void);
++static int native_cond_timedwait(rb_nativethread_cond_t *, pthread_mutex_t *,
++                                 const struct timespec *);
+ 
+-#define TIMER_THREAD_MASK    (1)
+-#define TIMER_THREAD_SLEEPY  (2|TIMER_THREAD_MASK)
+-#define TIMER_THREAD_BUSY    (4|TIMER_THREAD_MASK)
++#define TIMER_THREAD_CREATED_P() (timer_thread_pipe.owner_process == getpid())
+ 
+-#if defined(HAVE_POLL) && defined(HAVE_FCNTL) && defined(F_GETFL) && \
+-   defined(F_SETFL) && defined(O_NONBLOCK) && \
+-   defined(F_GETFD) && defined(F_SETFD) && defined(FD_CLOEXEC)
+-/* The timer thread sleeps while only one Ruby thread is running. */
+-# define TIMER_IMPL TIMER_THREAD_SLEEPY
+-#else
+-# define TIMER_IMPL TIMER_THREAD_BUSY
+-#endif
+-
+-static struct {
+-    pthread_t id;
+-    int created;
+-} timer_thread;
+-#define TIMER_THREAD_CREATED_P() (timer_thread.created != 0)
++#define THREAD_INVALID ((const rb_thread_t *)-1)
++static const rb_thread_t *sigwait_th;
+ 
+ #if defined(HAVE_PTHREAD_CONDATTR_SETCLOCK) && \
+     defined(CLOCK_REALTIME) && defined(CLOCK_MONOTONIC) && \
+@@ -75,49 +64,86 @@ static pthread_condattr_t *condattr_monotonic = &condattr_mono;
+ static const void *const condattr_monotonic = NULL;
+ #endif
+ 
++/* 100ms.  10ms is too small for user level thread scheduling
++ * on recent Linux (tested on 2.6.35)
++ */
++#define TIME_QUANTUM_USEC (100 * 1000)
++
++static struct timespec native_cond_timeout(rb_nativethread_cond_t *,
++                                           struct timespec rel);
++
+ static void
+-gvl_acquire_common(rb_vm_t *vm)
++gvl_acquire_common(rb_vm_t *vm, rb_thread_t *th)
+ {
+     if (vm->gvl.acquired) {
+-
+-	if (!vm->gvl.waiting++) {
+-	    /*
+-	     * Wake up timer thread iff timer thread is slept.
+-	     * When timer thread is polling mode, we don't want to
+-	     * make confusing timer thread interval time.
+-	     */
+-	    rb_thread_wakeup_timer_thread_low();
+-	}
+-
+-	while (vm->gvl.acquired) {
+-            rb_native_cond_wait(&vm->gvl.cond, &vm->gvl.lock);
+-	}
+-
+-	--vm->gvl.waiting;
+-
+-	if (vm->gvl.need_yield) {
+-	    vm->gvl.need_yield = 0;
++        native_thread_data_t *nd = &th->native_thread_data;
++
++        VM_ASSERT(th->unblock.func == 0 && "we reuse ubf_list for GVL waitq");
++
++        list_add_tail(&vm->gvl.waitq, &nd->ubf_list);
++        do {
++            if (!vm->gvl.timer) {
++                struct timespec ts = { 0, TIME_QUANTUM_USEC * 1000 };
++                /*
++                 * become designated timer thread to kick vm->gvl.acquired
++                 * periodically
++                 */
++                ts = native_cond_timeout(&nd->sleep_cond, ts);
++                vm->gvl.timer = th;
++                native_cond_timedwait(&nd->sleep_cond, &vm->gvl.lock, &ts);
++                vm->gvl.timer = 0;
++                ubf_wakeup_all_threads();
++
++                /*
++                 * Timeslice.  We can't touch thread_destruct_lock here,
++                 * as the process may fork while this thread is contending
++                 * for GVL:
++                 */
++                if (vm->gvl.acquired)
++                    RUBY_VM_SET_TIMER_INTERRUPT(vm->gvl.acquired->ec);
++            }
++            else {
++                rb_native_cond_wait(&nd->sleep_cond, &vm->gvl.lock);
++            }
++        } while (vm->gvl.acquired);
++
++        list_del_init(&nd->ubf_list);
++
++        if (vm->gvl.need_yield) {
++            vm->gvl.need_yield = 0;
+             rb_native_cond_signal(&vm->gvl.switch_cond);
+-	}
++        }
+     }
++    vm->gvl.acquired = th;
++    /*
++     * Designate the next gvl.timer thread, favor the last thread in
++     * the waitq since it will be in waitq longest
++     */
++    if (!vm->gvl.timer) {
++        native_thread_data_t *last;
+ 
+-    vm->gvl.acquired = 1;
++        last = list_tail(&vm->gvl.waitq, native_thread_data_t, ubf_list);
++        if (last) rb_native_cond_signal(&last->sleep_cond);
++    }
+ }
+ 
+ static void
+ gvl_acquire(rb_vm_t *vm, rb_thread_t *th)
+ {
+     rb_native_mutex_lock(&vm->gvl.lock);
+-    gvl_acquire_common(vm);
++    gvl_acquire_common(vm, th);
+     rb_native_mutex_unlock(&vm->gvl.lock);
+ }
+ 
+-static void
++static native_thread_data_t *
+ gvl_release_common(rb_vm_t *vm)
+ {
++    native_thread_data_t *next;
+     vm->gvl.acquired = 0;
+-    if (vm->gvl.waiting > 0)
+-        rb_native_cond_signal(&vm->gvl.cond);
++    next = list_top(&vm->gvl.waitq, native_thread_data_t, ubf_list);
++    if (next) rb_native_cond_signal(&next->sleep_cond);
++
++    return next;
+ }
+ 
+ static void
+@@ -131,34 +157,32 @@ gvl_release(rb_vm_t *vm)
+ static void
+ gvl_yield(rb_vm_t *vm, rb_thread_t *th)
+ {
+-    rb_native_mutex_lock(&vm->gvl.lock);
++    native_thread_data_t *next;
+ 
+-    gvl_release_common(vm);
++    rb_native_mutex_lock(&vm->gvl.lock);
++    next = gvl_release_common(vm);
+ 
+     /* An another thread is processing GVL yield. */
+     if (UNLIKELY(vm->gvl.wait_yield)) {
+-	while (vm->gvl.wait_yield)
++        while (vm->gvl.wait_yield)
+             rb_native_cond_wait(&vm->gvl.switch_wait_cond, &vm->gvl.lock);
+-	goto acquire;
+     }
+-
+-    if (vm->gvl.waiting > 0) {
+-	/* Wait until another thread task take GVL. */
+-	vm->gvl.need_yield = 1;
+-	vm->gvl.wait_yield = 1;
+-	while (vm->gvl.need_yield)
++    else if (next) {
++        /* Wait until another thread task takes GVL. */
++        vm->gvl.need_yield = 1;
++        vm->gvl.wait_yield = 1;
++        while (vm->gvl.need_yield)
+             rb_native_cond_wait(&vm->gvl.switch_cond, &vm->gvl.lock);
+-	vm->gvl.wait_yield = 0;
++        vm->gvl.wait_yield = 0;
++        rb_native_cond_broadcast(&vm->gvl.switch_wait_cond);
+     }
+     else {
+-	rb_native_mutex_unlock(&vm->gvl.lock);
+-	sched_yield();
++        rb_native_mutex_unlock(&vm->gvl.lock);
++        sched_yield();
+         rb_native_mutex_lock(&vm->gvl.lock);
++        rb_native_cond_broadcast(&vm->gvl.switch_wait_cond);
+     }
+-
+-    rb_native_cond_broadcast(&vm->gvl.switch_wait_cond);
+-  acquire:
+-    gvl_acquire_common(vm);
++    gvl_acquire_common(vm, th);
+     rb_native_mutex_unlock(&vm->gvl.lock);
+ }
+ 
+@@ -166,11 +190,11 @@ static void
+ gvl_init(rb_vm_t *vm)
+ {
+     rb_native_mutex_initialize(&vm->gvl.lock);
+-    rb_native_cond_initialize(&vm->gvl.cond);
+     rb_native_cond_initialize(&vm->gvl.switch_cond);
+     rb_native_cond_initialize(&vm->gvl.switch_wait_cond);
++    list_head_init(&vm->gvl.waitq);
+     vm->gvl.acquired = 0;
+-    vm->gvl.waiting = 0;
++    vm->gvl.timer = 0;
+     vm->gvl.need_yield = 0;
+     vm->gvl.wait_yield = 0;
+ }
+@@ -180,7 +204,6 @@ gvl_destroy(rb_vm_t *vm)
+ {
+     rb_native_cond_destroy(&vm->gvl.switch_wait_cond);
+     rb_native_cond_destroy(&vm->gvl.switch_cond);
+-    rb_native_cond_destroy(&vm->gvl.cond);
+     rb_native_mutex_destroy(&vm->gvl.lock);
+ }
+ 
+@@ -989,17 +1012,6 @@ native_thread_create(rb_thread_t *th)
+     return err;
+ }
+ 
+-#if (TIMER_IMPL & TIMER_THREAD_MASK)
+-static void
+-native_thread_join(pthread_t th)
+-{
+-    int err = pthread_join(th, 0);
+-    if (err) {
+-	rb_raise(rb_eThreadError, "native_thread_join() failed (%d)", err);
+-    }
+-}
+-#endif /* TIMER_THREAD_MASK */
+-
+ #if USE_NATIVE_THREAD_PRIORITY
+ 
+ static void
+@@ -1045,7 +1057,7 @@ ubf_pthread_cond_signal(void *ptr)
+ }
+ 
+ static void
+-native_sleep(rb_thread_t *th, struct timespec *timeout_rel)
++native_cond_sleep(rb_thread_t *th, struct timespec *timeout_rel)
+ {
+     struct timespec timeout;
+     rb_nativethread_lock_t *lock = &th->interrupt_lock;
+@@ -1138,17 +1150,8 @@ static void
+ ubf_select(void *ptr)
+ {
+     rb_thread_t *th = (rb_thread_t *)ptr;
+-    register_ubf_list(th);
+ 
+-    /*
+-     * ubf_wakeup_thread() doesn't guarantee to wake up a target thread.
+-     * Therefore, we repeatedly call ubf_wakeup_thread() until a target thread
+-     * exit from ubf function.
+-     * In the other hands, we shouldn't call rb_thread_wakeup_timer_thread()
+-     * if running on timer thread because it may make endless wakeups.
+-     */
+-    if (!pthread_equal(pthread_self(), timer_thread.id))
+-	rb_thread_wakeup_timer_thread();
++    register_ubf_list(th);
+     ubf_wakeup_thread(th);
+ }
+ 
+@@ -1185,39 +1188,16 @@ static int ubf_threads_empty(void) { return 1; }
+ #define TT_DEBUG 0
+ #define WRITE_CONST(fd, str) (void)(write((fd),(str),sizeof(str)-1)<0)
+ 
+-/* 100ms.  10ms is too small for user level thread scheduling
+- * on recent Linux (tested on 2.6.35)
+- */
+-#define TIME_QUANTUM_USEC (100 * 1000)
+-
+-#if TIMER_IMPL == TIMER_THREAD_SLEEPY
+ static struct {
+-    /*
+-     * Read end of each pipe is closed inside timer thread for shutdown
+-     * Write ends are closed by a normal Ruby thread during shutdown
+-     */
++    /* pipes are closed in forked children when owner_process does not match */
+     int normal[2];
+-    int low[2];
+ 
+     /* volatile for signal handler use: */
+     volatile rb_pid_t owner_process;
+ } timer_thread_pipe = {
+     {-1, -1},
+-    {-1, -1}, /* low priority */
+ };
+ 
+-NORETURN(static void async_bug_fd(const char *mesg, int errno_arg, int fd));
+-static void
+-async_bug_fd(const char *mesg, int errno_arg, int fd)
+-{
+-    char buff[64];
+-    size_t n = strlcpy(buff, mesg, sizeof(buff));
+-    if (n < sizeof(buff)-3) {
+-	ruby_snprintf(buff+n, sizeof(buff)-n, "(%d)", fd);
+-    }
+-    rb_async_bug_errno(buff, errno_arg);
+-}
+-
+ /* only use signal-safe system calls here */
+ static void
+ rb_thread_wakeup_timer_thread_fd(int fd)
+@@ -1249,49 +1229,33 @@ rb_thread_wakeup_timer_thread_fd(int fd)
+ }
+ 
+ void
+-rb_thread_wakeup_timer_thread(void)
++rb_thread_wakeup_timer_thread(int sig)
+ {
+     /* must be safe inside sighandler, so no mutex */
+     if (timer_thread_pipe.owner_process == getpid()) {
+-	rb_thread_wakeup_timer_thread_fd(timer_thread_pipe.normal[1]);
+-    }
+-}
+-
+-static void
+-rb_thread_wakeup_timer_thread_low(void)
+-{
+-    if (timer_thread_pipe.owner_process == getpid()) {
+-	rb_thread_wakeup_timer_thread_fd(timer_thread_pipe.low[1]);
+-    }
+-}
+-
+-/* VM-dependent API is not available for this function */
+-static void
+-consume_communication_pipe(int fd)
+-{
+-#define CCP_READ_BUFF_SIZE 1024
+-    /* buffer can be shared because no one refers to them. */
+-    static char buff[CCP_READ_BUFF_SIZE];
+-    ssize_t result;
+-
+-    while (1) {
+-	result = read(fd, buff, sizeof(buff));
+-	if (result == 0) {
+-	    return;
+-	}
+-	else if (result < 0) {
+-	    int e = errno;
+-	    switch (e) {
+-	      case EINTR:
+-		continue; /* retry */
+-	      case EAGAIN:
+-#if defined(EWOULDBLOCK) && EWOULDBLOCK != EAGAIN
+-	      case EWOULDBLOCK:
+-#endif
+-		return;
+-	      default:
+-		async_bug_fd("consume_communication_pipe: read", e, fd);
+-	    }
++        rb_thread_wakeup_timer_thread_fd(timer_thread_pipe.normal[1]);
++
++        /*
++         * system_working check is required because vm and main_thread are
++         * freed during shutdown
++         */
++        if (sig && system_working) {
++            volatile rb_execution_context_t *ec;
++            rb_vm_t *vm = GET_VM();
++            rb_thread_t *mth;
++
++            /*
++             * FIXME: root VM and main_thread should be static and not
++             * on heap for maximum safety (and startup/shutdown speed)
++             */
++            if (!vm) return;
++            mth = vm->main_thread;
++            if (!mth || !system_working) return;
++
++            /* this relies on GC for grace period before cont_free */
++            ec = ACCESS_ONCE(rb_execution_context_t *, mth->ec);
++
++            if (ec) RUBY_VM_SET_TRAP_INTERRUPT(ec);
+ 	}
+     }
+ }
+@@ -1324,6 +1288,7 @@ set_nonblock(int fd)
+ 	rb_sys_fail(0);
+ }
+ 
++/* communication pipe with timer thread and signal handler */
+ static int
+ setup_communication_pipe_internal(int pipes[2])
+ {
+@@ -1348,108 +1313,6 @@ setup_communication_pipe_internal(int pipes[2])
+     return 0;
+ }
+ 
+-/* communication pipe with timer thread and signal handler */
+-static int
+-setup_communication_pipe(void)
+-{
+-    rb_pid_t owner = timer_thread_pipe.owner_process;
+-
+-    if (owner && owner != getpid()) {
+-        CLOSE_INVALIDATE(normal[0]);
+-        CLOSE_INVALIDATE(normal[1]);
+-        CLOSE_INVALIDATE(low[0]);
+-        CLOSE_INVALIDATE(low[1]);
+-    }
+-
+-    if (setup_communication_pipe_internal(timer_thread_pipe.normal) < 0) {
+-	return errno;
+-    }
+-    if (setup_communication_pipe_internal(timer_thread_pipe.low) < 0) {
+-	return errno;
+-    }
+-
+-    return 0;
+-}
+-
+-/**
+- * Let the timer thread sleep a while.
+- *
+- * The timer thread sleeps until woken up by rb_thread_wakeup_timer_thread() if only one Ruby thread is running.
+- * @pre the calling context is in the timer thread.
+- */
+-static inline void
+-timer_thread_sleep(rb_vm_t *vm)
+-{
+-    int result;
+-    int need_polling;
+-    struct pollfd pollfds[2];
+-
+-    pollfds[0].fd = timer_thread_pipe.normal[0];
+-    pollfds[0].events = POLLIN;
+-    pollfds[1].fd = timer_thread_pipe.low[0];
+-    pollfds[1].events = POLLIN;
+-
+-    need_polling = !ubf_threads_empty();
+-
+-    if (SIGCHLD_LOSSY && !need_polling) {
+-        rb_native_mutex_lock(&vm->waitpid_lock);
+-        if (!list_empty(&vm->waiting_pids) || !list_empty(&vm->waiting_grps)) {
+-            need_polling = 1;
+-        }
+-        rb_native_mutex_unlock(&vm->waitpid_lock);
+-    }
+-
+-    if (vm->gvl.waiting > 0 || need_polling) {
+-	/* polling (TIME_QUANTUM_USEC usec) */
+-	result = poll(pollfds, 1, TIME_QUANTUM_USEC/1000);
+-    }
+-    else {
+-	/* wait (infinite) */
+-	result = poll(pollfds, numberof(pollfds), -1);
+-    }
+-
+-    if (result == 0) {
+-	/* maybe timeout */
+-    }
+-    else if (result > 0) {
+-	consume_communication_pipe(timer_thread_pipe.normal[0]);
+-	consume_communication_pipe(timer_thread_pipe.low[0]);
+-    }
+-    else { /* result < 0 */
+-	int e = errno;
+-	switch (e) {
+-	  case EBADF:
+-	  case EINVAL:
+-	  case ENOMEM: /* from Linux man */
+-	  case EFAULT: /* from FreeBSD man */
+-	    rb_async_bug_errno("thread_timer: select", e);
+-	  default:
+-	    /* ignore */;
+-	}
+-    }
+-}
+-#endif /* TIMER_THREAD_SLEEPY */
+-
+-#if TIMER_IMPL == TIMER_THREAD_BUSY
+-# define PER_NANO 1000000000
+-void rb_thread_wakeup_timer_thread(void) {}
+-static void rb_thread_wakeup_timer_thread_low(void) {}
+-
+-static rb_nativethread_lock_t timer_thread_lock;
+-static rb_nativethread_cond_t timer_thread_cond;
+-
+-static inline void
+-timer_thread_sleep(rb_vm_t *unused)
+-{
+-    struct timespec ts;
+-    ts.tv_sec = 0;
+-    ts.tv_nsec = TIME_QUANTUM_USEC * 1000;
+-    ts = native_cond_timeout(&timer_thread_cond, ts);
+-
+-    native_cond_timedwait(&timer_thread_cond, &timer_thread_lock, &ts);
+-}
+-#endif /* TIMER_IMPL == TIMER_THREAD_BUSY */
+-
+ #if !defined(SET_CURRENT_THREAD_NAME) && defined(__linux__) && defined(PR_SET_NAME)
+ # define SET_CURRENT_THREAD_NAME(name) prctl(PR_SET_NAME, name)
+ #endif
+@@ -1500,137 +1363,26 @@ native_set_another_thread_name(rb_nativethread_id_t thread_id, VALUE name)
+     return name;
+ }
+ 
+-static void *
+-thread_timer(void *p)
+-{
+-    rb_vm_t *vm = p;
+-#ifdef HAVE_PTHREAD_SIGMASK /* mainly to enable SIGCHLD */
+-    {
+-        sigset_t mask;
+-        sigemptyset(&mask);
+-        pthread_sigmask(SIG_SETMASK, &mask, NULL);
+-    }
+-#endif
+-
+-    if (TT_DEBUG) WRITE_CONST(2, "start timer thread\n");
+-
+-#ifdef SET_CURRENT_THREAD_NAME
+-    SET_CURRENT_THREAD_NAME("ruby-timer-thr");
+-#endif
+-
+-#if TIMER_IMPL == TIMER_THREAD_BUSY
+-    rb_native_mutex_initialize(&timer_thread_lock);
+-    rb_native_cond_initialize(&timer_thread_cond);
+-    rb_native_mutex_lock(&timer_thread_lock);
+-#endif
+-    while (system_working > 0) {
+-
+-	/* timer function */
+-	ubf_wakeup_all_threads();
+-	timer_thread_function(0);
+-
+-	if (TT_DEBUG) WRITE_CONST(2, "tick\n");
+-
+-        /* wait */
+-	timer_thread_sleep(vm);
+-    }
+-#if TIMER_IMPL == TIMER_THREAD_BUSY
+-    rb_native_mutex_unlock(&timer_thread_lock);
+-    rb_native_cond_destroy(&timer_thread_cond);
+-    rb_native_mutex_destroy(&timer_thread_lock);
+-#endif
+-
+-    if (TT_DEBUG) WRITE_CONST(2, "finish timer thread\n");
+-    return NULL;
+-}
+-
+-#if (TIMER_IMPL & TIMER_THREAD_MASK)
+ static void
+ rb_thread_create_timer_thread(void)
+ {
+-    if (!timer_thread.created) {
+-	size_t stack_size = 0;
+-	int err;
+-	pthread_attr_t attr;
+-	rb_vm_t *vm = GET_VM();
++    /* we only create the pipe, and lazy-spawn */
++    rb_pid_t current = getpid();
++    rb_pid_t owner = timer_thread_pipe.owner_process;
+ 
+-	err = pthread_attr_init(&attr);
+-	if (err != 0) {
+-	    rb_warn("pthread_attr_init failed for timer: %s, scheduling broken",
+-		    strerror(err));
+-	    return;
+-        }
+-# ifdef PTHREAD_STACK_MIN
+-	{
+-	    size_t stack_min = PTHREAD_STACK_MIN; /* may be dynamic, get only once */
+-	    const size_t min_size = (4096 * 4);
+-	    /* Allocate the machine stack for the timer thread
+-	     * at least 16KB (4 pages).  FreeBSD 8.2 AMD64 causes
+-	     * machine stack overflow only with PTHREAD_STACK_MIN.
+-	     */
+-	    enum {
+-		needs_more_stack =
+-#if defined HAVE_VALGRIND_MEMCHECK_H && defined __APPLE__
+-		1
+-#else
+-		THREAD_DEBUG != 0
+-#endif
+-	    };
+-	    stack_size = stack_min;
+-	    if (stack_size < min_size) stack_size = min_size;
+-	    if (needs_more_stack) {
+-		stack_size += +((BUFSIZ - 1) / stack_min + 1) * stack_min;
+-	    }
+-	    err = pthread_attr_setstacksize(&attr, stack_size);
+-	    if (err != 0) {
+-		rb_bug("pthread_attr_setstacksize(.., %"PRIuSIZE") failed: %s",
+-			stack_size, strerror(err));
+-	    }
+-	}
+-# endif
++    if (owner && owner != current) {
++        CLOSE_INVALIDATE(normal[0]);
++        CLOSE_INVALIDATE(normal[1]);
++    }
+ 
+-#if TIMER_IMPL == TIMER_THREAD_SLEEPY
+-	err = setup_communication_pipe();
+-	if (err) return;
+-#endif /* TIMER_THREAD_SLEEPY */
++    if (setup_communication_pipe_internal(timer_thread_pipe.normal) < 0) return;
+ 
+-	/* create timer thread */
+-	if (timer_thread.created) {
+-	    rb_bug("rb_thread_create_timer_thread: Timer thread was already created\n");
+-	}
+-	err = pthread_create(&timer_thread.id, &attr, thread_timer, vm);
+-	pthread_attr_destroy(&attr);
+-
+-	if (err == EINVAL) {
+-	    /*
+-	     * Even if we are careful with our own stack use in thread_timer(),
+-	     * any third-party libraries (eg libkqueue) which rely on __thread
+-	     * storage can cause small stack sizes to fail.  So lets hope the
+-	     * default stack size is enough for them:
+-	     */
+-	    stack_size = 0;
+-	    err = pthread_create(&timer_thread.id, NULL, thread_timer, vm);
+-	}
+-	if (err != 0) {
+-	    rb_warn("pthread_create failed for timer: %s, scheduling broken",
+-		    strerror(err));
+-	    if (stack_size) {
+-		rb_warn("timer thread stack size: %"PRIuSIZE, stack_size);
+-	    }
+-	    else {
+-		rb_warn("timer thread stack size: system default");
+-	    }
+-	    VM_ASSERT(err == 0);
+-	    return;
+-	}
+-#if TIMER_IMPL == TIMER_THREAD_SLEEPY
+-	/* validate pipe on this process */
+-	timer_thread_pipe.owner_process = getpid();
+-#endif /* TIMER_THREAD_SLEEPY */
+-	timer_thread.created = 1;
++    if (owner != current) {
++        /* validate pipe on this process */
++        sigwait_th = THREAD_INVALID;
++        timer_thread_pipe.owner_process = current;
+     }
+ }
+-#endif /* TIMER_IMPL & TIMER_THREAD_MASK */
+ 
+ static int
+ native_stop_timer_thread(void)
+@@ -1639,24 +1391,6 @@ native_stop_timer_thread(void)
+     stopped = --system_working <= 0;
+ 
+     if (TT_DEBUG) fprintf(stderr, "stop timer thread\n");
+-    if (stopped) {
+-#if TIMER_IMPL == TIMER_THREAD_SLEEPY
+-	/* kick timer thread out of sleep */
+-	rb_thread_wakeup_timer_thread_fd(timer_thread_pipe.normal[1]);
+-#endif
+-
+-	/* timer thread will stop looping when system_working <= 0: */
+-	native_thread_join(timer_thread.id);
+-
+-	/*
+-	 * don't care if timer_thread_pipe may fill up at this point.
+-	 * If we restart timer thread, signals will be processed, if
+-	 * we don't, it's because we're in a different child
+-	 */
+-
+-	if (TT_DEBUG) fprintf(stderr, "joined timer thread\n");
+-	timer_thread.created = 0;
+-    }
+     return stopped;
+ }
+ 
+@@ -1713,20 +1447,14 @@ ruby_stack_overflowed_p(const rb_thread_t *th, const void *addr)
+ int
+ rb_reserved_fd_p(int fd)
+ {
+-#if TIMER_IMPL == TIMER_THREAD_SLEEPY
+     if ((fd == timer_thread_pipe.normal[0] ||
+-	 fd == timer_thread_pipe.normal[1] ||
+-	 fd == timer_thread_pipe.low[0] ||
+-	 fd == timer_thread_pipe.low[1]) &&
++	 fd == timer_thread_pipe.normal[1]) &&
+ 	timer_thread_pipe.owner_process == getpid()) { /* async-signal-safe */
+ 	return 1;
+     }
+     else {
+ 	return 0;
+     }
+-#else
+-    return 0;
+-#endif
+ }
+ 
+ rb_nativethread_id_t
+@@ -1788,4 +1516,65 @@ rb_sleep_cond_put(rb_nativethread_cond_t *cond)
+ }
+ #endif /* USE_NATIVE_SLEEP_COND */
+ 
++int
++rb_sigwait_fd_get(const rb_thread_t *th)
++{
++    if (timer_thread_pipe.owner_process == getpid() &&
++        timer_thread_pipe.normal[0] >= 0) {
++        if (ATOMIC_PTR_CAS(sigwait_th, THREAD_INVALID, th) == THREAD_INVALID) {
++            return timer_thread_pipe.normal[0];
++        }
++    }
++    return -1; /* avoid thundering herd */
++}
++
++void
++rb_sigwait_fd_put(const rb_thread_t *th, int fd)
++{
++    const rb_thread_t *old;
++
++    VM_ASSERT(timer_thread_pipe.normal[0] == fd);
++    old = ATOMIC_PTR_EXCHANGE(sigwait_th, THREAD_INVALID);
++    if (old != th) assert(old == th);
++}
++
++void
++rb_sigwait_sleep(rb_thread_t *th, int sigwait_fd, const struct timespec *ts)
++{
++    struct pollfd pfd;
++
++    pfd.fd = sigwait_fd;
++    pfd.events = POLLIN;
++
++    (void)ppoll(&pfd, 1, ts, 0);
++    check_signals_nogvl(th, sigwait_fd);
++}
++
++static void
++native_sleep(rb_thread_t *th, struct timespec *timeout_rel)
++{
++    int sigwait_fd = rb_sigwait_fd_get(th);
++
++    if (sigwait_fd >= 0) {
++        rb_native_mutex_lock(&th->interrupt_lock);
++        th->unblock.func = ubf_sigwait;
++        rb_native_mutex_unlock(&th->interrupt_lock);
++
++        GVL_UNLOCK_BEGIN(th);
++
++        if (!RUBY_VM_INTERRUPTED(th->ec)) {
++            rb_sigwait_sleep(th, sigwait_fd, timeout_rel);
++        }
++        else {
++            check_signals_nogvl(th, sigwait_fd);
++        }
++        unblock_function_clear(th);
++        rb_sigwait_fd_put(th, sigwait_fd);
++        rb_sigwait_fd_migrate(th->vm);
++        GVL_UNLOCK_END(th);
++    }
++    else {
++        native_cond_sleep(th, timeout_rel);
++    }
++}
+ #endif /* THREAD_SYSTEM_DEPENDENT_IMPLEMENTATION */
+diff --git a/thread_pthread.h b/thread_pthread.h
+index 0566193eb5..e3f09800a3 100644
+--- a/thread_pthread.h
++++ b/thread_pthread.h
+@@ -32,12 +32,12 @@ typedef struct native_thread_data_struct {
+ 
+ typedef struct rb_global_vm_lock_struct {
+     /* fast path */
+-    unsigned long acquired;
++    const struct rb_thread_struct *acquired;
+     rb_nativethread_lock_t lock;
+ 
+     /* slow path */
+-    volatile unsigned long waiting;
+-    rb_nativethread_cond_t cond;
++    struct list_head waitq;
++    const struct rb_thread_struct *timer;
+ 
+     /* yield */
+     rb_nativethread_cond_t switch_cond;
+diff --git a/thread_win32.c b/thread_win32.c
+index 2d5eac1ff4..7f78601f68 100644
+--- a/thread_win32.c
++++ b/thread_win32.c
+@@ -20,6 +20,7 @@
+ 
+ #define native_thread_yield() Sleep(0)
+ #define unregister_ubf_list(th)
++#define ubf_wakeup_all_threads() do {} while (0)
+ 
+ static volatile DWORD ruby_native_thread_key = TLS_OUT_OF_INDEXES;
+ 
+@@ -691,7 +692,7 @@ timer_thread_func(void *dummy)
+ }
+ 
+ void
+-rb_thread_wakeup_timer_thread(void)
++rb_thread_wakeup_timer_thread(int sig)
+ {
+     /* do nothing */
+ }
+@@ -768,6 +769,25 @@ rb_reserved_fd_p(int fd)
+     return 0;
+ }
+ 
++int
++rb_sigwait_fd_get(rb_thread_t *th)
++{
++    return -1; /* TODO */
++}
++
++void
++rb_sigwait_fd_put(rb_thread_t *th, int fd)
++{
++    rb_bug("not implemented, should not be called");
++}
++
++
++void
++rb_sigwait_sleep(const rb_thread_t *th, int fd, const struct timespec *ts)
++{
++    rb_bug("not implemented, should not be called");
++}
++
+ rb_nativethread_id_t
+ rb_nativethread_self(void)
+ {
+diff --git a/vm_core.h b/vm_core.h
+index 73ef51da49..5ab553c169 100644
+--- a/vm_core.h
++++ b/vm_core.h
+@@ -1577,7 +1577,7 @@ void rb_vm_pop_frame(rb_execution_context_t *ec);
+ void rb_thread_start_timer_thread(void);
+ void rb_thread_stop_timer_thread(void);
+ void rb_thread_reset_timer_thread(void);
+-void rb_thread_wakeup_timer_thread(void);
++void rb_thread_wakeup_timer_thread(int);
+ 
+ static inline void
+ rb_vm_living_threads_init(rb_vm_t *vm)
+-- 
+EW
