@@ -33,7 +33,6 @@ module InstallPost
   # Copies correct dll files from mys location to package dir.
   def self.copy_dll_files
     pkg_pre = (@@arch == '64' ? 'mingw-w64-x86_64' : 'mingw-w64-i686')
-    # pkgs = 'gcc-libs gdbm libffi openssl readline zlib'
     pkgs = 'gcc-libs gdbm libffi openssl readline zlib'
     dll_files, lib_files = find_dlls(pkgs, pkg_pre)
 

@@ -27,6 +27,9 @@ end
 
 module Prepare  
 
+  YELLOW = "\e[33m"
+  RESET = "\e[0m"
+
   @@r_inst_dir = "ruby#{ENV['R_VERS_2']}_#{ ENV['MINGW_INSTALLS'][-2,2]}"
   @@arch = @@r_inst_dir[-2,2]
 
@@ -124,7 +127,7 @@ module Prepare
         patches.concat(vers_patches)
         patches.sort_by! { |p| File.basename(p) }
         patches.each { |p|
-          puts "#{'—' * 55} #{File.basename(p)}" 
+          puts "#{YELLOW}#{'—' * 55} #{File.basename(p)}#{RESET}" 
           puts `patch -p1 -N --no-backup-if-mismatch -i #{p}`
         }
         puts ''  # just for formatting of prepare.log
@@ -133,7 +136,7 @@ module Prepare
 
     # Checks mingw openssl version.
     def check_openssl
-      puts "\n——————————————————————————————————————————————————————— OpenSSL Info"
+      puts "\n#{YELLOW}——————————————————————————————————————————————————————— OpenSSL Info#{RESET}"
       arch = (@@arch == '32' ? 'i686' : 'x86_64')
       puts `pacman -Qs mingw-w64-#{arch}-openssl`.strip
       puts `#{ENV['MSYS2_DIR']}/mingw#{@@arch}/bin/openssl version`
