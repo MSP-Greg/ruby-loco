@@ -1,0 +1,185 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <e@80x24.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on dcvr.yhbt.net
+X-Spam-Level: 
+X-Spam-ASN:  
+X-Spam-Status: No, score=-4.0 required=3.0 tests=ALL_TRUSTED,BAYES_00
+	shortcircuit=no autolearn=ham autolearn_force=no version=3.4.1
+Received: from localhost (dcvr.yhbt.net [127.0.0.1])
+	by dcvr.yhbt.net (Postfix) with ESMTP id 8EB441F597
+	for <spew@80x24.org>; Sun, 29 Jul 2018 00:22:56 +0000 (UTC)
+From: Eric Wong <e@80x24.org>
+To: spew@80x24.org
+Subject: [PATCH] drop thread_destruct_lock and interrupt current ec directly
+Date: Sun, 29 Jul 2018 00:22:56 +0000
+Message-Id: <20180729002256.22651-1-e@80x24.org>
+List-Id: <spew.80x24.org>
+Archived-At: <https://80x24.org/spew/20180729002256.22651-1-e@80x24.org/>
+List-Archive: <https://80x24.org/spew/>
+List-Post: <mailto:spew@80x24.org>
+
+We don't need to rely on vm->thread_destruct_lock or a coherent
+vm->running_thread on any platform.  Seperate timer-thread for
+time slice and signal handling is relegated to thread_win32.c,
+now.
+---
+ thread.c         | 48 +++++++-----------------------------------------
+ thread_pthread.c |  3 +--
+ thread_win32.c   |  5 ++++-
+ vm_core.h        |  6 ++++--
+ 4 files changed, 16 insertions(+), 46 deletions(-)
+
+diff --git a/thread.c b/thread.c
+index f52e338859..01bfad1e66 100644
+--- a/thread.c
++++ b/thread.c
+@@ -352,9 +352,8 @@ rb_thread_s_debug_set(VALUE self, VALUE val)
+ #endif
+ NOINLINE(static int thread_start_func_2(rb_thread_t *th, VALUE *stack_start,
+ 					VALUE *register_stack_start));
+-#ifndef HAVE_PTHREAD_H
+-static void timer_thread_function(void *);
+-#endif
++static void timer_thread_function(void);
++void ruby_sigchld_handler(rb_vm_t *); /* signal.c */
+ 
+ static void
+ ubf_sigwait(void *ignore)
+@@ -424,7 +423,6 @@ rb_vm_gvl_destroy(rb_vm_t *vm)
+ {
+     gvl_release(vm);
+     gvl_destroy(vm);
+-    rb_native_mutex_destroy(&vm->thread_destruct_lock);
+     if (0) {
+         /* may be held by running threads */
+         rb_native_mutex_destroy(&vm->waitpid_lock);
+@@ -785,10 +783,6 @@ thread_start_func_2(rb_thread_t *th, VALUE *stack_start, VALUE *register_stack_s
+ 
+ 	rb_fiber_close(th->ec->fiber_ptr);
+     }
+-    rb_native_mutex_lock(&th->vm->thread_destruct_lock);
+-    /* make sure vm->running_thread never point me after this point.*/
+-    th->vm->running_thread = NULL;
+-    rb_native_mutex_unlock(&th->vm->thread_destruct_lock);
+     thread_cleanup_func(th, FALSE);
+     gvl_release(th->vm);
+ 
+@@ -2149,9 +2143,6 @@ threadptr_get_interrupts(rb_thread_t *th)
+     return interrupt & (rb_atomic_t)~ec->interrupt_mask;
+ }
+ 
+-/* signal.c */
+-void ruby_sigchld_handler(rb_vm_t *);
+-
+ MJIT_FUNC_EXPORTED void
+ rb_threadptr_execute_interrupts(rb_thread_t *th, int blocking_timing)
+ {
+@@ -4244,40 +4235,16 @@ rb_threadptr_check_signal(rb_thread_t *mth)
+     }
+ }
+ 
+-#ifndef HAVE_PTHREAD_H
+ static void
+-timer_thread_function(void *arg)
++timer_thread_function(void)
+ {
+-    rb_vm_t *vm = GET_VM(); /* TODO: fix me for Multi-VM */
++    volatile rb_execution_context_t *ec;
+ 
+-    /*
+-     * Tricky: thread_destruct_lock doesn't close a race against
+-     * vm->running_thread switch. however it guarantees th->running_thread
+-     * point to valid pointer or NULL.
+-     */
+-    rb_native_mutex_lock(&vm->thread_destruct_lock);
+     /* for time slice */
+-    if (vm->running_thread) {
+-	RUBY_VM_SET_TIMER_INTERRUPT(vm->running_thread->ec);
+-    }
+-    rb_native_mutex_unlock(&vm->thread_destruct_lock);
+-
+-    /* check signal */
+-    ruby_sigchld_handler(vm);
+-    rb_threadptr_check_signal(vm->main_thread);
+-
+-#if 0
+-    /* prove profiler */
+-    if (vm->prove_profile.enable) {
+-	rb_thread_t *th = vm->running_thread;
+-
+-	if (vm->during_gc) {
+-	    /* GC prove profiling */
+-	}
+-    }
+-#endif
++    ec = ACCESS_ONCE(rb_execution_context_t *,
++                     ruby_current_execution_context_ptr);
++    if (ec) RUBY_VM_SET_TIMER_INTERRUPT(ec);
+ }
+-#endif
+ 
+ static void
+ async_bug_fd(const char *mesg, int errno_arg, int fd)
+@@ -5165,7 +5132,6 @@ Init_Thread(void)
+ 	    /* acquire global vm lock */
+ 	    gvl_init(th->vm);
+ 	    gvl_acquire(th->vm, th);
+-            rb_native_mutex_initialize(&th->vm->thread_destruct_lock);
+             rb_native_mutex_initialize(&th->vm->waitpid_lock);
+             rb_native_mutex_initialize(&th->interrupt_lock);
+ 
+diff --git a/thread_pthread.c b/thread_pthread.c
+index 019ef5d62c..3cf9af04a4 100644
+--- a/thread_pthread.c
++++ b/thread_pthread.c
+@@ -99,8 +99,7 @@ gvl_acquire_common(rb_vm_t *vm, rb_thread_t *th)
+                  * as the process may fork while this thread is contending
+                  * for GVL:
+                  */
+-                if (vm->gvl.acquired)
+-                    RUBY_VM_SET_TIMER_INTERRUPT(vm->gvl.acquired->ec);
++                if (vm->gvl.acquired) timer_thread_function();
+             }
+             else {
+                 rb_native_cond_wait(&nd->sleep_cond, &vm->gvl.lock);
+diff --git a/thread_win32.c b/thread_win32.c
+index 7f78601f68..3770200d30 100644
+--- a/thread_win32.c
++++ b/thread_win32.c
+@@ -681,11 +681,14 @@ static struct {
+ static unsigned long __stdcall
+ timer_thread_func(void *dummy)
+ {
++    rb_vm_t *vm = GET_VM();
+     thread_debug("timer_thread\n");
+     rb_w32_set_thread_description(GetCurrentThread(), L"ruby-timer-thread");
+     while (WaitForSingleObject(timer_thread.lock, TIME_QUANTUM_USEC/1000) ==
+ 	   WAIT_TIMEOUT) {
+-	timer_thread_function(dummy);
++	timer_thread_function();
++	ruby_sigchld_handler(vm); /* probably no-op */
++	rb_threadptr_check_signal(vm->main_thread);
+     }
+     thread_debug("timer killed\n");
+     return 0;
+diff --git a/vm_core.h b/vm_core.h
+index 5ab553c169..23b52d70c9 100644
+--- a/vm_core.h
++++ b/vm_core.h
+@@ -562,10 +562,12 @@ typedef struct rb_vm_struct {
+     VALUE self;
+ 
+     rb_global_vm_lock_t gvl;
+-    rb_nativethread_lock_t    thread_destruct_lock;
+ 
+     struct rb_thread_struct *main_thread;
+-    struct rb_thread_struct *running_thread;
++
++    /* persists across uncontended GVL release/acquire for time slice */
++    const struct rb_thread_struct *running_thread;
++
+ #ifdef USE_SIGALTSTACK
+     void *main_altstack;
+ #endif
+-- 
+EW
