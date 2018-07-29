@@ -3,6 +3,9 @@
 
 module TestScript
 
+  YELLOW = "\e[33m"
+  RESET = "\e[0m"
+
   @@stripe_len = 65
   @@puts_len   = 79
   @@failures   = 0
@@ -40,13 +43,13 @@ module TestScript
                   "#{results_str}\n" \
                   "#{command_line()}\n"
 
-    puts "#{'—' * @@puts_len} Test Results"
+    puts "#{YELLOW}#{'—' * @@puts_len} Test Results#{RESET}"
     puts results_str
 
     File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-Summary - Test Results.log"), results_str)
 
     unless sum_test_all.empty?
-      puts "\n#{'—' * @@puts_len} Summary test-all"
+      puts "\n#{YELLOW}#{'—' * @@puts_len} Summary test-all#{RESET}"
       puts sum_test_all
       File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-Summary - test-all.log"), sum_test_all)
     end
@@ -234,7 +237,7 @@ module TestScript
     unless  faults.empty?
       t1 = faults.length
       msg = t1 == 1 ? "#{type}" : "#{type}s"
-      str << "#{'—' * @@stripe_len} Parallel Tests - #{t1} #{msg}\n\n"
+      str << "#{YELLOW}#{'—' * @@stripe_len} Parallel Tests - #{t1} #{msg}#{RESET}\n\n"
       str << faults.sort_by { |f| f[1] }.map { |f| "#{f[0]}#{f[1]}" }.join("\n")
       str << "\n\n"
     end
@@ -262,7 +265,7 @@ module TestScript
         t1 = errors.length
         msg = t1 == 1 ? "1 Error" : "#{t1} Errors"
         wid = @@stripe_len + t1.to_s.length
-        str << "#{'—' * @@stripe_len} #{msg}\n#{' ' * wid}  #{file}\n\n"
+        str << "#{YELLOW}#{'—' * @@stripe_len} #{msg}#{RESET}\n#{' ' * wid}  #{file}\n\n"
         errors.each { |test, file, line, msg|
           str << "#{test.ljust wid+1} Line: #{line.to_s.ljust(5)}\n#{msg}\n\n"
         }
@@ -292,7 +295,7 @@ module TestScript
         t1 = faults.length
         msg = t1 == 1 ? "1 Failure" : "#{t1} Failures"
         wid = @@stripe_len + t1.to_s.length
-        str << "#{'—' * @@stripe_len} #{msg}\n#{' ' * wid}  #{file}\n\n"
+        str << "#{YELLOW}#{'—' * @@stripe_len} #{msg}#{RESET}\n#{' ' * wid}  #{file}\n\n"
         faults.each { |test, file, line, msg|
           str << "#{test.ljust wid+1} Line: #{line.to_s.ljust(5)}\n#{msg}\n\n"
         }
