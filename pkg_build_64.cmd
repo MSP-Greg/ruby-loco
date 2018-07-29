@@ -110,7 +110,6 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 
 @rem Parse spec files, add total time file, and zip
 @echo.
-@echo ——————————————————————————————————————————————————————————————————————————————— Build ^& Test Times
 @call time_log_64.cmd
 
 @if "%AV_BUILD%" NEQ "true" ( ruby test_script.rb )

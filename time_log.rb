@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+puts "\e[33m#{'—' * 79} Build & Test Times\e[0m"
+
 logs = Dir.glob("#{ENV['R_NAME']}-#{ENV['R_VERS']}*.log")
 
 t_ttl = 0

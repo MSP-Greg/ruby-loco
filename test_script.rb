@@ -305,7 +305,7 @@ module TestScript
   end
   
   def zip_save
-    puts "#{'—' * @@puts_len} Saving Artifacts"
+    puts "#{YELLOW}#{'—' * @@puts_len} Saving Artifacts#{RESET}"
     
     push_artifacts if @@is_av
     
