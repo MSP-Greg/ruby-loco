@@ -52,7 +52,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @cd %DP0%src/build%SUFFIX%
 @if "%R_VERS_2%" GEQ "24" (
   @echo btest
-  make.exe "TESTOPTS=-v -j%M_JOBS%" btest      > %LOG_PATH_NAME%-test-btest.log 2>&1
+  make.exe "TESTOPTS=-v" btest                 > %LOG_PATH_NAME%-test-btest.log 2>&1
   @echo test-basic
   make.exe "TESTOPTS=-v -j%M_JOBS%" test-basic > %LOG_PATH_NAME%-test-basic.log 2>&1
 ) else (
