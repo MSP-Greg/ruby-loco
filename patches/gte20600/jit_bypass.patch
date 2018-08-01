@@ -3,7 +3,7 @@ diff --git a/test/ruby/test_jit.rb b/test/ruby/test_jit.rb
 index c70bf962c0..6a7b873d0c 100644
 --- a/test/ruby/test_jit.rb
 +++ b/test/ruby/test_jit.rb
-@@ -787,4 +787,4 @@ def eval_with_jit(env = nil, script, **opts)
+@@ -849,4 +849,4 @@ def eval_with_jit(env = nil, script, **opts)
    def code_block(code)
      "```\n#{code}\n```\n\n"
    end
