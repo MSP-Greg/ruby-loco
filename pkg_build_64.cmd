@@ -50,7 +50,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 
 @rem ————————————————————————————————————————————————————————— btest, test-basic
 
-@@PATH=%PKG_RUBY%/bin;%MSYS2_DIR%/mingw64/bin;%MSYS2_DIR%/usr/bin;%GIT_PATH%;%ORIG_PATH%
+@PATH=%PKG_RUBY%/bin;%MSYS2_DIR%/mingw64/bin;%MSYS2_DIR%/usr/bin;%GIT_PATH%;%ORIG_PATH%
 
 @if "%R_VERS_2%" GEQ "24" (
   @echo btest
@@ -70,7 +70,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @attrib -r %DP0%src/build%SUFFIX%/*.* /s /d
 
 @rem just in case...
-@@PATH=%MSYS2_DIR%/mingw64/bin;%MSYS2_DIR%/usr/bin;%GIT_PATH%;%ORIG_PATH%
+@PATH=%MSYS2_DIR%/mingw64/bin;%MSYS2_DIR%/usr/bin;%GIT_PATH%;%ORIG_PATH%
 
 @if "%R_VERS_2%" GEQ "25" (
   @echo test-spec
@@ -84,7 +84,7 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @attrib -r %DP0%src/ruby/spec/*.* /s /d
 @attrib -r %DP0%src/ruby/spec/ruby/*.* /s /d
 
-@PATH=%PKG_RUBY%/bin;%GIT_PATH%;%ORIG_PATH%
+@PATH=%PKG_RUBY%/bin;%MSYS2_DIR%/mingw64/bin;%MSYS2_DIR%/usr/bin;%GIT_PATH%;%ORIG_PATH%
 
 @cd %REPO_RUBY%/spec/ruby
 @echo mspec
