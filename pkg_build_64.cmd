@@ -49,14 +49,20 @@ bash.exe --login -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck
 @if "%R_VERS_2%" GEQ "25" ( set RUBY_FORCE_TEST_JIT=1 )
 
 @rem ————————————————————————————————————————————————————————— btest, test-basic
-@cd %DP0%src/build%SUFFIX%
+
+@@PATH=%PKG_RUBY%/bin;%MSYS2_DIR%/mingw64/bin;%MSYS2_DIR%/usr/bin;%GIT_PATH%;%ORIG_PATH%
+
 @if "%R_VERS_2%" GEQ "24" (
   @echo btest
-  make.exe "TESTOPTS=-v" btest                 > %LOG_PATH_NAME%-test-btest.log 2>&1
+  @cd %DP0%src/ruby/bootstraptest
+  @ruby -v runner.rb --ruby=%PKG_RUBY%/bin/ruby.exe -v > %LOG_PATH_NAME%-test-btest.log 2>&1
+  @rem make.exe "TESTOPTS=-v" btest                 > %LOG_PATH_NAME%-test-btest.log 2>&1
   @echo test-basic
+  @cd %DP0%src/build%SUFFIX%
   make.exe "TESTOPTS=-v -j%M_JOBS%" test-basic > %LOG_PATH_NAME%-test-basic.log 2>&1
 ) else (
   @echo test
+  @cd %DP0%src/build%SUFFIX%
   make.exe "TESTOPTS=-v -j%M_JOBS%" test       > %LOG_PATH_NAME%-test.log 2>&1
 )
 
