@@ -1,0 +1,15 @@
+Patch by MSP-Greg
+needed when updating from gcc 7.3.0 to 8.2.0
+diff --git a/bootstraptest/test_thread.rb b/bootstraptest/test_thread.rb
+index d16295de8b..e4b49c5a0b 100644
+--- a/bootstraptest/test_thread.rb
++++ b/bootstraptest/test_thread.rb
+@@ -333,7 +333,7 @@ def m
+ 
+ assert_normal_exit %q{
+   Thread.new("foo", &Object.method(:class_eval)).join
+-}, '[ruby-dev:34128]'
++}, '[ruby-dev:34128]', 'SIGSEGV'
+ 
+ assert_equal 'ok', %q{
+   begin
