@@ -22,10 +22,10 @@ $pre = "mingw-w64-x86_64-"
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW base base-devel" -ForegroundColor Yellow
 pacman.exe -Sy --noconfirm --needed --noprogressbar base base-devel 2> $null
 
-# Write-Host "$($dash * 63) Updating MSYS2 / MinGW toolchain `& ruby depends" -ForegroundColor Yellow
-# $tools =  "___toolchain ___gdbm ___gmp ___libffi ___ncurses ___readline ___zlib".replace('___', $pre)
-Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends" -ForegroundColor Yellow
-$tools =  "___gdbm ___gmp ___libffi ___ncurses ___readline ___zlib".replace('___', $pre)
+Write-Host "$($dash * 63) Updating MSYS2 / MinGW toolchain `& ruby depends" -ForegroundColor Yellow
+$tools =  "___toolchain ___gdbm ___gmp ___libffi ___ncurses ___readline ___zlib".replace('___', $pre)
+#Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends" -ForegroundColor Yellow
+#$tools =  "___gdbm ___gmp ___libffi ___ncurses ___readline ___zlib".replace('___', $pre)
 pacman.exe -S --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
 
 #—————————————————————————————————————————————————————————————————————————————— Update gnupg
