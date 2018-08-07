@@ -6,15 +6,15 @@ X-Spam-ASN:
 X-Spam-Status: No, score=-4.0 required=3.0 tests=ALL_TRUSTED,BAYES_00
 	shortcircuit=no autolearn=ham autolearn_force=no version=3.4.1
 Received: from localhost (dcvr.yhbt.net [127.0.0.1])
-	by dcvr.yhbt.net (Postfix) with ESMTP id 54916208EB
-	for <spew@80x24.org>; Mon,  6 Aug 2018 05:35:11 +0000 (UTC)
+	by dcvr.yhbt.net (Postfix) with ESMTP id EE7DD208EB
+	for <spew@80x24.org>; Mon,  6 Aug 2018 23:12:56 +0000 (UTC)
 From: Eric Wong <e@80x24.org>
 To: spew@80x24.org
-Subject: [PATCH] io.c: make all pipes nonblocking by default
-Date: Mon,  6 Aug 2018 05:35:11 +0000
-Message-Id: <20180806053511.2421-1-e@80x24.org>
+Subject: [PATCH v3] io.c: make all pipes nonblocking by default
+Date: Mon,  6 Aug 2018 23:12:56 +0000
+Message-Id: <20180806231256.14039-1-e@80x24.org>
 List-Id: <spew.80x24.org>
-Archived-At: <https://80x24.org/spew/20180806053511.2421-1-e@80x24.org/>
+Archived-At: <https://80x24.org/spew/20180806231256.14039-1-e@80x24.org/>
 List-Archive: <https://80x24.org/spew/>
 List-Post: <mailto:spew@80x24.org>
 
@@ -30,8 +30,8 @@ made blocking before exec-family calls.
 Timer-thread elimination in https://bugs.ruby-lang.org/issues/14937
 introduced a race condition in signal handling.  It is possible
 to receive a signal inside BLOCKING_REGION right before read/write
-syscalls.  If this patch cannot be accepted, I will have to revert
-to reintroduce timer-thread and increase resource use (which
+syscalls.  If this patch cannot be accepted, I cannot proceed
+with timer-thread elimination to reduce resource use (which
 led to other failures in the past).  The race condition
 introduced for [Misc #14937] led to rare CI failures on a few
 tests:
@@ -48,22 +48,22 @@ proposal: https://bugs.ruby-lang.org/issues/13618
 
 TODO: all sockets and FIFOs non-blocking by default, too
 ---
- io.c                                     | 44 +++++++++++++-----------
- process.c                                | 44 ++++++++++++++++++++++++
+ io.c                                     | 46 +++++++++++++-----------
+ process.c                                | 38 ++++++++++++++++++++
  spec/ruby/core/io/read_nonblock_spec.rb  |  1 -
  spec/ruby/core/io/write_nonblock_spec.rb |  1 -
  test/io/nonblock/test_flush.rb           |  1 +
  test/ruby/test_io.rb                     |  1 +
- test/ruby/test_process.rb                |  8 +++++
- thread.c                                 | 31 +++++++++++++----
+ test/ruby/test_process.rb                |  9 +++++
+ thread.c                                 | 31 ++++++++++++----
  win32/win32.c                            | 17 +++++++--
- 9 files changed, 116 insertions(+), 32 deletions(-)
+ 9 files changed, 113 insertions(+), 32 deletions(-)
 
 diff --git a/io.c b/io.c
-index 1d7626c089..5591b99016 100644
+index 1d7626c089..9377cb801a 100644
 --- a/io.c
 +++ b/io.c
-@@ -316,6 +316,26 @@ rb_cloexec_dup2(int oldfd, int newfd)
+@@ -316,6 +316,28 @@ rb_cloexec_dup2(int oldfd, int newfd)
      return ret;
  }
  
@@ -79,6 +79,8 @@ index 1d7626c089..5591b99016 100644
 +    oflags = fcntl(fd, F_GETFL);
 +    if (oflags == -1)
 +        return -1;
++    if (oflags & O_NONBLOCK)
++        return 0;
 +    oflags |= O_NONBLOCK;
 +    err = fcntl(fd, F_SETFL, oflags);
 +    if (err == -1)
@@ -90,7 +92,7 @@ index 1d7626c089..5591b99016 100644
  int
  rb_cloexec_pipe(int fildes[2])
  {
-@@ -324,7 +344,7 @@ rb_cloexec_pipe(int fildes[2])
+@@ -324,7 +346,7 @@ rb_cloexec_pipe(int fildes[2])
  #if defined(HAVE_PIPE2)
      static int try_pipe2 = 1;
      if (try_pipe2) {
@@ -99,7 +101,7 @@ index 1d7626c089..5591b99016 100644
          if (ret != -1)
              return ret;
          /* pipe2 is available since Linux 2.6.27, glibc 2.9. */
-@@ -350,6 +370,8 @@ rb_cloexec_pipe(int fildes[2])
+@@ -350,6 +372,8 @@ rb_cloexec_pipe(int fildes[2])
  #endif
      rb_maygvl_fd_fix_cloexec(fildes[0]);
      rb_maygvl_fd_fix_cloexec(fildes[1]);
@@ -108,7 +110,7 @@ index 1d7626c089..5591b99016 100644
      return ret;
  }
  
-@@ -2691,27 +2713,9 @@ read_all(rb_io_t *fptr, long siz, VALUE str)
+@@ -2691,27 +2715,9 @@ read_all(rb_io_t *fptr, long siz, VALUE str)
  void
  rb_io_set_nonblock(rb_io_t *fptr)
  {
@@ -138,10 +140,10 @@ index 1d7626c089..5591b99016 100644
  
  struct read_internal_arg {
 diff --git a/process.c b/process.c
-index 0c534a8a36..a88eb530a7 100644
+index 0c534a8a36..d70789f838 100644
 --- a/process.c
 +++ b/process.c
-@@ -1450,6 +1450,45 @@ before_exec_non_async_signal_safe(void)
+@@ -1450,6 +1450,39 @@ before_exec_non_async_signal_safe(void)
      rb_thread_stop_timer_thread();
  }
  
@@ -174,20 +176,14 @@ index 0c534a8a36..a88eb530a7 100644
 +    /* many programs cannot deal with non-blocking stdin/stdout/stderr */
 +    int fd;
 +    for (fd = 0; fd < 3; fd++) {
-+        if (set_blocking(fd) != 0) {
-+            int e = errno;
-+
-+            if (e != EBADF) {
-+                rb_async_bug_errno("set_blocking failed before exec", e);
-+            }
-+        }
++        (void)set_blocking(fd); /* can't do much about errors anyhow */
 +    }
 +}
 +
  static void
  before_exec(void)
  {
-@@ -3421,6 +3460,7 @@ rb_execarg_run_options(const struct rb_execarg *eargp, struct rb_execarg *sargp,
+@@ -3421,6 +3454,7 @@ rb_execarg_run_options(const struct rb_execarg *eargp, struct rb_execarg *sargp,
              rb_execarg_allocate_dup2_tmpbuf(sargp, RARRAY_LEN(ary));
          }
      }
@@ -195,7 +191,7 @@ index 0c534a8a36..a88eb530a7 100644
  
      return 0;
  }
-@@ -3621,6 +3661,10 @@ read_retry(int fd, void *buf, size_t len)
+@@ -3621,6 +3655,10 @@ read_retry(int fd, void *buf, size_t len)
  {
      ssize_t r;
  
@@ -255,20 +251,21 @@ index a1462c53b2..2e0b12d435 100644
        Thread.pass until t.stop?
        assert_raise(RuntimeError) { s.clear }
 diff --git a/test/ruby/test_process.rb b/test/ruby/test_process.rb
-index 759230f834..58a5709562 100644
+index 759230f834..e83408bc94 100644
 --- a/test/ruby/test_process.rb
 +++ b/test/ruby/test_process.rb
-@@ -762,6 +762,14 @@ def test_execopts_redirect_pipe
+@@ -762,6 +762,15 @@ def test_execopts_redirect_pipe
            Process.wait pid
          end
        }
 +
 +      # ensure standard FDs we redirect to are blocking for compatibility
-+      with_pipes(4) do |pipes|
++      with_pipes(3) do |pipes|
 +        src = 'p [STDIN,STDOUT,STDERR].map(&:nonblock?)'
 +        rdr = { 0 => pipes[0][0], 1 => pipes[1][1], 2 => pipes[2][1] }
 +        pid = spawn(RUBY, '-rio/nonblock', '-e', src, rdr)
 +        assert_equal("[false, false, false]\n", pipes[1][0].gets)
++        Process.wait pid
 +      end
      end
    end
