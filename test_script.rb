@@ -51,6 +51,7 @@ module TestScript
     unless sum_test_all.empty?
       puts "\n#{YELLOW}#{'—' * @@puts_len} Summary test-all#{RESET}"
       puts sum_test_all
+      sum_test_all = sum_test_all.gsub(/^\e\[33m|\e\[0m$/, '')
       File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-Summary - test-all.log"), sum_test_all)
     end
     unless warnings_str.empty?
