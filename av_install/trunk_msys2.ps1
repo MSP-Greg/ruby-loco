@@ -19,6 +19,7 @@ $env:path = "$msys2\usr\bin;C:\ruby25-x64\bin;C:\Program Files\7-Zip;C:\Program 
 
 $pre = "mingw-w64-x86_64-"
 $fc  = 'Yellow'
+
 #—————————————————————————————————————————————————————————————————————————————— Check-Exit
 # checks whether to exit
 function Check-Exit($msg, $pop) {
@@ -39,7 +40,7 @@ Check-Exit 'Cannot update with -Syu'
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW base" -ForegroundColor $fc
 # change to -Syu if above is commented out
 pacman.exe -S --noconfirm --needed --noprogressbar base 2> $null
-Check-Exit 'Cannot update base'
+# Check-Exit 'Cannot update base'
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW db gdbm libgdbm libreadline ncurses" -ForegroundColor $fc
 pacman.exe -S --noconfirm --needed --noprogressbar db gdbm libgdbm libreadline ncurses 2> $null
