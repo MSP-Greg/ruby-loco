@@ -18,30 +18,61 @@ $pkgs_u = $pkgs.replace('\', '/')
 $env:path = "$msys2\usr\bin;C:\ruby25-x64\bin;C:\Program Files\7-Zip;C:\Program Files\AppVeyor\BuildAgent;C:\Program Files\Git\cmd;C:\Windows\system32;C:\Program Files;C:\Windows"
 
 $pre = "mingw-w64-x86_64-"
+$fc  = 'Yellow'
+#—————————————————————————————————————————————————————————————————————————————— Check-Exit
+# checks whether to exit
+function Check-Exit($msg, $pop) {
+  if ($LastExitCode -and $LastExitCode -ne 0) {
+    if ($pop) { Pop-Location }
+    Write-Host $msg -ForegroundColor $fc
+    exit 1
+  }
+}
+
 #—————————————————————————————————————————————————————————————————————————————— Update MSYS2
-Write-Host "$($dash * 63) Updating MSYS2 / MinGW base base-devel" -ForegroundColor Yellow
-pacman.exe -Sy --noconfirm --needed --noprogressbar base base-devel 2> $null
+# Only use below for really outdated systems, as it wil perform a full update
+# for 'newer' systems...
+Write-Host "$($dash * 63) Updating MSYS2 / MinGW -Syu" -ForegroundColor $fc
+pacman.exe -Syu --noconfirm --needed --noprogressbar
+Check-Exit 'Cannot update with -Syu'
 
-Write-Host "$($dash * 63) Updating MSYS2 / MinGW toolchain `& ruby depends" -ForegroundColor Yellow
-$tools =  "___toolchain ___gdbm ___gmp ___libffi ___ncurses ___readline ___zlib".replace('___', $pre)
-#Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends" -ForegroundColor Yellow
-#$tools =  "___gdbm ___gmp ___libffi ___ncurses ___readline ___zlib".replace('___', $pre)
-pacman.exe -S --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
+Write-Host "$($dash * 63) Updating MSYS2 / MinGW base" -ForegroundColor $fc
+# change to -Syu if above is commented out
+pacman.exe -S --noconfirm --needed --noprogressbar base 2> $null
+Check-Exit 'Cannot update base'
 
-#—————————————————————————————————————————————————————————————————————————————— Update gnupg
-Write-Host "$($dash * 63) Updating gnupg extended dependencies" -ForegroundColor Yellow
+Write-Host "$($dash * 63) Updating MSYS2 / MinGW db gdbm libgdbm libreadline ncurses" -ForegroundColor $fc
+pacman.exe -S --noconfirm --needed --noprogressbar db gdbm libgdbm libreadline ncurses 2> $null
+Check-Exit 'Cannot update db gdbm libgdbm libreadline ncurses'
+
+Write-Host "$($dash * 63) Updating MSYS2 / MinGW base-devel" -ForegroundColor $fc
+pacman.exe -S --noconfirm --needed --noprogressbar base-devel 2> $null
+Check-Exit 'Cannot update base-devel'
+
+Write-Host "$($dash * 63) Updating gnupg `& depends" -ForegroundColor $fc
+
+Write-Host "Updating gnupg extended dependencies" -ForegroundColor $fc
 #pacman.exe -S --noconfirm --needed --noprogressbar brotli ca-certificates glib2 gmp heimdal-libs icu libasprintf libcrypt
 #pacman.exe -S --noconfirm --needed --noprogressbar libdb libedit libexpat libffi libgettextpo libhogweed libidn2 liblzma
 pacman.exe -S --noconfirm --needed --noprogressbar libmetalink libnettle libnghttp2 libopenssl libp11-kit libpcre libpsl 2> $null
 #pacman.exe -S --noconfirm --needed --noprogressbar libssh2 libtasn1 libunistring libxml2 libxslt openssl p11-kit 
 
-Write-Host "$($dash * 63) Updating gnupg package dependencies" -ForegroundColor Yellow
+Write-Host "Updating gnupg package dependencies" -ForegroundColor Yellow
 # below are listed gnupg dependencies
 pacman.exe -S --noconfirm --needed --noprogressbar bzip2 libassuan libbz2 libcurl libgcrypt libgnutls libgpg-error libiconv 2> $null
 pacman.exe -S --noconfirm --needed --noprogressbar libintl libksba libnpth libreadline libsqlite nettle pinentry zlib 2> $null
 
-Write-Host "$($dash * 63) Updating gnupg" -ForegroundColor Yellow
+Write-Host "Updating gnupg" -ForegroundColor Yellow
 pacman.exe -S --noconfirm --needed --noprogressbar gnupg 2> $null
+Check-Exit 'Cannot update gnupg'
+
+Write-Host "$($dash * 63) Updating MSYS2 / MinGW toolchain" -ForegroundColor $fc
+pacman.exe -S --noconfirm --needed --noprogressbar $($pre + 'toolchain') 2> $null
+Check-Exit 'Cannot update toolchain'
+
+Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends" -ForegroundColor Yellow
+$tools =  "___gdbm ___gmp ___libffi ___ncurses ___readline ___zlib".replace('___', $pre)
+pacman.exe -S --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
 
 #—————————————————————————————————————————————————————————————————————————————— Add GPG key
 Write-Host "$($dash * 63) Adding GPG key" -ForegroundColor Yellow
