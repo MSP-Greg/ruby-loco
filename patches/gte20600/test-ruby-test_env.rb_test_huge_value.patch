@@ -1,0 +1,13 @@
+diff --git a/test/ruby/test_env.rb b/test/ruby/test_env.rb
+index 749f0c5b08..b9b8fc8b04 100644
+--- a/test/ruby/test_env.rb
++++ b/test/ruby/test_env.rb
+@@ -457,7 +457,7 @@ def test_update
+   def test_huge_value
+     huge_value = "bar" * 40960
+     ENV["foo"] = "bar"
+-    if /mswin|mingw/ =~ RUBY_PLATFORM && windows_version < 7
++    if /mswin/ =~ RUBY_PLATFORM && windows_version < 7
+       assert_raise(Errno::EINVAL) { ENV["foo"] = huge_value }
+       assert_equal("bar", ENV["foo"])
+     else
