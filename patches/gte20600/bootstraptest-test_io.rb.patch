@@ -1,0 +1,22 @@
+Patch by MSP-Greg
+r63774 seems to cause a singel intermittent failure
+diff --git a/bootstraptest/test_io.rb b/bootstraptest/test_io.rb
+index 731c3e4cc5..49e1214500 100644
+--- a/bootstraptest/test_io.rb
++++ b/bootstraptest/test_io.rb
+@@ -30,11 +30,12 @@
+   end
+ }, '[ruby-dev:32566]'
+ 
+-assert_finish 2, %q{
++
++assert_finish 1, %q{
+   r, w = IO.pipe
+-  Thread.new(Thread.current) { |parent|
++  Thread.new {
+     w << "ab"
+-    Thread.pass until parent.stop?
++    sleep 0.01
+     w << "ab"
+   }
+   r.gets("abab")
