@@ -69,6 +69,11 @@ build() {
   [[ -d "${srcdir}/build${SUFFIX}" ]] && rm -rf "${srcdir}/build${SUFFIX}"
   mkdir -p "${srcdir}/build${SUFFIX}" && cd "${srcdir}/build${SUFFIX}"
 
+  echo ——————————————————————————————————————————————————————————————————————————————— printenv
+  printenv
+  echo ———————————————————————————————————————————————————————————————————————————————
+  
+  
   ../${_realname}/configure \
     --prefix=/${r_inst_dir} \
     --build=${MINGW_CHOST} \
