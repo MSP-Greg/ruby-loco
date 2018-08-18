@@ -5,8 +5,8 @@ $ks1 = 'hkp://pool.sks-keyservers.net'
 $ks2 = 'hkp://pgp.mit.edu'
 
 $msys2   = 'C:\msys64'
-$openssl = 'mingw-w64-x86_64-openssl-1.1.0.h-1-any.pkg.tar.xz'
-$dl_uri  = 'https://dl.bintray.com/msp-greg/ruby_trunk'
+$openssl = 'mingw-w64-x86_64-openssl-1.1.0.i-1-any.pkg.tar.xz'
+$dl_uri  = 'https://ci.appveyor.com/api/projects/MSP-Greg/ruby-makepkg-mingw/artifacts'
 
 $wc  = $(New-Object System.Net.WebClient)
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
@@ -42,16 +42,18 @@ Write-Host "$($dash * 63) Updating MSYS2 / MinGW base" -ForegroundColor $fc
 pacman.exe -S --noconfirm --needed --noprogressbar base 2> $null
 # Check-Exit 'Cannot update base'
 
+<#
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW db gdbm libgdbm libreadline ncurses" -ForegroundColor $fc
 pacman.exe -S --noconfirm --needed --noprogressbar db gdbm libgdbm libreadline ncurses 2> $null
 Check-Exit 'Cannot update db gdbm libgdbm libreadline ncurses'
+#>
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW base-devel" -ForegroundColor $fc
 pacman.exe -S --noconfirm --needed --noprogressbar base-devel 2> $null
 Check-Exit 'Cannot update base-devel'
 
+<#
 Write-Host "$($dash * 63) Updating gnupg `& depends" -ForegroundColor $fc
-
 Write-Host "Updating gnupg extended dependencies" -ForegroundColor $fc
 #pacman.exe -S --noconfirm --needed --noprogressbar brotli ca-certificates glib2 gmp heimdal-libs icu libasprintf libcrypt
 #pacman.exe -S --noconfirm --needed --noprogressbar libdb libedit libexpat libffi libgettextpo libhogweed libidn2 liblzma
@@ -66,6 +68,7 @@ pacman.exe -S --noconfirm --needed --noprogressbar libintl libksba libnpth libre
 Write-Host "Updating gnupg" -ForegroundColor Yellow
 pacman.exe -S --noconfirm --needed --noprogressbar gnupg 2> $null
 Check-Exit 'Cannot update gnupg'
+#>
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW toolchain" -ForegroundColor $fc
 pacman.exe -S --noconfirm --needed --noprogressbar $($pre + 'toolchain') 2> $null
@@ -75,6 +78,7 @@ Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends" -ForegroundColor 
 $tools =  "___gdbm ___gmp ___libffi ___ncurses ___readline ___zlib".replace('___', $pre)
 pacman.exe -S --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
 
+<#
 #—————————————————————————————————————————————————————————————————————————————— Add GPG key
 Write-Host "$($dash * 63) Adding GPG key" -ForegroundColor Yellow
 Write-Host "try retrieving & signing key" -ForegroundColor Yellow
@@ -93,6 +97,7 @@ if ($LastExitCode -and $LastExitCode -ne 0) {
     exit $LastExitCode
   } else { Write-Host GPG Key Lookup succeeded from $ks2 }
 }   else { Write-Host GPG Key Lookup succeeded from $ks1 }
+#>
 
 if ( !(Test-Path -Path $pkgs -PathType Container) ) {
   New-Item -Path $pkgs -ItemType Directory 1> $null
@@ -101,8 +106,12 @@ if ( !(Test-Path -Path $pkgs -PathType Container) ) {
 #—————————————————————————————————————————————————————————————————————————————— Add openssl
 Write-Host "$($dash * 63) Install custom openssl" -ForegroundColor Yellow
 Write-Host "Installing $openssl"
-$wc.DownloadFile("$dl_uri/$openssl", "$pkgs\$openssl")
-$wc.DownloadFile("$dl_uri/$openssl" + ".sig", "$pkgs\$openssl" + ".sig")
+
+$uri = "$dl_uri/$openssl" + "?all=true&pr=false"
+$wc.DownloadFile($uri, "$pkgs\$openssl")
+
+#$uri = "$dl_uri/$openssl" + ".sig?all=true&pr=false"
+#$wc.DownloadFile($uri, "$pkgs\$openssl" + ".sig")
 
 pacman.exe -Rdd --noconfirm mingw-w64-x86_64-openssl 1> $null
 pacman.exe -Udd --noconfirm $pkgs_u/$openssl         1> $null
