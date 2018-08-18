@@ -37,18 +37,13 @@ sha256sums=()
 
 PACKAGER=MSP-Greg
 
-PATH=${PATH}:${GIT_PATH_SH}
-
 prepare() {
+  echo ———————————————————————————————————————————————————————————————————————— prepare
   echo ruby ${R_VERS}${R_PATCH} ${R_DATE} ${R_SVN}
   echo MINGW_CHOST ${MINGW_CHOST}   CARCH ${CARCH}
   where git
   echo
-  echo PATH
-  echo ${PATH}
-  echo
   cd ${dir}
-  PATH=${PATH}:${GIT_PATH_SH}:${RUBY_OPATH}
   ${RUBY} prepare.rb
   
   cd ${srcdir}/${_realname}
@@ -62,6 +57,7 @@ prepare() {
 }
 
 build() {
+  echo —————————————————————————————————————————————————————————————————————————— build
   echo ruby ${R_VERS}${R_PATCH} ${R_DATE} ${R_SVN}
 
   CPPFLAGS+=" -DFD_SETSIZE=2048"
@@ -69,11 +65,8 @@ build() {
   [[ -d "${srcdir}/build${SUFFIX}" ]] && rm -rf "${srcdir}/build${SUFFIX}"
   mkdir -p "${srcdir}/build${SUFFIX}" && cd "${srcdir}/build${SUFFIX}"
 
-  echo ——————————————————————————————————————————————————————————————————————————————— printenv
-  printenv
-  echo ———————————————————————————————————————————————————————————————————————————————
-  
-  
+  PATH=${PATH}:${GIT_PATH_SH}:${RUBY_OPATH}  
+
   ../${_realname}/configure \
     --prefix=/${r_inst_dir} \
     --build=${MINGW_CHOST} \
@@ -82,39 +75,41 @@ build() {
     --disable-install-doc \
     --with-git=${GIT} \
     --with-out-ext=pty,syslog,tk
-  echo ——————————————————————————————————————————————————————————————————————————————— Done with configure
+  echo ———————————————————————————————————————————————————————————— Done with configure
 
-  mkdir -p "${dir}/pkg/${r_inst_dir}/${r_inst_dir}"
+  mkdir -p "${dir}/pkg/${r_inst_dir}"
   attrib.exe -r ${srcdir}/ruby/\*\.\* //s //d
   attrib.exe -r ${srcdir}/ruby/spec/ruby/\*\.\* //s //d
   attrib.exe -r ${srcdir}/build${SUFFIX}/\*\.\* //s //d
   if [[ ${R_VERS_2} > 24 ]]; then
     # make -j ${jobs} UNICODE_FILES=.
-    # echo ——————————————————————————————————————————————————————————————————————————————— Done with update-unicode
+    # echo ——————————————————————————————————————————————————————— Done with update-unicode
     make -j ${jobs}
   else
     jobs=1
     make after-update
-    echo ——————————————————————————————————————————————————————————————————————————————— Done with after-update
+    echo ————————————————————————————————————————————————————————— Done with after-update
     make UNICODE_FILES=.
   fi
-  echo ——————————————————————————————————————————————————————————————————————————————— Done with all, jobs = ${jobs}
 }
 
 package() {
+  echo ———————————————————————————————————————————————————————————————————————— package
   echo ruby ${R_VERS}${R_PATCH} ${R_DATE} ${R_SVN}
-
-  pkgdir=${dir}/pkg/${r_inst_dir}
+  echo ———————————————————————————————————————————————————————————————
+  
+  pkgdir=${dir}/pkg
 
   cd "${srcdir}/build${SUFFIX}"
   make -f GNUMakefile DESTDIR="${pkgdir}" install-nodoc
+  echo ——————————————————————————————————————————————————— Done with make install-nodoc
   for script in {erb,gem,irb,rdoc,ri}; do
     install ${srcdir}/${_realname}/bin/${script} \
       ${pkgdir}/${r_inst_dir}/bin/
   done
   cd "../.."
   NEW_RUBY=${PKG_RUBY}/bin/ruby.exe
-  if [[ ${R_VERS_2} < 25 ]]; then
+  if [[ ${R_VERS_2} < 26 ]]; then
     ${NEW_RUBY} install_rubygems.rb ${r_inst_dir}
   fi
   ${NEW_RUBY} install_gem_update.rb

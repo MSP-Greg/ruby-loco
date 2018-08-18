@@ -4,8 +4,9 @@
 module TestScript
 
   YELLOW = "\e[33m"
-  RESET = "\e[0m"
-
+  RESET  = "\e[0m"
+  DASH   = '—'
+  
   @@stripe_len = 65
   @@puts_len   = 79
   @@failures   = 0
@@ -43,13 +44,13 @@ module TestScript
                   "#{results_str}\n" \
                   "#{command_line()}\n"
 
-    puts "#{YELLOW}#{'—' * @@puts_len} Test Results#{RESET}"
+    puts "#{YELLOW}#{DASH * @@puts_len} Test Results#{RESET}"
     puts results_str
 
     File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-Summary - Test Results.log"), results_str)
 
     unless sum_test_all.empty?
-      puts "\n#{YELLOW}#{'—' * @@puts_len} Summary test-all#{RESET}"
+      puts "\n#{YELLOW}#{DASH * @@puts_len} Summary test-all#{RESET}"
       puts sum_test_all
       sum_test_all = sum_test_all.gsub(/^\e\[33m|\e\[0m$/, '')
       File.binwrite(File.join(__dir__, "#{ENV['R_NAME']}-Summary - test-all.log"), sum_test_all)
@@ -78,7 +79,7 @@ module TestScript
   private
 
   def log_warnings(log)
-    str = +''
+    str = ''.dup
     if !log.empty? && (s = File.binread(log[0]))
       s.gsub!(/\r/, '')
       s.scan(/^\.\.[^\n]+\n[^\n].+?:\d+:\d+: warning: .+?\^\n/m) { |w|
@@ -219,7 +220,7 @@ module TestScript
   end
 
   def generate_test_all(s, results)
-    str = +''
+    str = ''.dup
 
     # Find and log parallel failures ands errors
     str << errors_faults_parallel(s, 'Failure', 'F')
@@ -232,13 +233,13 @@ module TestScript
   end
 
   def errors_faults_parallel(log, type, abbrev)
-    str = +''
+    str = ''.dup
     faults = []
     faults = log.scan(/^( *\d+ )([A-Z][^#\n]+#test_[^\n]+? = #{abbrev})/)
     unless  faults.empty?
       t1 = faults.length
       msg = t1 == 1 ? "#{type}" : "#{type}s"
-      str << "#{YELLOW}#{'—' * @@stripe_len} Parallel Tests - #{t1} #{msg}#{RESET}\n\n"
+      str << "#{YELLOW}#{DASH * @@stripe_len} Parallel Tests - #{t1} #{msg}#{RESET}\n\n"
       str << faults.sort_by { |f| f[1] }.map { |f| "#{f[0]}#{f[1]}" }.join("\n")
       str << "\n\n"
     end
@@ -266,7 +267,7 @@ module TestScript
         t1 = errors.length
         msg = t1 == 1 ? "1 Error" : "#{t1} Errors"
         wid = @@stripe_len + t1.to_s.length
-        str << "#{YELLOW}#{'—' * @@stripe_len} #{msg}#{RESET}\n#{' ' * wid}  #{file}\n\n"
+        str << "#{YELLOW}#{DASH * @@stripe_len} #{msg}#{RESET}\n#{' ' * wid}  #{file}\n\n"
         errors.each { |test, file, line, msg|
           str << "#{test.ljust wid+1} Line: #{line.to_s.ljust(5)}\n#{msg}\n\n"
         }
@@ -276,7 +277,7 @@ module TestScript
   end
   
   def faults_final(log)
-    str = +''
+    str = ''.dup
     faults = []
     log.scan(/^ *\d+\) Failure:\n([^\n]+?) \[([^\n]+?):(\d+)\]:\n(.+?)\n\n/m) { |test, file, line, msg|
       file.sub!(/[\S]+?\/test\//, '')
@@ -296,7 +297,7 @@ module TestScript
         t1 = faults.length
         msg = t1 == 1 ? "1 Failure" : "#{t1} Failures"
         wid = @@stripe_len + t1.to_s.length
-        str << "#{YELLOW}#{'—' * @@stripe_len} #{msg}#{RESET}\n#{' ' * wid}  #{file}\n\n"
+        str << "#{YELLOW}#{DASH * @@stripe_len} #{msg}#{RESET}\n#{' ' * wid}  #{file}\n\n"
         faults.each { |test, file, line, msg|
           str << "#{test.ljust wid+1} Line: #{line.to_s.ljust(5)}\n#{msg}\n\n"
         }
@@ -306,7 +307,7 @@ module TestScript
   end
   
   def zip_save
-    puts "#{YELLOW}#{'—' * @@puts_len} Saving Artifacts#{RESET}"
+    puts "#{YELLOW}#{DASH * @@puts_len} Saving Artifacts#{RESET}"
     
     push_artifacts if @@is_av
     
@@ -323,8 +324,8 @@ module TestScript
   
   def push_artifacts
     z_files = "#{ENV['PKG_RUBY']}\\* " \
-              ".\\pkg\\#{ENV['R_NAME']}\\.BUILDINFO " \
-              ".\\pkg\\#{ENV['R_NAME']}\\.PKGINFO " \
+              ".\\pkg\\.BUILDINFO " \
+              ".\\pkg\\.PKGINFO " \
               ".\\av_install\\#{ENV['R_BRANCH']}_install.cmd " \
               ".\\av_install\\#{ENV['R_BRANCH']}_pkgs.cmd " \
               ".\\av_install\\#{ENV['R_BRANCH']}_msys2.cmd"

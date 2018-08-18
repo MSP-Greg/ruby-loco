@@ -18,7 +18,7 @@ module InstallPost
 
   @@carch = @@arch == '64' ? 'x86_64' : 'i686'
   # path to root ruby install dir
-  @@pkg_path = File.join(__dir__, 'pkg', @@pkg_name, @@pkg_name)
+  @@pkg_path = File.join(__dir__, 'pkg', @@pkg_name)
 
   def self.run
     copy_dll_files
@@ -40,7 +40,7 @@ module InstallPost
     msys2_dll_bin_path = File.join(ENV['MSYS2_DIR'].gsub('\\', "/"), "mingw#{@@arch}", "bin")
 
     # create side-by-side directory and add manifest xml file
-    dest = File.join(__dir__, 'pkg', @@pkg_name, @@pkg_name, 'bin', 'ruby_builtin_dlls').gsub('/', '\\')
+    dest = File.join(@@pkg_path, 'bin', 'ruby_builtin_dlls').gsub('/', '\\')
     `mkdir #{dest}` unless Dir.exist?(dest)
     create_manifest(dll_files, dest)
 
@@ -59,7 +59,7 @@ module InstallPost
     dll_dirs.each { |d|
       src = File.join(ENV['MSYS2_DIR'].gsub('\\', "/"), "mingw#{@@arch}", "lib", d)
       if Dir.exist?(src)
-        dest = File.join(__dir__, 'pkg', @@pkg_name, @@pkg_name, "lib", d)
+        dest = File.join(@@pkg_path, "lib", d)
         `mkdir #{dest.gsub('/', '\\')}` unless Dir.exist?(dest)
         `xcopy /s /q #{src.gsub('/', '\\')} #{dest.gsub('/', '\\')}`
         puts "#{COL_SPACE}Copy dir #{d}"
@@ -116,7 +116,7 @@ module InstallPost
   # Adds private assembly data to ruby.exe and rubyw.exe files
   def self.add_priv_assm
     libruby_regex = /msvcrt-ruby\d+\.dll$/i
-    bin_dir = File.join(__dir__, 'pkg', @@pkg_name, @@pkg_name, 'bin')
+    bin_dir = File.join(@@pkg_path, 'bin')
     Dir.chdir(bin_dir) { |d|
       libruby = Dir['*.dll'].grep(libruby_regex)[0]
       new = <<-EOT

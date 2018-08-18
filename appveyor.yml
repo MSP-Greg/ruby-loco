@@ -10,11 +10,12 @@ init:
   # Flag for whether build is local or running in Appveyor
   - set AV_BUILD=true
   # Minimize path so bash conflicts don't arise
-  - set base_path=C:\ruby25-x64\bin;C:\Program Files\7-Zip;C:\Program Files\AppVeyor\BuildAgent;C:\Program Files\Git\cmd;C:\Windows\system32;C:\Program Files;C:\Windows
+  - set orig_path=%PATH%
+  - set base_path=C:\Program Files\7-Zip;C:\Program Files\AppVeyor\BuildAgent;C:\Program Files\Git\cmd;C:\Windows\system32;C:\Program Files;C:\Windows
   - set PATH=%base_path%
 
 install:
-  # Update MSYS2 / MinGW and install OpenSSL 1.1.0 & GDBM 1.10
+  # Update MSYS2 / MinGW and install OpenSSL 1.1.0
   - ps: .\av_install\trunk_msys2.ps1
   #- ps: .\av_install\trunk_msys2_full.ps1
 

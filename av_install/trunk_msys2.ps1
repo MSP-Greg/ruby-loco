@@ -5,8 +5,11 @@ $ks1 = 'hkp://pool.sks-keyservers.net'
 $ks2 = 'hkp://pgp.mit.edu'
 
 $msys2   = 'C:\msys64'
-$openssl = 'mingw-w64-x86_64-openssl-1.1.0.i-1-any.pkg.tar.xz'
-$dl_uri  = 'https://ci.appveyor.com/api/projects/MSP-Greg/ruby-makepkg-mingw/artifacts'
+$openssl = 'mingw-w64-x86_64-openssl-1.1.1_pre9-1-any.pkg.tar.xz'
+$dl_uri  = 'https://ci.appveyor.com/api/buildjobs/d5cvbsgovr80qo28/artifacts'
+
+#$openssl = 'mingw-w64-x86_64-openssl-1.1.0.i-1-any.pkg.tar.xz'
+#$dl_uri  = 'https://ci.appveyor.com/api/buildjobs/8h2vajjdhgwh2xre/artifacts'
 
 $wc  = $(New-Object System.Net.WebClient)
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
@@ -107,14 +110,13 @@ if ( !(Test-Path -Path $pkgs -PathType Container) ) {
 Write-Host "$($dash * 63) Install custom openssl" -ForegroundColor Yellow
 Write-Host "Installing $openssl"
 
-$uri = "$dl_uri/$openssl" + "?all=true&pr=false"
-$wc.DownloadFile($uri, "$pkgs\$openssl")
+$wc.DownloadFile("$dl_uri/$openssl", "$pkgs\$openssl")
+#$wc.DownloadFile("$dl_uri/$openssl" + ".sig", "$pkgs\$openssl" + ".sig")
 
-#$uri = "$dl_uri/$openssl" + ".sig?all=true&pr=false"
-#$wc.DownloadFile($uri, "$pkgs\$openssl" + ".sig")
-
-pacman.exe -Rdd --noconfirm mingw-w64-x86_64-openssl 1> $null
-pacman.exe -Udd --noconfirm $pkgs_u/$openssl         1> $null
+Write-Host "pacman.exe -Rdd --noconfirm mingw-w64-x86_64-openssl" -ForegroundColor Yellow
+pacman.exe -Rdd --noconfirm mingw-w64-x86_64-openssl
+Write-Host "pacman.exe -Udd --noconfirm $pkgs_u/$openssl" -ForegroundColor Yellow
+pacman.exe -Udd --noconfirm $pkgs_u/$openssl
 if ($LastExitCode) {
   Write-Host "Error installing openssl" -ForegroundColor Yellow
   exit 1
