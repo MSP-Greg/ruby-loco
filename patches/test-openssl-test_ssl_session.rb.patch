@@ -1,9 +1,9 @@
 Patch by MSP-Greg
 diff --git a/test/openssl/test_ssl_session.rb b/test/openssl/test_ssl_session.rb
-index 7b0f9acaed..5cd047d203 100644
+index e199f86d2b..839f2f6247 100644
 --- a/test/openssl/test_ssl_session.rb
 +++ b/test/openssl/test_ssl_session.rb
-@@ -204,13 +204,14 @@ def test_server_session_cache
+@@ -205,13 +205,14 @@ def test_server_session_cache
            ssl.puts("abc"); assert_equal "abc\n", ssl.gets
            first_session ||= ssl.session
  
@@ -23,7 +23,7 @@ index 7b0f9acaed..5cd047d203 100644
            end
          }
        end
-@@ -334,12 +335,14 @@ def test_ctx_server_session_cb
+@@ -335,12 +336,14 @@ def test_ctx_server_session_cb
        connections = 2
        sess2 = server_connect_with_session(port, cctx, sess0.dup) { |ssl|
          ssl.puts("abc"); assert_equal "abc\n", ssl.gets
@@ -36,7 +36,7 @@ index 7b0f9acaed..5cd047d203 100644
 +            "see https://github.com/openssl/openssl/pull/4014 session_reused? is #{reused ? 'true' : 'false'}"
          end
 -        assert_equal true, ssl.session_reused?
-+        pend('Issue with 1.1.0g on Appveyor') if openssl?(1, 1, 0, 7) && ENV['AV_BUILD'] == 'true'
++        pend('Issue with 1.1.0g on Appveyor') if openssl?(1, 1, 0, 7) && ENV['APPVEYOR']
 +        assert_equal true, reused
          ssl.session
        }

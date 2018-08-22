@@ -1,8 +1,9 @@
 Patch by MSP-Greg
-index 1d19af1e10..fb87085f87 100644
+diff --git a/test/readline/test_readline.rb b/test/readline/test_readline.rb
+index 0e6f006caf..9a31f20521 100644
 --- a/test/readline/test_readline.rb
 +++ b/test/readline/test_readline.rb
-@@ -412,18 +412,21 @@ def test_modify_text_in_pre_input_hook
+@@ -418,18 +418,21 @@ def test_modify_text_in_pre_input_hook
    end if !/EditLine|\A4\.3\z/n.match(Readline::VERSION)
  
    def test_input_metachar
@@ -35,7 +36,7 @@ index 1d19af1e10..fb87085f87 100644
    end if !/EditLine/n.match(Readline::VERSION)
  
    def test_input_metachar_multibyte
-@@ -580,11 +583,15 @@ def replace_stdio(stdin_path, stdout_path)
+@@ -586,11 +589,15 @@ def replace_stdio(stdin_path, stdout_path)
    end
  
    def with_temp_stdio

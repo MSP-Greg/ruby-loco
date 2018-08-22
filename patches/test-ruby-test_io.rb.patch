@@ -4,7 +4,7 @@ diff --git a/testdiff --git a/test/ruby/test_io.rb b/test/ruby/test_io.rb
 index 1c45787648..12f14e81ef 100644
 --- a/test/ruby/test_io.rb
 +++ b/test/ruby/test_io.rb
-@@ -3705,25 +3705,43 @@ def test_closed_stream_in_rescue
+@@ -3714,25 +3714,43 @@ def test_closed_stream_in_rescue
      def test_write_no_garbage
        skip "multiple threads already active" if Thread.list.size > 1
        res = {}

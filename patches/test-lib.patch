@@ -4,7 +4,7 @@ a) turns on verbose
 b) adjusts assertions count so that tests, regardless of manner run, show similar results.
 c) adds assertion total by test to each line of output
 diff --git a/test/lib/minitest/unit.rb b/test/lib/minitest/unit.rb
-index aa9a09f049..243052dc3a 100644
+index e8c22c60b7..8afdc28d17 100644
 --- a/test/lib/minitest/unit.rb
 +++ b/test/lib/minitest/unit.rb
 @@ -3,7 +3,7 @@
@@ -148,7 +148,7 @@ index aa9a09f049..243052dc3a 100644
  
        options
 diff --git a/test/lib/test/unit.rb b/test/lib/test/unit.rb
-index 51c8960c52..498293d126 100644
+index 7a09466d1c..466fe91c77 100644
 --- a/test/lib/test/unit.rb
 +++ b/test/lib/test/unit.rb
 @@ -3,10 +3,10 @@
@@ -181,7 +181,7 @@ index 51c8960c52..498293d126 100644
          end
  
          opts.on '-n', '--name PATTERN', "Filter test method names on pattern: /REGEXP/, !/REGEXP/ or STRING" do |a|
-@@ -451,7 +458,6 @@ def _run_parallel suites, type, result
+@@ -453,7 +460,6 @@ def _run_parallel suites, type, result
            warn "Error: parameter of -j option should be greater than 0."
            return
          end
@@ -189,7 +189,7 @@ index 51c8960c52..498293d126 100644
          # Require needed thing for parallel running
          require 'timeout'
          @tasks = @files.dup # Array of filenames.
-@@ -504,7 +510,12 @@ def _run_parallel suites, type, result
+@@ -506,7 +512,12 @@ def _run_parallel suites, type, result
              suites.map! {|r| eval("::"+r[:testcase])}
              del_status_line or puts
              unless suites.empty?
@@ -203,7 +203,7 @@ index 51c8960c52..498293d126 100644
                _run_suites(suites, type)
              end
              @options[:parallel] = parallel
-@@ -521,7 +532,7 @@ def _run_parallel suites, type, result
+@@ -523,7 +534,7 @@ def _run_parallel suites, type, result
              if @options[:retry]
                @errors   += rep.map{|x| x[:result][0] }.inject(:+)
                @failures += rep.map{|x| x[:result][1] }.inject(:+)
@@ -212,7 +212,7 @@ index 51c8960c52..498293d126 100644
              end
            end
            unless @warnings.empty?
-@@ -581,7 +592,7 @@ def setup_options(opts, options)
+@@ -583,7 +594,7 @@ def setup_options(opts, options)
  
        def _run_suites(suites, type)
          result = super
@@ -221,7 +221,7 @@ index 51c8960c52..498293d126 100644
          report.sort_by!{|r| r.start_with?("Skipped:") ? 0 : \
                             (r.start_with?("Failure:") ? 1 : 2) }
          failed(nil)
-@@ -695,6 +706,7 @@ def output
+@@ -697,6 +708,7 @@ def output
        end
  
        def _prepare_run(suites, type)
@@ -229,7 +229,7 @@ index 51c8960c52..498293d126 100644
          options[:job_status] ||= :replace if @tty && !@verbose
          case options[:color]
          when :always
-@@ -1084,13 +1096,17 @@ def puke klass, meth, e
+@@ -1086,13 +1098,17 @@ def puke klass, meth, e
          # TODO:
          #   this overriding is for minitest feature that skip messages are
          #   hidden when not verbose (-v), note this is temporally.
@@ -268,16 +268,15 @@ index 47822ecef5..a3ec586103 100644
    STATE = {
      count: 0,
 diff --git a/test/lib/zombie_hunter.rb b/test/lib/zombie_hunter.rb
-index ea94844b53..79b2eb26df 100644
+index 33bc467941..dad1e04758 100644
 --- a/test/lib/zombie_hunter.rb
 +++ b/test/lib/zombie_hunter.rb
-@@ -3,6 +3,10 @@
- # There might be compiler processes executed by MJIT
- return if RubyVM::MJIT.enabled?
+@@ -1,5 +1,9 @@
+ # frozen_string_literal: true
  
 +# The assertions called in after_teardown are offset in minitest/unit.rb
-+# so that assertions counts with and with this are the same.  If the count
-+# changes, please adjust the code in unit.rb, search for zombie
++# so that assertions counts with and without this are the same.  If the
++# count changes, please adjust the code in unit.rb, search for zombie
 +
  module ZombieHunter
    def after_teardown
