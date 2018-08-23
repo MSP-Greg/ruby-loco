@@ -1,59 +1,79 @@
 Patch by MSP-Greg
+See GitHub PR 1941, https://github.com/ruby/ruby/pull/1941
+diff --git a/test/lib/minitest/unit.rb b/test/lib/minitest/unit.rb
+index e8c22c60b77c..5e047e04797d 100644
+--- a/test/lib/minitest/unit.rb
++++ b/test/lib/minitest/unit.rb
+@@ -1171,6 +1171,21 @@ def rubinius? platform = defined?(RUBY_ENGINE) && RUBY_ENGINE
+       def windows? platform = RUBY_PLATFORM
+         /mswin|mingw/ =~ platform
+       end
++
++      ##
++      # Is this running on mingw?
++
++      def mingw? platform = RUBY_PLATFORM
++        /mingw/ =~ platform
++      end
++
++      ##
++      # Is this running on mswin?
++
++      def mswin? platform = RUBY_PLATFORM
++        /mswin/ =~ platform
++      end
++
+     end
+ 
+     ##
 diff --git a/test/readline/test_readline.rb b/test/readline/test_readline.rb
-index 0e6f006caf..9a31f20521 100644
+index 0e6f006caf2f..cfa90fe3f1bc 100644
 --- a/test/readline/test_readline.rb
 +++ b/test/readline/test_readline.rb
-@@ -418,18 +418,21 @@ def test_modify_text_in_pre_input_hook
+@@ -13,17 +13,11 @@ class TestReadline < Test::Unit::TestCase
+   SAVED_ENV = %w[COLUMNS LINES]
+ 
+   def setup
+-    if ENV.key?('APPVEYOR') && /mingw/ =~ RUBY_PLATFORM
+-      skip 'failing on AppVeyor MinGW build for now'
+-    end
+     @saved_env = ENV.values_at(*SAVED_ENV)
+     @inputrc, ENV[INPUTRC] = ENV[INPUTRC], IO::NULL
+   end
+ 
+   def teardown
+-    if ENV.key?('APPVEYOR') && /mingw/ =~ RUBY_PLATFORM
+-      return
+-    end
+     ENV[INPUTRC] = @inputrc
+     Readline.instance_variable_set("@completion_proc", nil)
+     begin
+@@ -418,6 +412,7 @@ def test_modify_text_in_pre_input_hook
    end if !/EditLine|\A4\.3\z/n.match(Readline::VERSION)
  
    def test_input_metachar
--    bug6601 = '[ruby-core:45682]'
--    Readline::HISTORY << "hello"
--    wo = nil
--    line = with_pipe do |r, w|
--      wo = w.dup
--      wo.write("\C-re\ef\n")
-+    skip("Won't pass on Windows w/readline 7.0.003 [ruby-core:45682]") if windows?
-+    begin
-+      bug6601 = '[ruby-core:45682]'
-+      Readline::HISTORY << "hello"
-+      wo = nil
-+      line = with_pipe do |r, w|
-+        wo = w.dup
-+        wo.write("\C-re\ef\n")
-+      end
-+      assert_equal("hello", line, bug6601)
-+    ensure
-+      wo.close
-+      Readline.delete_text
-+      Readline::HISTORY.clear
++    skip("Won't pass on mingw w/readline 7.0.005 [ruby-core:45682]") if mingw?
+     bug6601 = '[ruby-core:45682]'
+     Readline::HISTORY << "hello"
+     wo = nil
+@@ -427,7 +422,7 @@ def test_input_metachar
      end
--    assert_equal("hello", line, bug6601)
--  ensure
+     assert_equal("hello", line, bug6601)
+   ensure
 -    wo.close
--    Readline.delete_text
--    Readline::HISTORY.clear
++    wo&.close
+     Readline.delete_text
+     Readline::HISTORY.clear
    end if !/EditLine/n.match(Readline::VERSION)
- 
-   def test_input_metachar_multibyte
-@@ -586,11 +589,15 @@ def replace_stdio(stdin_path, stdout_path)
+@@ -589,6 +584,11 @@ def with_temp_stdio
+     Tempfile.create("test_readline_stdin") {|stdin|
+       Tempfile.create("test_readline_stdout") {|stdout|
+         yield stdin, stdout
++        if windows?
++          # needed since readline holds refs to tempfiles, can't delete on Windows
++          Readline.input = STDIN
++          Readline.output = STDOUT
++        end
+       }
+     }
    end
- 
-   def with_temp_stdio
--    Tempfile.create("test_readline_stdin") {|stdin|
--      Tempfile.create("test_readline_stdout") {|stdout|
--        yield stdin, stdout
--      }
--    }
-+    stdin =  Tempfile.new("test_readline_stdin")
-+    stdout = Tempfile.new("test_readline_stdout")
-+    yield stdin, stdout
-+    if stdout
-+      stdout.closed? ? stdout.unlink : stdout.close!
-+    end
-+    if stdin
-+      stdin.closed?  ? stdin.unlink  : stdin.close!
-+    end
-   end
- 
-   def with_pipe
