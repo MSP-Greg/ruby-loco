@@ -301,3 +301,23 @@ index 23e1542d8f..8906ff0b88 100644
        begin
          sock = nil
          Thread.start do
+diff --git a/test/net/utils.rb b/test/net/utils.rb
+index e69de29bb2..d026e7f172 100644
+--- a/test/net/utils.rb
++++ b/test/net/utils.rb
+@@ -0,0 +1,15 @@
++# frozen_string_literal: true
++
++module Net::TestUtils
++  CA_FILE     = File.join(__dir__, "fixtures/cacert.pem")
++  SERVER_KEY  = File.join(__dir__, "fixtures/server.key")
++  SERVER_CERT = File.join(__dir__, "fixtures/server.crt")
++
++  def self.create_ssl_ctx
++    ctx = OpenSSL::SSL::SSLContext.new
++    ctx.ca_file = CA_FILE
++    ctx.key  = OpenSSL::PKey::RSA.new( File.read(SERVER_KEY) )
++    ctx.cert = OpenSSL::X509::Certificate.new( File.read(SERVER_CERT) )
++    ctx
++  end
++end
