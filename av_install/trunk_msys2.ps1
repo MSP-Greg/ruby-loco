@@ -5,7 +5,7 @@ $ks1 = 'hkp://pool.sks-keyservers.net'
 $ks2 = 'hkp://pgp.mit.edu'
 
 $msys2   = 'C:\msys64'
-$openssl = 'mingw-w64-x86_64-openssl-1.1.1_pre9-1-any.pkg.tar.xz'
+$openssl = 'mingw-w64-x86_64-openssl-1.1.1_pre10-1-any.pkg.tar.xz'
 $dl_uri  = 'https://ci.appveyor.com/api/projects/MSP-Greg/ruby-makepkg-mingw/artifacts'
 
 #$openssl = 'mingw-w64-x86_64-openssl-1.1.0.i-1-any.pkg.tar.xz'
