@@ -26,21 +26,21 @@
 @rem ————————————————————————————————————————————————————————————————————— Build
 bash.exe -c  "cd '%DP0%'; MINGW_INSTALLS=mingw64 makepkg-mingw --nocheck --skippgpcheck -dLf -p PKGBUILD"
 @echo ———————————————————————————————————————————————————————————————————————————————
-@set /a ERROR_BLD=ERRORLEVEL
+@set /a ERROR_BLD=%ERRORLEVEL%
 
 @cd %DP0%src/build%SUFFIX%/ext
 @7z.exe a ../../../ext_build_files.7z **/Makefile **/*.h **/*.log **/*.mk
 @cd %DP0%
 @if "%AV_BUILD%"=="true" ( appveyor PushArtifact ext_build_files.7z )
 
-@if %ERROR_BLD%==1 (
+@if %ERROR_BLD% NEQ 0 (
   cd %DP0%src/build%SUFFIX%/.ext/x64-mingw32
   7z.exe a ../../../../ext_so_files.7z *.so **/*.so
   dir *.so
   cd %DP0%
 
   if "%AV_BUILD%"=="true" ( appveyor PushArtifact ext_so_files.7z )
-  exit 1
+  exit %ERROR_BLD%
 )
 
 @@PATH=%MSYS2_DIR%/mingw64/bin;%MSYS2_DIR%/usr/bin;%GIT_PATH%;%base_path%

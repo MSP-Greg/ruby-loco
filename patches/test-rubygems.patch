@@ -1,11 +1,11 @@
-Patch by MSP-Greg
-test_gem_gemcutter_utilities.rb - remove some skips
+Patch by MSP-Greg  updated as 2018-08-27 r64557
+test_gem_gemcutter_utilities.rb - remove some intermittent skips
 several patches allow 'ruby runner.rb rubygems' to pass all tests
 diff --git a/lib/rubygems/test_case.rb b/lib/rubygems/test_case.rb
-index f1cd3d274c..3a98851849 100644
+index ced33c4d11..6316186c73 100644
 --- a/lib/rubygems/test_case.rb
 +++ b/lib/rubygems/test_case.rb
-@@ -1302,8 +1302,14 @@ def self.rubybin
+@@ -1320,8 +1320,14 @@ def self.rubybin
    end
  
    @@ruby = rubybin
@@ -23,7 +23,7 @@ index f1cd3d274c..3a98851849 100644
    ##
    # Construct a new Gem::Dependency.
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index f383d5af58..b6f657889d 100644
+index ddf0f7e04c..b353064639 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
 @@ -818,7 +818,7 @@ def test_self_platforms
@@ -95,7 +95,7 @@ index 549e34c218..64fd892cad 100644
  
    def test_explain
 diff --git a/test/rubygems/test_gem_gemcutter_utilities.rb b/test/rubygems/test_gem_gemcutter_utilities.rb
-index 7b3e273957..155ebf0101 100644
+index 90f9142171..6b70ba1adf 100644
 --- a/test/rubygems/test_gem_gemcutter_utilities.rb
 +++ b/test/rubygems/test_gem_gemcutter_utilities.rb
 @@ -13,6 +13,9 @@ def setup
@@ -108,26 +108,6 @@ index 7b3e273957..155ebf0101 100644
  
      @cmd = Gem::Command.new '', 'summary'
      @cmd.extend Gem::GemcutterUtilities
-@@ -179,7 +182,8 @@ def test_sign_in_with_other_credentials_doesnt_overwrite_other_keys
-   end
- 
-   def test_sign_in_with_bad_credentials
--    skip 'Always uses $stdin on windows' if Gem.win_platform?
-+    skip 'Always uses $stdin on windows' if
-+      Gem.win_platform? && RUBY_VERSION <= '1.9.2'
- 
-     assert_raises Gem::MockGemUi::TermError do
-       util_sign_in ['Access Denied.', 403, 'Forbidden']
-@@ -190,7 +194,8 @@ def test_sign_in_with_bad_credentials
-   end
- 
-   def util_sign_in response, host = nil, args = []
--    skip 'Always uses $stdin on windows' if Gem.win_platform?
-+    skip 'Always uses $stdin on windows' if
-+      Gem.win_platform? && RUBY_VERSION <= '1.9.2'
- 
-     email    = 'you@example.com'
-     password = 'secret'
 diff --git a/test/rubygems/test_gem_local_remote_options.rb b/test/rubygems/test_gem_local_remote_options.rb
 index a51182b11c..ef0070840f 100644
 --- a/test/rubygems/test_gem_local_remote_options.rb
@@ -159,103 +139,3 @@ index a51182b11c..ef0070840f 100644
    end
  
  end
-diff --git a/test/rubygems/test_gem_package.rb b/test/rubygems/test_gem_package.rb
-index 09ef27ee22..2b07420150 100644
---- a/test/rubygems/test_gem_package.rb
-+++ b/test/rubygems/test_gem_package.rb
-@@ -150,7 +150,7 @@ def test_add_files
-   end
- 
-   def test_add_files_symlink
--    skip 'symlink not supported' if Gem.win_platform?
-+    skip 'symlink not supported' if Gem.win_platform? && RUBY_VERSION < '2.3'
- 
-     spec = Gem::Specification.new
-     spec.files = %w[lib/code.rb lib/code_sym.rb]
-@@ -159,7 +159,11 @@ def test_add_files_symlink
-     File.open 'lib/code.rb',  'w' do |io| io.write '# lib/code.rb'  end
- 
-     # NOTE: 'code.rb' is correct, because it's relative to lib/code_sym.rb
--    File.symlink('code.rb', 'lib/code_sym.rb')
-+    begin
-+      File.symlink('code.rb', 'lib/code_sym.rb')
-+    rescue Errno::EACCES
-+      skip "symlink - must be admin with no UAC on Windows"
-+    end
- 
-     package = Gem::Package.new 'bogus.gem'
-     package.spec = spec
-@@ -451,7 +455,7 @@ def test_extract_tar_gz_absolute
-   end
- 
-   def test_extract_tar_gz_symlink_relative_path
--    skip 'symlink not supported' if Gem.win_platform?
-+    skip 'symlink not supported' if Gem.win_platform? && RUBY_VERSION < '2.3'
- 
-     package = Gem::Package.new @gem
- 
-@@ -460,8 +464,12 @@ def test_extract_tar_gz_symlink_relative_path
-       tar.mkdir       'lib',         0755
-       tar.add_symlink 'lib/foo.rb', '../relative.rb', 0644
-     end
--
--    package.extract_tar_gz tgz_io, @destination
-+    
-+    begin
-+      package.extract_tar_gz tgz_io, @destination
-+    rescue Errno::EACCES
-+      skip "symlink - must be admin with no UAC on Windows"
-+    end
- 
-     extracted = File.join @destination, 'lib/foo.rb'
-     assert_path_exists extracted
-@@ -472,28 +480,32 @@ def test_extract_tar_gz_symlink_relative_path
-   end
- 
-   def test_extract_symlink_parent
--   skip 'symlink not supported' if Gem.win_platform?
-+    skip 'symlink not supported' if Gem.win_platform? && RUBY_VERSION < '2.3'
- 
--   package = Gem::Package.new @gem
-+    package = Gem::Package.new @gem
- 
--   tgz_io = util_tar_gz do |tar|
--     tar.mkdir       'lib',               0755
--     tar.add_symlink 'lib/link', '../..', 0644
--     tar.add_file    'lib/link/outside.txt', 0644 do |io| io.write 'hi' end
--   end
-+    tgz_io = util_tar_gz do |tar|
-+      tar.mkdir       'lib',               0755
-+      tar.add_symlink 'lib/link', '../..', 0644
-+      tar.add_file    'lib/link/outside.txt', 0644 do |io| io.write 'hi' end
-+    end
- 
--   # Extract into a subdirectory of @destination; if this test fails it writes
--   # a file outside destination_subdir, but we want the file to remain inside
--   # @destination so it will be cleaned up.
--   destination_subdir = File.join @destination, 'subdir'
--   FileUtils.mkdir_p destination_subdir
-+    # Extract into a subdirectory of @destination; if this test fails it writes
-+    # a file outside destination_subdir, but we want the file to remain inside
-+    # @destination so it will be cleaned up.
-+    destination_subdir = File.join @destination, 'subdir'
-+    FileUtils.mkdir_p destination_subdir
- 
--   e = assert_raises Gem::Package::PathError do
--     package.extract_tar_gz tgz_io, destination_subdir
--   end
-+    e = assert_raises(Gem::Package::PathError, Errno::EACCES) do
-+      package.extract_tar_gz tgz_io, destination_subdir
-+    end
- 
--   assert_equal("installing into parent path lib/link/outside.txt of " +
--                 "#{destination_subdir} is not allowed", e.message)
-+    if Gem::Package::PathError === e
-+      assert_equal("installing into parent path lib/link/outside.txt of " +
-+                   "#{destination_subdir} is not allowed", e.message)
-+    else
-+      skip "symlink - must be admin with no UAC on Windows"
-+    end
-   end
- 
-   def test_extract_tar_gz_directory
