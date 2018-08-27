@@ -6,6 +6,7 @@ $ks2 = 'hkp://pgp.mit.edu'
 
 $msys2   = 'C:\msys64'
 $openssl = 'mingw-w64-x86_64-openssl-1.1.1_pre10-1-any.pkg.tar.xz'
+$openssl_sha = '0689fe7fe1dc6e7297a41e415b5d82596f5f369245db9725c3d164368e6356c1465183c9f9ef6348163500586f82e6e8e9873ba5c2ba807d5ac183b1e4697ab1'
 $dl_uri  = 'https://ci.appveyor.com/api/projects/MSP-Greg/ruby-makepkg-mingw/artifacts'
 
 #$openssl = 'mingw-w64-x86_64-openssl-1.1.0.i-1-any.pkg.tar.xz'
@@ -30,6 +31,35 @@ function Check-Exit($msg, $pop) {
     if ($pop) { Pop-Location }
     Write-Host $msg -ForegroundColor $fc
     exit 1
+  }
+}
+
+#—————————————————————————————————————————————————————————————————————————————— Check_SHA
+# checks SHA512 from file, script variable & Appveyor message
+function Check-SHA($path, $file, $uri_dl, $sha_local) {
+  $uri_bld = $uri_dl -replace '/artifacts$', ''
+  $obj_bld = ConvertFrom-Json -InputObject $(Invoke-WebRequest -Uri $uri_bld)
+  $job_id = $obj_bld.build.jobs[0].jobId
+
+  $json_msgs = Invoke-WebRequest -Uri "https://ci.appveyor.com/api/buildjobs/$job_id/messages"
+  $obj_msgs = ConvertFrom-Json -InputObject $json_msgs
+  $sha_msg  = $($obj_msgs.list | Where {$_.message -eq $($file + '_SHA512')}).details
+
+  $sha_file = $(CertUtil -hashfile $path\$file SHA512).split("`r`n")[1].replace(' ', '')
+  if ($sha_local -ne '') {
+    if (($sha_msg -eq $sha_file) -and ($sha_local -eq $sha_file)) {
+      Write-Host "Three SHA512 values match for file, Appveyor message, and local script" -ForegroundColor $fc
+    } else {
+      Write-Host SHA512 values do not match -ForegroundColor $fc
+      exit 1
+    }
+  } else {
+    if ($sha_msg -eq $sha_file) {
+      Write-Host SHA512 matches for file and Appveyor message -ForegroundColor $fc
+    } else {
+      Write-Host SHA512 values do not match -ForegroundColor $fc
+      exit 1
+    }
   }
 }
 
@@ -112,6 +142,7 @@ Write-Host "Installing $openssl"
 
 $wc.DownloadFile("$dl_uri/$openssl", "$pkgs\$openssl")
 #$wc.DownloadFile("$dl_uri/$openssl" + ".sig", "$pkgs\$openssl" + ".sig")
+Check-SHA $pkgs $openssl $dl_uri $openssl_sha
 
 Write-Host "pacman.exe -Rdd --noconfirm mingw-w64-x86_64-openssl" -ForegroundColor Yellow
 pacman.exe -Rdd --noconfirm mingw-w64-x86_64-openssl

@@ -323,6 +323,7 @@ module TestScript
   end
   
   def push_artifacts
+    require 'digest'
     z_files = "#{ENV['PKG_RUBY']}\\* " \
               ".\\pkg\\.BUILDINFO " \
               ".\\pkg\\.PKGINFO " \
@@ -332,10 +333,14 @@ module TestScript
 
     if @@failures == 0
       `#{ENV['7zip']} a ruby_%R_BRANCH%.7z     #{z_files}`
+      sha512 = Digest::SHA512.file("ruby_#{ENV['R_BRANCH']}.7z").hexdigest
+      `appveyor AddMessage ruby_#{ENV['R_BRANCH']}.7z_SHA512 -Details #{sha512}`
       puts "Saved ruby_#{ENV['R_BRANCH']}.7z\n"
       `appveyor PushArtifact ruby_#{ENV['R_BRANCH']}.7z -DeploymentName \"Ruby Trunk Build\"`
     else
       `#{ENV['7zip']} a ruby_%R_BRANCH%_bad.7z #{z_files}`
+      sha512 = Digest::SHA512.file("ruby_#{ENV['R_BRANCH']}_bad.7z").hexdigest
+      `appveyor AddMessage ruby_#{ENV['R_BRANCH']}_bad.7z_SHA512 -Details #{sha512}`
       puts "Saved ruby_#{ENV['R_BRANCH']}_bad.7z\n"
       `appveyor PushArtifact ruby_#{ENV['R_BRANCH']}_bad.7z -DeploymentName \"Ruby Trunk Build (bad)\"`
     end
