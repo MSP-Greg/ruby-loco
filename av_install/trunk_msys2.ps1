@@ -24,7 +24,7 @@ $env:path = "$msys2\usr\bin;C:\ruby25-x64\bin;C:\Program Files\7-Zip;C:\Program 
 $pre = "mingw-w64-x86_64-"
 $fc  = 'Yellow'
 
-#—————————————————————————————————————————————————————————————————————————————— Check-Exit
+#—————————————————————————————————————————————————————————————————————————— Check-Exit
 # checks whether to exit
 function Check-Exit($msg, $pop) {
   if ($LastExitCode -and $LastExitCode -ne 0) {
@@ -34,7 +34,7 @@ function Check-Exit($msg, $pop) {
   }
 }
 
-#—————————————————————————————————————————————————————————————————————————————— Check_SHA
+#——————————————————————————————————————————————————————————————————————————— Check_SHA
 # checks SHA512 from file, script variable & Appveyor message
 function Check-SHA($path, $file, $uri_dl, $sha_local) {
   $uri_bld = $uri_dl -replace '/artifacts$', ''
@@ -63,19 +63,20 @@ function Check-SHA($path, $file, $uri_dl, $sha_local) {
   }
 }
 
-#—————————————————————————————————————————————————————————————————————————————— Update MSYS2
+#———————————————————————————————————————————————————————————————————————— Update MSYS2
+
+<#—————————————————————————————————————————————— 30-Aug-2018 Fully updated on Appveyor
 # Only use below for really outdated systems, as it wil perform a full update
 # for 'newer' systems...
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW -Syu" -ForegroundColor $fc
 pacman.exe -Syu --noconfirm --needed --noprogressbar
 Check-Exit 'Cannot update with -Syu'
 
-<#—————————————————————————————————————————————— 30-Aug-2018 Fully updated on Appveyor
-
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW base" -ForegroundColor $fc
 # change to -Syu if above is commented out
 pacman.exe -S --noconfirm --needed --noprogressbar base 2> $null
 # Check-Exit 'Cannot update base'
+#>
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW toolchain" -ForegroundColor $fc
 pacman.exe -S --noconfirm --needed --noprogressbar $($pre + 'toolchain') 2> $null
@@ -84,10 +85,9 @@ Check-Exit 'Cannot update toolchain'
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends" -ForegroundColor Yellow
 $tools =  "___gdbm ___gmp ___libffi ___ncurses ___readline ___zlib".replace('___', $pre)
 pacman.exe -S --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
-#>
 
 <#
-#—————————————————————————————————————————————————————————————————————————————— Add GPG key
+#————————————————————————————————————————————————————————————————————————— Add GPG key
 Write-Host "$($dash * 63) Adding GPG key" -ForegroundColor Yellow
 Write-Host "try retrieving & signing key" -ForegroundColor Yellow
 
@@ -111,7 +111,7 @@ if ( !(Test-Path -Path $pkgs -PathType Container) ) {
   New-Item -Path $pkgs -ItemType Directory 1> $null
 }
 
-#—————————————————————————————————————————————————————————————————————————————— Add openssl
+#————————————————————————————————————————————————————————————————————————— Add openssl
 Write-Host "$($dash * 63) Install custom openssl" -ForegroundColor Yellow
 Write-Host "Installing $openssl"
 
