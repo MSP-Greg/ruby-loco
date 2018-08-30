@@ -79,7 +79,7 @@ pacman.exe -S --noconfirm --needed --noprogressbar base 2> $null
 #>
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW toolchain" -ForegroundColor $fc
-pacman.exe -S --noconfirm --needed --noprogressbar $($pre + 'toolchain') 2> $null
+pacman.exe -Sy --noconfirm --needed --noprogressbar $($pre + 'toolchain') 2> $null
 Check-Exit 'Cannot update toolchain'
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends" -ForegroundColor Yellow
