@@ -45,7 +45,7 @@ prepare() {
   echo
   cd ${dir}
   ${RUBY} prepare.rb
-  
+
   cd ${srcdir}/${_realname}
   autoreconf -fi
 
@@ -61,11 +61,13 @@ build() {
   echo ruby ${R_VERS}${R_PATCH} ${R_DATE} ${R_SVN}
 
   CPPFLAGS+=" -DFD_SETSIZE=2048"
+  CFLAGS+=" -O3"
+  CXXFLAGS+=" -O3"
 
   [[ -d "${srcdir}/build${SUFFIX}" ]] && rm -rf "${srcdir}/build${SUFFIX}"
   mkdir -p "${srcdir}/build${SUFFIX}" && cd "${srcdir}/build${SUFFIX}"
 
-  PATH=${PATH}:${GIT_PATH_SH}:${RUBY_OPATH}  
+  PATH=${PATH}:${GIT_PATH_SH}:${RUBY_OPATH}
 
   ../${_realname}/configure \
     --prefix=/${r_inst_dir} \
@@ -97,7 +99,7 @@ package() {
   echo ———————————————————————————————————————————————————————————————————————— package
   echo ruby ${R_VERS}${R_PATCH} ${R_DATE} ${R_SVN}
   echo ———————————————————————————————————————————————————————————————
-  
+
   pkgdir=${dir}/pkg
 
   cd "${srcdir}/build${SUFFIX}"
