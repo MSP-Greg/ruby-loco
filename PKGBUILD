@@ -61,8 +61,8 @@ build() {
   echo ruby ${R_VERS}${R_PATCH} ${R_DATE} ${R_SVN}
 
   CPPFLAGS+=" -DFD_SETSIZE=2048"
-  CFLAGS+=" -O3"
-  CXXFLAGS+=" -O3"
+  # CFLAGS+=" -O3"
+  # CXXFLAGS+=" -O3"
 
   [[ -d "${srcdir}/build${SUFFIX}" ]] && rm -rf "${srcdir}/build${SUFFIX}"
   mkdir -p "${srcdir}/build${SUFFIX}" && cd "${srcdir}/build${SUFFIX}"
