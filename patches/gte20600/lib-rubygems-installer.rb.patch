@@ -1,17 +1,19 @@
 Patch by MSP-Greg
+Fix up my errors in Ruby r64582, RubyGems 17fc12f
 diff --git a/lib/rubygems/installer.rb b/lib/rubygems/installer.rb
-index 657f21296f..3df95c7728 100644
+index 657f21296f..03619d9563 100644
 --- a/lib/rubygems/installer.rb
 +++ b/lib/rubygems/installer.rb
-@@ -771,16 +771,19 @@ def app_script_text(bin_file_name)
+@@ -771,26 +771,31 @@ def app_script_text(bin_file_name)
    # return the stub script text used to launch the true Ruby script
  
    def windows_stub_script(bindir, bin_file_name)
 -    rb_bindir = RbConfig::CONFIG["bindir"]
 -    # All comparisons should be case insensitive
 -    if bindir.downcase == rb_bindir.downcase
-+    rb_bindir = (RbConfig::TOPDIR || File.dirname(RbConfig::CONFIG["bindir"])).downcase
-+    ruby_exe = "#{RbConfig::CONFIG['RUBY_INSTALL_NAME']}#{RbConfig::CONFIG['EXEEXT']}"
++    rb_config = RbConfig::CONFIG
++    rb_topdir = RbConfig::TOPDIR || File.dirname(rb_config["bindir"])
++    ruby_exe = "#{rb_config['RUBY_INSTALL_NAME']}#{rb_config['EXEEXT']}"
 +    ruby_exe = ruby_exe == '' ? 'ruby.exe' : ruby_exe
 +
 +    # check whether ruby executable exists in bindir
@@ -23,12 +25,15 @@ index 657f21296f..3df95c7728 100644
        TEXT
 -    elsif bindir.downcase.start_with? (RbConfig::TOPDIR || File.dirname(rb_bindir)).downcase
 -      # stub within ruby folder, but not standard bin.  Not portable
-+    elsif bindir.downcase.start_with? rb_bindir
++    elsif bindir.downcase.start_with? rb_topdir.downcase
 +      # stub within ruby folder, but not standard bin.  Portable
        require 'pathname'
        from = Pathname.new bindir
-       to   = Pathname.new rb_bindir
-@@ -790,7 +793,8 @@ def windows_stub_script(bindir, bin_file_name)
+-      to   = Pathname.new rb_bindir
++      to   = Pathname.new "#{rb_topdir}/bin"
+       rel  = to.relative_path_from from
+       <<-TEXT
+ @ECHO OFF
  @"%~dp0#{rel}/ruby.exe" "%~dpn0" %*
        TEXT
      else

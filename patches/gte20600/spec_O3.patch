@@ -1,3 +1,5 @@
+Patch by MSP-Greg
+Issues noticed when gcc options changed from -O2 to -O3
 diff --git a/spec/ruby/core/encoding/converter/search_convpath_spec.rb b/spec/ruby/core/encoding/converter/search_convpath_spec.rb
 index 1f1438f756..d1d9c9adc2 100644
 --- a/spec/ruby/core/encoding/converter/search_convpath_spec.rb
