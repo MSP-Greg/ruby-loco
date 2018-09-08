@@ -6,12 +6,12 @@ $ks2 = 'hkp://pgp.mit.edu'
 
 $msys2   = 'C:\msys64'
 $openssl = 'mingw-w64-x86_64-openssl-1.1.1_pre10-1-any.pkg.tar.xz'
-# 2018-09-05
-$openssl_sha = '9a610688c36fe588aff20292ce2d9416df588958ea83a96a9f74f89e82597f3f62a5ab011374176df00cefde0b74379ee0b1f450a403214d206d929fef313bea'
+# 2018-09-08
+$openssl_sha = '6530dd0c37e5cff8dab4f9309da3a32348aa0c424a7773168f0d656b502f21b68da3cd7512747cc620fd5d1dfefcb604b9a81e9b65e9690a305f71e03f8eca7a'
 $dl_uri  = 'https://ci.appveyor.com/api/projects/MSP-Greg/ruby-makepkg-mingw/artifacts'
 
 #$openssl = 'mingw-w64-x86_64-openssl-1.1.0.i-1-any.pkg.tar.xz'
-#$dl_uri  = 'https://ci.appveyor.com/api/buildjobs/8h2vajjdhgwh2xre/artifacts'
+#$dl_uri  = 'https://ci.appveyor.com/api/projects/MSP-Greg/ruby-makepkg-mingw/artifacts'
 
 $wc  = $(New-Object System.Net.WebClient)
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
