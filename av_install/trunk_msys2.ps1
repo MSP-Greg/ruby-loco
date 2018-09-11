@@ -5,9 +5,9 @@ $ks1 = 'hkp://pool.sks-keyservers.net'
 $ks2 = 'hkp://pgp.mit.edu'
 
 $msys2   = 'C:\msys64'
-$openssl = 'mingw-w64-x86_64-openssl-1.1.1_pre10-1-any.pkg.tar.xz'
-# 2018-09-08
-$openssl_sha = '6530dd0c37e5cff8dab4f9309da3a32348aa0c424a7773168f0d656b502f21b68da3cd7512747cc620fd5d1dfefcb604b9a81e9b65e9690a305f71e03f8eca7a'
+$openssl = 'mingw-w64-x86_64-openssl-1.1.1-1-any.pkg.tar.xz'
+# OpenSSL 1.1.1 release
+$openssl_sha = '0c8be3277693f60c319f997659c2fed0eadce8535aed29a4617ec24da082b60ee30a03d3fe1024dae4461041e6e9a5e5cff1a68fa08b4b8791ea1bf7b02abc40'
 $dl_uri  = 'https://ci.appveyor.com/api/projects/MSP-Greg/ruby-makepkg-mingw/artifacts'
 
 #$openssl = 'mingw-w64-x86_64-openssl-1.1.0.i-1-any.pkg.tar.xz'

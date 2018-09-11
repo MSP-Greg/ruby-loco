@@ -34,9 +34,9 @@ module PreparePre
         vers_2 = version[/\d+\.\d+/].sub('.', '')
 
         # Add title to Appveyor build
-        if patch == 'dev' && ENV['APPVEYOR']
+        if ENV['APPVEYOR']
           arch = ENV['BITS'] == '64' ? '[x64-mingw32]' : '[i386-mingw32]'
-          title = "ruby #{version}dev (#{date} #{branch} #{svn}) #{arch}"
+          title = "ruby #{version}#{patch} (#{date} #{branch} #{svn}) #{arch}"
           `appveyor UpdateBuild -Message \"#{title}\"`
         end
 

@@ -33,7 +33,7 @@ module Prepare
   @@r_inst_dir = "ruby#{ENV['R_VERS_2']}_#{ ENV['MINGW_INSTALLS'][-2,2]}"
   @@arch = @@r_inst_dir[-2,2]
 
-  class << self  
+  class << self
 
     def run
       @@r_vers_int = vers_str_2_int(ENV['R_VERS'])
