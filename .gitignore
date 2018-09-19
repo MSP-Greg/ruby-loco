@@ -1,54 +1,14 @@
-git
-bundled_gems/**
-git/**
-pkg/**
-spec/**
-src/**
-temp/**
+/build/
+/git
+/install/
+/ruby
+/rubyinstaller2
+/ruby_readline
+/zips
 
-**/*.gz
-**/*.log
-**/*.log.[0-9]
-**/*.txt
-**/*.xlsb
-**/*.xz
-**/*.7z
-**/*.7z.sig
-**/*.7z.zip
+*.txt
+*.log
+*.7z
 
-pkg_set_env.cmd
-pkg_test*.cmd
-publish_*.rb
-publish_*.cmd
-z_*.rb
-z_*.cmd
-
-
-# ==================================================== Windows
-Desktop.ini
-$RECYCLE.BIN/
-*.lnk
-
-# ==================================================== OSX
-
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Thumbnails
-._*
-
-# Files that might appear in the root of a volume
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
+local.ps1
+/z_testing.rb

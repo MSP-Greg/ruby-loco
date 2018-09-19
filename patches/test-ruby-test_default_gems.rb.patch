@@ -1,0 +1,22 @@
+Patch by MSP-Greg
+uses gemspecs in ruby under test, not srcdir
+diff --git a/test/ruby/test_default_gems.rb b/test/ruby/test_default_gems.rb
+index 837f7571ea..76c11316c9 100644
+--- a/test/ruby/test_default_gems.rb
++++ b/test/ruby/test_default_gems.rb
+@@ -4,8 +4,13 @@
+ class TestDefaultGems < Test::Unit::TestCase
+ 
+   def test_validate_gemspec
+-    srcdir = File.expand_path('../../..', __FILE__)
+-    Dir.glob("#{srcdir}/{lib,ext}/**/*.gemspec").map do |src|
++    if Dir.exist?(dflt_dir = Gem::BasicSpecification.default_specifications_dir)
++      spec_glob = "#{dflt_dir}/*.gemspec"
++    else
++      srcdir = File.expand_path('../../..', __FILE__)
++      spec_glob = "#{srcdir}/{lib,ext}/**/*.gemspec"
++    end
++    Dir.glob(spec_glob).map do |src|
+       assert_nothing_raised do
+         raise("invalid spec in #{src}") unless Gem::Specification.load(src)
+       end

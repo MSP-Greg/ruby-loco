@@ -181,7 +181,7 @@ index 7a09466d1c..466fe91c77 100644
          end
  
          opts.on '-n', '--name PATTERN', "Filter test method names on pattern: /REGEXP/, !/REGEXP/ or STRING" do |a|
-@@ -453,7 +460,6 @@ def _run_parallel suites, type, result
+@@ -455,7 +462,6 @@ def _run_parallel suites, type, result
            warn "Error: parameter of -j option should be greater than 0."
            return
          end
@@ -189,7 +189,7 @@ index 7a09466d1c..466fe91c77 100644
          # Require needed thing for parallel running
          require 'timeout'
          @tasks = @files.dup # Array of filenames.
-@@ -506,7 +512,12 @@ def _run_parallel suites, type, result
+@@ -508,7 +514,12 @@ def _run_parallel suites, type, result
              suites.map! {|r| eval("::"+r[:testcase])}
              del_status_line or puts
              unless suites.empty?
@@ -203,7 +203,7 @@ index 7a09466d1c..466fe91c77 100644
                _run_suites(suites, type)
              end
              @options[:parallel] = parallel
-@@ -523,7 +534,7 @@ def _run_parallel suites, type, result
+@@ -525,7 +536,7 @@ def _run_parallel suites, type, result
              if @options[:retry]
                @errors   += rep.map{|x| x[:result][0] }.inject(:+)
                @failures += rep.map{|x| x[:result][1] }.inject(:+)
@@ -212,7 +212,7 @@ index 7a09466d1c..466fe91c77 100644
              end
            end
            unless @warnings.empty?
-@@ -583,7 +594,7 @@ def setup_options(opts, options)
+@@ -585,7 +596,7 @@ def setup_options(opts, options)
  
        def _run_suites(suites, type)
          result = super
@@ -221,7 +221,7 @@ index 7a09466d1c..466fe91c77 100644
          report.sort_by!{|r| r.start_with?("Skipped:") ? 0 : \
                             (r.start_with?("Failure:") ? 1 : 2) }
          failed(nil)
-@@ -697,6 +708,7 @@ def output
+@@ -699,6 +710,7 @@ def output
        end
  
        def _prepare_run(suites, type)
@@ -229,7 +229,7 @@ index 7a09466d1c..466fe91c77 100644
          options[:job_status] ||= :replace if @tty && !@verbose
          case options[:color]
          when :always
-@@ -1086,13 +1098,17 @@ def puke klass, meth, e
+@@ -1088,13 +1100,17 @@ def puke klass, meth, e
          # TODO:
          #   this overriding is for minitest feature that skip messages are
          #   hidden when not verbose (-v), note this is temporally.

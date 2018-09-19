@@ -1,0 +1,33 @@
+Patch by MSP-Greg
+Use IO.copy_stream for copying files, put temp folders in ENV['TEMP']
+diff --git a/spec/mspec/lib/mspec/helpers/fs.rb b/spec/mspec/lib/mspec/helpers/fs.rb
+index fb2c0f702c..26dd821162 100644
+--- a/spec/mspec/lib/mspec/helpers/fs.rb
++++ b/spec/mspec/lib/mspec/helpers/fs.rb
+@@ -1,12 +1,6 @@
+ # Copies a file
+ def cp(source, dest)
+-  File.open(dest, "wb") do |d|
+-    File.open(source, "rb") do |s|
+-      while data = s.read(1024)
+-        d.write data
+-      end
+-    end
+-  end
++  IO.copy_stream source, dest
+ end
+ 
+ # Creates each directory in path that does not exist.
+diff --git a/spec/mspec/lib/mspec/helpers/tmp.rb b/spec/mspec/lib/mspec/helpers/tmp.rb
+index 4e1273dcfe..8f8b6d48e4 100644
+--- a/spec/mspec/lib/mspec/helpers/tmp.rb
++++ b/spec/mspec/lib/mspec/helpers/tmp.rb
+@@ -3,7 +3,7 @@
+ # should clean up any temporary files created so that the temp
+ # directory is empty when the process exits.
+ 
+-SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp")
++SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp", ENV['TEMP'])
+ 
+ SPEC_TEMP_UNIQUIFIER = "0"
+ 

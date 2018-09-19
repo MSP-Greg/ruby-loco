@@ -1,94 +1,26 @@
 Patch by MSP-Greg
-seemed to help with some parallel build issues
+Allows using mkmf.rb when running test-all tests from install
 diff --git a/lib/mkmf.rb b/lib/mkmf.rb
-index 7f53bb4b97..5c7d750612 100644
+index b035670466..191ac20b57 100644
 --- a/lib/mkmf.rb
 +++ b/lib/mkmf.rb
-@@ -309,16 +309,30 @@ module Logging
-     @postpone = 0
-     @quiet = $extmk
- 
--    def self::log_open
--      @log ||= File::open(@logfile, 'wb')
-+    def self.log_open
-+      tmr = 0
-+      `attrib -r /s /d`
-+    rescue
-+    ensure
-+      if @log.nil?
-+        while File.exist?(@logfile) && !File.writable?(@logfile)
-+          sleep(0.2)
-+          tmr += 0.2
-+          if tmr > 2
-+            puts "#{'- ' * 20} #{@logfile} not writable #{Dir.pwd}"
-+            break
-+          end
-+        end
-+        @log = File.open(@logfile, 'wb')
-+      end
-       @log.sync = true
+@@ -240,6 +240,10 @@ def map_dir(dir, map = nil)
+   elsif File.exist?(($hdrdir = ($top_srcdir ||= topdir) + "/include")  + "/ruby.h")
+     $topdir ||= RbConfig::CONFIG["topdir"]
+     $arch_hdrdir = "$(extout)/include/$(arch)"
++  elsif File.exist?(($hdrdir = RbConfig::CONFIG["rubyhdrdir"]) + "/ruby/ruby.h")
++    $extmk = false
++    $topdir = $top_srcdir = $hdrdir
++    $arch_hdrdir = RbConfig::CONFIG["rubyarchhdrdir"]
+   else
+     abort <<MESSAGE
+ mkmf.rb can't find header files for ruby at #{$hdrdir}/ruby.h
+@@ -451,7 +455,7 @@ def create_tmpsrc(src)
+   def have_devel?
+     unless defined? $have_devel
+       $have_devel = true
+-      $have_devel = try_link(MAIN_DOES_NOTHING)
++      #$have_devel = try_link(MAIN_DOES_NOTHING)
      end
- 
--    def self::log_opened?
-+    def self.log_opened?
-       @log and not @log.closed?
-     end
- 
--    def self::open
-+    def self.open
-       log_open
-       $stderr.reopen(@log)
-       $stdout.reopen(@log)
-@@ -328,17 +342,17 @@ def self::open
-       $stdout.reopen(@orgout)
-     end
- 
--    def self::message(*s)
-+    def self.message(*s)
-       log_open
-       @log.printf(*s)
-     end
- 
--    def self::logfile file
-+    def self.logfile file
-       @logfile = file
-       log_close
-     end
- 
--    def self::log_close
-+    def self.log_close
-       if @log and not @log.closed?
-         @log.flush
-         @log.close
-@@ -346,16 +360,28 @@ def self::log_close
-       end
-     end
- 
--    def self::postpone
-+    def self.postpone
-       tmplog = "mkmftmp#{@postpone += 1}.log"
-       open do
-         log, *save = @log, @logfile, @orgout, @orgerr
-         @log, @logfile, @orgout, @orgerr = nil, tmplog, log, log
-         begin
-           log.print(open {yield @log})
-+          `attrib -r /s /d`
-+        rescue
-         ensure
--          @log.close if @log and not @log.closed?
--          File::open(tmplog) {|t| FileUtils.copy_stream(t, log)} if File.exist?(tmplog)
-+          @log.close if @log && !@log.closed?
-+          tmr = 0
-+          while File.exist?(tmplog) && !File.readable?(tmplog)
-+            `attrib -r /s /d`
-+            sleep(0.2)
-+            tmr += 0.2
-+            if tmr > 2
-+              puts "#{'- ' * 20} #{tmplog} not readable #{Dir.pwd}"
-+              break
-+            end
-+          end
-+          File.open(tmplog) {|t| FileUtils.copy_stream(t, log)} if File.exist?(tmplog)
-           @log, @logfile, @orgout, @orgerr = log, *save
-           @postpone -= 1
-           MakeMakefile.rm_f tmplog
+     $have_devel
+   end

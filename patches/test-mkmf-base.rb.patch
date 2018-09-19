@@ -1,0 +1,13 @@
+Patch by MSP-Greg
+allows running tests from standard ruby install
+diff --git a/test/mkmf/base.rb b/test/mkmf/base.rb
+index 3ba3e03387..5c787b1f8e 100644
+--- a/test/mkmf/base.rb
++++ b/test/mkmf/base.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-$extmk = true
++$extmk = false
+ 
+ require 'test/unit'
+ require 'mkmf'

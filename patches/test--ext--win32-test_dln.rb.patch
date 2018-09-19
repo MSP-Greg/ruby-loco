@@ -1,0 +1,48 @@
+Patch by MSP-Greg
+Allows test to find dlntest.dll when placed in install folder
+diff --git a/test/-ext-/win32/test_dln.rb b/test/-ext-/win32/test_dln.rb
+index e8f68ac4d4..53dc07184f 100644
+--- a/test/-ext-/win32/test_dln.rb
++++ b/test/-ext-/win32/test_dln.rb
+@@ -8,20 +8,22 @@ module Win32
+     class TestDln < Test::Unit::TestCase
+       def test_check_imported
+         bug = '[Bug #6303]'
+-        so = ::File.expand_path("../ext/-test-/win32/dln/dlntest.dll", ::EnvUtil.rubybin)
+-        assert_send([::File, :file?, so])
+-        path = ::ENV['PATH']
+-        path = ::File.dirname(so) + ::File::PATH_SEPARATOR + path
++        unless File.exist? (so = File.join(::RbConfig::CONFIG['archdir'], '-test-/win32/dln/dlntest.dll'))
++          so = ::File.expand_path("../ext/-test-/win32/dln/dlntest.dll", ::EnvUtil.rubybin)
++        end
++        assert ::File.exist? so
++        path = "#{::File.dirname so}#{::File::PATH_SEPARATOR}#{::ENV['PATH']}"
+         assert_in_out_err([{'PATH'=>path}, '-r-test-/win32/dln', '-eexit'], '', [], [], bug, timeout: 10)
+       end
+ 
+       def test_nonascii_load
+         bug9699 = '[ruby-core:61845] [Bug #9699]'
+-        so = "-test-/dln/empty." + ::RbConfig::CONFIG["DLEXT"]
++        so = "-test-/dln/empty.#{::RbConfig::CONFIG['DLEXT']}"
+         so = $:.find {|d| d = ::File.join(d, so); break d if ::File.exist?(d)}
+         assert_not_nil(so)
+         ::Dir.mkdir(dir = ::File.join(testdir = ::Dir.mktmpdir("test"), "\u{30c6 30b9 30c8}"))
+-        ::File.copy_stream(so, ::File.join(dir, ::File.basename(so)))
++        new_so = ::File.join(dir, ::File.basename(so))
++        ::File.copy_stream(so, new_so)
+         assert_separately(['-', bug9699, testdir, ::File.basename(so)], <<-'end;')
+           bug, dir, so = *ARGV
+           assert_nothing_raised(LoadError, bug) do
+@@ -29,9 +31,9 @@ def test_nonascii_load
+           end
+         end;
+       ensure
+-        ::File.unlink(::File.join(dir, ::File.basename(so))) rescue nil
+-        ::Dir.rmdir(dir) rescue nil
+-        ::Dir.rmdir(testdir) rescue nil
++        ::File.unlink(new_so) rescue nil
++        ::Dir.rmdir(dir)      rescue nil
++        ::Dir.rmdir(testdir)  rescue nil
+       end
+ 
+     end

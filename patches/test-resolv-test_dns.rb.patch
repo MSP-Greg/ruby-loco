@@ -1,0 +1,25 @@
+Patch by MSP-Greg
+Skip Appveyor failure
+diff --git a/test/resolv/test_dns.rb b/test/resolv/test_dns.rb
+index d75a431bcc..8bbf08cc17 100644
+--- a/test/resolv/test_dns.rb
++++ b/test/resolv/test_dns.rb
+@@ -162,10 +162,14 @@ def test_no_server
+     # A rase condition here.
+     # Another program may use the port.
+     # But no way to prevent it.
+-    Timeout.timeout(5) do
+-      Resolv::DNS.open(:nameserver_port => [[host, port]]) {|dns|
+-        assert_equal([], dns.getresources("test-no-server.example.org", Resolv::DNS::Resource::IN::A))
+-      }
++    begin
++      Timeout.timeout(5) do
++        Resolv::DNS.open(:nameserver_port => [[host, port]]) {|dns|
++          assert_equal([], dns.getresources("test-no-server.example.org", Resolv::DNS::Resource::IN::A))
++        }
++      end
++    rescue Timeout::Error
++      skip 'Timeout Error on Appveyor'
+     end
+   end
+ 

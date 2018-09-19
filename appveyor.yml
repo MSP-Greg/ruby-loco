@@ -1,50 +1,38 @@
----
-version: "{build}"
+image:
+- Visual Studio 2017
+
+deploy: off
+
 clone_depth: 5
+
 init:
   # Remove any ENV settings related to OpenSSL-Win
-  - set SSL_CERT_DIR=
-  - set SSL_CERT_FILE=
-  - set OPENSSL_CONF=
-  - set OPENSSL_DIR=
-  # Flag for whether build is local or running in Appveyor
-  - set AV_BUILD=true
-  # Minimize path so bash conflicts don't arise
-  - set orig_path=%PATH%
-  - set base_path=C:\Program Files\7-Zip;C:\Program Files\AppVeyor\BuildAgent;C:\Program Files\Git\cmd;C:\Windows\system32;C:\Program Files;C:\Windows
-  - set PATH=%base_path%
+  - ps: |
+      Remove-Item env:SSL_CERT_DIR  -ErrorAction SilentlyContinue
+      Remove-Item env:SSL_CERT_FILE -ErrorAction SilentlyContinue
+      Remove-Item env:OPENSSL_CONF  -ErrorAction SilentlyContinue
+      Remove-Item env:OPENSSL_DIR   -ErrorAction SilentlyContinue
+      ren C:\Windows\System32\libssl-1_1-x64.dll    libssl-1_1-x64.dll_
+      ren C:\Windows\System32\libcrypto-1_1-x64.dll libcrypto-1_1-x64.dll_
 
 install:
-  # Update MSYS2 / MinGW and install OpenSSL 1.1.0
-  - ps: .\av_install\trunk_msys2.ps1
-  #- ps: .\av_install\trunk_msys2_full.ps1
+  # Update MSYS2 / MinGW and install OpenSSL
+  - ps: |
+      git clone -q --depth=5 --no-tags --branch=master https://github.com/oneclick/rubyinstaller2.git    ./rubyinstaller2
+      git clone -q --depth=5 --no-tags --branch=master https://github.com/ConnorAtherton/rb-readline.git ./ruby_readline
+      git clone -q --depth=5 --no-tags --branch=trunk  https://github.com/ruby/ruby.git                  ./ruby
+      $env:path = "C:\Ruby25-x64\bin;$env:path"
+      .\trunk_msys2.ps1
 
-  # Tests are happier with a git path that doesn't contain a space
-  - mklink /d C:\projects\ruby-loco\git "C:\Program Files\Git"
-
-  - git clone -q --depth=5 --branch=master https://github.com/oneclick/rubyinstaller2.git    C:\ri2
-  - git clone -q --depth=5 --no-tags --branch=master https://github.com/ConnorAtherton/rb-readline.git C:\rb-readline
-  - git clone -q --depth=5 --no-tags --branch=trunk  https://github.com/ruby/ruby.git C:\projects\ruby-loco\src\ruby
-  # below 3 lines just for special checkouts
-  #- cd \projects\ruby-loco\src\ruby
-  #- git checkout 72f88ebcc1
-  #- cd \projects\ruby-loco
-  
 build_script:
-  # builds, installs and tests
-  - pkg_build_64.cmd
-  - echo Done with pkg_build
+  # builds, installs
+  - ps: ./1_0_build_install_64.ps1
 
 test_script:
-  # processes test logs, outputs 'Test Results', saves artifacts
-  - echo In test_script
-  - set TEST_SCRIPT=done
-  - ruby test_script.rb
+  # tests, generates logs and artifacts
+  - ps: ./2_0_test.ps1
 
 on_finish:
-  # Run test_script if tests (in pkg_build_64.cmd) timed out and test_script.rb didn't run
-  - echo In on_finish
-  - if "%TEST_SCRIPT%" NEQ "done" ( ruby test_script.rb )
-
-cache:
-  - C:\projects\ruby-loco\bundled_gems
+  - ps: |
+      ren C:\Windows\System32\libssl-1_1-x64.dll_    libssl-1_1-x64.dll
+      ren C:\Windows\System32\libcrypto-1_1-x64.dll_ libcrypto-1_1-x64.dll

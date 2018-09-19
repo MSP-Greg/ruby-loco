@@ -1,0 +1,140 @@
+Patch by MSP-Greg
+Allows running Core RubyGems tests from installed Ruby
+diff --git a/lib/rubygems/test_case.rb b/lib/rubygems/test_case.rb
+index ced33c4d11..1f28a1666b 100644
+--- a/lib/rubygems/test_case.rb
++++ b/lib/rubygems/test_case.rb
+@@ -1320,8 +1320,6 @@ def self.rubybin
+   end
+ 
+   @@ruby = rubybin
+-  @@good_rake = "#{rubybin} \"#{File.expand_path('../../../test/rubygems/good_rake.rb', __FILE__)}\""
+-  @@bad_rake = "#{rubybin} \"#{File.expand_path('../../../test/rubygems/bad_rake.rb', __FILE__)}\""
+ 
+   ##
+   # Construct a new Gem::Dependency.
+@@ -1509,14 +1507,10 @@ def self.load_cert cert_name
+ 
+   def self.cert_path cert_name
+     if 32 == (Time.at(2**32) rescue 32) then
+-      cert_file =
+-        File.expand_path "../../../test/rubygems/#{cert_name}_cert_32.pem",
+-                         __FILE__
+-
++      cert_file = File.join test_path, "#{cert_name}_cert_32.pem"
+       return cert_file if File.exist? cert_file
+     end
+-
+-    File.expand_path "../../../test/rubygems/#{cert_name}_cert.pem", __FILE__
++    File.join test_path, "#{cert_name}_cert.pem"
+   end
+ 
+   ##
+@@ -1534,7 +1528,23 @@ def self.load_key key_name, passphrase = nil
+   # Returns the path to the key named +key_name+ from <tt>test/rubygems</tt>
+ 
+   def self.key_path key_name
+-    File.expand_path "../../../test/rubygems/#{key_name}_key.pem", __FILE__
++    File.join test_path, "#{key_name}_key.pem"
++  end
++
++  def self.test_path
++    @@test_path ||= begin
++      temp = $LOAD_PATH.reverse.find { |p| /test\/(lib|rubygems|-ext-)\z/ =~ p } || ''
++      if temp.empty?
++        temp = File.expand_path('../../../test/rubygems', __FILE__)
++      else
++        temp = File.join File.dirname(temp), 'rubygems'
++        temp = '' unless File.exist? File.join(temp, 'test_gem.rb')
++      end
++      r_bin = Gem::TestCase.rubybin
++      @@good_rake ||= "#{r_bin} \"#{File.join temp, 'good_rake.rb'}\""
++      @@bad_rake  ||= "#{r_bin} \"#{File.join temp, 'bad_rake.rb'}\""
++      temp
++    end
+   end
+ 
+   # :stopdoc:
+@@ -1596,3 +1606,5 @@ def self.key_path key_name
+ END {tmpdirs.each {|dir| Dir.rmdir(dir)} if $$ == pid}
+ Gem.clear_paths
+ Gem.loaded_specs.clear
++# $LOAD_PATH has path to tests loaded
++Gem::TestCase.test_path
+diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
+index ddf0f7e04c..fb398fb92b 100644
+--- a/test/rubygems/test_gem.rb
++++ b/test/rubygems/test_gem.rb
+@@ -818,7 +818,11 @@ def test_self_platforms
+   end
+ 
+   def test_self_prefix
+-    assert_equal @@project_dir, Gem.prefix
++    if Gem.method(:host).source_location[0].start_with? "#{@@project_dir}/"
++      assert_equal @@project_dir, Gem.prefix
++    else
++      assert_nil Gem.prefix
++    end
+   end
+ 
+   def test_self_prefix_libdir
+@@ -1490,7 +1494,13 @@ def test_auto_activation_of_used_gemdeps_file
+     assert_equal expected_specs, Gem.use_gemdeps.sort_by { |s| s.name }
+   end
+ 
+-  LIB_PATH = File.expand_path "../../../lib".dup.untaint, __FILE__.dup.untaint
++  if defined? :RbConfig
++    t = RbConfig::CONFIG['rubylibdir']
++    LIB_PATH = File.exist?( File.join t, 'rubygems.rb') ? t :
++      File.expand_path("../../../lib".dup.untaint, __FILE__.dup.untaint)
++  else  
++    LIB_PATH = File.expand_path("../../../lib".dup.untaint, __FILE__.dup.untaint)
++  end
+ 
+   if Gem::USE_BUNDLER_FOR_GEMDEPS
+     BUNDLER_LIB_PATH = File.expand_path $LOAD_PATH.find {|lp| File.file?(File.join(lp, "bundler.rb")) }.dup.untaint
+diff --git a/test/rubygems/test_gem_commands_environment_command.rb b/test/rubygems/test_gem_commands_environment_command.rb
+index 1451f03982..981c5afa3d 100644
+--- a/test/rubygems/test_gem_commands_environment_command.rb
++++ b/test/rubygems/test_gem_commands_environment_command.rb
+@@ -26,7 +26,9 @@ def test_execute
+     assert_match %r|RUBY VERSION: \d+\.\d+\.\d+ \(.*\) \[.*\]|, @ui.output
+     assert_match %r|INSTALLATION DIRECTORY: #{Regexp.escape @gemhome}|,
+                  @ui.output
+-    assert_match %r|RUBYGEMS PREFIX: |, @ui.output
++    if Gem.method(:host).source_location[0].start_with? "#{@@project_dir}/"
++      assert_match %r|RUBYGEMS PREFIX: |, @ui.output
++    end
+     assert_match %r|RUBY EXECUTABLE:.*#{RbConfig::CONFIG['ruby_install_name']}|,
+                  @ui.output
+     assert_match %r|GIT EXECUTABLE: #{@cmd.send(:git_path)}|, @ui.output
+diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
+index 549e34c218..92521682aa 100644
+--- a/test/rubygems/test_gem_commands_update_command.rb
++++ b/test/rubygems/test_gem_commands_update_command.rb
+@@ -482,8 +482,10 @@ def test_update_rubygems_arguments
+ 
+     arguments = @cmd.update_rubygems_arguments
+ 
+-    assert_equal '--prefix',           arguments.shift
+-    assert_equal Gem.prefix,           arguments.shift
++    if Gem.method(:host).source_location[0].start_with? "#{@@project_dir}/"
++      assert_equal '--prefix',           arguments.shift
++      assert_equal Gem.prefix,           arguments.shift
++    end
+     assert_equal '--no-rdoc',          arguments.shift
+     assert_equal '--no-ri',            arguments.shift
+     assert_equal '--previous-version', arguments.shift
+@@ -496,8 +498,10 @@ def test_update_rubygems_arguments_1_8_x
+ 
+     arguments = @cmd.update_rubygems_arguments
+ 
+-    assert_equal '--prefix',           arguments.shift
+-    assert_equal Gem.prefix,           arguments.shift
++    if Gem.method(:host).source_location[0].start_with? "#{@@project_dir}/"
++      assert_equal '--prefix',           arguments.shift
++      assert_equal Gem.prefix,           arguments.shift
++    end
+     assert_equal '--no-rdoc',          arguments.shift
+     assert_equal '--no-ri',            arguments.shift
+     assert_empty arguments
