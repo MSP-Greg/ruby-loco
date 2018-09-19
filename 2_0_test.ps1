@@ -49,14 +49,13 @@ function Run-Proc {
          [string]$StdErr , [string]$e_args , [string]$Dir   , [int]$TimeLimit
   )
 
-  Write-Host "$($dash * 50) $Title" -ForegroundColor $fc
+  Write-Host "$($dash * 35) $Title" -ForegroundColor $fc
 
   if ($TimeLimit -eq $null -or $TimeLimit -eq 0 ) {
     Write-Host "Need TimeLimit!"
     exit
   }
-
-  $msg = "Time Limit {0,8:n2} seconds  {1}" -f @($TimeLimit, $(Get-Date -Format mm:ss))
+  $msg = "Time Limit {0,8:n1} s       {1}" -f @($TimeLimit, $(Get-Date -Format mm:ss))
   Write-Host $msg
 
   $start = Get-Date
@@ -68,16 +67,27 @@ function Run-Proc {
     -WorkingDirectory $Dir `
     -NoNewWindow -PassThru
 
+  $handle = $proc.Handle
+
   Wait-Process -Id $proc.id -Timeout $TimeLimit -ea 0 -ev froze
   if ($froze) {
     Write-Host "Exceeded time limit..." -ForegroundColor $fc
+    $handle = $null
     Kill-Proc $proc
-    $status = " (failed)"
+    $status = " (frozen)"
   }
   $diff = New-TimeSpan -Start $start -End $(Get-Date)
-  $msg = "Test Time  {0,8:n2}" -f @($diff.TotalSeconds)
-  Write-Host $msg
+  $msg = "Test Time  {0,8:n1}" -f @($diff.TotalSeconds)
+  Write-Host $msg -NoNewLine
+  if ($proc.ExitCode -eq 0) {
+    Write-Host " passed" -ForegroundColor Green
+  } else {
+    Write-Host " failed" -ForegroundColor Red
+    $status = " (failed)"
+  }
   $script:time_info += ("{0:mm}:{0:ss} {1}`n" -f @($diff, "$Title$status"))
+  $handle = $null
+  $proc   = $null
 }
 
 #———————————————————————————————————————————————————————————————————————— Finish
