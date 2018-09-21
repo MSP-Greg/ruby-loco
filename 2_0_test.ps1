@@ -166,7 +166,7 @@ function Test-All {
   Copy-Item "$d_build/ext/-test-/win32/dln/dlntest.dll" `
                 "$ruby_so/-test-/win32/dln/dlntest.dll"
 
-  $env:path = "$d_install/bin;$d_repo/git/cmd$base_path"
+  $env:path = "$d_install/bin;$d_repo/git/cmd;$base_path"
   $env:RUBY_FORCE_TEST_JIT = '1'
 
   $args = "--disable=gems -rdevkit runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `

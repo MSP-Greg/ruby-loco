@@ -12,7 +12,7 @@ index e8f68ac4d4..53dc07184f 100644
 -        assert_send([::File, :file?, so])
 -        path = ::ENV['PATH']
 -        path = ::File.dirname(so) + ::File::PATH_SEPARATOR + path
-+        unless File.exist? (so = File.join(::RbConfig::CONFIG['archdir'], '-test-/win32/dln/dlntest.dll'))
++        unless ::File.exist? (so = ::File.join(::RbConfig::CONFIG['archdir'], '-test-/win32/dln/dlntest.dll'))
 +          so = ::File.expand_path("../ext/-test-/win32/dln/dlntest.dll", ::EnvUtil.rubybin)
 +        end
 +        assert ::File.exist? so
