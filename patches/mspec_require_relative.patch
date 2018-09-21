@@ -1,0 +1,397 @@
+Patch by MSP-Greg
+Change many requires to require_relative
+diff --git a/spec/mspec/lib/mspec.rb b/spec/mspec/lib/mspec.rb
+index 42d590c99a..3795b06a0c 100644
+--- a/spec/mspec/lib/mspec.rb
++++ b/spec/mspec/lib/mspec.rb
+@@ -1,10 +1,10 @@
+-require 'mspec/matchers'
+-require 'mspec/expectations'
+-require 'mspec/mocks'
+-require 'mspec/runner'
+-require 'mspec/guards'
+-require 'mspec/helpers'
+-require 'mspec/version'
++require_relative 'mspec/matchers'
++require_relative 'mspec/expectations'
++require_relative 'mspec/mocks'
++require_relative 'mspec/runner'
++require_relative 'mspec/guards'
++require_relative 'mspec/helpers'
++require_relative 'mspec/version'
+ 
+ # If the implementation on which the specs are run cannot
+ # load pp from the standard library, add a pp.rb file that
+diff --git a/spec/mspec/lib/mspec/commands/mkspec.rb b/spec/mspec/lib/mspec/commands/mkspec.rb
+index 7a943aa1fe..9e58fdb683 100755
+--- a/spec/mspec/lib/mspec/commands/mkspec.rb
++++ b/spec/mspec/lib/mspec/commands/mkspec.rb
+@@ -1,10 +1,10 @@
+ #!/usr/bin/env ruby
+ 
+ require 'rbconfig'
+-require 'mspec/version'
+-require 'mspec/utils/options'
+-require 'mspec/utils/name_map'
+-require 'mspec/helpers/fs'
++require_relative '../version'
++require_relative '../utils/options'
++require_relative '../utils/name_map'
++require_relative '../helpers/fs'
+ 
+ class MkSpec
+   attr_reader :config
+diff --git a/spec/mspec/lib/mspec/commands/mspec-ci.rb b/spec/mspec/lib/mspec/commands/mspec-ci.rb
+index cb0193f42d..d7c005199b 100644
+--- a/spec/mspec/lib/mspec/commands/mspec-ci.rb
++++ b/spec/mspec/lib/mspec/commands/mspec-ci.rb
+@@ -2,9 +2,9 @@
+ 
+ $:.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
+ 
+-require 'mspec/version'
+-require 'mspec/utils/options'
+-require 'mspec/utils/script'
++require_relative '../version'
++require_relative '../utils/options'
++require_relative '../utils/script'
+ 
+ 
+ class MSpecCI < MSpecScript
+@@ -68,7 +68,7 @@ def run
+     tags = ["fails", "critical", "unstable", "incomplete", "unsupported"]
+     tags += Array(config[:ci_xtags])
+ 
+-    require 'mspec/runner/filters/tag'
++    require_relative '../runner/filters/tag'
+     filter = TagFilter.new(:exclude, *tags)
+     filter.register
+ 
+diff --git a/spec/mspec/lib/mspec/commands/mspec-run.rb b/spec/mspec/lib/mspec/commands/mspec-run.rb
+index 249f9f5771..a56825f61a 100644
+--- a/spec/mspec/lib/mspec/commands/mspec-run.rb
++++ b/spec/mspec/lib/mspec/commands/mspec-run.rb
+@@ -2,9 +2,9 @@
+ 
+ $:.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
+ 
+-require 'mspec/version'
+-require 'mspec/utils/options'
+-require 'mspec/utils/script'
++require_relative '../version'
++require_relative '../utils/options'
++require_relative '../utils/script'
+ 
+ 
+ class MSpecRun < MSpecScript
+diff --git a/spec/mspec/lib/mspec/commands/mspec-tag.rb b/spec/mspec/lib/mspec/commands/mspec-tag.rb
+index 8bc3382e91..2b7431e18c 100644
+--- a/spec/mspec/lib/mspec/commands/mspec-tag.rb
++++ b/spec/mspec/lib/mspec/commands/mspec-tag.rb
+@@ -1,8 +1,8 @@
+ #!/usr/bin/env ruby
+ 
+-require 'mspec/version'
+-require 'mspec/utils/options'
+-require 'mspec/utils/script'
++require_relative '../version'
++require_relative '../utils/options'
++require_relative '../utils/script'
+ 
+ 
+ class MSpecTag < MSpecScript
+@@ -97,7 +97,7 @@ def options(argv=ARGV)
+   end
+ 
+   def register
+-    require 'mspec/runner/actions'
++    require_relative '../runner/actions'
+ 
+     case config[:tagger]
+     when :add, :del
+diff --git a/spec/mspec/lib/mspec/commands/mspec.rb b/spec/mspec/lib/mspec/commands/mspec.rb
+index 6cb1e87a58..3f6c065c1c 100755
+--- a/spec/mspec/lib/mspec/commands/mspec.rb
++++ b/spec/mspec/lib/mspec/commands/mspec.rb
+@@ -1,11 +1,11 @@
+ #!/usr/bin/env ruby
+ 
+-require 'mspec/version'
+-require 'mspec/utils/options'
+-require 'mspec/utils/script'
+-require 'mspec/helpers/tmp'
+-require 'mspec/runner/actions/filter'
+-require 'mspec/runner/actions/timer'
++require_relative '../version'
++require_relative '../utils/options'
++require_relative '../utils/script'
++require_relative '../helpers/tmp'
++require_relative '../runner/actions/filter'
++require_relative '../runner/actions/timer'
+ 
+ 
+ class MSpecMain < MSpecScript
+@@ -91,7 +91,7 @@ def register; end
+   def multi_exec(argv)
+     MSpec.register_files @files
+ 
+-    require 'mspec/runner/formatters/multi'
++    require_relative '../runner/formatters/multi'
+     formatter = MultiFormatter.new
+     if config[:formatter]
+       warn "formatter options is ignored due to multi option"
+diff --git a/spec/mspec/lib/mspec/expectations.rb b/spec/mspec/lib/mspec/expectations.rb
+index d07f959b27..0c32eb8863 100644
+--- a/spec/mspec/lib/mspec/expectations.rb
++++ b/spec/mspec/lib/mspec/expectations.rb
+@@ -1,2 +1,2 @@
+-require 'mspec/expectations/expectations'
+-require 'mspec/expectations/should'
++require_relative 'expectations/expectations'
++require_relative 'expectations/should'
+diff --git a/spec/mspec/lib/mspec/guards.rb b/spec/mspec/lib/mspec/guards.rb
+index 454ac0c776..e7e022dd11 100644
+--- a/spec/mspec/lib/mspec/guards.rb
++++ b/spec/mspec/lib/mspec/guards.rb
+@@ -1,11 +1,11 @@
+-require 'mspec/guards/block_device'
+-require 'mspec/guards/bug'
+-require 'mspec/guards/conflict'
+-require 'mspec/guards/endian'
+-require 'mspec/guards/feature'
+-require 'mspec/guards/guard'
+-require 'mspec/guards/platform'
+-require 'mspec/guards/quarantine'
+-require 'mspec/guards/support'
+-require 'mspec/guards/superuser'
+-require 'mspec/guards/version'
++require_relative 'guards/block_device'
++require_relative 'guards/bug'
++require_relative 'guards/conflict'
++require_relative 'guards/endian'
++require_relative 'guards/feature'
++require_relative 'guards/guard'
++require_relative 'guards/platform'
++require_relative 'guards/quarantine'
++require_relative 'guards/support'
++require_relative 'guards/superuser'
++require_relative 'guards/version'
+diff --git a/spec/mspec/lib/mspec/helpers.rb b/spec/mspec/lib/mspec/helpers.rb
+index b7ac9f4e85..399cf6e7a3 100644
+--- a/spec/mspec/lib/mspec/helpers.rb
++++ b/spec/mspec/lib/mspec/helpers.rb
+@@ -1,14 +1,14 @@
+-require 'mspec/helpers/argf'
+-require 'mspec/helpers/argv'
+-require 'mspec/helpers/datetime'
+-require 'mspec/helpers/fixture'
+-require 'mspec/helpers/flunk'
+-require 'mspec/helpers/frozen_error_class'
+-require 'mspec/helpers/fs'
+-require 'mspec/helpers/io'
+-require 'mspec/helpers/mock_to_path'
+-require 'mspec/helpers/numeric'
+-require 'mspec/helpers/ruby_exe'
+-require 'mspec/helpers/scratch'
+-require 'mspec/helpers/tmp'
+-require 'mspec/helpers/warning'
++require_relative 'helpers/argf'
++require_relative 'helpers/argv'
++require_relative 'helpers/datetime'
++require_relative 'helpers/fixture'
++require_relative 'helpers/flunk'
++require_relative 'helpers/frozen_error_class'
++require_relative 'helpers/fs'
++require_relative 'helpers/io'
++require_relative 'helpers/mock_to_path'
++require_relative 'helpers/numeric'
++require_relative 'helpers/ruby_exe'
++require_relative 'helpers/scratch'
++require_relative 'helpers/tmp'
++require_relative 'helpers/warning'
+diff --git a/spec/mspec/lib/mspec/matchers.rb b/spec/mspec/lib/mspec/matchers.rb
+index f3e8e7bb73..058f2de7de 100644
+--- a/spec/mspec/lib/mspec/matchers.rb
++++ b/spec/mspec/lib/mspec/matchers.rb
+@@ -1,36 +1,36 @@
+-require 'mspec/matchers/base'
+-require 'mspec/matchers/be_an_instance_of'
+-require 'mspec/matchers/be_ancestor_of'
+-require 'mspec/matchers/be_close'
+-require 'mspec/matchers/be_computed_by'
+-require 'mspec/matchers/be_empty'
+-require 'mspec/matchers/be_false'
+-require 'mspec/matchers/be_kind_of'
+-require 'mspec/matchers/be_nan'
+-require 'mspec/matchers/be_nil'
+-require 'mspec/matchers/be_true'
+-require 'mspec/matchers/be_true_or_false'
+-require 'mspec/matchers/complain'
+-require 'mspec/matchers/eql'
+-require 'mspec/matchers/equal'
+-require 'mspec/matchers/equal_element'
+-require 'mspec/matchers/have_constant'
+-require 'mspec/matchers/have_class_variable'
+-require 'mspec/matchers/have_instance_method'
+-require 'mspec/matchers/have_instance_variable'
+-require 'mspec/matchers/have_method'
+-require 'mspec/matchers/have_private_instance_method'
+-require 'mspec/matchers/have_private_method'
+-require 'mspec/matchers/have_protected_instance_method'
+-require 'mspec/matchers/have_public_instance_method'
+-require 'mspec/matchers/have_singleton_method'
+-require 'mspec/matchers/include'
+-require 'mspec/matchers/include_any_of'
+-require 'mspec/matchers/infinity'
+-require 'mspec/matchers/match_yaml'
+-require 'mspec/matchers/raise_error'
+-require 'mspec/matchers/output'
+-require 'mspec/matchers/output_to_fd'
+-require 'mspec/matchers/respond_to'
+-require 'mspec/matchers/signed_zero'
+-require 'mspec/matchers/block_caller'
++require_relative 'matchers/base'
++require_relative 'matchers/be_an_instance_of'
++require_relative 'matchers/be_ancestor_of'
++require_relative 'matchers/be_close'
++require_relative 'matchers/be_computed_by'
++require_relative 'matchers/be_empty'
++require_relative 'matchers/be_false'
++require_relative 'matchers/be_kind_of'
++require_relative 'matchers/be_nan'
++require_relative 'matchers/be_nil'
++require_relative 'matchers/be_true'
++require_relative 'matchers/be_true_or_false'
++require_relative 'matchers/complain'
++require_relative 'matchers/eql'
++require_relative 'matchers/equal'
++require_relative 'matchers/equal_element'
++require_relative 'matchers/have_constant'
++require_relative 'matchers/have_class_variable'
++require_relative 'matchers/have_instance_method'
++require_relative 'matchers/have_instance_variable'
++require_relative 'matchers/have_method'
++require_relative 'matchers/have_private_instance_method'
++require_relative 'matchers/have_private_method'
++require_relative 'matchers/have_protected_instance_method'
++require_relative 'matchers/have_public_instance_method'
++require_relative 'matchers/have_singleton_method'
++require_relative 'matchers/include'
++require_relative 'matchers/include_any_of'
++require_relative 'matchers/infinity'
++require_relative 'matchers/match_yaml'
++require_relative 'matchers/raise_error'
++require_relative 'matchers/output'
++require_relative 'matchers/output_to_fd'
++require_relative 'matchers/respond_to'
++require_relative 'matchers/signed_zero'
++require_relative 'matchers/block_caller'
+diff --git a/spec/mspec/lib/mspec/mocks.rb b/spec/mspec/lib/mspec/mocks.rb
+index 6a029c7b53..79313e46ed 100644
+--- a/spec/mspec/lib/mspec/mocks.rb
++++ b/spec/mspec/lib/mspec/mocks.rb
+@@ -1,3 +1,3 @@
+-require 'mspec/mocks/mock'
+-require 'mspec/mocks/proxy'
+-require 'mspec/mocks/object'
++require_relative 'mocks/mock'
++require_relative 'mocks/proxy'
++require_relative 'mocks/object'
+diff --git a/spec/mspec/lib/mspec/runner.rb b/spec/mspec/lib/mspec/runner.rb
+index df57b9f69b..ada53539dc 100644
+--- a/spec/mspec/lib/mspec/runner.rb
++++ b/spec/mspec/lib/mspec/runner.rb
+@@ -1,12 +1,12 @@
+-require 'mspec/mocks'
+-require 'mspec/runner/mspec'
+-require 'mspec/runner/context'
+-require 'mspec/runner/evaluate'
+-require 'mspec/runner/example'
+-require 'mspec/runner/exception'
+-require 'mspec/runner/object'
+-require 'mspec/runner/formatters'
+-require 'mspec/runner/actions'
+-require 'mspec/runner/filters'
+-require 'mspec/runner/shared'
+-require 'mspec/runner/tag'
++require_relative 'mocks'
++require_relative 'runner/mspec'
++require_relative 'runner/context'
++require_relative 'runner/evaluate'
++require_relative 'runner/example'
++require_relative 'runner/exception'
++require_relative 'runner/object'
++require_relative 'runner/formatters'
++require_relative 'runner/actions'
++require_relative 'runner/filters'
++require_relative 'runner/shared'
++require_relative 'runner/tag'
+diff --git a/spec/mspec/lib/mspec/runner/actions.rb b/spec/mspec/lib/mspec/runner/actions.rb
+index 0a5a05fbd1..a3e10033ad 100644
+--- a/spec/mspec/lib/mspec/runner/actions.rb
++++ b/spec/mspec/lib/mspec/runner/actions.rb
+@@ -1,6 +1,6 @@
+-require 'mspec/runner/actions/tally'
+-require 'mspec/runner/actions/timer'
+-require 'mspec/runner/actions/filter'
+-require 'mspec/runner/actions/tag'
+-require 'mspec/runner/actions/taglist'
+-require 'mspec/runner/actions/tagpurge'
++require_relative 'actions/tally'
++require_relative 'actions/timer'
++require_relative 'actions/filter'
++require_relative 'actions/tag'
++require_relative 'actions/taglist'
++require_relative 'actions/tagpurge'
+diff --git a/spec/mspec/lib/mspec/runner/filters.rb b/spec/mspec/lib/mspec/runner/filters.rb
+index d0420faca6..bb668a0c6f 100644
+--- a/spec/mspec/lib/mspec/runner/filters.rb
++++ b/spec/mspec/lib/mspec/runner/filters.rb
+@@ -1,4 +1,4 @@
+-require 'mspec/runner/filters/match'
+-require 'mspec/runner/filters/regexp'
+-require 'mspec/runner/filters/tag'
+-require 'mspec/runner/filters/profile'
++require_relative 'filters/match'
++require_relative 'filters/regexp'
++require_relative 'filters/tag'
++require_relative 'filters/profile'
+diff --git a/spec/mspec/lib/mspec/runner/formatters.rb b/spec/mspec/lib/mspec/runner/formatters.rb
+index d085031a12..a9934dde15 100644
+--- a/spec/mspec/lib/mspec/runner/formatters.rb
++++ b/spec/mspec/lib/mspec/runner/formatters.rb
+@@ -1,12 +1,12 @@
+-require 'mspec/runner/formatters/describe'
+-require 'mspec/runner/formatters/dotted'
+-require 'mspec/runner/formatters/file'
+-require 'mspec/runner/formatters/specdoc'
+-require 'mspec/runner/formatters/html'
+-require 'mspec/runner/formatters/summary'
+-require 'mspec/runner/formatters/unit'
+-require 'mspec/runner/formatters/spinner'
+-require 'mspec/runner/formatters/method'
+-require 'mspec/runner/formatters/yaml'
+-require 'mspec/runner/formatters/profile'
+-require 'mspec/runner/formatters/junit'
++require_relative 'formatters/describe'
++require_relative 'formatters/dotted'
++require_relative 'formatters/file'
++require_relative 'formatters/specdoc'
++require_relative 'formatters/html'
++require_relative 'formatters/summary'
++require_relative 'formatters/unit'
++require_relative 'formatters/spinner'
++require_relative 'formatters/method'
++require_relative 'formatters/yaml'
++require_relative 'formatters/profile'
++require_relative 'formatters/junit'
+diff --git a/spec/mspec/lib/mspec/version.rb b/spec/mspec/lib/mspec/version.rb
+index 9126f5366e..9a20c9cf02 100644
+--- a/spec/mspec/lib/mspec/version.rb
++++ b/spec/mspec/lib/mspec/version.rb
+@@ -1,4 +1,4 @@
+-require 'mspec/utils/version'
++require_relative 'utils/version'
+ 
+ module MSpec
+   VERSION = SpecVersion.new "1.8.0"
