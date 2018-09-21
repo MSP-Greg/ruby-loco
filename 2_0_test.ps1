@@ -186,7 +186,7 @@ function Test-All {
 
 #————————————————————————————————————————————————————————————————————————— MSpec
 function MSpec {
-  $env:path = "$d_install/bin;$d_repo/git/cmd$base_path"
+  $env:path = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
   Run-Proc `
     -exe    "ruby.exe" `
