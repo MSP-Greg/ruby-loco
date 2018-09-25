@@ -8,8 +8,9 @@ For local use, set items in local.ps1
 
 #————————————————————————————————————————————————————————————————— Apply-Patches
 # Applies patches
-function Apply-Patches {
-  Push-Location "$d_repo/patches"
+function Apply-Patches($p_dir) {
+  $patch_exe = "$d_msys2/usr/bin/patch.exe"
+  Push-Location "$d_repo/$p_dir"
   [string[]]$patches = Get-ChildItem -Include *.patch -Path . -Recurse |
     select -expand name
   Pop-Location
@@ -17,7 +18,7 @@ function Apply-Patches {
   foreach ($p in $patches) {
     if ($p.substring(0,2) -eq "__") { continue }
     Write-Host $($dash * 55) $p -ForegroundColor $fc
-    patch.exe -p1 -N --no-backup-if-mismatch -i "$d_repo/patches/$p"
+    & $patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p"
   }
   Pop-Location
   Write-Host ''
@@ -230,7 +231,7 @@ Set-Variables
 Set-Variables-Local
 Set-Env
 
-Apply-Patches
+Apply-Patches "patches"
 
 Create-Folders
 
@@ -285,3 +286,8 @@ $build_files = "$d_zips/ext_build_files.7z"
 &$7z a $build_files **/Makefile **/*.h **/*.log **/*.mk 1> $null
 if ($is_av) { Push-AppveyorArtifact $build_files -DeploymentName "Ext build files" }
 Pop-Location
+
+# apply patches for testing
+Apply-Patches "patches_basic_boot"
+Apply-Patches "patches_spec"
+Apply-Patches "patches_test"

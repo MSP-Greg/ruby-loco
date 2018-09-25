@@ -1,3 +1,5 @@
+Patch by MSP-Greg
+without the '.to_s' call, '.search_convpath' causes a silent segv...
 diff --git a/spec/ruby/core/encoding/converter/search_convpath_spec.rb b/spec/ruby/core/encoding/converter/search_convpath_spec.rb
 index 9e924da023..4913681bbb 100644
 --- a/spec/ruby/core/encoding/converter/search_convpath_spec.rb
