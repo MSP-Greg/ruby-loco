@@ -55,7 +55,7 @@ function Set-Variables {
   $env:MSYSTEM_CHOST = $chost
   $env:MSYSTEM = "MINGW$bits"
 
-  # not sure if below are needed, maybe jst for makepkg scripts.  See
+  # not sure if below are needed, maybe just for makepkg scripts.  See
   # https://github.com/Alexpux/MSYS2-packages/blob/master/pacman/makepkg_mingw64.conf
   # https://github.com/Alexpux/MSYS2-packages/blob/master/pacman/makepkg_mingw32.conf
   $env:CARCH        = $carch
