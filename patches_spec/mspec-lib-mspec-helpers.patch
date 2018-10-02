@@ -37,7 +37,7 @@ index 4e1273dcfe..38a6f7de71 100644
 +# created so that the temp directory is empty when the process exits.
 +
 +if /mswin|mingw/ =~ RUBY_PLATFORM
-+  temp_dir = ENV['TEMP'] || ENV['TMP'] || ENV['TMPDIR']
++  temp_dir = ENV['TMPDIR'] || ENV['TEMP'] || ENV['TMP']
 +  if temp_dir and (temp_dir = temp_dir.dup.gsub("\\", "/")) and Dir.exist?(temp_dir)
 +    SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp", temp_dir)
 +  else
