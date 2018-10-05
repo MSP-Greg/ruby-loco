@@ -1,0 +1,171 @@
+Patch by MSP-Greg
+Allows -V option to be used with -j
+diff --git a/spec/mspec/lib/mspec/runner/formatters/multi.rb b/spec/mspec/lib/mspec/runner/formatters/multi.rb
+index 5932eeef62..917c23bc53 100644
+--- a/spec/mspec/lib/mspec/runner/formatters/multi.rb
++++ b/spec/mspec/lib/mspec/runner/formatters/multi.rb
+@@ -1,6 +1,12 @@
+-require 'mspec/runner/formatters/spinner'
+-
+-class MultiFormatter < SpinnerFormatter
++if MSpecScript.config[:verbose]
++  require_relative 'dotted'
++  multi_super = DottedFormatter
++else
++  require_relative 'spinner'
++  multi_super = SpinnerFormatter
++end
++  
++class MultiFormatter < multi_super
+   def initialize(out=nil)
+     super(out)
+     @counter = @tally = Tally.new
+@@ -34,7 +40,13 @@ def print_exception(exc, count)
+     print "\n#{count})\n#{exc}\n"
+   end
+ 
+-  def finish
+-    super(false)
++  if MSpecScript.config[:verbose]
++    def start  ; end
++    def unload ; end
++    def finish(_ = nil) ; super() ; end
++  else
++    def finish ; super(false) ; end
+   end
++  
++  
+ end
+diff --git a/spec/mspec/lib/mspec/runner/formatters/yaml.rb b/spec/mspec/lib/mspec/runner/formatters/yaml.rb
+index 090a9b1b9d..d11dd5cfc0 100644
+--- a/spec/mspec/lib/mspec/runner/formatters/yaml.rb
++++ b/spec/mspec/lib/mspec/runner/formatters/yaml.rb
+@@ -4,11 +4,15 @@
+ class YamlFormatter < DottedFormatter
+   def initialize(out=nil)
+     super(nil)
+-
+-    if out.nil?
+-      @finish = $stdout
++    if MSpecScript.config[:verbose]
++      @examples_last = 0
++      @finish = out.nil? ? $stdout : File.open(out, "w")
+     else
+-      @finish = File.open out, "w"
++      if out.nil?
++        @finish = $stdout
++      else
++        @finish = File.open out, "w"
++      end
+     end
+   end
+ 
+@@ -16,7 +20,19 @@ def switch
+     @out = @finish
+   end
+ 
+-  def after(state)
++  def after(state) ; end
++
++  if MSpecScript.config[:verbose]
++    def register
++      super
++      MSpec.register :unload, self
++    end
++
++    def unload
++      file_examples = @tally.counter.examples - @examples_last
++      @examples_last = @tally.counter.examples
++      ::STDOUT.write ".#{file_examples}"
++    end
+   end
+ 
+   def finish
+diff --git a/spec/mspec/lib/mspec/runner/parallel.rb b/spec/mspec/lib/mspec/runner/parallel.rb
+index 7428b33682..6cfc09e470 100644
+--- a/spec/mspec/lib/mspec/runner/parallel.rb
++++ b/spec/mspec/lib/mspec/runner/parallel.rb
+@@ -1,4 +1,5 @@
+ class ParallelRunner
++
+   def initialize(files, processes, formatter, argv)
+     @files = files
+     @processes = processes
+@@ -6,6 +7,14 @@ def initialize(files, processes, formatter, argv)
+     @argv = argv
+     @last_files = {}
+     @output_files = []
++    if MSpecScript.config[:verbose]
++      @cntr = 1
++      @pid_alpha = {}
++      @ttl_files = @files.length
++      wid = @ttl_files.to_s.length
++      @fmt = "[%#{wid}d/%#{wid}d]  %1s  %4s  %s"
++    end
++    @files.shuffle! if MSpec.randomize?
+     @success = true
+   end
+ 
+@@ -28,6 +37,15 @@ def handle(child, message)
+     case message
+     when '.'
+       @formatter.unload
++      if MSpecScript.config[:verbose]
++        while chunk = (child.read_nonblock(1) rescue nil)
++          message += chunk
++        end
++        message.gsub!(/^\.+|\.+$/, '')
++        fn = @last_files[child][/spec\/ruby\/(\S+)$/,1]
++        ::STDOUT.puts format(@fmt, @cntr, @ttl_files ,@pid_alpha[child], message, fn)
++        @cntr += 1
++      end
+       send_new_file_or_quit(child)
+     else
+       if message == nil
+@@ -80,8 +98,10 @@ def run
+     puts @children.map { |child| child.gets }.uniq
+     @formatter.start
+     begin
+-      @children.each { |child| send_new_file_or_quit(child) }
+-
++      @children.each_with_index { |child, idx|
++        @pid_alpha[child] = (idx + 65).chr if MSpecScript.config[:verbose]
++        send_new_file_or_quit(child)
++      }
+       until @children.empty?
+         IO.select(@children)[0].each { |child|
+           handle(child, child.read(1))
+diff --git a/spec/mspec/lib/mspec/utils/options.rb b/spec/mspec/lib/mspec/utils/options.rb
+index 9f8dd01dbf..30f2c8448e 100644
+--- a/spec/mspec/lib/mspec/utils/options.rb
++++ b/spec/mspec/lib/mspec/utils/options.rb
+@@ -390,16 +390,20 @@ def repeat
+ 
+   def verbose
+     on("-V", "--verbose", "Output the name of each file processed") do
+-      obj = Object.new
+-      def obj.start
+-        @width = MSpec.retrieve(:files).inject(0) { |max, f| f.size > max ? f.size : max }
+-      end
+-      def obj.load
+-        file = MSpec.retrieve :file
+-        STDERR.print "\n#{file.ljust(@width)}"
++      if MSpecScript.config[:multi] || ENV['MSPEC_MULTI']
++        config[:verbose] = true
++      else
++        obj = Object.new
++        def obj.start
++          @width = MSpec.retrieve(:files).inject(0) { |max, f| f.size > max ? f.size : max }
++        end
++        def obj.load
++          file = MSpec.retrieve :file
++          STDERR.print "\n#{file.ljust(@width)}"
++        end
++        MSpec.register :start, obj
++        MSpec.register :load, obj
+       end
+-      MSpec.register :start, obj
+-      MSpec.register :load, obj
+     end
+ 
+     on("-m", "--marker", "MARKER",
