@@ -34,7 +34,7 @@ function Kill-Proc($proc) {
   foreach ($process in $r_processes) {
     $id = $process.ProcessId
     if (!$process.HasExited) {
-      Stop-Process -Id $id -Force
+      Stop-Process -Id $id -Force -ErrorAction SilentlyContinue
       sleep (0.1)
     }
   }
@@ -105,7 +105,9 @@ function Finish {
   # remove zero length log files, typically stderr files
   $zero_length_files = Get-ChildItem -Path $d_logs -Include *.log -Recurse |
     where {$_.length -eq 0}
-  foreach ($file in $zero_length_files) { Remove-Item -Path $file -Force }
+  foreach ($file in $zero_length_files) {
+    Remove-Item -Path $file -Force -ErrorAction SilentlyContinue
+  }
 
   $env:path = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
