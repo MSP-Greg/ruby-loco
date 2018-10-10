@@ -101,7 +101,7 @@ function Create-Folders {
 
   # create git symlink, which RubyGems seems to want
   if (!(Test-Path -Path $d_repo/git -PathType Container )) {
-        New-Item  -Path $d_repo/git -ItemType SymbolicLink -Value $d_git 1> $null
+        New-Item  -Path $d_repo/git -ItemType Junction -Value $d_git 1> $null
   }
 
   New-Item -Path $d_build   -ItemType Directory 1> $null
@@ -260,7 +260,8 @@ Remove-Read-Only $d_build
 Run "$make -j$jobs 2>&1" $true
 Time-Log "$make -j$jobs"
 
-Run "$make -f GNUMakefile DESTDIR=$d_repo_u install-nodoc"
+# Run "$make -f GNUMakefile DESTDIR=$d_repo_u install-nodoc"
+Run "$make DESTDIR=$d_repo_u install-nodoc"
 Time-Log "$make install"
 
 cd $d_repo

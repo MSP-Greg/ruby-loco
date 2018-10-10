@@ -124,7 +124,7 @@ function Finish {
   if ($exit) { exit 1 }
 }
 
-#—————————————————————————————————————————————————————————————————————
+#————————————————————————————————————————————————————————————————————— BasicTest
 function BasicTest {
   $env:path = "$d_install/bin;$base_path"
   # needs miniruby at root (build)
@@ -179,7 +179,7 @@ function Test-All {
     -StdErr "test_all_err.log" `
     -Title  "test-all" `
     -Dir    "$d_ruby/test" `
-    -TimeLimit 1500
+    -TimeLimit 1800
 
   Remove-Item -Path "$d_install/lib/ruby/$abi/$rarch/-test-" -Recurse
 }
