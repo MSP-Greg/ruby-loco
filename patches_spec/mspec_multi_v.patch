@@ -100,7 +100,7 @@ index 7428b33682..6cfc09e470 100644
 +      @pid_alpha = {}
 +      @ttl_files = @files.length
 +      wid = @ttl_files.to_s.length
-+      @fmt = "[%#{wid}d/%#{wid}d]  %1s  %4s  %s"
++      @fmt = "[%#{wid}d/%#{wid}d]  %1s  %4s  %s\n"
 +    end
 +    @files.shuffle! if MSpec.randomize?
      @success = true
@@ -116,7 +116,7 @@ index 7428b33682..6cfc09e470 100644
 +        end
 +        message.gsub!(/^\.+|\.+$/, '')
 +        fn = @last_files[child][/spec\/ruby\/(\S+)$/,1]
-+        ::STDOUT.puts format(@fmt, @cntr, @ttl_files ,@pid_alpha[child], message, fn)
++        ::STDOUT.write format(@fmt, @cntr, @ttl_files ,@pid_alpha[child], message, fn)
 +        @cntr += 1
 +      end
        send_new_file_or_quit(child)
