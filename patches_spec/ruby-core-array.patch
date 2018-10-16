@@ -1,3 +1,4 @@
+Patch by MSP-Greg
 diff --git a/spec/ruby/core/array/fixtures/classes.rb b/spec/ruby/core/array/fixtures/classes.rb
 index 4292554724..50decfd205 100644
 --- a/spec/ruby/core/array/fixtures/classes.rb
@@ -9,14 +10,14 @@ index 4292554724..50decfd205 100644
 -    frozen_array = [1,2,3]
 -    frozen_array.freeze
 -    frozen_array
-+    [1,2,3].dup.freeze
++    [1,2,3].freeze
    end
  
    def self.empty_frozen_array
 -    frozen_array = []
 -    frozen_array.freeze
 -    frozen_array
-+    [].dup.freeze
++    [].freeze
    end
  
    def self.recursive_array
@@ -31,8 +32,8 @@ index e6e5e851b6..cbff729553 100644
 -          return true if x == 2
 -          raise raise StandardError, 'Oops' if x == 3
 +          case x
-+          when 3 then raise StandardError, 'Oops'
 +          when 2 then true
++          when 3 then raise StandardError, 'Oops'
 +          else false
 +          end
          end
@@ -41,69 +42,3 @@ index e6e5e851b6..cbff729553 100644
        end
  
        a.should == [1, 3, 4]
-diff --git a/spec/ruby/core/enumerable/shared/enumeratorized.rb b/spec/ruby/core/enumerable/shared/enumeratorized.rb
-index 05d27b5783..80c1db55b9 100644
---- a/spec/ruby/core/enumerable/shared/enumeratorized.rb
-+++ b/spec/ruby/core/enumerable/shared/enumeratorized.rb
-@@ -1,41 +1,36 @@
- describe :enumeratorized_with_unknown_size, shared: true do
--  describe "when no block is given" do
--    describe "returned Enumerator" do
--      it "size returns nil" do
--        @object.send(*@method).size.should == nil
--      end
-+  describe "when no block is given returned Enumerator" do
-+    it "size returns nil" do
-+      @object.send(*@method).size.should == nil
-     end
-   end
- end
- 
- describe :enumeratorized_with_origin_size, shared: true do
--  describe "when no block is given" do
--    describe "returned Enumerator" do
--      it "size returns the enumerable size" do
--        @object.send(*@method).size.should == @object.size
--      end
-+  describe "when no block is given returned Enumerator" do
-+    it "size returns the enumerable size" do
-+      @object ||= [1,2,3]
-+      @object.send(*@method).size.should == @object.size
-     end
-   end
- end
- 
- describe :enumeratorized_with_cycle_size, shared: true do
--  describe "when no block is given" do
--    describe "returned Enumerator" do
--      describe "size" do
--        it "should be the result of multiplying the enumerable size by the argument passed" do
--          @object.cycle(2).size.should == @object.size * 2
--          @object.cycle(7).size.should == @object.size * 7
--          @object.cycle(0).size.should == 0
--          @empty_object.cycle(2).size.should == 0
--        end
-+  describe "when no block is given returned Enumerator" do
-+    describe "size" do
-+      it "should be the result of multiplying the enumerable size by the argument passed" do
-+        @object.cycle(2).size.should == @object.size * 2
-+        @object.cycle(7).size.should == @object.size * 7
-+        @object.cycle(0).size.should == 0
-+        @empty_object.cycle(2).size.should == 0
-+      end
- 
--        it "should be zero when the argument passed is 0 or less" do
--          @object.cycle(-1).size.should == 0
--        end
-+      it "should be zero when the argument passed is 0 or less" do
-+        @object.cycle(-1).size.should == 0
-+      end
- 
--        it "should be Float::INFINITY when no argument is passed" do
--          @object.cycle.size.should == Float::INFINITY
--        end
-+      it "should be Float::INFINITY when no argument is passed" do
-+        @object.cycle.size.should == Float::INFINITY
-       end
-     end
-   end
