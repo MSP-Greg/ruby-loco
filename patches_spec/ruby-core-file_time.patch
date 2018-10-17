@@ -1,0 +1,124 @@
+Patch by MSP-Greg
+See https://bugs.ruby-lang.org/issues/13726
+diff --git a/spec/ruby/core/file/atime_spec.rb b/spec/ruby/core/file/atime_spec.rb
+index d4106c0411..c791aa6d74 100644
+--- a/spec/ruby/core/file/atime_spec.rb
++++ b/spec/ruby/core/file/atime_spec.rb
+@@ -15,7 +15,7 @@
+     File.atime(@file).should be_kind_of(Time)
+   end
+ 
+-  platform_is :linux do
++  guard -> { platform_is :linux or (platform_is :windows and ruby_version_is '2.5') } do
+     ## NOTE also that some Linux systems disable atime (e.g. via mount params) for better filesystem speed.
+     it "returns the last access time for the named file with microseconds" do
+       supports_subseconds = Integer(`stat -c%x '#{__FILE__}'`[/\.(\d+)/, 1], 10)
+diff --git a/spec/ruby/core/file/ctime_spec.rb b/spec/ruby/core/file/ctime_spec.rb
+index 50ffbe6a79..5753e0d90e 100644
+--- a/spec/ruby/core/file/ctime_spec.rb
++++ b/spec/ruby/core/file/ctime_spec.rb
+@@ -14,7 +14,7 @@
+     File.ctime(@file).should be_kind_of(Time)
+   end
+ 
+-  platform_is :linux do
++  guard -> { platform_is :linux or (platform_is :windows and ruby_version_is '2.5') } do
+     it "returns the change time for the named file (the time at which directory information about the file was changed, not the file itself) with microseconds." do
+       supports_subseconds = Integer(`stat -c%z '#{__FILE__}'`[/\.(\d+)/, 1], 10)
+       if supports_subseconds != 0
+diff --git a/spec/ruby/core/file/mtime_spec.rb b/spec/ruby/core/file/mtime_spec.rb
+index 4c26cb5dac..d5769c0584 100644
+--- a/spec/ruby/core/file/mtime_spec.rb
++++ b/spec/ruby/core/file/mtime_spec.rb
+@@ -15,7 +15,7 @@
+     File.mtime(@filename).should be_close(@mtime, 2.0)
+   end
+ 
+-  platform_is :linux do
++  guard -> { platform_is :linux or (platform_is :windows and ruby_version_is '2.5') } do
+     it "returns the modification Time of the file with microseconds" do
+       supports_subseconds = Integer(`stat -c%y '#{__FILE__}'`[/\.(\d+)/, 1], 10)
+       if supports_subseconds != 0
+diff --git a/spec/ruby/core/file/utime_spec.rb b/spec/ruby/core/file/utime_spec.rb
+index 542681ea93..64af82ef19 100644
+--- a/spec/ruby/core/file/utime_spec.rb
++++ b/spec/ruby/core/file/utime_spec.rb
+@@ -1,6 +1,11 @@
+ require_relative '../../spec_helper'
+ 
+ describe "File.utime" do
++
++  before :all do
++    @time_is_float = /mswin|mingw/ =~ RUBY_PLATFORM && RUBY_VERSION >= '2.5'
++  end
++
+   before :each do
+     @atime = Time.now
+     @mtime = Time.now
+@@ -16,18 +21,33 @@
+ 
+   it "sets the access and modification time of each file" do
+     File.utime(@atime, @mtime, @file1, @file2)
+-    File.atime(@file1).to_i.should be_close(@atime.to_i, 2)
+-    File.mtime(@file1).to_i.should be_close(@mtime.to_i, 2)
+-    File.atime(@file2).to_i.should be_close(@atime.to_i, 2)
+-    File.mtime(@file2).to_i.should be_close(@mtime.to_i, 2)
++    if @time_is_float
++      File.atime(@file1).should be_close(@atime, 0.0001)
++      File.mtime(@file1).should be_close(@mtime, 0.0001)
++      File.atime(@file2).should be_close(@atime, 0.0001)
++      File.mtime(@file2).should be_close(@mtime, 0.0001)
++    else
++      File.atime(@file1).to_i.should be_close(@atime.to_i, 2)
++      File.mtime(@file1).to_i.should be_close(@mtime.to_i, 2)
++      File.atime(@file2).to_i.should be_close(@atime.to_i, 2)
++      File.mtime(@file2).to_i.should be_close(@mtime.to_i, 2)
++    end
+   end
+ 
+   it "uses the current times if two nil values are passed" do
++    tn = Time.now
+     File.utime(nil, nil, @file1, @file2)
+-    File.atime(@file1).to_i.should be_close(Time.now.to_i, 2)
+-    File.mtime(@file1).to_i.should be_close(Time.now.to_i, 2)
+-    File.atime(@file2).to_i.should be_close(Time.now.to_i, 2)
+-    File.mtime(@file2).to_i.should be_close(Time.now.to_i, 2)
++    if @time_is_float
++      File.atime(@file1).should be_close(tn, 0.050)
++      File.mtime(@file1).should be_close(tn, 0.050)
++      File.atime(@file2).should be_close(tn, 0.050)
++      File.mtime(@file2).should be_close(tn, 0.050)
++    else
++      File.atime(@file1).to_i.should be_close(Time.now.to_i, 2)
++      File.mtime(@file1).to_i.should be_close(Time.now.to_i, 2)
++      File.atime(@file2).to_i.should be_close(Time.now.to_i, 2)
++      File.mtime(@file2).to_i.should be_close(Time.now.to_i, 2)
++    end
+   end
+ 
+   it "accepts an object that has a #to_path method" do
+@@ -35,11 +55,19 @@
+   end
+ 
+   it "accepts numeric atime and mtime arguments" do
+-    File.utime(@atime.to_i, @mtime.to_i, @file1, @file2)
+-    File.atime(@file1).to_i.should be_close(@atime.to_i, 2)
+-    File.mtime(@file1).to_i.should be_close(@mtime.to_i, 2)
+-    File.atime(@file2).to_i.should be_close(@atime.to_i, 2)
+-    File.mtime(@file2).to_i.should be_close(@mtime.to_i, 2)
++    if @time_is_float
++      File.utime(@atime.to_f, @mtime.to_f, @file1, @file2)
++      File.atime(@file1).should be_close(@atime, 0.0001)
++      File.mtime(@file1).should be_close(@mtime, 0.0001)
++      File.atime(@file2).should be_close(@atime, 0.0001)
++      File.mtime(@file2).should be_close(@mtime, 0.0001)
++    else
++      File.utime(@atime.to_i, @mtime.to_i, @file1, @file2)
++      File.atime(@file1).to_i.should be_close(@atime.to_i, 2)
++      File.mtime(@file1).to_i.should be_close(@mtime.to_i, 2)
++      File.atime(@file2).to_i.should be_close(@atime.to_i, 2)
++      File.mtime(@file2).to_i.should be_close(@mtime.to_i, 2)
++    end
+   end
+ 
+   platform_is :linux do
