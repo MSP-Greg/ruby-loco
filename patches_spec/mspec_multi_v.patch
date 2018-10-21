@@ -37,10 +37,10 @@ index 5932eeef62..917c23bc53 100644
 +  
  end
 diff --git a/spec/mspec/lib/mspec/runner/formatters/yaml.rb b/spec/mspec/lib/mspec/runner/formatters/yaml.rb
-index 090a9b1b9d..d11dd5cfc0 100644
+index 090a9b1b9d..245144bc49 100644
 --- a/spec/mspec/lib/mspec/runner/formatters/yaml.rb
 +++ b/spec/mspec/lib/mspec/runner/formatters/yaml.rb
-@@ -4,11 +4,15 @@
+@@ -4,11 +4,16 @@
  class YamlFormatter < DottedFormatter
    def initialize(out=nil)
      super(nil)
@@ -49,6 +49,7 @@ index 090a9b1b9d..d11dd5cfc0 100644
 -      @finish = $stdout
 +    if MSpecScript.config[:verbose]
 +      @examples_last = 0
++      @expectations_last = 0
 +      @finish = out.nil? ? $stdout : File.open(out, "w")
      else
 -      @finish = File.open out, "w"
@@ -60,7 +61,7 @@ index 090a9b1b9d..d11dd5cfc0 100644
      end
    end
  
-@@ -16,7 +20,19 @@ def switch
+@@ -16,7 +21,21 @@ def switch
      @out = @finish
    end
  
@@ -75,14 +76,16 @@ index 090a9b1b9d..d11dd5cfc0 100644
 +
 +    def unload
 +      file_examples = @tally.counter.examples - @examples_last
++      file_expectations = @tally.counter.expectations - @expectations_last
 +      @examples_last = @tally.counter.examples
-+      ::STDOUT.write ".#{file_examples}"
++      @expectations_last = @tally.counter.expectations
++      ::STDOUT.write ".#{file_examples}.#{file_expectations}"
 +    end
    end
  
    def finish
 diff --git a/spec/mspec/lib/mspec/runner/parallel.rb b/spec/mspec/lib/mspec/runner/parallel.rb
-index 7428b33682..6cfc09e470 100644
+index 7428b33682..0dad7803e1 100644
 --- a/spec/mspec/lib/mspec/runner/parallel.rb
 +++ b/spec/mspec/lib/mspec/runner/parallel.rb
 @@ -1,4 +1,5 @@
@@ -100,34 +103,42 @@ index 7428b33682..6cfc09e470 100644
 +      @pid_alpha = {}
 +      @ttl_files = @files.length
 +      wid = @ttl_files.to_s.length
-+      @fmt = "[%#{wid}d/%#{wid}d]  %1s  %4s  %s\n"
++      @fmt = "[%#{wid}d/%#{wid}d]  %1s  %4s   %5s   %s\n"
 +    end
 +    @files.shuffle! if MSpec.randomize?
      @success = true
    end
  
-@@ -28,6 +37,15 @@ def handle(child, message)
+@@ -28,6 +37,16 @@ def handle(child, message)
      case message
      when '.'
        @formatter.unload
 +      if MSpecScript.config[:verbose]
-+        while chunk = (child.read_nonblock(1) rescue nil)
++        while chunk = (child.read_nonblock(64) rescue nil)
 +          message += chunk
 +        end
 +        message.gsub!(/^\.+|\.+$/, '')
++        vals = message.split '.'
 +        fn = @last_files[child][/spec\/ruby\/(\S+)$/,1]
-+        ::STDOUT.write format(@fmt, @cntr, @ttl_files ,@pid_alpha[child], message, fn)
++        ::STDOUT.write format(@fmt, @cntr, @ttl_files ,@pid_alpha[child], vals[0], vals[1], fn)
 +        @cntr += 1
 +      end
        send_new_file_or_quit(child)
      else
        if message == nil
-@@ -80,8 +98,10 @@ def run
+@@ -79,9 +98,17 @@ def run
+ 
      puts @children.map { |child| child.gets }.uniq
      @formatter.start
-     begin
+-    begin
 -      @children.each { |child| send_new_file_or_quit(child) }
--
+ 
++    if MSpecScript.config[:verbose]
++      wid = @ttl_files.to_s.length
++      STDOUT.puts "   #{' ' * wid * 2} PID Examples  Exp  File"
++    end
++
++    begin
 +      @children.each_with_index { |child, idx|
 +        @pid_alpha[child] = (idx + 65).chr if MSpecScript.config[:verbose]
 +        send_new_file_or_quit(child)
