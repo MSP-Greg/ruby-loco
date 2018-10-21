@@ -1,5 +1,6 @@
 Patch by MSP-Greg
-See https://bugs.ruby-lang.org/issues/13726
+See https://bugs.ruby-lang.org/issues/13726, update windows for updated file time
+resolution
 diff --git a/spec/ruby/core/file/atime_spec.rb b/spec/ruby/core/file/atime_spec.rb
 index d4106c0411..c791aa6d74 100644
 --- a/spec/ruby/core/file/atime_spec.rb
