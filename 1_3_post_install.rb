@@ -152,7 +152,7 @@ class << self
     require 'rubygems'
     require 'rubygems/gem_runner'
     suffix = %w[--no-document --env-shebang --silent]
-    if RUBY_VERSION < '2.5'
+    if /trunk/ !~ RUBY_DESCRIPTION 
       Gem::GemRunner.new.run %w[uninstall rubygems-update -x]
       # rdoc won't update without UI confirmation of bin directory file replacement ?
       Gem::GemRunner.new.run(%w[update minitest power_assert rake rdoc test-unit] + suffix)
