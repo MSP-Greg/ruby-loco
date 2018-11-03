@@ -56,7 +56,7 @@ function Basic-Info {
   $env:path = "$d_install/bin;$base_path"
   Write-Host $($dash * 80) -ForegroundColor $fc
   ruby -v
-  bundler version
+  bundle version
   ruby -ropenssl -e "puts OpenSSL::OPENSSL_LIBRARY_VERSION"
   Write-Host "gem --version" $(gem --version)
   rake -V
