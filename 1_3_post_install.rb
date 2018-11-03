@@ -164,7 +164,8 @@ class << self
       Gem::GemRunner.new.run %w[cleanup]
       Gem::GemRunner.new.run(%w[install bundler] + suffix)
     else
-      Gem::GemRunner.new.run(%w[install bundler] + suffix)
+      # added as of r65509
+      # Gem::GemRunner.new.run(%w[install bundler] + suffix)
     end
 
   end
