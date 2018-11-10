@@ -84,7 +84,7 @@ pacman.exe -Sy --noconfirm --needed --noprogressbar $($pre + 'toolchain') 2> $nu
 Check-Exit 'Cannot update toolchain'
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends" -ForegroundColor Yellow
-$tools =  "___gdbm ___gmp ___libffi ___ncurses ___readline ___zlib".replace('___', $pre)
+$tools =  "___gdbm ___gmp ___libffi ___ncurses ___ragel ___readline ___zlib".replace('___', $pre)
 pacman.exe -S --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
 
 # As of Sept-2018 libyaml is not installed on Appveyor
