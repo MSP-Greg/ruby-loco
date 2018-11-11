@@ -4,9 +4,7 @@ $key = 'D688DA4A77D8FA18'
 $ks1 = 'hkp://pool.sks-keyservers.net'
 $ks2 = 'hkp://pgp.mit.edu'
 
-$msys2    = 'C:\msys64'
-$dl_msys2 = 'http://repo.msys2.org/msys/x86_64'
-
+$msys2   = 'C:\msys64'
 # OpenSSL 1.1.1 release
 $openssl = 'mingw-w64-x86_64-openssl-1.1.1-1-any.pkg.tar.xz'
 $openssl_sha = '0c8be3277693f60c319f997659c2fed0eadce8535aed29a4617ec24da082b60ee30a03d3fe1024dae4461041e6e9a5e5cff1a68fa08b4b8791ea1bf7b02abc40'
@@ -134,20 +132,6 @@ if ($LastExitCode) {
   exit 1
 } else { Write-Host "Finished" }
 
-#————————————————————————————————————————————————————————————————————————— Revert to bison 3.1
-Write-Host "$($dash * 63) Install bison 3.1" -ForegroundColor Yellow
-$bison = 'bison-3.1-1-x86_64.pkg.tar.xz'
-$sig = $bison + '.sig'
-
-$wc.DownloadFile("$dl_msys2/$bison" , "$pkgs\$bison")
-$wc.DownloadFile("$dl_msys2/$sig"   , "$pkgs\$sig")
-
-Write-Host "pacman.exe -Rdd --noconfirm bison" -ForegroundColor Yellow
-pacman.exe -Rdd --noconfirm bison
-Write-Host "pacman.exe -Udd --noconfirm $pkgs_u/$bison" -ForegroundColor Yellow
-pacman.exe -Udd --noconfirm $pkgs_u/$bison
-
-#—————————————————————————————————————————————————————————————————————————
 Write-Host "$($dash * 63) MinGW Package Check" -ForegroundColor Yellow
 bash -c "pacman -Qs x86_64\.\+\(gcc\|gdbm\|openssl\) | sed -n '/^local/p' | sed 's/^local\///' | sed 's/ (.\+$//'"
 Write-Host "$($dash * 83)" -ForegroundColor Yellow
