@@ -1,10 +1,10 @@
 Patch by MSP-Greg
 Allows using mkmf.rb when running test-all tests from install
 diff --git a/lib/mkmf.rb b/lib/mkmf.rb
-index b035670466..191ac20b57 100644
+index 355ea171ee..8f99406d65 100644
 --- a/lib/mkmf.rb
 +++ b/lib/mkmf.rb
-@@ -240,6 +240,10 @@ def map_dir(dir, map = nil)
+@@ -246,6 +246,10 @@ def map_dir(dir, map = nil)
    elsif File.exist?(($hdrdir = ($top_srcdir ||= topdir) + "/include")  + "/ruby.h")
      $topdir ||= RbConfig::CONFIG["topdir"]
      $arch_hdrdir = "$(extout)/include/$(arch)"
@@ -15,7 +15,7 @@ index b035670466..191ac20b57 100644
    else
      abort <<MESSAGE
  mkmf.rb can't find header files for ruby at #{$hdrdir}/ruby.h
-@@ -451,7 +455,7 @@ def create_tmpsrc(src)
+@@ -457,7 +461,7 @@ def create_tmpsrc(src)
    def have_devel?
      unless defined? $have_devel
        $have_devel = true
