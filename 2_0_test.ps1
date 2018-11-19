@@ -181,7 +181,7 @@ function Test-All {
     -StdErr "test_all_err.log" `
     -Title  "test-all" `
     -Dir    "$d_ruby/test" `
-    -TimeLimit 1800
+    -TimeLimit 2100
 
   Remove-Item -Path "$d_install/lib/ruby/$abi/$rarch/-test-" -Recurse
 }
