@@ -1,24 +1,26 @@
 Patch by MSP-Greg
 Attempts to fix issues when run on 'busy' Appveyor systems
 diff --git a/bootstraptest/runner.rb b/bootstraptest/runner.rb
-index a5d5d219cf..936dd2b10e 100755
+index feb8ada5c1..936dd2b10e 100755
 --- a/bootstraptest/runner.rb
 +++ b/bootstraptest/runner.rb
-@@ -383,8 +383,14 @@ def assert_finish(timeout_seconds, testsrc, message = '')
+@@ -383,9 +383,15 @@ def assert_finish(timeout_seconds, testsrc, message = '')
        end
        if io.respond_to?(:read_nonblock)
          if IO.select([io], nil, nil, diff)
 +          tries = 0
            begin
              io.read_nonblock(1024)
+-          rescue Errno::EAGAIN, IO::WaitReadable, EOFError
 +          rescue IO::WaitReadable
 +            IO.select([io])
 +            tries += 1 
 +            break if tries > 3
 +            retry
-           rescue Errno::EAGAIN, EOFError
++          rescue Errno::EAGAIN, EOFError
              break
            end while true
+         end
 diff --git a/bootstraptest/test_io.rb b/bootstraptest/test_io.rb
 index 89c00d0b88..b65476fbe0 100644
 --- a/bootstraptest/test_io.rb
