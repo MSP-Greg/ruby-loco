@@ -1,0 +1,177 @@
+From f5dd3244ffce8193ca5c9e2361d748ec51a75dc6 Mon Sep 17 00:00:00 2001
+From: Eric Wong <e@80x24.org>
+Date: Thu, 15 Nov 2018 23:56:07 +0000
+Subject: [PATCH] thread_pthread.c: close race from UBF_TIMER and
+ non-GVL-releasing thread
+
+A Ruby thread may run without releasing the GVL if there is no
+contention.  And there may be no contention because another
+thread missed its wakeup and needs to rely on ubf_list for
+wakeups.  So we need to ensure the Ruby thread can relinquish
+GVL and trigger ubf_list wakeups to target thread when the POSIX
+timer fires.
+
+Thus, we trigger a timeslice on SIGVTALRM when triggered by
+UBF_TIMER (we do not want excessive switching overhead on every
+SIGVTALRM signal, either).
+---
+ configure.ac     |  1 +
+ thread.c         |  3 ++-
+ thread_pthread.c | 56 ++++++++++++++++++++++++++++++++++++++----------
+ 3 files changed, 48 insertions(+), 12 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 2dc4fd36ae..dfc0e527e1 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1908,6 +1908,7 @@ AC_CHECK_FUNCS(shutdown)
+ AC_CHECK_FUNCS(sigaction)
+ AC_CHECK_FUNCS(sigaltstack)
+ AC_CHECK_FUNCS(sigprocmask)
++AC_CHECK_FUNCS(sigqueue)
+ AC_CHECK_FUNCS(sinh)
+ AC_CHECK_FUNCS(spawnv)
+ AC_CHECK_FUNCS(symlink)
+diff --git a/thread.c b/thread.c
+index 0711ef5552..5531546e84 100644
+--- a/thread.c
++++ b/thread.c
+@@ -4238,12 +4238,13 @@ rb_threadptr_check_signal(rb_thread_t *mth)
+     }
+ }
+ 
++/* async-signal-safe */
+ static void
+ timer_thread_function(void)
+ {
+     volatile rb_execution_context_t *ec;
+ 
+-    /* for time slice */
++    /* for time slice, this relies on GC for grace period */
+     ec = ACCESS_ONCE(rb_execution_context_t *,
+                      ruby_current_execution_context_ptr);
+     if (ec) RUBY_VM_SET_TIMER_INTERRUPT(ec);
+diff --git a/thread_pthread.c b/thread_pthread.c
+index 1f2ac00b67..c9edfbf488 100644
+--- a/thread_pthread.c
++++ b/thread_pthread.c
+@@ -46,6 +46,8 @@
+ 
+ #if defined(SIGVTALRM) && !defined(__CYGWIN__)
+ #  define USE_UBF_LIST 1
++static LIST_HEAD(ubf_list_head);
++static rb_nativethread_lock_t ubf_list_lock = RB_NATIVETHREAD_LOCK_INIT;
+ #endif
+ 
+ /*
+@@ -542,11 +544,20 @@ native_cond_timeout(rb_nativethread_cond_t *cond, const rb_hrtime_t rel)
+ 
+ static pthread_key_t ruby_native_thread_key;
+ 
++#if defined(HAVE_SIGACTION) && defined(USE_UBF_LIST)
+ static void
+-null_func(int i)
++vtalrm_func(int sig, siginfo_t *info, void *ctx)
+ {
+-    /* null */
++    /*
++     * if triggered by UBF_TIMER, force running thread to call
++     * ubf_wakeup_all_threads via gvl_yield
++     */
++    if (info && info->si_ptr == &ubf_list_head)
++        timer_thread_function();
+ }
++#else /* do any platforms have pthreads, SIGVTALRM, but no sigaction? */
++static void vtalrm_func(int sig) { /* noop */ }
++#endif /* HAVE_SIGACTION && USE_UBF_LIST */
+ 
+ static rb_thread_t *
+ ruby_thread_from_native(void)
+@@ -578,7 +589,19 @@ Init_native_thread(rb_thread_t *th)
+     th->thread_id = pthread_self();
+     fill_thread_id_str(th);
+     native_thread_init(th);
+-    posix_signal(SIGVTALRM, null_func);
++#if defined(HAVE_SIGACTION) && defined(USE_UBF_LIST)
++    {
++        struct sigaction sa;
++
++        sigemptyset(&sa.sa_mask);
++        sa.sa_sigaction = vtalrm_func;
++        sa.sa_flags = SA_SIGINFO;
++        if (sigaction(SIGVTALRM, &sa, 0) != 0)
++            rb_async_bug_errno("sigaction", errno);
++    }
++#else
++    posix_signal(SIGVTALRM, vtalrm_func);
++#endif
+ }
+ 
+ static void
+@@ -1269,8 +1292,6 @@ native_cond_sleep(rb_thread_t *th, rb_hrtime_t *rel)
+ }
+ 
+ #ifdef USE_UBF_LIST
+-static LIST_HEAD(ubf_list_head);
+-static rb_nativethread_lock_t ubf_list_lock = RB_NATIVETHREAD_LOCK_INIT;
+ 
+ static void
+ ubf_list_atfork(void)
+@@ -1677,7 +1698,7 @@ ubf_timer_pthread_create(rb_pid_t current)
+     if (setup_communication_pipe_internal(timer_pthread.low) < 0)
+         return;
+ 
+-    err = pthread_create(&timer_pthread.thid, 0, timer_pthread_fn, GET_VM());
++    err = pthread_create(&timer_pthread.thid, 0, timer_pthread_fn, 0);
+     if (!err)
+         timer_pthread.owner = current;
+     else
+@@ -1700,7 +1721,7 @@ ubf_timer_create(rb_pid_t current)
+ 
+     sev.sigev_notify = SIGEV_SIGNAL;
+     sev.sigev_signo = SIGVTALRM;
+-    sev.sigev_value.sival_ptr = &timer_posix;
++    sev.sigev_value.sival_ptr = &ubf_list_head;
+     if (!timer_create(UBF_TIMER_CLOCK, &sev, &timer_posix.timerid))
+         timer_posix.owner = current;
+     else
+@@ -2084,11 +2105,24 @@ native_sleep(rb_thread_t *th, rb_hrtime_t *rel)
+ }
+ 
+ #if UBF_TIMER == UBF_TIMER_PTHREAD
++static void
++timer_pthread_sigqueue(rb_pid_t pid, int sig)
++{
++#if defined(HAVE_SIGQUEUE) && defined(HAVE_SIGACTION)
++    union sigval sv;
++
++    sv.sival_ptr = &ubf_list_head;
++    if (sigqueue(pid, sig, sv) != 0)
++        rb_async_bug_errno("sigqueue", errno);
++#else
++    kill(pid, sig);
++#endif
++}
++
+ static void *
+-timer_pthread_fn(void *p)
++timer_pthread_fn(void *ignore)
+ {
+-    rb_vm_t *vm = p;
+-    pthread_t main_thread_id = vm->main_thread->thread_id;
++    rb_pid_t pid = getpid();
+     struct pollfd pfd;
+     int timeout = -1;
+ 
+@@ -2100,7 +2134,7 @@ timer_pthread_fn(void *p)
+         (void)consume_communication_pipe(pfd.fd);
+ 
+         if (system_working > 0 && ATOMIC_CAS(timer_pthread.armed, 1, 1)) {
+-            pthread_kill(main_thread_id, SIGVTALRM);
++            timer_pthread_sigqueue(pid, SIGVTALRM);
+ 
+             if (rb_signal_buff_size() || !ubf_threads_empty()) {
+                 timeout = TIME_QUANTUM_MSEC;
+-- 
+EW
+
