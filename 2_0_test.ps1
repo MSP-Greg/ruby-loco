@@ -136,7 +136,7 @@ function BasicTest {
     -e_args "-rdevkit --disable-gems ../ruby/basictest/runner.rb" `
     -StdOut "test_basic.log" `
     -StdErr "test_basic_err.log" `
-    -Title  "test-basic" `
+    -Title  "test-basic (basictest)" `
     -Dir    $d_build `
     -TimeLimit 20
 }
@@ -150,7 +150,7 @@ function BootStrapTest {
     -e_args "--disable=gems runner.rb --ruby=`"$ruby_exe --disable=gems`" -v" `
     -StdOut "test_bootstrap.log" `
     -StdErr "test_bootstrap_err.log" `
-    -Title  "btest" `
+    -Title  "btest (bootstraptest)" `
     -Dir    "$d_ruby/bootstraptest" `
     -TimeLimit 100
 }
@@ -163,7 +163,7 @@ function Test-All {
 
   # copy items from build folder that are needed for test-all
   $ruby_so = "$d_install/lib/ruby/$abi/$rarch"
-  Copy-Item "$d_build/.ext/x64-mingw32/-test-" $ruby_so -Recurse
+  Copy-Item "$d_build/.ext/$rarch/-test-" $ruby_so -Recurse
   New-Item  -Path "$ruby_so/-test-/win32/dln" -ItemType Directory 1> $null
   Copy-Item "$d_build/ext/-test-/win32/dln/dlntest.dll" `
                 "$ruby_so/-test-/win32/dln/dlntest.dll"
@@ -183,7 +183,8 @@ function Test-All {
     -Dir    "$d_ruby/test" `
     -TimeLimit 2100
 
-  Remove-Item -Path "$d_install/lib/ruby/$abi/$rarch/-test-" -Recurse
+  # comment out below to allow full testing of Appveyor artifact
+  # Remove-Item -Path "$d_install/lib/ruby/$abi/$rarch/-test-" -Recurse
 }
 
 #————————————————————————————————————————————————————————————————————————— MSpec
