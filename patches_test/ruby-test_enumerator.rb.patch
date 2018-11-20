@@ -1,0 +1,14 @@
+Patch by MSP-Greg
+native-fiber related?
+diff --git a/test/ruby/test_enumerator.rb b/test/ruby/test_enumerator.rb
+index 0839c2c3dd..3bffb7e976 100644
+--- a/test/ruby/test_enumerator.rb
++++ b/test/ruby/test_enumerator.rb
+@@ -258,6 +258,7 @@ def o.each
+   end
+ 
+   def test_peek_values
++    skip "Windows MinGW 2018-11-20" if mingw?
+     o = Object.new
+     def o.each
+       yield
