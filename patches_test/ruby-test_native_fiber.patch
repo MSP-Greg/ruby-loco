@@ -1,0 +1,26 @@
+Patch by MSP-Greg
+native-fiber related?
+diff --git a/test/ruby/test_enum.rb b/test/ruby/test_enum.rb
+index c56e280e06..1c161c006c 100644
+--- a/test/ruby/test_enum.rb
++++ b/test/ruby/test_enum.rb
+@@ -612,6 +612,7 @@ def test_each_cons
+   end
+ 
+   def test_zip
++    skip "Windows MinGW native fiber 2018-11-20" if mingw?
+     assert_equal([[1,1],[2,2],[3,3],[1,1],[2,2]], @obj.zip(@obj))
+     assert_equal([["a",1],["b",2],["c",3]], ["a", "b", "c"].zip(@obj))
+ 
+diff --git a/test/ruby/test_enumerator.rb b/test/ruby/test_enumerator.rb
+index 0839c2c3dd..892633a470 100644
+--- a/test/ruby/test_enumerator.rb
++++ b/test/ruby/test_enumerator.rb
+@@ -258,6 +258,7 @@ def o.each
+   end
+ 
+   def test_peek_values
++    skip "Windows MinGW native fiber 2018-11-20" if mingw?
+     o = Object.new
+     def o.each
+       yield
