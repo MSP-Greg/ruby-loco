@@ -1,0 +1,382 @@
+From 99f433dad5aca658e401cd2bd0408b30b6306987 Mon Sep 17 00:00:00 2001
+From: Samuel Williams <samuel.williams@oriontransfer.co.nz>
+Date: Wed, 21 Nov 2018 09:52:08 +1300
+Subject: [PATCH 1/9] Enable msys2 to check build status.
+
+---
+ configure.ac | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 5a221f6bf7d5..dcbaf0d623dc 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -2345,13 +2345,12 @@ AS_CASE(["$target_cpu-$target_os"],
+     AC_DEFINE_UNQUOTED(FIBER_USE_COROUTINE, ["$COROUTINE_H"])
+     AC_LIBOBJ([coroutine/x86/Context])
+   ],
+-  # TODO: Enable this after AppVeyor msys2 build succeeds
+-  # [x64-mingw32], [
+-  #   AC_MSG_RESULT(win64)
+-  #   COROUTINE_H=coroutine/win64/Context.h
+-  #   AC_DEFINE_UNQUOTED(FIBER_USE_COROUTINE, ["$COROUTINE_H"])
+-  #   AC_LIBOBJ([coroutine/win64/Context])
+-  # ],
++  [x64-mingw32], [
++    AC_MSG_RESULT(win64)
++    COROUTINE_H=coroutine/win64/Context.h
++    AC_DEFINE_UNQUOTED(FIBER_USE_COROUTINE, ["$COROUTINE_H"])
++    AC_LIBOBJ([coroutine/win64/Context])
++  ],
+   [*], [
+     AC_MSG_RESULT(no)
+   ]
+
+From 31a3982c6a6f20e6520b601ef0f074bfcbb3053d Mon Sep 17 00:00:00 2001
+From: Samuel Williams <samuel.williams@oriontransfer.co.nz>
+Date: Wed, 21 Nov 2018 12:59:27 +1300
+Subject: [PATCH 2/9] Use VirtualAlloc for windows stack allocation.
+
+---
+ cont.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cont.c b/cont.c
+index 56128a843a71..ad4c99a65090 100644
+--- a/cont.c
++++ b/cont.c
+@@ -885,7 +885,7 @@ fiber_machine_stack_alloc(size_t size)
+     }
+     else {
+ #ifdef _WIN32
+-        return malloc(size);
++        return VirtualAlloc(0, size, MEM_COMMIT, PAGE_READWRITE);
+ #else
+ 	void *page;
+ 	STACK_GROW_DIR_DETECTION;
+
+From 4cb011690e37e75b505021ec9a12c894a1422d05 Mon Sep 17 00:00:00 2001
+From: Samuel Williams <samuel.williams@oriontransfer.co.nz>
+Date: Wed, 21 Nov 2018 13:12:26 +1300
+Subject: [PATCH 3/9] Use VirtualProtect to add guard page on Windows.
+
+---
+ cont.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/cont.c b/cont.c
+index ad4c99a65090..b6c2a89247c5 100644
+--- a/cont.c
++++ b/cont.c
+@@ -885,7 +885,14 @@ fiber_machine_stack_alloc(size_t size)
+     }
+     else {
+ #ifdef _WIN32
+-        return VirtualAlloc(0, size, MEM_COMMIT, PAGE_READWRITE);
++        ptr = VirtualAlloc(0, size, MEM_COMMIT, PAGE_READWRITE);
++        if (!ptr) {
++          rb_raise(rb_eFiberError, "can't allocate machine stack to fiber: %s", ERRNOMSG)
++        }
++        
++        if (VirtualProtect(ptr, RB_PAGE_SIZE, PAGE_READWRITE | PAGE_GUARD, NULL)) {
++            rb_raise(rb_eFiberError, "can't set a guard page: %s", ERRNOMSG);
++        }
+ #else
+ 	void *page;
+ 	STACK_GROW_DIR_DETECTION;
+
+From 2b0105e87fd7615b23005977a49202943ae2ca7f Mon Sep 17 00:00:00 2001
+From: Samuel Williams <samuel.williams@oriontransfer.co.nz>
+Date: Wed, 21 Nov 2018 13:12:45 +1300
+Subject: [PATCH 4/9] Fix indentation of fiber_machine_stack_alloc.
+
+---
+ cont.c | 46 ++++++++++++++++++++++------------------------
+ 1 file changed, 22 insertions(+), 24 deletions(-)
+
+diff --git a/cont.c b/cont.c
+index b6c2a89247c5..778db5903ac7 100644
+--- a/cont.c
++++ b/cont.c
+@@ -872,42 +872,40 @@ fiber_machine_stack_alloc(size_t size)
+     char *ptr;
+ 
+     if (machine_stack_cache_index > 0) {
+-	if (machine_stack_cache[machine_stack_cache_index - 1].size == (size / sizeof(VALUE))) {
+-	    ptr = machine_stack_cache[machine_stack_cache_index - 1].ptr;
+-	    machine_stack_cache_index--;
+-	    machine_stack_cache[machine_stack_cache_index].ptr = NULL;
+-	    machine_stack_cache[machine_stack_cache_index].size = 0;
+-	}
+-	else{
++        if (machine_stack_cache[machine_stack_cache_index - 1].size == (size / sizeof(VALUE))) {
++            ptr = machine_stack_cache[machine_stack_cache_index - 1].ptr;
++            machine_stack_cache_index--;
++            machine_stack_cache[machine_stack_cache_index].ptr = NULL;
++            machine_stack_cache[machine_stack_cache_index].size = 0;
++        } else {
+             /* TODO handle multiple machine stack size */
+-	    rb_bug("machine_stack_cache size is not canonicalized");
+-	}
+-    }
+-    else {
++            rb_bug("machine_stack_cache size is not canonicalized");
++        }
++    } else {
+ #ifdef _WIN32
+         ptr = VirtualAlloc(0, size, MEM_COMMIT, PAGE_READWRITE);
+         if (!ptr) {
+           rb_raise(rb_eFiberError, "can't allocate machine stack to fiber: %s", ERRNOMSG)
+         }
+         
+-        if (VirtualProtect(ptr, RB_PAGE_SIZE, PAGE_READWRITE | PAGE_GUARD, NULL)) {
++        if (!VirtualProtect(ptr, RB_PAGE_SIZE, PAGE_READWRITE | PAGE_GUARD, NULL)) {
+             rb_raise(rb_eFiberError, "can't set a guard page: %s", ERRNOMSG);
+         }
+ #else
+-	void *page;
+-	STACK_GROW_DIR_DETECTION;
++        void *page;
++        STACK_GROW_DIR_DETECTION;
+ 
+-	errno = 0;
+-	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, FIBER_STACK_FLAGS, -1, 0);
+-	if (ptr == MAP_FAILED) {
+-	    rb_raise(rb_eFiberError, "can't alloc machine stack to fiber: %s", ERRNOMSG);
+-	}
++        errno = 0;
++        ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, FIBER_STACK_FLAGS, -1, 0);
++        if (ptr == MAP_FAILED) {
++            rb_raise(rb_eFiberError, "can't alloc machine stack to fiber: %s", ERRNOMSG);
++        }
+ 
+-	/* guard page setup */
+-	page = ptr + STACK_DIR_UPPER(size - RB_PAGE_SIZE, 0);
+-	if (mprotect(page, RB_PAGE_SIZE, PROT_NONE) < 0) {
+-	    rb_raise(rb_eFiberError, "can't set a guard page: %s", ERRNOMSG);
+-	}
++        /* guard page setup */
++        page = ptr + STACK_DIR_UPPER(size - RB_PAGE_SIZE, 0);
++        if (mprotect(page, RB_PAGE_SIZE, PROT_NONE) < 0) {
++            rb_raise(rb_eFiberError, "can't set a guard page: %s", ERRNOMSG);
++        }
+ #endif
+     }
+ 
+
+From 8b842068c9f60d1e0a9e376c08d94f5ed119a7b9 Mon Sep 17 00:00:00 2001
+From: Samuel Williams <samuel.williams@oriontransfer.co.nz>
+Date: Wed, 21 Nov 2018 13:17:16 +1300
+Subject: [PATCH 5/9] Must provide some pointer to VirtualProtect according to
+ documentation.
+
+---
+ cont.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/cont.c b/cont.c
+index 778db5903ac7..7b75516caac4 100644
+--- a/cont.c
++++ b/cont.c
+@@ -870,6 +870,9 @@ static char*
+ fiber_machine_stack_alloc(size_t size)
+ {
+     char *ptr;
++#ifdef _WIN32
++    DWORD old_protect;
++#endif
+ 
+     if (machine_stack_cache_index > 0) {
+         if (machine_stack_cache[machine_stack_cache_index - 1].size == (size / sizeof(VALUE))) {
+@@ -888,7 +891,7 @@ fiber_machine_stack_alloc(size_t size)
+           rb_raise(rb_eFiberError, "can't allocate machine stack to fiber: %s", ERRNOMSG)
+         }
+         
+-        if (!VirtualProtect(ptr, RB_PAGE_SIZE, PAGE_READWRITE | PAGE_GUARD, NULL)) {
++        if (!VirtualProtect(ptr, RB_PAGE_SIZE, PAGE_READWRITE | PAGE_GUARD, &old_protect)) {
+             rb_raise(rb_eFiberError, "can't set a guard page: %s", ERRNOMSG);
+         }
+ #else
+
+From d9e71de7a97373aff9571606bf1bd3b57b739679 Mon Sep 17 00:00:00 2001
+From: Samuel Williams <samuel.williams@oriontransfer.co.nz>
+Date: Wed, 21 Nov 2018 13:30:12 +1300
+Subject: [PATCH 6/9] Fix missing semi-colon.
+
+---
+ cont.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/cont.c b/cont.c
+index 7b75516caac4..9c1ed32506b0 100644
+--- a/cont.c
++++ b/cont.c
+@@ -887,10 +887,11 @@ fiber_machine_stack_alloc(size_t size)
+     } else {
+ #ifdef _WIN32
+         ptr = VirtualAlloc(0, size, MEM_COMMIT, PAGE_READWRITE);
++
+         if (!ptr) {
+-          rb_raise(rb_eFiberError, "can't allocate machine stack to fiber: %s", ERRNOMSG)
++            rb_raise(rb_eFiberError, "can't allocate machine stack to fiber: %s", ERRNOMSG);
+         }
+-        
++
+         if (!VirtualProtect(ptr, RB_PAGE_SIZE, PAGE_READWRITE | PAGE_GUARD, &old_protect)) {
+             rb_raise(rb_eFiberError, "can't set a guard page: %s", ERRNOMSG);
+         }
+
+From eaf86e336a6078aeaf31e650c9580a09ce080aaf Mon Sep 17 00:00:00 2001
+From: Samuel Williams <samuel.williams@oriontransfer.co.nz>
+Date: Wed, 21 Nov 2018 13:53:21 +1300
+Subject: [PATCH 7/9] Fix free -> VirtualFree.
+
+---
+ cont.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cont.c b/cont.c
+index 9c1ed32506b0..3623cf4ef4ef 100644
+--- a/cont.c
++++ b/cont.c
+@@ -1734,7 +1734,7 @@ fiber_store(rb_fiber_t *next_fib, rb_thread_t *th)
+ 	else {
+ 	    if (terminated_machine_stack.ptr != fib->cont.machine.stack) {
+ #ifdef _WIN32
+-                free((void*)terminated_machine_stack.ptr);
++                VirtualFree(terminated_machine_stack.ptr, 0, MEM_RELEASE);
+ #else
+                 munmap((void*)terminated_machine_stack.ptr, terminated_machine_stack.size * sizeof(VALUE));
+ #endif
+
+From bf83363b70cb8a296d2e1591306a59a731a036df Mon Sep 17 00:00:00 2001
+From: Samuel Williams <samuel.williams@oriontransfer.co.nz>
+Date: Wed, 21 Nov 2018 13:53:31 +1300
+Subject: [PATCH 8/9] Fix indentation.
+
+---
+ cont.c | 54 +++++++++++++++++++++++++++---------------------------
+ 1 file changed, 27 insertions(+), 27 deletions(-)
+
+diff --git a/cont.c b/cont.c
+index 3623cf4ef4ef..399e0846a73c 100644
+--- a/cont.c
++++ b/cont.c
+@@ -1698,11 +1698,11 @@ fiber_store(rb_fiber_t *next_fib, rb_thread_t *th)
+     rb_fiber_t *fib;
+ 
+     if (th->ec->fiber_ptr != NULL) {
+-	fib = th->ec->fiber_ptr;
++        fib = th->ec->fiber_ptr;
+     }
+     else {
+-	/* create root fiber */
+-	fib = root_fiber_alloc(th);
++        /* create root fiber */
++        fib = root_fiber_alloc(th);
+     }
+ 
+     VM_ASSERT(FIBER_RESUMED_P(fib) || FIBER_TERMINATED_P(fib));
+@@ -1710,7 +1710,7 @@ fiber_store(rb_fiber_t *next_fib, rb_thread_t *th)
+ 
+ #if FIBER_USE_NATIVE
+     if (FIBER_CREATED_P(next_fib)) {
+-	fiber_initialize_machine_stack_context(next_fib, th->vm->default_params.fiber_machine_stack_size);
++        fiber_initialize_machine_stack_context(next_fib, th->vm->default_params.fiber_machine_stack_size);
+     }
+ #endif
+ 
+@@ -1728,23 +1728,23 @@ fiber_store(rb_fiber_t *next_fib, rb_thread_t *th)
+     /* restored */
+ #ifdef MAX_MACHINE_STACK_CACHE
+     if (terminated_machine_stack.ptr) {
+-	if (machine_stack_cache_index < MAX_MACHINE_STACK_CACHE) {
+-	    machine_stack_cache[machine_stack_cache_index++] = terminated_machine_stack;
+-	}
+-	else {
+-	    if (terminated_machine_stack.ptr != fib->cont.machine.stack) {
++        if (machine_stack_cache_index < MAX_MACHINE_STACK_CACHE) {
++            machine_stack_cache[machine_stack_cache_index++] = terminated_machine_stack;
++        }
++        else {
++            if (terminated_machine_stack.ptr != fib->cont.machine.stack) {
+ #ifdef _WIN32
+                 VirtualFree(terminated_machine_stack.ptr, 0, MEM_RELEASE);
+ #else
+                 munmap((void*)terminated_machine_stack.ptr, terminated_machine_stack.size * sizeof(VALUE));
+ #endif
+-	    }
+-	    else {
+-		rb_bug("terminated fiber resumed");
+-	    }
+-	}
+-	terminated_machine_stack.ptr = NULL;
+-	terminated_machine_stack.size = 0;
++            }
++            else {
++                rb_bug("terminated fiber resumed");
++            }
++        }
++        terminated_machine_stack.ptr = NULL;
++        terminated_machine_stack.size = 0;
+     }
+ #endif /* not _WIN32 */
+     fib = th->ec->fiber_ptr;
+@@ -1753,19 +1753,19 @@ fiber_store(rb_fiber_t *next_fib, rb_thread_t *th)
+ 
+ #else /* FIBER_USE_NATIVE */
+     if (ruby_setjmp(fib->cont.jmpbuf)) {
+-	/* restored */
+-	fib = th->ec->fiber_ptr;
+-	if (fib->cont.argc == -1) rb_exc_raise(fib->cont.value);
+-	if (next_fib->cont.value == Qundef) {
+-	    cont_restore_0(&next_fib->cont, &next_fib->cont.value);
+-	    VM_UNREACHABLE(fiber_store);
+-	}
+-	return fib->cont.value;
++        /* restored */
++        fib = th->ec->fiber_ptr;
++        if (fib->cont.argc == -1) rb_exc_raise(fib->cont.value);
++        if (next_fib->cont.value == Qundef) {
++            cont_restore_0(&next_fib->cont, &next_fib->cont.value);
++            VM_UNREACHABLE(fiber_store);
++        }
++        return fib->cont.value;
+     }
+     else {
+-	VALUE undef = Qundef;
+-	cont_restore_0(&next_fib->cont, &undef);
+-	VM_UNREACHABLE(fiber_store);
++        VALUE undef = Qundef;
++        cont_restore_0(&next_fib->cont, &undef);
++        VM_UNREACHABLE(fiber_store);
+     }
+ #endif /* FIBER_USE_NATIVE */
+ }
+
+From ca41511de81dba9c848802973146e2dd6fcfee0f Mon Sep 17 00:00:00 2001
+From: Samuel Williams <samuel.williams@oriontransfer.co.nz>
+Date: Wed, 21 Nov 2018 14:36:25 +1300
+Subject: [PATCH 9/9] Fix another stack release issue.
+
+---
+ cont.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/cont.c b/cont.c
+index 399e0846a73c..400a0f08bdbf 100644
+--- a/cont.c
++++ b/cont.c
+@@ -416,10 +416,11 @@ cont_free(void *ptr)
+ 		rb_bug("Illegal root fiber parameter");
+ 	    }
+ #ifdef _WIN32
+-            free((void*)fib->ss_sp);
++            VirtualFree((void*)fib->ss_sp, 0, MEM_RELEASE);
+ #else
+ 	    munmap((void*)fib->ss_sp, fib->ss_size);
+ #endif
++            fib->ss_sp = NULL;
+ 	}
+ #elif defined(_WIN32)
+ 	if (!fiber_is_root_p(fib)) {
