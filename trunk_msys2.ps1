@@ -84,7 +84,7 @@ pacman.exe -Sy --noconfirm --needed --noprogressbar $($pre + 'toolchain') 2> $nu
 Check-Exit 'Cannot update toolchain'
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends" -ForegroundColor Yellow
-$tools =  "___gdbm ___gmp ___libffi ___ncurses ___ragel ___readline ___zlib".replace('___', $pre)
+$tools =  "___gdbm ___gmp ___libffi ___ncurses ___openssl ___ragel ___readline ___zlib".replace('___', $pre)
 pacman.exe -S --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
 
 # As of Sept-2018 libyaml is not installed on Appveyor
@@ -115,6 +115,7 @@ if ( !(Test-Path -Path $pkgs -PathType Container) ) {
   New-Item -Path $pkgs -ItemType Directory 1> $null
 }
 
+<# USE STANDARD MSYS2 1.1.1 package see line 87 ($tools = ... )
 #————————————————————————————————————————————————————————————————————————— Add openssl
 Write-Host "$($dash * 63) Install custom openssl" -ForegroundColor Yellow
 Write-Host "Installing $openssl"
@@ -131,6 +132,7 @@ if ($LastExitCode) {
   Write-Host "Error installing openssl" -ForegroundColor Yellow
   exit 1
 } else { Write-Host "Finished" }
+#>
 
 Write-Host "$($dash * 63) MinGW Package Check" -ForegroundColor Yellow
 bash -c "pacman -Qs x86_64\.\+\(gcc\|gdbm\|openssl\) | sed -n '/^local/p' | sed 's/^local\///' | sed 's/ (.\+$//'"
