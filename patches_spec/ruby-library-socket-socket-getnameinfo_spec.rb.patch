@@ -1,7 +1,7 @@
 Patch by MSP-Greg
 Issue errors on Appveyor intermittently, never locally...
 diff --git a/spec/ruby/library/socket/socket/getnameinfo_spec.rb b/spec/ruby/library/socket/socket/getnameinfo_spec.rb
-index 1e58205f25..c7aa0b05c1 100644
+index fbbbcb53c5..90dba1c5c5 100644
 --- a/spec/ruby/library/socket/socket/getnameinfo_spec.rb
 +++ b/spec/ruby/library/socket/socket/getnameinfo_spec.rb
 @@ -96,7 +96,7 @@ def should_be_valid_dns_name(name)
@@ -13,13 +13,13 @@ index 1e58205f25..c7aa0b05c1 100644
        before do
          @addr = [family_name, 21, @hostname]
        end
-@@ -107,10 +107,14 @@ def should_be_valid_dns_name(name)
+@@ -121,10 +121,14 @@ def should_be_valid_dns_name(name)
  
        describe 'without custom flags' do
          it 'returns an Array containing the hostname and service name' do
 -          array = Socket.getnameinfo(@addr)
 -          array.should be_an_instance_of(Array)
--          array[0].should include(@hostname)
+-          array[0].should == @hostname
 -          array[1].should == 'ftp'
 +          begin
 +            array = Socket.getnameinfo(@addr)
@@ -30,5 +30,5 @@ index 1e58205f25..c7aa0b05c1 100644
 +            e.message.should =~ /sockaddr resolved to multiple nodename/
 +          end
          end
-       end
  
+         it 'uses the 3rd value as the hostname if the 4th is not present' do

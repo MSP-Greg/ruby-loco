@@ -1,11 +1,11 @@
 Patch by MSP-Greg
-Skip Appveyor failure
+Skip Appveyor timeout failure
 diff --git a/test/resolv/test_dns.rb b/test/resolv/test_dns.rb
-index d75a431bcc..8bbf08cc17 100644
+index 669d86bd83..1a3b06cf8a 100644
 --- a/test/resolv/test_dns.rb
 +++ b/test/resolv/test_dns.rb
 @@ -162,10 +162,14 @@ def test_no_server
-     # A rase condition here.
+     # A race condition here.
      # Another program may use the port.
      # But no way to prevent it.
 -    Timeout.timeout(5) do
