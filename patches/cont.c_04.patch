@@ -1,0 +1,22 @@
+From eaf86e336a6078aeaf31e650c9580a09ce080aaf Mon Sep 17 00:00:00 2001
+From: Samuel Williams <samuel.williams@oriontransfer.co.nz>
+Date: Wed, 21 Nov 2018 13:53:21 +1300
+Subject: [PATCH] Fix free -> VirtualFree.
+
+---
+ cont.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cont.c b/cont.c
+index 9c1ed32506b0..3623cf4ef4ef 100644
+--- a/cont.c
++++ b/cont.c
+@@ -1734,7 +1734,7 @@ fiber_store(rb_fiber_t *next_fib, rb_thread_t *th)
+ 	else {
+ 	    if (terminated_machine_stack.ptr != fib->cont.machine.stack) {
+ #ifdef _WIN32
+-                free((void*)terminated_machine_stack.ptr);
++                VirtualFree(terminated_machine_stack.ptr, 0, MEM_RELEASE);
+ #else
+                 munmap((void*)terminated_machine_stack.ptr, terminated_machine_stack.size * sizeof(VALUE));
+ #endif
