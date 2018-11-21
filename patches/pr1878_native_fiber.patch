@@ -7,40 +7,6 @@ Subject: [PATCH 1/9] Enable msys2 to check build status.
  configure.ac | 13 ++++++-------
  1 file changed, 6 insertions(+), 7 deletions(-)
 
-diff --git a/configure.ac b/configure.ac
-index 5a221f6bf7d5..dcbaf0d623dc 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -2345,13 +2345,12 @@ AS_CASE(["$target_cpu-$target_os"],
-     AC_DEFINE_UNQUOTED(FIBER_USE_COROUTINE, ["$COROUTINE_H"])
-     AC_LIBOBJ([coroutine/x86/Context])
-   ],
--  # TODO: Enable this after AppVeyor msys2 build succeeds
--  # [x64-mingw32], [
--  #   AC_MSG_RESULT(win64)
--  #   COROUTINE_H=coroutine/win64/Context.h
--  #   AC_DEFINE_UNQUOTED(FIBER_USE_COROUTINE, ["$COROUTINE_H"])
--  #   AC_LIBOBJ([coroutine/win64/Context])
--  # ],
-+  [x64-mingw32], [
-+    AC_MSG_RESULT(win64)
-+    COROUTINE_H=coroutine/win64/Context.h
-+    AC_DEFINE_UNQUOTED(FIBER_USE_COROUTINE, ["$COROUTINE_H"])
-+    AC_LIBOBJ([coroutine/win64/Context])
-+  ],
-   [*], [
-     AC_MSG_RESULT(no)
-   ]
-
-From 31a3982c6a6f20e6520b601ef0f074bfcbb3053d Mon Sep 17 00:00:00 2001
-From: Samuel Williams <samuel.williams@oriontransfer.co.nz>
-Date: Wed, 21 Nov 2018 12:59:27 +1300
-Subject: [PATCH 2/9] Use VirtualAlloc for windows stack allocation.
-
----
- cont.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
 diff --git a/cont.c b/cont.c
 index 56128a843a71..ad4c99a65090 100644
 --- a/cont.c
