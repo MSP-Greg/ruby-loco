@@ -10,9 +10,6 @@ init:
       Remove-Item env:SSL_CERT_DIR  -ErrorAction SilentlyContinue
       Remove-Item env:SSL_CERT_FILE -ErrorAction SilentlyContinue
       Remove-Item env:OPENSSL_CONF  -ErrorAction SilentlyContinue
-      Remove-Item env:OPENSSL_DIR   -ErrorAction SilentlyContinue
-      ren C:\Windows\System32\libssl-1_1-x64.dll    libssl-1_1-x64.dll_
-      ren C:\Windows\System32\libcrypto-1_1-x64.dll libcrypto-1_1-x64.dll_
 
 install:
   # Update MSYS2 / MinGW and install OpenSSL
@@ -30,8 +27,3 @@ build_script:
 test_script:
   # tests, generates logs and artifacts
   - ps: ./2_0_test.ps1
-
-on_finish:
-  - ps: |
-      ren C:\Windows\System32\libssl-1_1-x64.dll_    libssl-1_1-x64.dll
-      ren C:\Windows\System32\libcrypto-1_1-x64.dll_ libcrypto-1_1-x64.dll

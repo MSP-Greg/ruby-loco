@@ -122,7 +122,7 @@ function Finish {
   # saves artifacts and adds messages to build
   ruby 2_1_test_script.rb $bits $install
   $exit = ($LastExitCode -and $LastExitCode -ne 0)
-
+  ruby.exe -v -ropenssl -e "puts 'Build    ' + OpenSSL::OPENSSL_VERSION, 'Runtime  ' + OpenSSL::OPENSSL_LIBRARY_VERSION"
   if ($exit) { exit 1 }
 }
 
