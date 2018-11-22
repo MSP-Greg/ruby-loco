@@ -1,0 +1,62 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <e@80x24.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on dcvr.yhbt.net
+X-Spam-Level: 
+X-Spam-ASN: AS63949 64.71.152.0/24
+X-Spam-Status: No, score=-2.2 required=3.0 tests=BAYES_00,RCVD_IN_DNSWL_NONE,
+	RDNS_NONE,SPF_HELO_PASS,SPF_PASS shortcircuit=no autolearn=no
+	autolearn_force=no version=3.4.2
+Received: from 80x24.org (unknown [64.71.152.64])
+	by dcvr.yhbt.net (Postfix) with ESMTP id 75C041F87F
+	for <spew@80x24.org>; Thu, 22 Nov 2018 20:26:28 +0000 (UTC)
+From: Eric Wong <e@80x24.org>
+To: spew@80x24.org
+Subject: [PATCH] ext/socket/init.c (wait_connectable): check socket exceptions
+Date: Thu, 22 Nov 2018 20:26:28 +0000
+Message-Id: <20181122202628.2468-1-e@80x24.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+List-Id: <spew.80x24.org>
+Archived-At: <https://80x24.org/spew/20181122202628.2468-1-e@80x24.org/>
+List-Archive: <https://80x24.org/spew/>
+List-Post: <mailto:spew@80x24.org>
+
+Based on reading <http://itamarst.org/writings/win32sockets.html>,
+using the socket exception list for select() may be the correct
+way to detect connect() success/failure on Win32.
+---
+ ext/socket/init.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/ext/socket/init.c b/ext/socket/init.c
+index 9742dddec2..cbf855928f 100644
+--- a/ext/socket/init.c
++++ b/ext/socket/init.c
+@@ -511,7 +511,7 @@ rsock_socket(int domain, int type, int proto)
+ static int
+ wait_connectable(int fd)
+ {
+-    int sockerr, revents;
++    int sockerr, revents, events;
+     socklen_t sockerrlen;
+ 
+     sockerrlen = (socklen_t)sizeof(sockerr);
+@@ -544,9 +544,13 @@ wait_connectable(int fd)
+      * So it's enough to wait only RB_WAITFD_OUT and check the pending error
+      * by getsockopt().
+      *
++     * RB_WAITFD_PRI may be needed for win32 (and harmless otherwise):
++     * http://itamarst.org/writings/win32sockets.html
++     *
+      * Note: rb_wait_for_single_fd already retries on EINTR/ERESTART
+      */
+-    revents = rb_wait_for_single_fd(fd, RB_WAITFD_IN|RB_WAITFD_OUT, NULL);
++    events = RB_WAITFD_IN|RB_WAITFD_OUT|RB_WAITFD_PRI;
++    revents = rb_wait_for_single_fd(fd, events, NULL);
+ 
+     if (revents < 0)
+         return -1;
+-- 
+EW
+
+
