@@ -1,19 +1,15 @@
-Patch by MSP-Greg
-fix r65926 for windows
 diff --git a/test/ruby/test_dir.rb b/test/ruby/test_dir.rb
-index fd8d455a0c..4c132b4e19 100644
+index e3dcd7fef4..e248c818b6 100644
 --- a/test/ruby/test_dir.rb
 +++ b/test/ruby/test_dir.rb
-@@ -374,7 +374,11 @@ def test_home
-       assert_equal(@nodir, Dir.home)
+@@ -377,8 +377,9 @@ def test_home
        assert_equal(@nodir, Dir.home(""))
-       if user = ENV["USER"]
+     end
+     if user = ENV["USER"]
++      tilde = windows? ? "~" : "~#{user}"
+       assert_nothing_raised(ArgumentError) do
 -        assert_equal(File.expand_path("~#{user}"), Dir.home(user))
-+        if windows?
-+          assert_equal(File.expand_path("~"), Dir.home(user))
-+        else
-+          assert_equal(File.expand_path("~#{user}"), Dir.home(user))
-+        end
++        assert_equal(File.expand_path(tilde), Dir.home(user))
        end
-     }
+     end
      %W[no:such:user \u{7559 5b88}:\u{756a}].each do |user|
