@@ -1,0 +1,84 @@
+From 3835e9191fa010e80b70afbbd2667f873e31c786 Mon Sep 17 00:00:00 2001
+From: Samuel Williams <samuel.williams@oriontransfer.co.nz>
+Date: Wed, 21 Nov 2018 09:52:08 +1300
+Subject: [PATCH 1/2] Enable msys2 to check build status.
+
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index b5a2ef86b295..01e2e0860a55 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -963,7 +963,7 @@ main()
+ 		AS_IF([test "$target_cpu" = x64], [
+ 		    ac_cv_func___builtin_setjmp=no
+ 		    ac_cv_func_round=no
+-		    rb_cv_fiber_coroutine=no # TODO: Enable this after AppVeyor msys2 build succeeds
++		    rb_cv_fiber_coroutine=yes
+ 		])
+ 		ac_cv_func_tgamma=no
+ 		rb_cv_negative_time_t=yes
+
+From b5813f539849f9d69b33b49b2ff0436980609c6b Mon Sep 17 00:00:00 2001
+From: Samuel Williams <samuel.williams@oriontransfer.co.nz>
+Date: Sat, 24 Nov 2018 00:30:45 +1300
+Subject: [PATCH 2/2] Fix argument order.
+
+---
+ coroutine/win64/Context.s | 34 +++++++++++++++++-----------------
+ 1 file changed, 17 insertions(+), 17 deletions(-)
+
+diff --git a/coroutine/win64/Context.s b/coroutine/win64/Context.s
+index 04d97d1aaff6..4b16e0ce8c03 100644
+--- a/coroutine/win64/Context.s
++++ b/coroutine/win64/Context.s
+@@ -23,23 +23,6 @@ coroutine_transfer:
+ 	pushq %r14
+ 	pushq %r15
+ 
+-	movaps -24(%rsp), %xmm6
+-	movaps -40(%rsp), %xmm7
+-	movaps -56(%rsp), %xmm8
+-	movaps -72(%rsp), %xmm9
+-	movaps -88(%rsp), %xmm10
+-	movaps -104(%rsp), %xmm11
+-	movaps -120(%rsp), %xmm12
+-	movaps -136(%rsp), %xmm13
+-	movaps -152(%rsp), %xmm14
+-	movaps -168(%rsp), %xmm15
+-
+-	# Save caller stack pointer:
+-	mov %rsp, (%rcx)
+-
+-	# Restore callee stack pointer:
+-	mov (%rdx), %rsp
+-
+ 	movaps %xmm15, -168(%rsp)
+ 	movaps %xmm14, -152(%rsp)
+ 	movaps %xmm13, -136(%rsp)
+@@ -51,6 +34,23 @@ coroutine_transfer:
+ 	movaps %xmm7, -40(%rsp)
+ 	movaps %xmm6, -24(%rsp)
+ 
++	# Save caller stack pointer:
++	mov %rsp, (%rcx)
++
++	# Restore callee stack pointer:
++	mov (%rdx), %rsp
++
++	movaps -24(%rsp), %xmm6
++	movaps -40(%rsp), %xmm7
++	movaps -56(%rsp), %xmm8
++	movaps -72(%rsp), %xmm9
++	movaps -88(%rsp), %xmm10
++	movaps -104(%rsp), %xmm11
++	movaps -120(%rsp), %xmm12
++	movaps -136(%rsp), %xmm13
++	movaps -152(%rsp), %xmm14
++	movaps -168(%rsp), %xmm15
++
+ 	# Restore callee stack:
+ 	popq %r15
+ 	popq %r14
