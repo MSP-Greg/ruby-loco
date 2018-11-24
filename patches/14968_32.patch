@@ -1,0 +1,73 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <e@80x24.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on dcvr.yhbt.net
+X-Spam-Level: 
+X-Spam-ASN:  
+X-Spam-Status: No, score=-4.0 required=3.0 tests=ALL_TRUSTED,AWL,BAYES_00
+	shortcircuit=no autolearn=ham autolearn_force=no version=3.4.2
+Received: from localhost (dcvr.yhbt.net [127.0.0.1])
+	by dcvr.yhbt.net (Postfix) with ESMTP id B9D691F97E
+	for <spew@80x24.org>; Sat, 24 Nov 2018 08:37:00 +0000 (UTC)
+From: Eric Wong <e@80x24.org>
+To: spew@80x24.org
+Subject: [PATCH] io.c: disable nonblocking-by-default on win32
+Date: Sat, 24 Nov 2018 08:37:00 +0000
+Message-Id: <20181124083700.25685-1-e@80x24.org>
+List-Id: <spew.80x24.org>
+Archived-At: <https://80x24.org/spew/20181124083700.25685-1-e@80x24.org/>
+List-Archive: <https://80x24.org/spew/>
+List-Post: <mailto:spew@80x24.org>
+
+Lets admit Windows will always be too different from POSIX-like
+platforms and non-blocking may never work as well or consistently.
+
+[ruby-core:89973] [ruby-core:89976] [ruby-core:89977] [Bug #14968]
+---
+ io.c | 16 +++++++++++++---
+ 1 file changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/io.c b/io.c
+index da3fcfc5667..4a3f1524096 100644
+--- a/io.c
++++ b/io.c
+@@ -135,6 +135,14 @@ off_t __syscall(quad_t number, ...);
+ #define rename(f, t)	rb_w32_urename((f), (t))
+ #endif
+ 
++#if defined(_WIN32)
++#  define RUBY_PIPE_NONBLOCK_DEFAULT    (0)
++#elif defined(O_NONBLOCK)
++#  define RUBY_PIPE_NONBLOCK_DEFAULT    (O_NONBLOCK)
++#else /* any platforms where O_NONBLOCK does not exist? */
++#  define RUBY_PIPE_NONBLOCK_DEFAULT    (0)
++#endif
++
+ VALUE rb_cIO;
+ VALUE rb_eEOFError;
+ VALUE rb_eIOError;
+@@ -345,7 +353,7 @@ rb_cloexec_pipe(int fildes[2])
+ #if defined(HAVE_PIPE2)
+     static int try_pipe2 = 1;
+     if (try_pipe2) {
+-        ret = pipe2(fildes, O_CLOEXEC | O_NONBLOCK);
++        ret = pipe2(fildes, O_CLOEXEC | RUBY_PIPE_NONBLOCK_DEFAULT);
+         if (ret != -1)
+             return ret;
+         /* pipe2 is available since Linux 2.6.27, glibc 2.9. */
+@@ -371,8 +379,10 @@ rb_cloexec_pipe(int fildes[2])
+ #endif
+     rb_maygvl_fd_fix_cloexec(fildes[0]);
+     rb_maygvl_fd_fix_cloexec(fildes[1]);
+-    rb_fd_set_nonblock(fildes[0]);
+-    rb_fd_set_nonblock(fildes[1]);
++    if (RUBY_PIPE_NONBLOCK_DEFAULT) {
++        rb_fd_set_nonblock(fildes[0]);
++        rb_fd_set_nonblock(fildes[1]);
++    }
+     return ret;
+ }
+ 
+-- 
+EW
+
+
