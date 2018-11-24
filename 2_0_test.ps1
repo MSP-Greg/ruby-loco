@@ -136,7 +136,7 @@ function BasicTest {
     -e_args "-rdevkit --disable-gems ../ruby/basictest/runner.rb" `
     -StdOut "test_basic.log" `
     -StdErr "test_basic_err.log" `
-    -Title  "test-basic (basictest)" `
+    -Title  "test-basic     (basictest)" `
     -Dir    $d_build `
     -TimeLimit 20
 }
@@ -150,7 +150,7 @@ function BootStrapTest {
     -e_args "--disable=gems runner.rb --ruby=`"$ruby_exe --disable=gems`" -v" `
     -StdOut "test_bootstrap.log" `
     -StdErr "test_bootstrap_err.log" `
-    -Title  "btest (bootstraptest)" `
+    -Title  "btest      (bootstraptest)" `
     -Dir    "$d_ruby/bootstraptest" `
     -TimeLimit 100
 }
