@@ -1,0 +1,61 @@
+diff --git a/appveyor.yml b/appveyor.yml
+index 542699ce0d..1f66ed486f 100644
+--- a/appveyor.yml
++++ b/appveyor.yml
+@@ -90,6 +90,11 @@ for:
+     - nmake install-nodoc
+     - \usr\bin\ruby -v -e "p :locale => Encoding.find('locale'), :filesystem => Encoding.find('filesystem')"
+   test_script:
++    - \usr\bin\bundle --version
++    - \usr\bin\gem    --version
++    - \usr\bin\irb    --version
++    - \usr\bin\rake   --version
++    - \usr\bin\rdoc   --version
+     - set /a JOBS=%NUMBER_OF_PROCESSORS%
+     - nmake -l "TESTOPTS=-v -q" btest
+     - nmake -l "TESTOPTS=-v -q" test-basic
+@@ -135,6 +140,13 @@ for:
+     - mingw32-make -j%JOBS%
+     - mingw32-make DESTDIR=../install install-nodoc
+   test_script:
++    - cd ..\install
++    - bin\bundle --version
++    - bin\gem    --version
++    - bin\irb    --version
++    - bin\rake   --version
++    - bin\rdoc   --version
++    - cd ..\build
+     - mingw32-make test
+     - mingw32-make test-all TESTOPTS="--retry --job-status=normal --show-skip --subprocess-timeout-scale=1.5 --excludes=../ruby/test/excludes/_appveyor -j %JOBS% --exclude win32ole --exclude test_open-uri"
+     # separately execute tests without -j which may crash worker with -j.
+diff --git a/lib/bundler.gemspec b/lib/bundler.gemspec
+index 2b2bb412d5..2847c50697 100644
+--- a/lib/bundler.gemspec
++++ b/lib/bundler.gemspec
+@@ -59,6 +59,6 @@
+   s.files += %w[bundler.gemspec]
+ 
+   s.bindir        = "exe"
+-  s.executables   = %w[bundle bundler]
++  s.executables   = %w[bundle bundle_ruby bundler]
+   s.require_paths = ["lib"]
+ end
+diff --git a/tool/rbinstall.rb b/tool/rbinstall.rb
+index 13a897cdc5..6c99b09c52 100755
+--- a/tool/rbinstall.rb
++++ b/tool/rbinstall.rb
+@@ -780,10 +780,14 @@ def install_default_gem(dir, srcdir)
+       bin_dir = File.join(gem_dir, 'gems', full_name, gemspec.bindir)
+       makedirs(bin_dir)
+ 
++      orig_cmdtype = $cmdtype
++      $cmdtype = nil if RUBY_PLATFORM =~ /mswin|mingw|bccwin/
++
+       gemspec.executables.map {|exec|
+         $script_installer.install(File.join(srcdir, 'libexec', exec),
+                                   File.join(bin_dir, exec))
+       }
++      $cmdtype = orig_cmdtype
+     end
+   end
+ end
