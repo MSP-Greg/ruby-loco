@@ -39,7 +39,7 @@ function Print-Time-Log {
 }
 
 #—————————————————————————————————————————————————————————————————————— Time-Log
-function Time-Log($msg) { 
+function Time-Log($msg) {
   if ($script:time_old) {
     $time_new = Get-Date
     $diff = New-TimeSpan -Start $time_old -End $time_new
@@ -56,10 +56,14 @@ function Basic-Info {
   $env:path = "$d_install/bin;$base_path"
   Write-Host $($dash * 80) -ForegroundColor $fc
   ruby -v
-  bundle version
   ruby -ropenssl -e "puts OpenSSL::OPENSSL_LIBRARY_VERSION"
-  Write-Host "gem --version" $(gem --version)
-  rake -V
+  
+  Write-Host "bundle version:" $(bundle version)
+  Write-Host "gem  --version:" $(gem --version)
+  Write-Host "irb  --version:" $(gem --version)
+  Write-Host "rake --version:" $(rdoc --version)
+  Write-Host "rdoc --version:" $(rdoc --version)
+  
   Write-Host "$($dash * 80)`n" -ForegroundColor $fc
 }
 
