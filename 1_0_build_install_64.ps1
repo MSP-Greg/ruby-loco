@@ -60,7 +60,7 @@ function Basic-Info {
   
   Write-Host "bundle version:" $(bundle version)
   Write-Host "gem  --version:" $(gem --version)
-  Write-Host "irb  --version:" $(gem --version)
+  Write-Host "irb  --version:" $(irb --version)
   Write-Host "rake --version:" $(rdoc --version)
   Write-Host "rdoc --version:" $(rdoc --version)
   
