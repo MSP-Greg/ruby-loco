@@ -1,8 +1,8 @@
 diff --git a/spec/ruby/core/main/using_spec.rb b/spec/ruby/core/main/using_spec.rb
-index 1fb812f5cc..34b507b520 100644
+index 1fb812f5cc..0902ebe436 100644
 --- a/spec/ruby/core/main/using_spec.rb
 +++ b/spec/ruby/core/main/using_spec.rb
-@@ -1,15 +1,15 @@
+@@ -1,15 +1,27 @@
  require_relative '../../spec_helper'
  require_relative 'fixtures/classes'
  
@@ -10,15 +10,23 @@ index 1fb812f5cc..34b507b520 100644
 +
  describe "main.using" do
    it "requires one Module argument" do
--    lambda do
++
+     lambda do
 -      eval('using', TOPLEVEL_BINDING)
--    end.should raise_error(ArgumentError)
-+    _, _, stderr, _ = Open3.popen3("ruby -e \"eval('using', TOPLEVEL_BINDING)\"")
-+    stderr.read.should =~ /\(ArgumentError\)/
++      eval('__dir__ 0', TOPLEVEL_BINDING)
+     end.should raise_error(ArgumentError)
++    STDERR.puts "\npassed '__dir__ 0'   is ArgumentError"
  
--    lambda do
+     lambda do
 -      eval('using "foo"', TOPLEVEL_BINDING)
--    end.should raise_error(TypeError)
++      eval('Complex nil', TOPLEVEL_BINDING)
+     end.should raise_error(TypeError)
++    STDERR.puts   "passed 'Complex nil' is TypeError"
++
++    _, _, stderr, th = Open3.popen3("ruby -e \"eval('using', TOPLEVEL_BINDING)\"")
++    stderr.read.should =~ /\(ArgumentError\)/
++    STDERR.puts "'using'  th.value #{th.value}"
++
 +    _, _, stderr, _ = Open3.popen3("ruby -e \"eval('using :foo', TOPLEVEL_BINDING)\"")
 +    stderr.read.should =~ /\(TypeError\)/
    end
