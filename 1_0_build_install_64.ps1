@@ -261,6 +261,8 @@ Time-Log "$make -j$jobs update-unicode, $make -j$jobs update-gems"
 Remove-Read-Only $d_ruby
 Remove-Read-Only $d_build
 
+& "$d_msys2/usr/bin/patch.exe" -p1 -N --no-backup-if-mismatch -i ../config.h.patch
+
 Run "$make -j$jobs 2>&1" $true
 Time-Log "$make -j$jobs"
 

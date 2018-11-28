@@ -1,34 +1,28 @@
 diff --git a/spec/ruby/core/main/using_spec.rb b/spec/ruby/core/main/using_spec.rb
-index 1fb812f5cc..0902ebe436 100644
+index b8e6eebc1b..1fb812f5cc 100644
 --- a/spec/ruby/core/main/using_spec.rb
 +++ b/spec/ruby/core/main/using_spec.rb
-@@ -1,15 +1,27 @@
- require_relative '../../spec_helper'
+@@ -2,16 +2,14 @@
  require_relative 'fixtures/classes'
  
-+require 'open3'
-+
  describe "main.using" do
-   it "requires one Module argument" do
-+
-     lambda do
--      eval('using', TOPLEVEL_BINDING)
-+      eval('__dir__ 0', TOPLEVEL_BINDING)
-     end.should raise_error(ArgumentError)
-+    STDERR.puts "\npassed '__dir__ 0'   is ArgumentError"
+-  platform_is_not :mingw do # This is broken after TracePoint target [Feature #15289], and ko1 is fixing this
+-    it "requires one Module argument" do
+-      lambda do
+-        eval('using', TOPLEVEL_BINDING)
+-      end.should raise_error(ArgumentError)
++  it "requires one Module argument" do
++    lambda do
++      eval('using', TOPLEVEL_BINDING)
++    end.should raise_error(ArgumentError)
  
-     lambda do
--      eval('using "foo"', TOPLEVEL_BINDING)
-+      eval('Complex nil', TOPLEVEL_BINDING)
-     end.should raise_error(TypeError)
-+    STDERR.puts   "passed 'Complex nil' is TypeError"
-+
-+    _, _, stderr, th = Open3.popen3("ruby -e \"eval('using', TOPLEVEL_BINDING)\"")
-+    stderr.read.should =~ /\(ArgumentError\)/
-+    STDERR.puts "'using'  th.value #{th.value}"
-+
-+    _, _, stderr, _ = Open3.popen3("ruby -e \"eval('using :foo', TOPLEVEL_BINDING)\"")
-+    stderr.read.should =~ /\(TypeError\)/
+-      lambda do
+-        eval('using "foo"', TOPLEVEL_BINDING)
+-      end.should raise_error(TypeError)
+-    end
++    lambda do
++      eval('using "foo"', TOPLEVEL_BINDING)
++    end.should raise_error(TypeError)
    end
  
    it "uses refinements from the given module only in the target file" do
