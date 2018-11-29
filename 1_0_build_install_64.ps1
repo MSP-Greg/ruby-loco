@@ -261,8 +261,6 @@ Time-Log "$make -j$jobs update-unicode, $make -j$jobs update-gems"
 Remove-Read-Only $d_ruby
 Remove-Read-Only $d_build
 
-& "$d_msys2/usr/bin/patch.exe" -p1 -N --no-backup-if-mismatch -i ../config.h.patch
-
 Run "$make -j$jobs 2>&1" $true
 Time-Log "$make -j$jobs"
 
@@ -288,9 +286,9 @@ Print-Time-Log
 Basic-Info
 
 # save extension build files
-Push-Location $d_build/ext
+Push-Location $d_build
 $build_files = "$d_zips/ext_build_files.7z"
-&$7z a $build_files **/Makefile **/*.h **/*.log **/*.mk 1> $null
+&$7z a $build_files .ext/**/*.h ext/**/Makefile ext/**/*.h ext/**/*.log ext/**/*.mk 1> $null
 if ($is_av) { Push-AppveyorArtifact $build_files -DeploymentName "Ext build files" }
 Pop-Location
 
