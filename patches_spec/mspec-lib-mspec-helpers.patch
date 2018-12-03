@@ -1,24 +1,6 @@
 Patch by MSP-Greg
-Use IO.copy_stream for copying files
 On Windows, put temp folders in windows temp folder
-diff --git a/spec/mspec/lib/mspec/helpers/fs.rb b/spec/mspec/lib/mspec/helpers/fs.rb
-index fb2c0f702c..26dd821162 100644
---- a/spec/mspec/lib/mspec/helpers/fs.rb
-+++ b/spec/mspec/lib/mspec/helpers/fs.rb
-@@ -1,12 +1,6 @@
- # Copies a file
- def cp(source, dest)
--  File.open(dest, "wb") do |d|
--    File.open(source, "rb") do |s|
--      while data = s.read(1024)
--        d.write data
--      end
--    end
--  end
-+  IO.copy_stream source, dest
- end
- 
- # Creates each directory in path that does not exist.
+** Use IO.copy_stream for copying files - removed, see r66147
 diff --git a/spec/mspec/lib/mspec/helpers/tmp.rb b/spec/mspec/lib/mspec/helpers/tmp.rb
 index 4e1273dcfe..38a6f7de71 100644
 --- a/spec/mspec/lib/mspec/helpers/tmp.rb
