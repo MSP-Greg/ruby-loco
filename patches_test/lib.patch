@@ -4,7 +4,7 @@ a) turns on verbose
 b) adjusts assertions count so that tests, regardless of manner run, show similar results.
 c) adds assertion total by test to each line of output
 diff --git a/test/lib/minitest/unit.rb b/test/lib/minitest/unit.rb
-index 25fd15d093..411201e4c9 100644
+index 25fd15d093..a49c3b97a2 100644
 --- a/test/lib/minitest/unit.rb
 +++ b/test/lib/minitest/unit.rb
 @@ -3,7 +3,7 @@
@@ -53,7 +53,7 @@ index 25fd15d093..411201e4c9 100644
        suites.map { |suite| _run_suite suite, type }
      end
  
-@@ -942,18 +945,39 @@ def _run_suite suite, type
+@@ -942,18 +945,40 @@ def _run_suite suite, type
  
        leakchecker = LeakChecker.new
  
@@ -92,6 +92,7 @@ index 25fd15d093..411201e4c9 100644
 +            print "[#{@cntr.to_s.rjust(retry_len)}/#{retry_run}] #{inst._assertions.to_s.rjust(6)} #{suite}##{method}#{ttl}#{result}"
 +          else
 +            print "#{inst._assertions.to_s.rjust(6)} #{suite}##{method}#{ttl}#{result}"
++            print @parallel_error if @parallel_error
 +          end
 +          print "\n"
 +        else
@@ -100,7 +101,7 @@ index 25fd15d093..411201e4c9 100644
          $stdout.flush
  
          unless defined?(RubyVM::MJIT) && RubyVM::MJIT.enabled? # compiler process is wrongly considered as leak
-@@ -963,7 +987,7 @@ def _run_suite suite, type
+@@ -963,7 +988,7 @@ def _run_suite suite, type
          inst._assertions
        }
  
@@ -109,7 +110,17 @@ index 25fd15d093..411201e4c9 100644
      end
  
      ##
-@@ -1003,7 +1027,7 @@ def puke klass, meth, e
+@@ -984,6 +1009,9 @@ def _run_suite suite, type
+     # error or failure.
+ 
+     def record suite, method, assertions, time, error
++      @parallel_error = (error && !options[:retry_run]) ?
++        "\n       #{location error}\n       #{error.message.gsub "\n", "\n       "}" :
++        nil
+     end
+ 
+     def location e # :nodoc:
+@@ -1003,7 +1031,7 @@ def puke klass, meth, e
        e = case e
            when MiniTest::Skip then
              @skips += 1
@@ -118,7 +129,7 @@ index 25fd15d093..411201e4c9 100644
              "Skipped:\n#{klass}##{meth} [#{location e}]:\n#{e.message}\n"
            when MiniTest::Assertion then
              @failures += 1
-@@ -1021,6 +1045,7 @@ def initialize # :nodoc:
+@@ -1021,6 +1049,7 @@ def initialize # :nodoc:
        @report = []
        @errors = @failures = @skips = 0
        @verbose = false
@@ -126,7 +137,7 @@ index 25fd15d093..411201e4c9 100644
        @mutex = Thread::Mutex.new
        @info_signal = Signal.list['INFO']
        @repeat_count = nil
-@@ -1055,6 +1080,11 @@ def process_args args = [] # :nodoc:
+@@ -1055,6 +1084,11 @@ def process_args args = [] # :nodoc:
            options[:verbose] = true
          end
  
@@ -138,7 +149,7 @@ index 25fd15d093..411201e4c9 100644
          opts.on '-n', '--name PATTERN', "Filter test names on pattern (e.g. /foo/)" do |a|
            options[:filter] = a
          end
-@@ -1072,6 +1102,8 @@ def process_args args = [] # :nodoc:
+@@ -1072,6 +1106,8 @@ def process_args args = [] # :nodoc:
        srand options[:seed]
  
        self.verbose = options[:verbose]
