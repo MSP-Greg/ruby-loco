@@ -243,6 +243,10 @@ cd $d_repo
 ruby 1_1_pre_build.rb 64
 
 cd $d_ruby
+# set time stamp for reproducible build
+$ts = $(git log -1 --format=%at).Trim()
+if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") { $env:SOURCE_DATE_EPOCH = $ts }
+
 Run "sh -c `"autoreconf -fi`""
 
 cd $d_build
