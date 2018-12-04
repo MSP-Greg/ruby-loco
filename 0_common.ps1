@@ -77,10 +77,6 @@ function Set-Variables {
   $script:dash = "$([char]0x2015)"
   $script:dl   = $($dash * 80)
 
-  # assumes symlink folder exists, some tools may not be happy with a space in
-  # git's path
-  $env:GIT = "$d_repo/git/cmd/git.exe"
-
   $script:UTF8 = $(New-Object System.Text.UTF8Encoding $False)
 }
 

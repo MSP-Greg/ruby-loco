@@ -219,6 +219,10 @@ ren "$d_install/lib/ruby/site_ruby/readline.rb" "readline.rb_"
 
 # PATH is set in each test function
 
+# assumes symlink folder exists, some tests may not be happy with a space in
+# git's path
+$env:GIT = "$d_repo/git/cmd/git.exe"
+
 $m_start = Get-Date
 
 BasicTest
