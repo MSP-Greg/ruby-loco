@@ -1,0 +1,15 @@
+diff --git a/configure.ac b/configure.ac
+index d562b16b6f..b9bcc46b5d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -652,8 +652,8 @@ AS_IF([test "$GCC" = yes], [
+     # suppress annoying -Wstrict-overflow warnings
+     RUBY_TRY_CFLAGS(-fno-strict-overflow, [RUBY_APPEND_OPTION(XCFLAGS, -fno-strict-overflow)])
+ 
+-    test "${debugflags+set}" || {RUBY_TRY_CFLAGS(-ggdb3, [debugflags=-ggdb3])}
+-    test "${debugflags+set}" || {RUBY_TRY_CFLAGS(-ggdb, [debugflags=-ggdb])}
++    # test "${debugflags+set}" || {RUBY_TRY_CFLAGS(-ggdb3, [debugflags=-ggdb3])}
++    # test "${debugflags+set}" || {RUBY_TRY_CFLAGS(-ggdb, [debugflags=-ggdb])}
+     test "${debugflags+set}" || {RUBY_TRY_CFLAGS(-g3, [debugflags=-g3])}
+ ])
+ test $ac_cv_prog_cc_g = yes && : ${debugflags=-g}

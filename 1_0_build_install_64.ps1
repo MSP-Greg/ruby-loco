@@ -225,7 +225,7 @@ function Set-Env {
   $env:CFLAGS   = "-march=$march -mtune=generic -O3 -pipe"
   $env:CXXFLAGS = "-march=$march -mtune=generic -O3 -pipe"
   $env:CPPFLAGS = "-D_FORTIFY_SOURCE=2 -D__USE_MINGW_ANSI_STDIO=1 -DFD_SETSIZE=2048"
-  $env:LDFLAGS  = "-pipe"
+  $env:LDFLAGS  = "-pipe -s"
 }
 
 #——————————————————————————————————————————————————————————————————— start build
@@ -249,7 +249,9 @@ ruby 1_1_pre_build.rb 64
 cd $d_ruby
 # set time stamp for reproducible build
 $ts = $(git log -1 --format=%at).Trim()
-if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") { $env:SOURCE_DATE_EPOCH = $ts }
+if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") {
+  $env:SOURCE_DATE_EPOCH = [String][int]$ts
+}
 
 Run "sh -c `"autoreconf -fi`""
 
@@ -269,6 +271,10 @@ Time-Log "$make -j$jobs update-unicode, $make -j$jobs update-gems"
 Remove-Read-Only $d_ruby
 Remove-Read-Only $d_build
 
+if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") {
+  $env:SOURCE_DATE_EPOCH = [String][int]$ts
+}
+
 Run "$make -j$jobs 2>&1" $true
 Time-Log "$make -j$jobs"
 
@@ -286,9 +292,9 @@ $env:path = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path
 ruby 1_3_post_install.rb $bits $install
 Time-Log "post install processing"
 
-Strip-Build
-Strip-Install
-Time-Log "strip build & install binary files"
+# Strip-Build
+# Strip-Install
+# Time-Log "strip build & install binary files"
 
 Print-Time-Log
 Basic-Info
