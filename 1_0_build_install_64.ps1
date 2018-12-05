@@ -63,7 +63,8 @@ function Basic-Info {
   Write-Host "irb  --version:" $(irb --version)
   Write-Host "rake --version:" $(rake --version)
   Write-Host "rdoc --version:" $(rdoc --version)
-  
+  Write-Host "ridk   version:"
+  ridk version
   Write-Host "$($dash * 80)`n" -ForegroundColor $fc
 }
 
@@ -225,7 +226,7 @@ function Set-Env {
   $env:CFLAGS   = "-march=$march -mtune=generic -O3 -pipe"
   $env:CXXFLAGS = "-march=$march -mtune=generic -O3 -pipe"
   $env:CPPFLAGS = "-D_FORTIFY_SOURCE=2 -D__USE_MINGW_ANSI_STDIO=1 -DFD_SETSIZE=2048"
-  $env:LDFLAGS  = "-pipe -s"
+  $env:LDFLAGS  = "-pipe -s --no-insert-timestamp"
 }
 
 #——————————————————————————————————————————————————————————————————— start build
@@ -274,7 +275,7 @@ Remove-Read-Only $d_build
 if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") {
   $env:SOURCE_DATE_EPOCH = [String][int]$ts
 }
-
+Write-Host "SOURCE_DATE_EPOCH = $env:SOURCE_DATE_EPOCH" -ForegroundColor $fc
 Run "$make -j$jobs 2>&1" $true
 Time-Log "$make -j$jobs"
 
