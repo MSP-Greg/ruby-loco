@@ -132,7 +132,8 @@ function Strip-Build {
   foreach ($dll in $dlls) {
     Set-ItemProperty -Path $dll -Name IsReadOnly -Value $false
     $t = $dll.replace('\', '/')
-    &$strip --strip-unneeded $t
+    # &$strip -Dp --strip-unneeded $t
+    &$strip -Dp --strip-all $t
   }
 
   [string[]]$exes = Get-ChildItem -Path ./*.exe |
@@ -140,7 +141,7 @@ function Strip-Build {
   foreach ($exe in $exes) {
     Set-ItemProperty -Path $exe -Name IsReadOnly -Value $false
     $t = $exe.replace('\', '/')
-    &$strip --strip-all $t
+    &$strip -Dp --strip-all $t
   }
 
   $d_so = "$d_build/.ext/$rarch"
@@ -150,7 +151,8 @@ function Strip-Build {
   foreach ($so in $sos) {
     Set-ItemProperty -Path $so -Name IsReadOnly -Value $false
     $t = $so.replace('\', '/')
-    &$strip --strip-unneeded $t
+    # &$strip -Dp --strip-unneeded $t
+    &$strip -Dp --strip-all $t
   }
   $msg = "Build:   Stripped {0,2} dll files, {1,2} exe files, and {2,3} so files" -f `
     @($dlls.length, $exes.length, $sos.length)
@@ -172,7 +174,8 @@ function Strip-Install {
   foreach ($dll in $dlls) {
     Set-ItemProperty -Path $dll -Name IsReadOnly -Value $false
     $t = $dll.replace('\', '/')
-    &$strip --strip-unneeded $t
+    # &$strip -Dp --strip-unneeded $t
+    &$strip -Dp --strip-all $t
   }
 
   [string[]]$exes = Get-ChildItem -Path ./bin/*.exe |
@@ -180,7 +183,7 @@ function Strip-Install {
   foreach ($exe in $exes) {
     Set-ItemProperty -Path $exe -Name IsReadOnly -Value $false
     $t = $exe.replace('\', '/')
-    &$strip --strip-all $t
+    &$strip -Dp --strip-all $t
   }
 
   $abi = ruby.exe -e "print RbConfig::CONFIG['ruby_version']"
@@ -191,7 +194,8 @@ function Strip-Install {
   foreach ($so in $sos) {
     Set-ItemProperty -Path $so -Name IsReadOnly -Value $false
     $t = $so.replace('\', '/')
-    &$strip --strip-unneeded $t
+    # &$strip -Dp --strip-unneeded $t
+    &$strip -Dp --strip-all $t
   }
 
   $msg = "Install: Stripped {0,2} dll files, {1,2} exe files, and {2,3} so files" -f `
