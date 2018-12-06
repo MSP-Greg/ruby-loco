@@ -1,0 +1,114 @@
+From 416eb1009cd1d35d858bd4396c71a90a7efeec01 Mon Sep 17 00:00:00 2001
+From: Eric Wong <e@80x24.org>
+Date: Thu, 6 Dec 2018 11:31:36 +0000
+Subject: [PATCH] io.c (rb_io_check_char_readable): do not io_fflush buffered
+ sockets
+
+I enabled userspace buffering on sockets to reduce syscall
+overhead while avoiding non-portable TCP_CORK/TCP_NOPUSH.
+This deadlocked for me because I was using independent threads
+for reading and writing simultaneously on the same socket.
+
+I also experimented with making io_fflush optionally
+non-blocking, but that caused stream corruption with the reader
+thread doing some writes.
+
+  https://80x24.org/spew/20181206104008.29153-1-e@80x24.org/raw
+
+Test script (hitting
+  news://news.public-inbox.org/inbox.comp.version-control.git
+  is fine)
+
+require 'socket'
+require 'uri'
+require 'io/nonblock'
+usage = "usage: #$0 news://news.public-inbox.org/inbox.comp.version-control.git"
+uri = ARGV.shift or abort usage
+uri = URI(uri)
+uri.port ||= 119
+group = uri.path.sub(%r{\A/+}, '') # String#delete_prefix requires Ruby 2.5+
+s = Socket.tcp(uri.host, uri.port)
+l = s.gets
+l =~ /\A2\d\d / or abort "bad greeting: #{l}"
+s.nonblock = true
+
+s.puts "GROUP #{group}"
+l = s.gets
+code, _, min, max = l.chomp!.split.map!(&:to_i)
+code == 211 or abort "bad GROUP response: #{l}"
+rdr = Thread.new do
+  nres = 0
+  r = s.dup
+  while l = r.gets
+    l.start_with?('205 ') and break # cmd_quit
+    l.start_with?('224 ') or abort "bad OVER response: #{l}"
+    while l = r.gets
+      if l == ".\r\n"
+        nres += 1
+        break
+      end
+    end
+  end
+  nres
+end
+
+range = min..max
+s.sync = false
+range.each { |i| s.puts "XOVER #{i}" }
+puts "requests=#{range.size} #{Time.now}"
+s.puts "QUIT"
+s.flush
+puts "responses=#{rdr.value} #{Time.now}"
+---
+ io.c | 29 ++++++++++++++++++++++-------
+ 1 file changed, 22 insertions(+), 7 deletions(-)
+
+diff --git a/io.c b/io.c
+index 24dacc5dd8..380162a354 100644
+--- a/io.c
++++ b/io.c
+@@ -836,19 +836,34 @@ flush_before_seek(rb_io_t *fptr)
+ void
+ rb_io_check_char_readable(rb_io_t *fptr)
+ {
++    static const int rw_socket = FMODE_READWRITE|FMODE_DUPLEX;
++
+     rb_io_check_closed(fptr);
+     if (!(fptr->mode & FMODE_READABLE)) {
+ 	rb_raise(rb_eIOError, "not opened for reading");
+     }
+-    if (fptr->wbuf.len) {
+-        if (io_fflush(fptr) < 0)
+-            rb_sys_fail(0);
++
++    /*
++     * Don't flush sockets in the reading thread. We may have a
++     * situation where a user shares one buffered socket between two
++     * threads: one thread dedicated to reading, and another thread
++     * dedicated to writing.  Trying to flush from the reader can
++     * deadlock the writer.
++     */
++    if ((fptr->mode & rw_socket) != rw_socket) {
++        if (fptr->wbuf.len) {
++            if (io_fflush(fptr) < 0)
++                rb_sys_fail(0);
++        }
+     }
+     if (fptr->tied_io_for_writing) {
+-	rb_io_t *wfptr;
+-	GetOpenFile(fptr->tied_io_for_writing, wfptr);
+-        if (io_fflush(wfptr) < 0)
+-            rb_sys_fail(0);
++        rb_io_t *wfptr;
++        GetOpenFile(fptr->tied_io_for_writing, wfptr);
++
++        if ((wfptr->mode & rw_socket) != rw_socket) {
++            if (io_fflush(wfptr) < 0)
++                rb_sys_fail(0);
++        }
+     }
+ }
+ 
+-- 
+EW
+
