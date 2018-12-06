@@ -276,7 +276,7 @@ if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") {
   $env:SOURCE_DATE_EPOCH = [String][int]$ts
 }
 Write-Host "SOURCE_DATE_EPOCH = $env:SOURCE_DATE_EPOCH" -ForegroundColor $fc
-Run "$make -j$jobs 2>&1" $true
+Run "$make SOURCE_DATE_EPOCH=$env:SOURCE_DATE_EPOCH -j$jobs 2>&1" $true
 Time-Log "$make -j$jobs"
 
 # Run "$make -f GNUMakefile DESTDIR=$d_repo_u install-nodoc"
