@@ -133,8 +133,7 @@ function Strip-Build {
   foreach ($dll in $dlls) {
     Set-ItemProperty -Path $dll -Name IsReadOnly -Value $false
     $t = $dll.replace('\', '/')
-    # &$strip -Dp --strip-unneeded $t
-    &$strip -Dp --strip-all $t
+    &$strip -Dp --strip-unneeded $t
   }
 
   [string[]]$exes = Get-ChildItem -Path ./*.exe |
@@ -152,8 +151,7 @@ function Strip-Build {
   foreach ($so in $sos) {
     Set-ItemProperty -Path $so -Name IsReadOnly -Value $false
     $t = $so.replace('\', '/')
-    # &$strip -Dp --strip-unneeded $t
-    &$strip -Dp --strip-all $t
+    &$strip -Dp --strip-unneeded $t
   }
   $msg = "Build:   Stripped {0,2} dll files, {1,2} exe files, and {2,3} so files" -f `
     @($dlls.length, $exes.length, $sos.length)
@@ -175,8 +173,7 @@ function Strip-Install {
   foreach ($dll in $dlls) {
     Set-ItemProperty -Path $dll -Name IsReadOnly -Value $false
     $t = $dll.replace('\', '/')
-    # &$strip -Dp --strip-unneeded $t
-    &$strip -Dp --strip-all $t
+    &$strip -Dp --strip-unneeded $t
   }
 
   [string[]]$exes = Get-ChildItem -Path ./bin/*.exe |
@@ -195,8 +192,7 @@ function Strip-Install {
   foreach ($so in $sos) {
     Set-ItemProperty -Path $so -Name IsReadOnly -Value $false
     $t = $so.replace('\', '/')
-    # &$strip -Dp --strip-unneeded $t
-    &$strip -Dp --strip-all $t
+    &$strip -Dp --strip-unneeded $t
   }
 
   $msg = "Install: Stripped {0,2} dll files, {1,2} exe files, and {2,3} so files" -f `
@@ -226,7 +222,7 @@ function Set-Env {
   $env:CFLAGS   = "-march=$march -mtune=generic -O3 -pipe"
   $env:CXXFLAGS = "-march=$march -mtune=generic -O3 -pipe"
   $env:CPPFLAGS = "-D_FORTIFY_SOURCE=2 -D__USE_MINGW_ANSI_STDIO=1 -DFD_SETSIZE=2048"
-  $env:LDFLAGS  = "-pipe -s"
+  $env:LDFLAGS  = "-pipe"
 }
 
 #——————————————————————————————————————————————————————————————————— start build
@@ -290,9 +286,9 @@ $env:path = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path
 ruby 1_3_post_install.rb $bits $install
 Time-Log "post install processing"
 
-# Strip-Build
-# Strip-Install
-# Time-Log "strip build & install binary files"
+Strip-Build
+Strip-Install
+Time-Log "strip build & install binary files"
 
 Print-Time-Log
 Basic-Info
