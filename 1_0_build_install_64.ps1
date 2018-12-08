@@ -226,7 +226,7 @@ function Set-Env {
   $env:CFLAGS   = "-march=$march -mtune=generic -O3 -pipe"
   $env:CXXFLAGS = "-march=$march -mtune=generic -O3 -pipe"
   $env:CPPFLAGS = "-D_FORTIFY_SOURCE=2 -D__USE_MINGW_ANSI_STDIO=1 -DFD_SETSIZE=2048"
-  $env:LDFLAGS  = "-pipe -s"
+  $env:LDFLAGS  = "-pipe -s -Wl,--no-insert-timestamp"
 }
 
 #——————————————————————————————————————————————————————————————————— start build
@@ -272,11 +272,8 @@ Time-Log "$make -j$jobs update-unicode, $make -j$jobs update-gems"
 Remove-Read-Only $d_ruby
 Remove-Read-Only $d_build
 
-if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") {
-  $env:SOURCE_DATE_EPOCH = [String][int]$ts
-}
 Write-Host "SOURCE_DATE_EPOCH = $env:SOURCE_DATE_EPOCH" -ForegroundColor $fc
-Run "$make SOURCE_DATE_EPOCH=$env:SOURCE_DATE_EPOCH -j$jobs 2>&1" $true
+Run "$make -j$jobs 2>&1" $true
 Time-Log "$make -j$jobs"
 
 # Run "$make -f GNUMakefile DESTDIR=$d_repo_u install-nodoc"
