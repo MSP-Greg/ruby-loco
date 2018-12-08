@@ -226,7 +226,7 @@ function Set-Env {
   $env:CFLAGS   = "-march=$march -mtune=generic -O3 -pipe"
   $env:CXXFLAGS = "-march=$march -mtune=generic -O3 -pipe"
   $env:CPPFLAGS = "-D_FORTIFY_SOURCE=2 -D__USE_MINGW_ANSI_STDIO=1 -DFD_SETSIZE=2048"
-  $env:LDFLAGS  = "-pipe -s -Wl,--no-insert-timestamp"
+  $env:LDFLAGS  = "-pipe -s"
 }
 
 #——————————————————————————————————————————————————————————————————— start build
