@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 # Code by MSP-Greg
 
+require 'fileutils'
+
 module PostInstall3
   if ARGV.length == 0
     ARCH = '64'
@@ -34,14 +36,14 @@ module PostInstall3
   # Files to copy from RI2 repo to ruby package / install dir
   RI2_FILES = [
     ["bin", %w|
-      resources\files\ridk.cmd
-      resources\files\ridk.ps1
-      resources\files\setrbvars.cmd | ],
+      resources/files/ridk.cmd
+      resources/files/ridk.ps1
+      resources/files/setrbvars.cmd | ],
 
-    ["lib\\ruby\\#{ABI}\\rubygems\\defaults", %w|
+    ["lib/ruby/#{ABI}/rubygems/defaults", %w|
       resources\files\operating_system.rb | ],
 
-    ["lib\\ruby\\site_ruby\\#{ABI}", %w|
+    ["lib/ruby/site_ruby/#{ABI}", %w|
       resources\files\irbrc_predefiner.rb | ],
   ]
   BINDIR = RbConfig::CONFIG['bindir']
@@ -77,14 +79,14 @@ class << self
     puts "#{'installing RubyInstaller2:'.ljust(COL_WID)}From #{D_RI2}"
     Dir.chdir(TOPDIR) { |d|
       RI2_FILES.each { |i|
-        unless Dir.exist?(i[0])
-          `mkdir #{i[0]}`
-        end
+        dest_dir = File.join(TOPDIR, i[0])
+        FileUtils.mkdir_p dest_dir unless Dir.exist?(dest_dir)
         i[1].each { |fn|
           fp = "#{D_RI2}/#{fn}"
           if File.exist?(fp)
             puts "#{COL_SPACE}#{fn}"
-            `copy /b /y #{fp.gsub('/', '\\')} #{i[0]}`
+            #`copy /b /y #{fp.gsub('/', '\\')} #{i[0]}`
+            FileUtils.cp fp, dest_dir, preserve: true
           else
             puts "#{COL_SPACE}#{fn} DOES NOT exist!"
           end
@@ -100,12 +102,13 @@ class << self
 
   # Adds files to ruby_installer/runtime dir
   def add_ri2_site_ruby
-    src = File.join(D_RI2, 'lib').gsub('/', '\\') # + "\\"
-    site_ruby = SITE_RUBY.gsub('/', '\\')
+    src = File.join(D_RI2, 'lib') # .gsub('/', '\\') # + "\\"
+    site_ruby = SITE_RUBY # .gsub('/', '\\')
     puts "#{'installing RI2 runtime files:'.ljust(COL_WID)}From #{src}"
     puts "#{COL_SPACE}To   #{site_ruby}"
-    # copy everything over to pkg dir
-    `xcopy /s /q /y #{src} #{site_ruby}`
+    # copy everything over to pkg/install dir
+    #`xcopy /s /q /y #{src} #{site_ruby}`
+    FileUtils.copy_entry src, site_ruby, preserve: true
     # now, loop thru build dir, and move to runtime
     Dir.chdir( File.join(SITE_RUBY, 'ruby_installer') ) { |d|
       Dir.glob('build/*.rb').each { |fn|
@@ -152,7 +155,7 @@ class << self
     require 'rubygems'
     require 'rubygems/gem_runner'
     suffix = %w[--no-document --env-shebang --silent]
-    if /trunk/ !~ RUBY_DESCRIPTION 
+    if /trunk/ !~ RUBY_DESCRIPTION
       Gem::GemRunner.new.run %w[uninstall rubygems-update -x]
       # rdoc won't update without UI confirmation of bin directory file replacement ?
       Gem::GemRunner.new.run(%w[update minitest power_assert rake rdoc test-unit] + suffix)

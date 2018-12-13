@@ -2,6 +2,7 @@
 # code by MSP-Greg
 
 require 'open3'
+require 'fileutils'
 
 module PostInstall2
   if ARGV.length == 0
@@ -57,12 +58,13 @@ class << self
     # copy bin/ dll's
     puts "#{'installing dll files:'.ljust(COL_WID)}FROM #{msys2_dll_bin_path}"
     dll_files.each { |fn|
-      orig = File.join msys2_dll_bin_path, fn
-      if File.exist? orig
+      src = File.join msys2_dll_bin_path, fn
+      if File.exist? src
         puts "#{COL_SPACE}#{fn}"
-        IO.copy_stream orig, File.join(dest, fn)
+        # IO.copy_stream orig, File.join(dest, fn)
+        cp src, File.join(dest, fn)
       else
-        puts "#{COL_SPACE}ERROR: #{File.basename(orig)} does not exist"
+        puts "#{COL_SPACE}ERROR: #{File.basename(fn)} does not exist"
       end
     }
     dll_dirs = lib_files.map{ | fn| File.dirname(fn) }.uniq
@@ -111,10 +113,11 @@ EOT
   end
 
   def add_rb_readline
-    src = File.join D_RL, "lib"
+    src = File.join(D_RL, "lib")
     pkg_dest = File.join D_INSTALL, 'lib', 'ruby', 'site_ruby'
-    Dir.mkdir pkg_dest unless Dir.exist? pkg_dest
-    `xcopy /s /q #{src.gsub('/', '\\')} #{pkg_dest.gsub('/', '\\')}`
+    Dir.mkdir_p pkg_dest unless Dir.exist? pkg_dest
+    #`xcopy /s /q #{src.gsub('/', '\\')} #{pkg_dest.gsub('/', '\\')}`
+    FileUtils.copy_entry src, pkg_dest, preserve: true
   end
 
   def copy_ssl_files
@@ -125,25 +128,38 @@ EOT
       File.binwrite("resources/ssl/cacert.pem", ca_file.content)
       Dir.mkdir "#{D_INSTALL}/ssl"
       Dir.mkdir "#{D_INSTALL}/ssl/certs"
-      IO.copy_stream "./resources/ssl/cacert.pem", "#{D_INSTALL}/ssl/cert.pem"
+      #IO.copy_stream "./resources/ssl/cacert.pem", "#{D_INSTALL}/ssl/cert.pem"
+      cp "./resources/ssl/cacert.pem", "#{D_INSTALL}/ssl/cert.pem"
       puts "#{'installing ssl files:'.ljust(COL_WID)}cert.pem"
 
       src = File.join D_MSYS2, "mingw#{ARCH}", "ssl", "openssl.cnf"
       if File.exist?(src)
-        IO.copy_stream src, "#{D_INSTALL}/ssl/openssl.cnf"
+        #IO.copy_stream src, "#{D_INSTALL}/ssl/openssl.cnf"
+        cp src, "#{D_INSTALL}/ssl/openssl.cnf"
         puts "#{COL_SPACE}openssl.cnf"
       end
 
-      IO.copy_stream "./resources/ssl/README-SSL.md", "#{D_INSTALL}/ssl/README-SSL.md"
+      #IO.copy_stream "./resources/ssl/README-SSL.md", "#{D_INSTALL}/ssl/README-SSL.md"
+      cp "./resources/ssl/README-SSL.md", "#{D_INSTALL}/ssl/README-SSL.md"
       puts "#{COL_SPACE}README-SSL.md"
-      IO.copy_stream "./resources/ssl/c_rehash.rb", "#{D_INSTALL}/ssl/c_rehash.rb"
+      #IO.copy_stream "./resources/ssl/c_rehash.rb", "#{D_INSTALL}/ssl/c_rehash.rb"
+      cp "./resources/ssl/c_rehash.rb", "#{D_INSTALL}/ssl/c_rehash.rb"
       puts "#{COL_SPACE}certs\\c_rehash.rb"
     }
   end
 
+  def cp(src, dest)
+    unless Dir.exist? (dest_dir = File.dirname dest)
+      FileUtils.mkdir_p dest_dir
+    end
+    FileUtils.copy_file(src, dest, preserve: true)    
+  end
+  
   def add_licenses
-    IO.copy_stream("#{D_RUBY}/LEGAL"     , "#{D_INSTALL}/LEGAL Ruby")
-    IO.copy_stream("#{D_RI2}/LICENSE.txt", "#{D_INSTALL}/LICENSE Ruby Installer.txt")
+    #IO.copy_stream("#{D_RUBY}/LEGAL"     , "#{D_INSTALL}/LEGAL Ruby")
+    #IO.copy_stream("#{D_RI2}/LICENSE.txt", "#{D_INSTALL}/LICENSE Ruby Installer.txt")
+    cp "#{D_RUBY}/LEGAL"     , "#{D_INSTALL}/LEGAL Ruby"
+    cp "#{D_RI2}/LICENSE.txt", "#{D_INSTALL}/LICENSE Ruby Installer.txt"
   end
 
   # Creates manifest xml file
