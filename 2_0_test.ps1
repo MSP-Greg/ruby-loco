@@ -213,6 +213,8 @@ $ruby_exe  = "$d_install/bin/ruby.exe"
 $abi       = &$ruby_exe -e "print RbConfig::CONFIG['ruby_version']"
 $script:time_info = ''
 
+&$d_install/bin/gem install `"timezone:>=1.3.2`" `"tzinfo:>=1.2.5`" --no-document
+
 #————————————————————————————————————————————————————————————————— start testing
 # test using readline.so, not rb-readline
 ren "$d_install/lib/ruby/site_ruby/readline.rb" "readline.rb_"
