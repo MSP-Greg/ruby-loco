@@ -170,6 +170,8 @@ function Test-All {
 
   $env:path = "$d_install/bin;$d_repo/git/cmd;$base_path"
   $env:RUBY_FORCE_TEST_JIT = '1'
+  # for rubygems/test_bundled_ca.rb
+  $env:TEST_SSL = '1'
 
   $args = "--disable=gems -rdevkit runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `
     " -a --show-skip --retry --job-status=normal --subprocess-timeout-scale=1.5"
