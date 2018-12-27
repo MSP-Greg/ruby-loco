@@ -28,3 +28,8 @@ build_script:
 test_script:
   # tests, generates logs and artifacts
   - ps: ./2_0_test.ps1
+
+
+cache:
+  # 2018-12-25
+  - C:\projects\ruby-loco\ruby\.downloaded-cache -> appveyor.yml
