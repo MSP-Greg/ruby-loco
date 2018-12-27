@@ -31,5 +31,5 @@ test_script:
 
 
 cache:
-  # 2018-12-25
-  - C:\projects\ruby-loco\ruby\.downloaded-cache -> appveyor.yml
+  # 2018-12-27
+  - C:\projects\ruby-loco\.downloaded-cache -> appveyor.yml

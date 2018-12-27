@@ -57,7 +57,7 @@ function Basic-Info {
   Write-Host $($dash * 80) -ForegroundColor $fc
   ruby -v
   ruby -ropenssl -e "puts OpenSSL::OPENSSL_LIBRARY_VERSION"
-  
+
   Write-Host "bundle version:" $(bundle version)
   Write-Host "gem  --version:" $(gem --version)
   Write-Host "irb  --version:" $(irb --version)
@@ -107,6 +107,17 @@ function Create-Folders {
   # create git symlink, which RubyGems seems to want
   if (!(Test-Path -Path $d_repo/git -PathType Container )) {
         New-Item  -Path $d_repo/git -ItemType Junction -Value $d_git 1> $null
+  }
+
+  # Create download cache
+  $dlc = ".downloaded-cache"
+  if (!(Test-Path -Path $d_repo/$dlc -PathType Container )) {
+         New-Item -Path $d_repo/$dlc -ItemType Directory 1> $null
+  }
+
+  # create download cache symlink
+  if (!(Test-Path -Path $d_repo/ruby/$dlc -PathType Container )) {
+        New-Item  -Path $d_repo/ruby/$dlc -ItemType Junction -Value $d_repo/$dlc 1> $null
   }
 
   New-Item -Path $d_build   -ItemType Directory 1> $null
