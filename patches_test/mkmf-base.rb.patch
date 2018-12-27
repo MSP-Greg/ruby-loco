@@ -1,21 +1,34 @@
 Patch by MSP-Greg
 allows running tests from standard ruby install
 diff --git a/test/mkmf/base.rb b/test/mkmf/base.rb
-index 80dec1421a..5c787b1f8e 100644
+index 80dec1421a..b4b5555f4e 100644
 --- a/test/mkmf/base.rb
 +++ b/test/mkmf/base.rb
-@@ -1,13 +1,5 @@
+@@ -1,14 +1,20 @@
  # frozen_string_literal: false
 -$extmk = true
--require 'rbconfig'
+ require 'rbconfig'
 -RbConfig.fire_update!("top_srcdir", File.expand_path("../..", __dir__))
 -File.foreach(RbConfig::CONFIG["topdir"]+"/Makefile") do |line|
 -  if /^CC_WRAPPER\s*=\s*/ =~ line
 -    RbConfig.fire_update!('CC_WRAPPER', $'.strip)
 -    break
--  end
--end
-+$extmk = false
- 
++
++# below is test for whether running from make or not
++if RbConfig::TOPDIR == File.dirname(RbConfig.method(:fire_update!).source_location[0])
++  $extmk = true
++  RbConfig.fire_update!("top_srcdir", File.expand_path("../..", __dir__))
++  File.foreach(RbConfig::CONFIG["topdir"]+"/Makefile") do |line|
++    if /^CC_WRAPPER\s*=\s*/ =~ line
++      RbConfig.fire_update!('CC_WRAPPER', $'.strip)
++      break
++    end
+   end
++else
++  $extmk = false
+ end
+-
++  
  require 'test/unit'
  require 'mkmf'
+ require 'tmpdir'
