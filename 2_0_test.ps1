@@ -129,15 +129,13 @@ function Finish {
 #————————————————————————————————————————————————————————————————————— BasicTest
 function BasicTest {
   $env:path = "$d_install/bin;$base_path"
-  # needs miniruby at root (build)
-  $env:RUBY = $ruby_exe
   Run-Proc `
     -exe    "ruby.exe" `
-    -e_args "-rdevkit --disable-gems ../ruby/basictest/runner.rb" `
+    -e_args "--disable=gems ruby_runner.rb -r -v --tty=no" `
     -StdOut "test_basic.log" `
     -StdErr "test_basic_err.log" `
     -Title  "test-basic     (basictest)" `
-    -Dir    $d_build `
+    -Dir    "$d_ruby/basictest" `
     -TimeLimit 20
 }
 
@@ -162,11 +160,13 @@ function Test-All {
   # if (Test-Path -Path $remove_test -PathType Leaf) { Remove-Item -Path $remove_test }
 
   # copy items from build folder that are needed for test-all
-  $ruby_so = "$d_install/lib/ruby/$abi/$rarch"
-  Copy-Item "$d_build/.ext/$rarch/-test-" $ruby_so -Recurse
-  New-Item  -Path "$ruby_so/-test-/win32/dln" -ItemType Directory 1> $null
-  Copy-Item "$d_build/ext/-test-/win32/dln/dlntest.dll" `
-                "$ruby_so/-test-/win32/dln/dlntest.dll"
+  if (Test-Path -Path "$d_build/.ext/$rarch/-test-" -PathType Container) {
+    $ruby_so = "$d_install/lib/ruby/$abi/$rarch"
+    Copy-Item "$d_build/.ext/$rarch/-test-" $ruby_so -Recurse
+    New-Item  -Path "$ruby_so/-test-/win32/dln" -ItemType Directory 1> $null
+    Copy-Item "$d_build/ext/-test-/win32/dln/dlntest.dll" `
+                  "$ruby_so/-test-/win32/dln/dlntest.dll"
+  }
 
   $env:path = "$d_install/bin;$d_repo/git/cmd;$base_path"
   $env:RUBY_FORCE_TEST_JIT = '1'

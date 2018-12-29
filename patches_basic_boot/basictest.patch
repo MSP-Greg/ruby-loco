@@ -1,0 +1,112 @@
+Patch by MSP-Greg
+Allows running basictest from a Ruby install
+diff --git a/basictest/ruby_runner.rb b/basictest/ruby_runner.rb
+new file mode 100644
+index 0000000000..9642d5d3de
+--- /dev/null
++++ b/basictest/ruby_runner.rb
+@@ -0,0 +1,28 @@
++ruby_opts = ENV["RUBYOPT"]
++ENV["RUBYOPT"] = "--disable=gems -W1"
++
++ARGV[0] and opt = ARGV[0][/\A--run-opt=(.*)/, 1] and ARGV.shift
++
++$stderr.reopen($stdout)
++error = ''
++
++`ruby.exe test.rb #{ARGV.join(' ')}`.each_line do |line|
++  if line =~ /^end of test/
++    print "\ntest succeeded\n"
++    if ruby_opts
++      ENV['RUBYOPT'] =ruby_opts
++    else
++      ENV.delete 'RUBYOPT'
++    end
++    exit true
++  end
++  error << line if %r:^(basictest/test.rb|not): =~ line
++end
++puts
++print error
++print "test failed\n"
++if ruby_opts
++  ENV['RUBYOPT'] =ruby_opts
++else
++  ENV.delete 'RUBYOPT'
++end
+diff --git a/basictest/test.rb b/basictest/test.rb
+index 25d52ca1ef..9e7284f7d2 100755
+--- a/basictest/test.rb
++++ b/basictest/test.rb
+@@ -10,6 +10,7 @@ def initialize
+     @tty = nil
+     @quiet = nil
+     @verbose = nil
++    ruby_arg = "./miniruby"
+     ARGV.each do |arg|
+       case arg
+       when /\A--color(?:=(?:always|(auto)|(never)|(.*)))?\z/
+@@ -23,6 +24,8 @@ def initialize
+         @quiet = true
+       when /\A-(v|-verbose)\z/
+         @verbose = true
++      when /\A-(r|-ruby)\z/
++        ruby_arg = "ruby"
+       end
+     end
+     @tty = STDERR.tty? && !STDOUT.tty? && /dumb/ !~ ENV["TERM"] if @tty.nil?
+@@ -47,6 +50,7 @@ def initialize
+       @passed = @failed = @reset = ""
+     end
+     extend(Rotator) if @tty
++    Object.const_set(:R_EXE, ruby_arg)
+   end
+ 
+   def passed_string
+@@ -1972,22 +1976,22 @@ module EvTest
+ 
+ test_check "system"
+ test_ok(`echo foobar` == "foobar\n")
+-test_ok(`./miniruby -e 'print "foobar"'` == 'foobar')
++test_ok(`#{R_EXE} -e 'print "foobar"'` == 'foobar')
+ 
+ script_tmp = "script_tmp.#{$$}"
+ tmp = open(script_tmp, "w")
+ tmp.print "print $zzz\n";
+ tmp.close
+ 
+-test_ok(`./miniruby -s #{script_tmp} -zzz` == 'true')
+-test_ok(`./miniruby -s #{script_tmp} -zzz=555` == '555')
++test_ok(`#{R_EXE} -s #{script_tmp} -zzz` == 'true')
++test_ok(`#{R_EXE} -s #{script_tmp} -zzz=555` == '555')
+ 
+ tmp = open(script_tmp, "w")
+ tmp.print "#! /usr/local/bin/ruby -s\n";
+ tmp.print "print $zzz\n";
+ tmp.close
+ 
+-test_ok(`./miniruby #{script_tmp} -zzz=678` == '678')
++test_ok(`#{R_EXE} #{script_tmp} -zzz=678` == '678')
+ 
+ tmp = open(script_tmp, "w")
+ tmp.print "this is a leading junk\n";
+@@ -1997,8 +2001,8 @@ module EvTest
+ tmp.print "this is a trailing junk\n";
+ tmp.close
+ 
+-test_ok(`./miniruby -x #{script_tmp}` == '')
+-test_ok(`./miniruby -x #{script_tmp} -zzz=555` == '555')
++test_ok(`#{R_EXE} -x #{script_tmp}` == '')
++test_ok(`#{R_EXE} -x #{script_tmp} -zzz=555` == '555')
+ 
+ tmp = open(script_tmp, "w")
+ for i in 1..5
+@@ -2006,7 +2010,7 @@ module EvTest
+ end
+ tmp.close
+ 
+-`./miniruby -i.bak -pe '$_.sub!(/^[0-9]+$/){$&.to_i * 5}' #{script_tmp}`
++`#{R_EXE} -i.bak -pe '$_.sub!(/^[0-9]+$/){$&.to_i * 5}' #{script_tmp}`
+ done = true
+ tmp = open(script_tmp, "r")
+ while tmp.gets
