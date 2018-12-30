@@ -1,5 +1,7 @@
+Patch by MSP-greg
+allows RubyGems tests to be run from install folder
 diff --git a/lib/rubygems/installer.rb b/lib/rubygems/installer.rb
-index 3c2a2ac3c2..e370acbc80 100644
+index 6cd073e11d..684946b190 100644
 --- a/lib/rubygems/installer.rb
 +++ b/lib/rubygems/installer.rb
 @@ -698,10 +698,13 @@ def process_options # :nodoc:
@@ -19,10 +21,10 @@ index 3c2a2ac3c2..e370acbc80 100644
        path = path.downcase
        user_bin_dir = user_bin_dir.downcase
 diff --git a/lib/rubygems/test_case.rb b/lib/rubygems/test_case.rb
-index 7648ffdc84..e3e8062c38 100644
+index a93f749240..42c91b9520 100644
 --- a/lib/rubygems/test_case.rb
 +++ b/lib/rubygems/test_case.rb
-@@ -1352,9 +1352,6 @@ def escape_path(*path)
+@@ -1353,9 +1353,6 @@ def escape_path(*path)
    end
  
    @@ruby = rubybin
@@ -32,7 +34,7 @@ index 7648ffdc84..e3e8062c38 100644
  
    ##
    # Construct a new Gem::Dependency.
-@@ -1541,15 +1538,11 @@ def self.load_cert(cert_name)
+@@ -1542,15 +1539,11 @@ def self.load_cert(cert_name)
    # <tt>test/rubygems/</tt>.
  
    def self.cert_path(cert_name)
@@ -51,7 +53,7 @@ index 7648ffdc84..e3e8062c38 100644
    end
  
    ##
-@@ -1567,9 +1560,25 @@ def self.load_key(key_name, passphrase = nil)
+@@ -1568,9 +1561,25 @@ def self.load_key(key_name, passphrase = nil)
    # Returns the path to the key named +key_name+ from <tt>test/rubygems</tt>
  
    def self.key_path(key_name)
@@ -78,7 +80,7 @@ index 7648ffdc84..e3e8062c38 100644
    # :stopdoc:
    # only available in RubyGems tests
  
-@@ -1629,3 +1638,5 @@ def self.key_path(key_name)
+@@ -1630,3 +1639,5 @@ def self.key_path(key_name)
  END {tmpdirs.each {|dir| Dir.rmdir(dir)} if $$ == pid}
  Gem.clear_paths
  Gem.loaded_specs.clear
