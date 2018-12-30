@@ -292,32 +292,3 @@ index 33bc467941..dad1e04758 100644
  module ZombieHunter
    def after_teardown
      super
-diff --git a/test/runner.rb b/test/runner.rb
-index d8b44644f7..b8d212f5a3 100644
---- a/test/runner.rb
-+++ b/test/runner.rb
-@@ -5,12 +5,19 @@
- $LOAD_PATH << src_testdir
- $LOAD_PATH.unshift "#{src_testdir}/lib"
- 
--# Get bundled gems on load path
--Dir.glob("#{src_testdir}/../gems/*/*.gemspec")
--  .reject {|f| f =~ /minitest|test-unit|power_assert/ }
--  .map {|f| $LOAD_PATH.unshift File.join(File.dirname(f), "lib") }
-+# Get bundled gems on load path, check whether running from install
-+abi = RbConfig::CONFIG['ruby_version']
-+if Dir.exist? (gem_dir = "#{RbConfig::TOPDIR}/lib/ruby/gems/#{abi}/gems")
-+  Dir.glob("#{gem_dir}/*/lib")
-+    .reject {|f| f =~ /\/(minitest|test-unit|power_assert)-/ }
-+    .each {|f| $LOAD_PATH.unshift f }
-+else
-+  Dir.glob("#{src_testdir}/../gems/*/*.gemspec")
-+    .reject {|f| f =~ /minitest|test-unit|power_assert/ }
-+    .each {|f| $LOAD_PATH.unshift File.join(File.dirname(f), "lib") }
-+end
- 
--require 'test/unit'
-+require_relative 'lib/test/unit'
- 
- module Gem
- end
