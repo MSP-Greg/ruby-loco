@@ -113,10 +113,14 @@ EOT
   end
 
   def add_rb_readline
+    # add readline patch
+    Dir.chdir(D_RL) { |d|
+      patch_exe = File.join D_MSYS2, "usr", "bin", "patch.exe"
+      patch = `#{patch_exe} -p1 -N --no-backup-if-mismatch -i #{__dir__}/patches/__readline_warnings.patch`
+    }
     src = File.join(D_RL, "lib")
     pkg_dest = File.join D_INSTALL, 'lib', 'ruby', 'site_ruby'
     Dir.mkdir_p pkg_dest unless Dir.exist? pkg_dest
-    #`xcopy /s /q #{src.gsub('/', '\\')} #{pkg_dest.gsub('/', '\\')}`
     FileUtils.copy_entry src, pkg_dest, preserve: true
   end
 
@@ -152,9 +156,9 @@ EOT
     unless Dir.exist? (dest_dir = File.dirname dest)
       FileUtils.mkdir_p dest_dir
     end
-    FileUtils.copy_file(src, dest, preserve: true)    
+    FileUtils.copy_file(src, dest, preserve: true)
   end
-  
+
   def add_licenses
     #IO.copy_stream("#{D_RUBY}/LEGAL"     , "#{D_INSTALL}/LEGAL Ruby")
     #IO.copy_stream("#{D_RI2}/LICENSE.txt", "#{D_INSTALL}/LICENSE Ruby Installer.txt")
