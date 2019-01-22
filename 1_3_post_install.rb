@@ -51,18 +51,6 @@ module PostInstall3
   # path to site_ruby dir
   SITE_RUBY = File.join TOPDIR, 'lib', 'ruby', 'site_ruby', ABI
 
-  # Array of regex and strings for bin file cleanup
-  # 1st element for full path ruby
-  # 2nd element for odd path ruby seen in rake.bat
-  # 3rd element for generic "ruby.exe" (e.g. RubyGems update --system)
-  CLEAN_INFO = [
-    [ /^@"#{Regexp.escape(BINDIR.gsub("/", "\\"))}\\ruby\.exe"/u, '@"%~dp0ruby.exe"'],
-    [ /^@"ruby.exe"/u                                           , '@"%~dp0ruby.exe"'],
-    [ /"#{Regexp.escape(BINDIR)}\/([^ "]+)"/u      , '"%~dp0\1"'],
-    [ /^#!(\/usr\/bin\/env|\/mingw#{ARCH}\/bin\/)/u, '#!'     ],
-    [ /\r/, '']
-  ]
-
 class << self
 
   def run
@@ -70,6 +58,7 @@ class << self
     add_ri2_site_ruby
     generate_version_file
     update_gems
+    add_bash_bin
   end
 
   private
@@ -171,6 +160,25 @@ class << self
       # Gem::GemRunner.new.run(%w[install bundler] + suffix)
     end
 
+  end
+
+  def add_bash_bin
+    # fix bundled gems bash scripts first
+    Dir.chdir BINDIR do
+      bash_bins = Dir["*"].select { |fn| !Dir.exist?(fn) && File.extname(fn).empty? }
+      bash_bins.each { |fn|
+        str = File.binread(fn).sub /\A[^\n]+ruby/, "#! ruby"
+        File.open(fn, "wb") { |f| f.write str }
+      }
+    end
+    # copy ruby/bin bash scripts & fix
+    Dir.chdir "#{D_RUBY}/bin" do
+      bash_bins = Dir["*"]
+      bash_bins.each { |fn|
+        str = File.binread(fn).sub /\A#![^\n]+ruby$/, "#! ruby"
+        File.open("#{BINDIR}/#{fn}", "wb") { |f| f.write str }
+      }
+    end
   end
 
 end
