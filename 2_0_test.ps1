@@ -170,6 +170,7 @@ function Test-All {
 
   $env:path = "$d_install/bin;$d_repo/git/cmd;$base_path"
   $env:RUBY_FORCE_TEST_JIT = '1'
+  $env:RUBYGEMS_TEST_PATH  = "$d_repo/ruby/test/rubygems"
   # for rubygems/test_bundled_ca.rb
   $env:TEST_SSL = '1'
 

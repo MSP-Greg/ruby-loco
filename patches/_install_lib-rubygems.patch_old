@@ -1,0 +1,88 @@
+Patch by MSP-greg
+allows RubyGems tests to be run from install folder
+diff --git a/lib/rubygems/installer.rb b/lib/rubygems/installer.rb
+index 6cd073e11d..684946b190 100644
+--- a/lib/rubygems/installer.rb
++++ b/lib/rubygems/installer.rb
+@@ -702,10 +702,13 @@ def process_options # :nodoc:
+ 
+   def check_that_user_bin_dir_is_in_path # :nodoc:
+     user_bin_dir = @bin_dir || Gem.bindir(gem_home)
+-    user_bin_dir = user_bin_dir.gsub(File::SEPARATOR, File::ALT_SEPARATOR) if
+-      File::ALT_SEPARATOR
+ 
+     path = ENV['PATH']
++    if File::ALT_SEPARATOR
++      user_bin_dir = user_bin_dir.gsub(File::SEPARATOR, File::ALT_SEPARATOR)
++      path = path.gsub(File::SEPARATOR, File::ALT_SEPARATOR)
++    end
++
+     if Gem.win_platform?
+       path = path.downcase
+       user_bin_dir = user_bin_dir.downcase
+diff --git a/lib/rubygems/test_case.rb b/lib/rubygems/test_case.rb
+index a93f749240..42c91b9520 100644
+--- a/lib/rubygems/test_case.rb
++++ b/lib/rubygems/test_case.rb
+@@ -1353,9 +1353,6 @@ def escape_path(*path)
+   end
+ 
+   @@ruby = rubybin
+-  gempath = File.expand_path('../../../test/rubygems', __FILE__)
+-  @@good_rake = "#{rubybin} #{escape_path(gempath, 'good_rake.rb')}"
+-  @@bad_rake = "#{rubybin} #{escape_path(gempath, 'bad_rake.rb')}"
+ 
+   ##
+   # Construct a new Gem::Dependency.
+@@ -1542,15 +1539,11 @@ def self.load_cert(cert_name)
+   # <tt>test/rubygems/</tt>.
+ 
+   def self.cert_path(cert_name)
+-    if 32 == (Time.at(2**32) rescue 32)
+-      cert_file =
+-        File.expand_path "../../../test/rubygems/#{cert_name}_cert_32.pem",
+-                         __FILE__
+-
++    if 32 == (Time.at(2**32) rescue 32) then
++      cert_file = File.join test_path, "#{cert_name}_cert_32.pem"
+       return cert_file if File.exist? cert_file
+     end
+-
+-    File.expand_path "../../../test/rubygems/#{cert_name}_cert.pem", __FILE__
++    File.join test_path, "#{cert_name}_cert.pem"
+   end
+ 
+   ##
+@@ -1568,9 +1561,25 @@ def self.load_key(key_name, passphrase = nil)
+   # Returns the path to the key named +key_name+ from <tt>test/rubygems</tt>
+ 
+   def self.key_path(key_name)
+-    File.expand_path "../../../test/rubygems/#{key_name}_key.pem", __FILE__
++    File.join test_path, "#{key_name}_key.pem"
+   end
+ 
++  def self.test_path
++    @@test_path ||= begin
++      temp = $LOAD_PATH.reverse.find { |p| /test\/(lib|rubygems|-ext-)\z/ =~ p } || ''
++      if temp.empty?
++        temp = File.expand_path('../../../test/rubygems', __FILE__)
++      else
++        temp = File.join File.dirname(temp), 'rubygems'
++        temp = '' unless File.exist? File.join(temp, 'test_gem.rb')
++      end
++      r_bin = Gem::TestCase.rubybin
++      @@good_rake ||= "#{r_bin} #{escape_path(temp, 'good_rake.rb')}"
++      @@bad_rake  ||= "#{r_bin} #{escape_path(temp, 'bad_rake.rb')}"
++      temp
++    end
++  end
++  
+   # :stopdoc:
+   # only available in RubyGems tests
+ 
+@@ -1630,3 +1639,5 @@ def self.key_path(key_name)
+ END {tmpdirs.each {|dir| Dir.rmdir(dir)} if $$ == pid}
+ Gem.clear_paths
+ Gem.loaded_specs.clear
++# $LOAD_PATH has path to tests loaded
++Gem::TestCase.test_path
