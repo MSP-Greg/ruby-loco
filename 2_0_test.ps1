@@ -178,7 +178,7 @@ function Test-All {
     " -a --show-skip --retry --job-status=normal --subprocess-timeout-scale=1.5"
 
   $env:RUBYOPT = "--disable=gems -w"
-    
+
   Run-Proc `
     -exe    $ruby_exe `
     -e_args $args `
@@ -187,6 +187,8 @@ function Test-All {
     -Title  "test-all" `
     -Dir    "$d_ruby/test" `
     -TimeLimit 2100
+
+  Remove-Item env:\RUBYOPT
 
   # comment out below to allow full testing of Appveyor artifact
   # Remove-Item -Path "$d_install/lib/ruby/$abi/$rarch/-test-" -Recurse
@@ -197,10 +199,10 @@ function MSpec {
   $env:path = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
 # -e_args "--disable=gems -rdevkit ../mspec/bin/mspec -j -V -T `"--disable=gems`"" `
-  
+
   Run-Proc `
     -exe    "ruby.exe" `
-    -e_args "--disable=gems -rdevkit ../mspec/bin/mspec -j -V" `
+    -e_args "--disable=gems -rdevkit ../mspec/bin/mspec -j -V -T `"--disable=gems`"" `
     -StdOut "test_mspec.log" `
     -StdErr "test_mspec_err.log" `
     -Title  "test-mspec" `
