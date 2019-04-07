@@ -143,18 +143,20 @@ class << self
   def update_gems
     require 'rubygems'
     require 'rubygems/gem_runner'
-    suffix = %w[--no-document --env-shebang --silent]
+    suffix = %w[--no-document --env-shebang --silent --norc]
     if /trunk/ !~ RUBY_DESCRIPTION
-      Gem::GemRunner.new.run %w[uninstall rubygems-update -x]
+      # Gem::GemRunner.new.run %w[uninstall rubygems-update -x]
       # rdoc won't update without UI confirmation of bin directory file replacement ?
       Gem::GemRunner.new.run(%w[update minitest power_assert rake rdoc test-unit] + suffix)
-      if RUBY_VERSION.start_with?('2.4')
+      if RUBY_VERSION.start_with? '2.4'
         Gem::GemRunner.new.run(%w[update did_you_mean] + suffix)
-      elsif RUBY_VERSION.start_with?('2.3')
+      elsif RUBY_VERSION.start_with? '2.3'
         Gem::GemRunner.new.run(%w[install did_you_mean:1.0.3] + suffix)
       end
       Gem::GemRunner.new.run %w[cleanup]
-      Gem::GemRunner.new.run(%w[install bundler] + suffix)
+      if RUBY_VERSION < "2.6"
+        Gem::GemRunner.new.run(%w[install bundler] + suffix)
+      end
     else
       # added as of r65509
       # Gem::GemRunner.new.run(%w[install bundler] + suffix)
