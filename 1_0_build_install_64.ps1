@@ -307,7 +307,7 @@ Basic-Info
 # save extension build files
 Push-Location $d_build
 $build_files = "$d_zips/ext_build_files.7z"
-&$7z a $build_files .ext\include\x64-mingw32\ruby\*.h ext\**\Makefile ext\**\*.h ext\**\*.log ext\**\*.mk 1> $null
+&$7z a $build_files config.log .ext\include\x64-mingw32\ruby\*.h ext\**\Makefile ext\**\*.h ext\**\*.log ext\**\*.mk 1> $null
 if ($is_av) { Push-AppveyorArtifact $build_files -DeploymentName "Ext build files" }
 Pop-Location
 
