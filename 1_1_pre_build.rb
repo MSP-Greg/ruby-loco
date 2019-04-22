@@ -35,6 +35,10 @@ class << self
           f.write "#define RUBY_REVISION #{svn}\n" \
                   "#define RUBY_BRANCH_NAME \"#{branch}\"\n"
         }
+      else
+        File.open('revision.h', 'wb:utf-8') { |f|
+          f.write "#define RUBY_BRANCH_NAME \"#{branch}\"\n"
+        }
       end
 
       # open version.h and get ruby info
@@ -49,7 +53,7 @@ class << self
                   v_data[/^#define[ \t]+RUBY_RELEASE_DAY[ \t]+(\d{1,2})/, 1].rjust(2,'0')
         patch = patch == '-1' ? 'dev' : "p#{patch}"
         arch = ARCH == '64' ? '[x64-mingw32]' : '[i386-mingw32]'
-        title = "#{patch} (#{date} #{branch} #{svn}) #{arch}"
+        title = "#{patch} (#{date} #{branch} #{svn}) #{arch}".sub(/ +\)/, ')')
       }
       # needed for r66602 and later
       if version.nil?
