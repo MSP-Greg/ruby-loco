@@ -30,7 +30,7 @@ class << self
       branch = "trunk" if /\A[0-9a-f]{7}\Z/ =~ branch
 
       # Get svn from commit info, write to revision.h
-      if svn = %x[git log -n1 --format=%H][0,10]
+      if svn = %x[git log -n1 --format=%H][0,7]
         File.open('revision.h', 'wb:utf-8') { |f|
           f.write "#define RUBY_REVISION #{svn}\n" \
                   "#define RUBY_BRANCH_NAME \"#{branch}\"\n"
