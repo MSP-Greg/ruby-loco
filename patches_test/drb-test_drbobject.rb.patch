@@ -1,0 +1,28 @@
+# Added for conflict with ruby/test_gc_compact.rb
+# see https://bugs.ruby-lang.org/issues/15809
+diff --git a/test/drb/test_drbobject.rb b/test/drb/test_drbobject.rb
+index 16b252d3ce..2f8329d4c0 100644
+--- a/test/drb/test_drbobject.rb
++++ b/test/drb/test_drbobject.rb
+@@ -31,6 +31,7 @@ def test_DRbObject_id_dereference
+   end
+ end
+ 
++module DRbTests
+ class TestDRbObject < Test::Unit::TestCase
+   include DRbObjectTest
+ 
+@@ -43,7 +44,7 @@ class TestDRbObjectTimerIdConv < Test::Unit::TestCase
+   include DRbObjectTest
+ 
+   def setup
+-    DRb.start_service(nil, nil, {:idconv => DRb::TimerIdConv.new})
++    DRb.start_service(nil, nil, {:idconv => DRb::TimerIdConv.new(0.2)})
+   end
+ end
+ 
+@@ -54,3 +55,4 @@ def setup
+     DRb.start_service(nil, nil, {:idconv => DRb::WeakIdConv.new})
+   end
+ end
++end
