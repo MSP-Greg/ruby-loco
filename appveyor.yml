@@ -1,4 +1,6 @@
-image: Visual Studio 2015
+---
+# clear cache 2019-05-17
+image: Visual Studio 2017
 
 deploy: off
 
