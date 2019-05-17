@@ -16,7 +16,7 @@ function Apply-Patches($p_dir) {
   Pop-Location
   Push-Location "$d_ruby"
   foreach ($p in $patches) {
-    if ($p.substring(0,2) -eq "__") { continue }
+    if ($p.StartsWith("__")) { continue }
     Write-Host $($dash * 55) $p -ForegroundColor $fc
     & $patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p"
   }

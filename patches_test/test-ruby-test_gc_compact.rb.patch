@@ -1,0 +1,14 @@
+# bypass return to test
+diff --git a/test/ruby/test_gc_compact.rb b/test/ruby/test_gc_compact.rb
+index d2b2c1bb47..6e0867a7d3 100644
+--- a/test/ruby/test_gc_compact.rb
++++ b/test/ruby/test_gc_compact.rb
+@@ -2,7 +2,7 @@
+ require 'test/unit'
+ require 'fiddle'
+ 
+-return
++# return
+ 
+ class TestGCCompact < Test::Unit::TestCase
+   def memory_location(obj)

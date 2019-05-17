@@ -1,0 +1,13 @@
+diff --git a/common.mk b/common.mk
+index 6377bd9940..bb7203dacb 100644
+--- a/common.mk
++++ b/common.mk
+@@ -19,7 +19,7 @@ enable_shared = $(ENABLE_SHARED:no=)
+ 
+ UNICODE_VERSION = 12.1.0
+ UNICODE_EMOJI_VERSION = 12.0
+-UNICODE_BETA = YES
++UNICODE_BETA = NO
+ 
+ ### set the following environment variable or uncomment the line if
+ ### the Unicode data files should be updated completely on every update ('make up',...).
