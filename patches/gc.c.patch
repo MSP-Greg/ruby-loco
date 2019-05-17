@@ -1,0 +1,27 @@
+From c19d2faa43d947e44743d08e1bd49ca76de89eee Mon Sep 17 00:00:00 2001
+From: Aaron Patterson <tenderlove@ruby-lang.org>
+Date: Fri, 17 May 2019 17:16:02 +0300
+Subject: [PATCH] disable allocation during compaction
+Ruby PR 2192  https://github.com/ruby/ruby/pull/2192
+diff --git a/gc.c b/gc.c
+index bf495bab4e28..7fc8ed309cae 100644
+--- a/gc.c
++++ b/gc.c
+@@ -8252,6 +8252,8 @@ gc_verify_compaction_references(int argc, VALUE *argv, VALUE mod)
+     /* Ensure objects are pinned */
+     rb_gc();
+ 
++    during_gc = TRUE;
++
+     if (kwvals[1]) {
+         /* Double heap size */
+         heap_add_pages(objspace, heap_eden, heap_allocated_pages);
+@@ -8263,6 +8265,8 @@ gc_verify_compaction_references(int argc, VALUE *argv, VALUE mod)
+     gc_update_references(objspace);
+     gc_check_references_for_moved(mod);
+ 
++    during_gc = FALSE;
++
+     rb_clear_method_cache_by_class(rb_cObject);
+     rb_clear_constant_cache();
+     heap_eden->free_pages = NULL;
