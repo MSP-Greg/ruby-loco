@@ -139,12 +139,12 @@ class << self
     File.binwrite(dest, f_str)
   end
 
-  # for trunk, only adds bundler
+  # for trunk/master, only adds bundler
   def update_gems
     require 'rubygems'
     require 'rubygems/gem_runner'
     suffix = %w[--no-document --env-shebang --silent --norc]
-    if /trunk/ !~ RUBY_DESCRIPTION
+    if /master/ !~ RUBY_DESCRIPTION
       # Gem::GemRunner.new.run %w[uninstall rubygems-update -x]
       # rdoc won't update without UI confirmation of bin directory file replacement ?
       Gem::GemRunner.new.run(%w[update minitest power_assert rake rdoc test-unit] + suffix)

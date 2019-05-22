@@ -29,7 +29,7 @@ module TestScript
 
   Dir.chdir(D_RUBY) { |d|
     branch = `git symbolic-ref -q HEAD`
-    branch = 'trunk' if branch.strip == ''
+    branch = 'master' if branch.strip == ''
     R_BRANCH = branch[/[^\/]+\Z/].strip
   }
 

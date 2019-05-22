@@ -27,7 +27,7 @@ class << self
     Dir.chdir( File.join(__dir__, 'ruby') ) { |d|
       branch = `git branch`[/^\* (.+)/, 1].sub(')', '')[/[^ \/]+\Z/]
       # set branch to trunk if it's a commit
-      branch = "trunk" if /\A[0-9a-f]{7}\Z/ =~ branch
+      branch = "master" if /\A[0-9a-f]{7}\Z/ =~ branch
 
       # Get svn from commit info, write to revision.h
       if svn = %x[git log -n1 --format=%H][0,10]
