@@ -353,10 +353,10 @@ module TestScript
     z_files = "#{D_INSTALL}/* ./trunk_msys2.ps1"
 
     if @@failures == 0
-      r_suffix = R_BRANCH
+      r_suffix = R_BRANCH == 'master' ? 'trunk' : R_BRANCH
       r_msg    = ''
     else
-      r_suffix = "#{R_BRANCH}_bad"
+      r_suffix = R_BRANCH == 'master' ? 'trunk_bad' : "#{R_BRANCH}_bad"
       r_msg    = ' (bad)'
     end
 
