@@ -4,7 +4,7 @@ diff --git a/lib/rubygems/installer.rb b/lib/rubygems/installer.rb
 index 6cd073e11d..684946b190 100644
 --- a/lib/rubygems/installer.rb
 +++ b/lib/rubygems/installer.rb
-@@ -702,10 +702,13 @@ def process_options # :nodoc:
+@@ -706,10 +706,13 @@ def process_options # :nodoc:
  
    def check_that_user_bin_dir_is_in_path # :nodoc:
      user_bin_dir = @bin_dir || Gem.bindir(gem_home)

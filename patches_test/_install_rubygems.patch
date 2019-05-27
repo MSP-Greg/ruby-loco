@@ -4,7 +4,7 @@ diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
 index e062eebbaa..92218bc8df 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
-@@ -855,7 +855,11 @@ def test_self_platforms
+@@ -882,7 +882,11 @@ def test_self_platforms
    end
  
    def test_self_prefix
@@ -51,7 +51,7 @@ diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/t
 index 549e34c218..92521682aa 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
-@@ -482,8 +482,10 @@ def test_update_rubygems_arguments
+@@ -502,8 +502,10 @@ def test_update_rubygems_arguments
  
      arguments = @cmd.update_rubygems_arguments
  
@@ -64,7 +64,7 @@ index 549e34c218..92521682aa 100644
      assert_equal '--no-rdoc',          arguments.shift
      assert_equal '--no-ri',            arguments.shift
      assert_equal '--previous-version', arguments.shift
-@@ -496,8 +498,10 @@ def test_update_rubygems_arguments_1_8_x
+@@ -516,8 +518,10 @@ def test_update_rubygems_arguments_1_8_x
  
      arguments = @cmd.update_rubygems_arguments
  

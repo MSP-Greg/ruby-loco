@@ -63,7 +63,7 @@ index 25d52ca1ef..9e7284f7d2 100755
    end
  
    def passed_string
-@@ -1972,22 +1976,22 @@ module EvTest
+@@ -1965,22 +1969,22 @@ module EvTest
  
  test_check "system"
  test_ok(`echo foobar` == "foobar\n")
@@ -90,7 +90,7 @@ index 25d52ca1ef..9e7284f7d2 100755
  
  tmp = open(script_tmp, "w")
  tmp.print "this is a leading junk\n";
-@@ -1997,8 +2001,8 @@ module EvTest
+@@ -1990,8 +1994,8 @@ module EvTest
  tmp.print "this is a trailing junk\n";
  tmp.close
  
@@ -101,7 +101,7 @@ index 25d52ca1ef..9e7284f7d2 100755
  
  tmp = open(script_tmp, "w")
  for i in 1..5
-@@ -2006,7 +2010,7 @@ module EvTest
+@@ -1999,7 +2003,7 @@ module EvTest
  end
  tmp.close
  
