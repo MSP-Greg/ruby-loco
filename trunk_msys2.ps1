@@ -20,7 +20,7 @@ $dash = "$([char]0x2015)"
 $pkgs = "C:\pkgs"
 $pkgs_u = $pkgs.replace('\', '/')
 
-$env:path = "$msys2\usr\bin;C:\ruby25-x64\bin;C:\Program Files\7-Zip;C:\Program Files\AppVeyor\BuildAgent;C:\Program Files\Git\cmd;C:\Windows\system32;C:\Program Files;C:\Windows"
+$env:path = "$msys2\usr\bin;C:\Ruby25-x64\bin;C:\Program Files\7-Zip;C:\Program Files\AppVeyor\BuildAgent;C:\Program Files\Git\cmd;C:\Windows\system32;C:\Program Files;C:\Windows"
 
 $pre = "mingw-w64-x86_64-"
 $fc  = 'Yellow'
@@ -84,7 +84,7 @@ pacman.exe -Sy --noconfirm --needed --noprogressbar $($pre + 'toolchain') 2> $nu
 Check-Exit 'Cannot update toolchain'
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends" -ForegroundColor Yellow
-$tools =  "___gdbm ___gmp ___libffi ___ncurses ___openssl ___ragel ___readline ___zlib".replace('___', $pre)
+$tools =  "___gdbm ___gmp ___libffi ___openssl ___ragel ___readline ___termcap ___zlib".replace('___', $pre)
 pacman.exe -S --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
 
 # As of Sept-2018 libyaml is not installed on Appveyor
