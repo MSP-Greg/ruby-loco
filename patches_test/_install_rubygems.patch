@@ -32,6 +32,20 @@ index c90ad2d41a..c255d06899 100644
    BUNDLER_LIB_PATH = File.expand_path $LOAD_PATH.find {|lp| File.file?(File.join(lp, "bundler.rb")) }.dup.untaint
    BUNDLER_FULL_NAME = "bundler-#{Bundler::VERSION}".freeze
  
+diff --git a/test/rubygems/test_gem_commands_environment_command.rb b/test/rubygems/test_gem_commands_environment_command.rb
+index 074df19e52..7104f6db7d 100644
+--- a/test/rubygems/test_gem_commands_environment_command.rb
++++ b/test/rubygems/test_gem_commands_environment_command.rb
+@@ -26,7 +26,8 @@ def test_execute
+     assert_match %r|RUBY VERSION: \d+\.\d+\.\d+ \(.*\) \[.*\]|, @ui.output
+     assert_match %r|INSTALLATION DIRECTORY: #{Regexp.escape @gemhome}|,
+                  @ui.output
+-    assert_match %r|RUBYGEMS PREFIX: |, @ui.output
++# Gem.prefix is nil for ruby-loco
++#    assert_match %r|RUBYGEMS PREFIX: |, @ui.output
+     assert_match %r|RUBY EXECUTABLE:.*#{RbConfig::CONFIG['ruby_install_name']}|,
+                  @ui.output
+     assert_match %r|GIT EXECUTABLE: #{@cmd.send(:git_path)}|, @ui.output
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
 index d9ee5f8468..105c7b2c4c 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
