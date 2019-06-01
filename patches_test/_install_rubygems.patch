@@ -1,10 +1,10 @@
 Patch by MSP-Greg
 Allows running Core RubyGems tests from installed Ruby
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index e062eebbaa..92218bc8df 100644
+index c90ad2d41a..c255d06899 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
-@@ -882,7 +882,11 @@ def test_self_platforms
+@@ -870,7 +870,11 @@ def test_self_platforms
    end
  
    def test_self_prefix
@@ -17,7 +17,7 @@ index e062eebbaa..92218bc8df 100644
    end
  
    def test_self_prefix_libdir
-@@ -1551,7 +1555,13 @@ def test_auto_activation_of_used_gemdeps_file
+@@ -1543,7 +1547,13 @@ def test_auto_activation_of_used_gemdeps_file
      assert_equal expected_specs, Gem.use_gemdeps.sort_by { |s| s.name }
    end
  
@@ -29,51 +29,24 @@ index e062eebbaa..92218bc8df 100644
 +  else  
 +    LIB_PATH = File.expand_path("../../../lib".dup.untaint, __FILE__.dup.untaint)
 +  end
+   BUNDLER_LIB_PATH = File.expand_path $LOAD_PATH.find {|lp| File.file?(File.join(lp, "bundler.rb")) }.dup.untaint
+   BUNDLER_FULL_NAME = "bundler-#{Bundler::VERSION}".freeze
  
-   if Gem::USE_BUNDLER_FOR_GEMDEPS
-     BUNDLER_LIB_PATH = File.expand_path $LOAD_PATH.find {|lp| File.file?(File.join(lp, "bundler.rb")) }.dup.untaint
-diff --git a/test/rubygems/test_gem_commands_environment_command.rb b/test/rubygems/test_gem_commands_environment_command.rb
-index 1451f03982..981c5afa3d 100644
---- a/test/rubygems/test_gem_commands_environment_command.rb
-+++ b/test/rubygems/test_gem_commands_environment_command.rb
-@@ -26,7 +26,9 @@ def test_execute
-     assert_match %r|RUBY VERSION: \d+\.\d+\.\d+ \(.*\) \[.*\]|, @ui.output
-     assert_match %r|INSTALLATION DIRECTORY: #{Regexp.escape @gemhome}|,
-                  @ui.output
--    assert_match %r|RUBYGEMS PREFIX: |, @ui.output
-+    if Gem.method(:host).source_location[0].start_with? "#{@@project_dir}/"
-+      assert_match %r|RUBYGEMS PREFIX: |, @ui.output
-+    end
-     assert_match %r|RUBY EXECUTABLE:.*#{RbConfig::CONFIG['ruby_install_name']}|,
-                  @ui.output
-     assert_match %r|GIT EXECUTABLE: #{@cmd.send(:git_path)}|, @ui.output
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
-index 549e34c218..92521682aa 100644
+index d9ee5f8468..105c7b2c4c 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
-@@ -502,8 +502,10 @@ def test_update_rubygems_arguments
+@@ -502,8 +502,11 @@ def test_update_rubygems_arguments
  
      arguments = @cmd.update_rubygems_arguments
  
 -    assert_equal '--prefix',           arguments.shift
 -    assert_equal Gem.prefix,           arguments.shift
++    # asserts fail from install folder
 +    if Gem.method(:host).source_location[0].start_with? "#{@@project_dir}/"
 +      assert_equal '--prefix',           arguments.shift
 +      assert_equal Gem.prefix,           arguments.shift
 +    end
-     assert_equal '--no-rdoc',          arguments.shift
-     assert_equal '--no-ri',            arguments.shift
+     assert_equal '--no-document',      arguments.shift
      assert_equal '--previous-version', arguments.shift
-@@ -516,8 +518,10 @@ def test_update_rubygems_arguments_1_8_x
- 
-     arguments = @cmd.update_rubygems_arguments
- 
--    assert_equal '--prefix',           arguments.shift
--    assert_equal Gem.prefix,           arguments.shift
-+    if Gem.method(:host).source_location[0].start_with? "#{@@project_dir}/"
-+      assert_equal '--prefix',           arguments.shift
-+      assert_equal Gem.prefix,           arguments.shift
-+    end
-     assert_equal '--no-rdoc',          arguments.shift
-     assert_equal '--no-ri',            arguments.shift
-     assert_empty arguments
+     assert_equal Gem::VERSION,         arguments.shift
