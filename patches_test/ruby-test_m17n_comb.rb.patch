@@ -2,7 +2,7 @@ Patch by MSP-Greg
 Added frozen_string_literal: true
 Changed some loops to quicken code up and less GC issues
 diff --git a/test/ruby/test_m17n_comb.rb b/test/ruby/test_m17n_comb.rb
-index 99c162a92f..3bd5c2be7e 100644
+index cfb8bff882..ad2f2627ec 100644
 --- a/test/ruby/test_m17n_comb.rb
 +++ b/test/ruby/test_m17n_comb.rb
 @@ -1,4 +1,4 @@
@@ -284,7 +284,7 @@ index 99c162a92f..3bd5c2be7e 100644
        desc = proc {encdumpcall(s1, :count, s2)}
        if !s1.valid_encoding? || !s2.valid_encoding?
          assert_raise(ArgumentError, Encoding::CompatibilityError, desc) { s1.count(s2) }
-@@ -752,21 +774,19 @@ def test_str_count
+@@ -756,21 +778,21 @@ def crypt_supports_des_crypt?
    end
  
    def test_str_crypt
@@ -292,25 +292,25 @@ index 99c162a92f..3bd5c2be7e 100644
 +    STRINGS.each { |salt|
        # skip input other than [0-9A-Za-z./] to confirm strict behavior
        next unless salt.ascii_only? && /\A[0-9a-zA-Z.\/]+\z/ =~ salt
--
+ 
 -      confirm_crypt_result(str, salt)
 +      STRINGS.each { |str| confirm_crypt_result(str, salt) }
      }
    end
  
-   if !strict_crypt
+   if !strict_crypt && /openbsd/ !~ RUBY_PLATFORM
      def test_str_crypt_nonstrict
 -      combination(STRINGS, STRINGS) {|str, salt|
 +      STRINGS.each { |salt|
          # only test input other than [0-9A-Za-z./] to confirm non-strict behavior
          next if salt.ascii_only? && /\A[0-9a-zA-Z.\/]+\z/ =~ salt
--
+ 
 -        confirm_crypt_result(str, salt)
 +        STRINGS.each { |str| confirm_crypt_result(str, salt) }
        }
      end
    end
-@@ -782,7 +802,7 @@ def test_str_crypt_nonstrict
+@@ -791,7 +813,7 @@ def test_str_crypt_nonstrict
    end
  
    def test_str_delete
@@ -319,7 +319,7 @@ index 99c162a92f..3bd5c2be7e 100644
        if s1.empty?
          assert_equal(s1, s1.delete(s2))
          next
-@@ -832,7 +852,7 @@ def test_str_dump
+@@ -841,7 +863,7 @@ def test_str_dump
    end
  
    def test_str_each_line
@@ -328,7 +328,7 @@ index 99c162a92f..3bd5c2be7e 100644
        if !s1.ascii_only? && !s2.ascii_only? && s1.encoding != s2.encoding
          assert_raise(Encoding::CompatibilityError) { s1.each_line(s2) {} }
          next
-@@ -880,7 +900,7 @@ def test_str_hex
+@@ -889,7 +911,7 @@ def test_str_hex
    end
  
    def test_str_include?
@@ -337,7 +337,7 @@ index 99c162a92f..3bd5c2be7e 100644
        if !s1.ascii_only? && !s2.ascii_only? && s1.encoding != s2.encoding
          assert_raise(Encoding::CompatibilityError) { s1.include?(s2) }
          assert_raise(Encoding::CompatibilityError) { s1.index(s2) }
-@@ -1049,7 +1069,7 @@ def test_str_oct
+@@ -1058,7 +1080,7 @@ def test_str_oct
    end
  
    def test_str_replace
@@ -346,7 +346,7 @@ index 99c162a92f..3bd5c2be7e 100644
        t = s1.dup
        t.replace s2
        assert_equal(s2, t)
-@@ -1070,7 +1090,7 @@ def test_str_reverse
+@@ -1079,7 +1101,7 @@ def test_str_reverse
    end
  
    def test_str_scan
@@ -355,7 +355,7 @@ index 99c162a92f..3bd5c2be7e 100644
        desc = proc {"#{s1.dump}.scan(#{s2.dump})"}
        if !s2.valid_encoding?
          assert_raise(RegexpError, desc) { s1.scan(s2) }
-@@ -1137,7 +1157,7 @@ def test_str_slice!
+@@ -1146,7 +1168,7 @@ def test_str_slice!
    end
  
    def test_str_split
@@ -364,7 +364,7 @@ index 99c162a92f..3bd5c2be7e 100644
        if !s2.valid_encoding?
          assert_raise(ArgumentError, RegexpError) { s1.split(s2) }
          next
-@@ -1165,7 +1185,7 @@ def test_str_split
+@@ -1174,7 +1196,7 @@ def test_str_split
    end
  
    def test_str_squeeze
@@ -373,7 +373,7 @@ index 99c162a92f..3bd5c2be7e 100644
        if !s1.valid_encoding? || !s2.valid_encoding?
          assert_raise(ArgumentError, Encoding::CompatibilityError, "#{encdump s1}.squeeze(#{encdump s2})") { s1.squeeze(s2) }
          next
-@@ -1254,7 +1274,7 @@ def test_str_to_s
+@@ -1263,7 +1285,7 @@ def test_str_to_s
    end
  
    def test_tr
@@ -382,7 +382,7 @@ index 99c162a92f..3bd5c2be7e 100644
        desc = "#{encdump s1}.tr(#{encdump s2}, #{encdump s3})"
        if s1.empty?
          assert_equal(s1, s1.tr(s2, s3), desc)
-@@ -1283,21 +1303,21 @@ def test_tr
+@@ -1292,21 +1314,21 @@ def test_tr
    end
  
    def test_tr_sjis
@@ -413,7 +413,7 @@ index 99c162a92f..3bd5c2be7e 100644
        desc = "#{encdump s1}.tr_s(#{encdump s2}, #{encdump s3})"
        if s1.empty?
          assert_equal(s1, s1.tr_s(s2, s3), desc)
-@@ -1362,9 +1382,8 @@ def test_str_succ
+@@ -1371,9 +1393,8 @@ def test_str_succ
          s = t
        }
      }
@@ -425,7 +425,7 @@ index 99c162a92f..3bd5c2be7e 100644
        {"A"=>"B", "A1"=>"A2", "A9"=>"B0", "9"=>"10", "Z"=>"AA"}.each do |orig, expected|
          s = orig.encode(enc)
          assert_strenc(expected.encode(enc), enc, s.succ, proc {"#{orig.dump}.encode(#{enc}).succ"})
-@@ -1378,7 +1397,7 @@ def test_str_succ2
+@@ -1387,7 +1408,7 @@ def test_str_succ2
    end
  
    def test_str_hash
@@ -434,7 +434,7 @@ index 99c162a92f..3bd5c2be7e 100644
        if s1.eql?(s2)
          assert_equal(s1.hash, s2.hash, "#{encdump s1}.hash == #{encdump s2}.dump")
        end
-@@ -1394,7 +1413,7 @@ def test_marshal
+@@ -1403,7 +1424,7 @@ def test_marshal
    end
  
    def test_str_sub
@@ -443,7 +443,7 @@ index 99c162a92f..3bd5c2be7e 100644
        if !s2.valid_encoding?
          assert_raise(RegexpError) { Regexp.new(Regexp.escape(s2)) }
          next
-@@ -1452,7 +1471,7 @@ def test_str_sub
+@@ -1461,7 +1482,7 @@ def test_str_sub
    end
  
    def test_str_sub!
@@ -452,7 +452,7 @@ index 99c162a92f..3bd5c2be7e 100644
        if !s2.valid_encoding?
          assert_raise(RegexpError) { Regexp.new(Regexp.escape(s2)) }
          next
-@@ -1551,7 +1570,7 @@ def test_str_chr
+@@ -1560,7 +1581,7 @@ def test_str_chr
    end
  
    def test_str_end_with?
@@ -461,7 +461,7 @@ index 99c162a92f..3bd5c2be7e 100644
        desc = "#{encdump s1}.end_with?(#{encdump s2})"
        if !str_enc_compatible?(s1, s2)
          assert_raise(Encoding::CompatibilityError, desc) { s1.end_with?(s2) }
-@@ -1570,7 +1589,7 @@ def test_str_end_with?
+@@ -1579,7 +1600,7 @@ def test_str_end_with?
    end
  
    def test_str_start_with?
@@ -470,7 +470,7 @@ index 99c162a92f..3bd5c2be7e 100644
        desc = "#{encdump s1}.start_with?(#{encdump s2})"
        if !str_enc_compatible?(s1, s2)
          assert_raise(Encoding::CompatibilityError, desc) { s1.start_with?(s2) }
-@@ -1605,7 +1624,7 @@ def test_str_ord
+@@ -1614,7 +1635,7 @@ def test_str_ord
    end
  
    def test_str_partition
@@ -479,7 +479,7 @@ index 99c162a92f..3bd5c2be7e 100644
        desc = "#{encdump s1}.partition(#{encdump s2})"
        if !str_enc_compatible?(s1, s2)
          assert_raise(Encoding::CompatibilityError, desc) { s1.partition(s2) }
-@@ -1621,7 +1640,7 @@ def test_str_partition
+@@ -1630,7 +1651,7 @@ def test_str_partition
    end
  
    def test_str_rpartition
