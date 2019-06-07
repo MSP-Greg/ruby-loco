@@ -16,10 +16,16 @@ module TestScript
     exit 1
   end
 
-  if ARGV.length == 2 && !ARGV[1].nil?  && ARGV[1] != ''
+  if ARGV.length == 3 && !ARGV[1].nil? && ARGV[1] != ''
     D_INSTALL = File.join __dir__, ARGV[1]
   elsif ARGV.length == 1
     D_INSTALL = File.join __dir__, 'install'
+  end
+
+  if ARGV.length == 3 && !ARGV[2].nil? && ARGV[2] != '' && (t = ARGV[2].to_i)
+    @@cli_fails = t
+  else
+    @@cli_fails = 0
   end
 
   D_LOGS  = File.join __dir__, 'logs'
@@ -82,7 +88,7 @@ module TestScript
                   "#{sp} #{RUBY_DESCRIPTION}\n" \
                   "#{sp} #{Time.now.getutc}\n\n" \
                   "#{results_str}\n" \
-                  "#{command_line()}\n"
+                  "#{@@cli_fails == 0 ? 'CLI passed' : 'CLI failures'}\n"
 
     puts "\n#{YELLOW}#{DASH * PUTS_LEN} Test Results#{RESET}"
     puts results_str
@@ -111,7 +117,7 @@ module TestScript
       end
     end
 
-    exit @@failures
+    exit (@@failures + @@cli_fails)
   end
 
   private
@@ -229,23 +235,6 @@ module TestScript
     end
   end
 
-  def command_line
-    begin
-      bundle_v = "bundle version  #{`bundle version`}"
-    rescue
-      bundle_v = "bundle version  NOT FOUND!"
-      @@failures += 1
-    end
-
-    begin
-      rake_v   = "rake -V         #{`rake -V`}"
-    rescue
-      rake_v   = "rake -V         NOT FOUND!"
-      @@failures += 1
-    end
-    bundle_v + rake_v
-  end
-
   def generate_test_all(s, results)
     str = ''.dup
 
@@ -352,7 +341,7 @@ module TestScript
     require 'digest'
     z_files = "#{D_INSTALL}/* ./trunk_msys2.ps1"
 
-    if @@failures == 0
+    if (@@failures + @@cli_fails) == 0
       r_suffix = R_BRANCH == 'master' ? 'trunk' : R_BRANCH
       r_msg    = ''
     else

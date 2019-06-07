@@ -51,23 +51,6 @@ function Time-Log($msg) {
   }
 }
 
-#———————————————————————————————————————————————————————————————————— Basic Info
-function Basic-Info {
-  $env:path = "$d_install/bin;$base_path"
-  Write-Host $($dash * 80) -ForegroundColor $fc
-  ruby -v
-  ruby -ropenssl -e "puts OpenSSL::OPENSSL_LIBRARY_VERSION"
-
-  Write-Host "bundle version:" $(bundle version)
-  Write-Host "gem  --version:" $(gem --version)
-  Write-Host "irb  --version:" $(irb --version)
-  Write-Host "rake --version:" $(rake --version)
-  Write-Host "rdoc --version:" $(rdoc --version)
-  Write-Host "ridk   version:"
-  ridk version
-  Write-Host "$($dash * 80)`n" -ForegroundColor $fc
-}
-
 #———————————————————————————————————————————————————————————————————— Check-Exit
 # checks whether to exit
 function Check-Exit($msg, $pop) {
@@ -302,7 +285,6 @@ Strip-Install
 Time-Log "strip build & install binary files"
 
 Print-Time-Log
-Basic-Info
 
 # save extension build files
 Push-Location $d_build

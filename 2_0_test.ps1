@@ -3,6 +3,8 @@ Runs Ruby tests with STDOUT & STDERR sent to two files, allows setting a max
 time, so if a test freezes, it can be stopped.
 #>
 
+$exit_code = 0
+
 #————————————————————————————————————————————————————————————————————— Kill-Proc
 # Kills a process by first looping thru child & grandchild processes and
 # stopping them, then stops passed process
@@ -90,6 +92,25 @@ function Run-Proc {
   $proc   = $null
 }
 
+#—————————————————————————————————————————————————————————————————————— CLI-Test
+function CLI-Test {
+  Write-Host $($dash * 80) -ForegroundColor $fc
+  ruby -ropenssl -e "puts RUBY_DESCRIPTION, OpenSSL::OPENSSL_LIBRARY_VERSION"
+
+  Write-Host "bundle version:" $(bundle version)
+  $exit_code += [int](0 + $LastExitCode)
+  Write-Host "gem  --version:" $(gem --version)
+  $exit_code += [int](0 + $LastExitCode)
+  Write-Host "irb  --version:" $(irb --version)
+  $exit_code += [int](0 + $LastExitCode)
+  Write-Host "rake --version:" $(rake --version)
+  $exit_code += [int](0 + $LastExitCode)
+  Write-Host "rdoc --version:" $(rdoc --version)
+  $exit_code += [int](0 + $LastExitCode)
+  Write-Host "ridk   version:`n$(ridk version)"
+  Write-Host "----------------------------------------------------------- $exit_code"
+}
+
 #———————————————————————————————————————————————————————————————————————— Finish
 # cleanup, save artifacts, etc
 function Finish {
@@ -120,11 +141,11 @@ function Finish {
   cd $d_repo
   # script checks test results, determines whether build is good or not,
   # saves artifacts and adds messages to build
-  ruby 2_1_test_script.rb $bits $install
-  $exit = ($LastExitCode -and $LastExitCode -ne 0)
+  ruby 2_1_test_script.rb $bits $install $exit_code
+  $exit += ($LastExitCode -and $LastExitCode -ne 0)
   ruby.exe -v -ropenssl -e "puts 'Build    ' + OpenSSL::OPENSSL_VERSION, 'Runtime  ' + OpenSSL::OPENSSL_LIBRARY_VERSION"
   Write-Host "Build worker image: $env:APPVEYOR_BUILD_WORKER_IMAGE"
-  if ($exit) { exit 1 }
+  if ($exit -ne 0) { exit 1 }
 }
 
 #————————————————————————————————————————————————————————————————————— BasicTest
@@ -221,7 +242,9 @@ $ruby_exe  = "$d_install/bin/ruby.exe"
 $abi       = &$ruby_exe -e "print RbConfig::CONFIG['ruby_version']"
 $script:time_info = ''
 
-&$d_install/bin/gem install `"timezone:>=1.3.2`" `"tzinfo:>=2.0.0`" `"tzinfo-data:>=1.2018.7`" --no-document --norc
+$env:path = "$d_install/bin;$base_path"
+
+gem install `"timezone:>=1.3.2`" `"tzinfo:>=2.0.0`" `"tzinfo-data:>=1.2018.7`" --no-document --conservative --norc
 
 #————————————————————————————————————————————————————————————————— start testing
 # test using readline.so, not rb-readline
@@ -234,6 +257,23 @@ ren "$d_install/lib/ruby/site_ruby/readline.rb" "readline.rb_"
 $env:GIT = "$d_repo/git/cmd/git.exe"
 
 $m_start = Get-Date
+
+Write-Host $($dash * 80) -ForegroundColor $fc
+ruby -ropenssl -e "puts RUBY_DESCRIPTION, OpenSSL::OPENSSL_LIBRARY_VERSION"
+
+# could not make the below work in a function, $exit_code was not set WHY WHY?
+# CLI-Test
+Write-Host "bundle version:" $(bundle version)
+$exit_code += [int](0 + $LastExitCode)
+Write-Host "gem  --version:" $(gem --version)
+$exit_code += [int](0 + $LastExitCode)
+Write-Host "irb  --version:" $(irb --version)
+$exit_code += [int](0 + $LastExitCode)
+Write-Host "rake --version:" $(rake --version)
+$exit_code += [int](0 + $LastExitCode)
+Write-Host "rdoc --version:" $(rdoc --version)
+$exit_code += [int](0 + $LastExitCode)
+Write-Host "ridk   version:`n$(ridk version)"
 
 BasicTest
 sleep 2

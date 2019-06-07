@@ -159,7 +159,7 @@ index 25fd15d093..a49c3b97a2 100644
  
        options
 diff --git a/test/lib/test/unit.rb b/test/lib/test/unit.rb
-index f11e4179b9..1d35eb182d 100644
+index 16db7ad9c3..a43753cdca 100644
 --- a/test/lib/test/unit.rb
 +++ b/test/lib/test/unit.rb
 @@ -3,11 +3,11 @@
@@ -193,7 +193,7 @@ index f11e4179b9..1d35eb182d 100644
          end
  
          opts.on '-n', '--name PATTERN', "Filter test method names on pattern: /REGEXP/, !/REGEXP/ or STRING" do |a|
-@@ -457,7 +464,6 @@ def _run_parallel suites, type, result
+@@ -459,7 +466,6 @@ def _run_parallel suites, type, result
            warn "Error: parameter of -j option should be greater than 0."
            return
          end
@@ -201,7 +201,7 @@ index f11e4179b9..1d35eb182d 100644
          # Require needed thing for parallel running
          require 'timeout'
          @tasks = @files.dup # Array of filenames.
-@@ -510,7 +516,12 @@ def _run_parallel suites, type, result
+@@ -512,7 +518,12 @@ def _run_parallel suites, type, result
              suites.map! {|r| eval("::"+r[:testcase])}
              del_status_line or puts
              unless suites.empty?
@@ -215,7 +215,7 @@ index f11e4179b9..1d35eb182d 100644
                _run_suites(suites, type)
              end
              @options[:parallel] = parallel
-@@ -527,7 +538,7 @@ def _run_parallel suites, type, result
+@@ -529,7 +540,7 @@ def _run_parallel suites, type, result
              if @options[:retry]
                @errors   += rep.map{|x| x[:result][0] }.inject(:+)
                @failures += rep.map{|x| x[:result][1] }.inject(:+)
@@ -224,7 +224,7 @@ index f11e4179b9..1d35eb182d 100644
              end
            end
            unless @warnings.empty?
-@@ -587,7 +598,7 @@ def setup_options(opts, options)
+@@ -589,7 +600,7 @@ def setup_options(opts, options)
  
        def _run_suites(suites, type)
          result = super
@@ -233,7 +233,7 @@ index f11e4179b9..1d35eb182d 100644
          report.sort_by!{|r| r.start_with?("Skipped:") ? 0 : \
                             (r.start_with?("Failure:") ? 1 : 2) }
          failed(nil)
-@@ -701,6 +712,7 @@ def output
+@@ -703,6 +714,7 @@ def output
        end
  
        def _prepare_run(suites, type)
@@ -241,7 +241,7 @@ index f11e4179b9..1d35eb182d 100644
          options[:job_status] ||= :replace if @tty && !@verbose
          case options[:color]
          when :always
-@@ -1081,13 +1093,17 @@ def puke klass, meth, e
+@@ -1083,13 +1095,17 @@ def puke klass, meth, e
          # TODO:
          #   this overriding is for minitest feature that skip messages are
          #   hidden when not verbose (-v), note this is temporally.
