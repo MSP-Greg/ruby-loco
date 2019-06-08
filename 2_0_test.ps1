@@ -142,7 +142,7 @@ function Finish {
   cd $d_repo
   # script checks test results, determines whether build is good or not,
   # saves artifacts and adds messages to build
-  ruby 2_1_test_script.rb $bits $install $exit_code
+  ruby.exe 2_1_test_script.rb $bits $install $exit_code
   $exit += ($LastExitCode -and $LastExitCode -ne 0)
   ruby.exe -v -ropenssl -e "puts 'Build    ' + OpenSSL::OPENSSL_VERSION, 'Runtime  ' + OpenSSL::OPENSSL_LIBRARY_VERSION"
   Write-Host "Build worker image: $env:APPVEYOR_BUILD_WORKER_IMAGE"

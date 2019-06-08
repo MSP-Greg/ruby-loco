@@ -325,7 +325,7 @@ module TestScript
     puts "#{YELLOW}#{DASH * PUTS_LEN} Saving Artifacts#{RESET}"
     push_artifacts
 
-    fn_log = "zlogs_#{R_BRANCH}_#{RUBY_RELEASE_DATE}_#{RUBY_REVISION[0..9]}.7z"
+    fn_log = "zlogs_#{R_BRANCH}_#{RUBY_RELEASE_DATE[0,10]}_#{RUBY_REVISION[0,10]}.7z"
 
     `attrib +r *.log`
     `7z.exe a ./zips/#{fn_log} ./logs/*.log`
