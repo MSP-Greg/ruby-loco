@@ -62,7 +62,7 @@ module TestScript
 
   def run
     logs = []
-    Dir.chdir File.join(__dir__, 'logs')
+    Dir.chdir File.join __dir__, 'logs'
     logs = Dir["*.log"]
 
     warnings_str = ''.dup
@@ -74,7 +74,6 @@ module TestScript
 
       case fn
       when 'test_all.log'           ; r[0], sum_test_all = log_test_all(str)
-#      when 'test_spec.log'          ; r[1] = log_spec(str)
       when 'test_mspec.log'         ; r[2] = log_mspec(str)
       when 'test_basic.log'         ; r[3] = log_basic(str)
       when 'test_bootstrap_err.log' ; r[4] = log_btest(str)
@@ -88,12 +87,12 @@ module TestScript
                   "#{sp} #{RUBY_DESCRIPTION}\n" \
                   "#{sp} #{Time.now.getutc}\n\n" \
                   "#{results_str}\n" \
-                  "#{@@cli_fails == 0 ? 'CLI passed' : 'CLI failures'}\n"
+                  "#{@@cli_fails == 0 ? 'CLI passed' : 'CLI FAILED!'}\n"
 
     puts "\n#{YELLOW}#{DASH * PUTS_LEN} Test Results#{RESET}"
     puts results_str
 
-    File.binwrite(File.join(D_LOGS, "Summary_Test_Results.log"), results_str)
+    File.binwrite File.join(D_LOGS, "Summary_Test_Results.log"), results_str
 
     unless sum_test_all.empty?
       puts "\n#{YELLOW}#{DASH * PUTS_LEN} Summary test-all#{RESET}"
@@ -102,7 +101,7 @@ module TestScript
       File.binwrite(File.join(D_LOGS, "Summary_test-all.log"), sum_test_all)
     end
 
-    Dir.chdir(__dir__)
+    Dir.chdir __dir__
     zip_save
 
     if IS_AV

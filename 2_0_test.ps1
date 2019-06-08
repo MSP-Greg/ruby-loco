@@ -107,7 +107,8 @@ function CLI-Test {
   $exit_code += [int](0 + $LastExitCode)
   Write-Host "rdoc --version:" $(rdoc --version)
   $exit_code += [int](0 + $LastExitCode)
-  Write-Host "ridk   version:`n$(ridk version)"
+  Write-Host "ridk   version:"
+  ridk version
   Write-Host "----------------------------------------------------------- $exit_code"
 }
 
@@ -244,8 +245,6 @@ $script:time_info = ''
 
 $env:path = "$d_install/bin;$base_path"
 
-gem install `"timezone:>=1.3.2`" `"tzinfo:>=2.0.0`" `"tzinfo-data:>=1.2018.7`" --no-document --conservative --norc
-
 #————————————————————————————————————————————————————————————————— start testing
 # test using readline.so, not rb-readline
 ren "$d_install/lib/ruby/site_ruby/readline.rb" "readline.rb_"
@@ -258,11 +257,15 @@ $env:GIT = "$d_repo/git/cmd/git.exe"
 
 $m_start = Get-Date
 
-Write-Host $($dash * 80) -ForegroundColor $fc
+Write-Host $($dash * 92) -ForegroundColor $fc
 ruby -ropenssl -e "puts RUBY_DESCRIPTION, OpenSSL::OPENSSL_LIBRARY_VERSION"
+
+Write-Host $($dash * 74) Install `'tz`' gems -ForegroundColor $fc
+gem install `"timezone:>=1.3.2`" `"tzinfo:>=2.0.0`" `"tzinfo-data:>=1.2018.7`" --no-document --conservative --norc
 
 # could not make the below work in a function, $exit_code was not set WHY WHY?
 # CLI-Test
+Write-Host $($dash * 74) CLI Test -ForegroundColor $fc
 Write-Host "bundle version:" $(bundle version)
 $exit_code += [int](0 + $LastExitCode)
 Write-Host "gem  --version:" $(gem --version)
@@ -273,7 +276,10 @@ Write-Host "rake --version:" $(rake --version)
 $exit_code += [int](0 + $LastExitCode)
 Write-Host "rdoc --version:" $(rdoc --version)
 $exit_code += [int](0 + $LastExitCode)
-Write-Host "ridk   version:`n$(ridk version)"
+Write-Host "ridk   version:"
+ridk version
+
+Write-Host `n$($dash * 74) Runs Tests -ForegroundColor $fc
 
 BasicTest
 sleep 2
