@@ -27,7 +27,7 @@ class << self
     Dir.chdir( File.join(__dir__, 'ruby') ) { |d|
       branch = `git branch`[/^\* (.+)/, 1].sub(')', '')[/[^ \/]+\Z/]
       # set branch to trunk if it's a commit
-      branch = "master" if /\A[0-9a-f]{7}\Z/ =~ branch
+      branch = 'master' if /\A[0-9a-f]{7}\Z/ =~ branch
 
       # Get svn from commit info, write to revision.h
       if svn = %x[git log -n1 --format=%H][0,10]
@@ -53,6 +53,8 @@ class << self
                   v_data[/^#define[ \t]+RUBY_RELEASE_DAY[ \t]+(\d{1,2})/, 1].rjust(2,'0')
         patch = patch == '-1' ? 'dev' : "p#{patch}"
         arch = ARCH == '64' ? '[x64-mingw32]' : '[i386-mingw32]'
+        # update for git commit time as date in RUBY_DESCRIPTION
+        date = Time.at(%x[git log -n1 --format=%ct].to_i).utc.strftime('%FT%TZ')[0,10]
         title = "#{patch} (#{date} #{branch} #{svn}) #{arch}".sub(/ +\)/, ')')
       }
       # needed for r66602 and later
