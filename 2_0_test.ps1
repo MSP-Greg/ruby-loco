@@ -198,7 +198,7 @@ function Test-All {
   $env:TEST_SSL = '1'
 
   $args = "-rdevkit runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `
-    " -a --show-skip --retry --job-status=normal --subprocess-timeout-scale=1.5"
+    " -a --show-skip --retry --job-status=normal --timeout-scale=1.5"
 
   $env:RUBYOPT = "--disable=gems -w"
 
