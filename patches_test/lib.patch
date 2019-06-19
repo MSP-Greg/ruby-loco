@@ -241,7 +241,7 @@ index 16db7ad9c3..a43753cdca 100644
          options[:job_status] ||= :replace if @tty && !@verbose
          case options[:color]
          when :always
-@@ -1083,13 +1095,17 @@ def puke klass, meth, e
+@@ -1084,13 +1096,17 @@ def puke klass, meth, e
          # TODO:
          #   this overriding is for minitest feature that skip messages are
          #   hidden when not verbose (-v), note this is temporally.

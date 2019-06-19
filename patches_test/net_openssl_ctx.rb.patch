@@ -2,7 +2,7 @@ Patch by MSP-Greg
 Add shared util.rb file with create_ssl_ctx method
 Removes duplicated code in ftp, imap, & smtp
 diff --git a/test/net/ftp/test_ftp.rb b/test/net/ftp/test_ftp.rb
-index 98322fdd57..701be94d68 100644
+index a5219644bb..1127d85649 100644
 --- a/test/net/ftp/test_ftp.rb
 +++ b/test/net/ftp/test_ftp.rb
 @@ -6,6 +6,7 @@
@@ -192,7 +192,7 @@ index 98322fdd57..701be94d68 100644
          sock.sync_close = true
          begin
 diff --git a/test/net/imap/test_imap.rb b/test/net/imap/test_imap.rb
-index 936f4e0f42..77a9d9b662 100644
+index e33ab2441b..0905712c9f 100644
 --- a/test/net/imap/test_imap.rb
 +++ b/test/net/imap/test_imap.rb
 @@ -2,11 +2,9 @@
@@ -235,7 +235,7 @@ index 936f4e0f42..77a9d9b662 100644
          imap
        end
      rescue SystemCallError
-@@ -689,14 +687,7 @@ def test_append_fail
+@@ -701,14 +699,7 @@ def test_append_fail
    def imaps_test
      server = create_tcp_server
      port = server.addr[1]
@@ -249,9 +249,9 @@ index 936f4e0f42..77a9d9b662 100644
 -    }
 +    ctx = Net::TestUtils.create_ssl_ctx
      ssl_server = OpenSSL::SSL::SSLServer.new(server, ctx)
+     started = false
      ths = Thread.start do
-       Thread.current.report_on_exception = false # always join-ed
-@@ -735,14 +726,7 @@ def starttls_test
+@@ -750,14 +741,7 @@ def starttls_test
          sock.print("* OK test server\r\n")
          sock.gets
          sock.print("RUBY0001 OK completed\r\n")
@@ -301,23 +301,3 @@ index 23e1542d8f..8906ff0b88 100644
        begin
          sock = nil
          Thread.start do
-diff --git a/test/net/utils.rb b/test/net/utils.rb
-index e69de29bb2..d026e7f172 100644
---- a/test/net/utils.rb
-+++ b/test/net/utils.rb
-@@ -0,0 +1,15 @@
-+# frozen_string_literal: true
-+
-+module Net::TestUtils
-+  CA_FILE     = File.join(__dir__, "fixtures/cacert.pem")
-+  SERVER_KEY  = File.join(__dir__, "fixtures/server.key")
-+  SERVER_CERT = File.join(__dir__, "fixtures/server.crt")
-+
-+  def self.create_ssl_ctx
-+    ctx = OpenSSL::SSL::SSLContext.new
-+    ctx.ca_file = CA_FILE
-+    ctx.key  = OpenSSL::PKey::RSA.new( File.read(SERVER_KEY) )
-+    ctx.cert = OpenSSL::X509::Certificate.new( File.read(SERVER_CERT) )
-+    ctx
-+  end
-+end

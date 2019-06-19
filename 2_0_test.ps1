@@ -173,7 +173,7 @@ function BootStrapTest {
     -StdErr "test_bootstrap_err.log" `
     -Title  "btest      (bootstraptest)" `
     -Dir    "$d_ruby/bootstraptest" `
-    -TimeLimit 100
+    -TimeLimit 200
 }
 
 #—————————————————————————————————————————————————————————————————————— Test-All
