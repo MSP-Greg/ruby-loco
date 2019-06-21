@@ -324,8 +324,8 @@ module TestScript
   def zip_save
     puts "#{YELLOW}#{DASH * PUTS_LEN} Saving Artifacts#{RESET}"
     push_artifacts
-
-    fn_log = "zlogs_#{R_BRANCH}_#{RUBY_RELEASE_DATE[0,10]}_#{RUBY_REVISION[0,10]}.7z"
+    date = RUBY_DESCRIPTION[/\((\d{4}-\d{2}-\d{2})/, 1]
+    fn_log = "zlogs_#{R_BRANCH}_#{date}_#{RUBY_REVISION[0,10]}.7z"
 
     `attrib +r *.log`
     `7z.exe a ./zips/#{fn_log} ./logs/*.log`
