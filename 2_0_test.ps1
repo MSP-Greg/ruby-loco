@@ -200,8 +200,8 @@ function Test-All {
   $args = "-rdevkit runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `
     " -a --show-skip --retry --job-status=normal --timeout-scale=1.5"
 
-  $env:RUBYOPT = "--disable=gems -w"
-
+  #$env:RUBYOPT = "--disable=gems -w"
+  $env:RUBYOPT = "--enable=frozen-string-literal --disable=gems -w"
   Run-Proc `
     -exe    $ruby_exe `
     -e_args $args `
@@ -220,6 +220,8 @@ function Test-All {
 #————————————————————————————————————————————————————————————————————————— MSpec
 function MSpec {
   $env:path = "$d_install/bin;$d_repo/git/cmd;$base_path"
+
+  $env:RUBYOPT = "--enable=frozen-string-literal"
 
   Run-Proc `
     -exe    "ruby.exe" `
@@ -290,5 +292,7 @@ sleep 5
 MSpec
 
 ren "$d_install/lib/ruby/site_ruby/readline.rb_" "readline.rb"
+
+Remove-Item Env:\RUBYOPT
 
 Finish
