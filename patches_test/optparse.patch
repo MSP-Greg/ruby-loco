@@ -488,24 +488,19 @@ index b743aa00c1..35a2eb0a3e 100644
      r = nil
      o = OptionParser.new do |opts|
 diff --git a/test/optparse/test_zsh_completion.rb b/test/optparse/test_zsh_completion.rb
-index 1bc6c7f0bb..8f098d22ed 100644
+index c548d4af8a..2824e09cf7 100644
 --- a/test/optparse/test_zsh_completion.rb
 +++ b/test/optparse/test_zsh_completion.rb
-@@ -1,10 +1,7 @@
+@@ -1,6 +1,5 @@
 -# frozen_string_literal: false
 -require 'test/unit'
 -require 'optparse'
 +# frozen_string_literal: true
 +require_relative 'optparse_setup'
  
--class TestOptionParser < Test::Unit::TestCase
--end
--class TestOptionParser::BashCompletion < Test::Unit::TestCase
-+class TestOptionParser::BashCompletionZSH < Test::Unit::TestCase
-   def setup
-     @opt = OptionParser.new
-     @opt.define("-z", "zzz") {}
-@@ -14,7 +11,7 @@ def setup
+ class TestOptionParser < Test::Unit::TestCase
+ end
+@@ -14,7 +13,7 @@ def setup
    end
  
    def test_compsys
