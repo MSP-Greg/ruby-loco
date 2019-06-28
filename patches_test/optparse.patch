@@ -2,15 +2,16 @@ Patch by MSP-Greg
 changed from class inheritance to include
 frozen_string_literal: true
 diff --git a/test/optparse/optparse_setup.rb b/test/optparse/optparse_setup.rb
-index e69de29bb2..32a1494c30 100644
---- a/test/optparse/optparse_setup.rb
+new file mode 100644
+index 0000000000..aa0e730e28
+--- /dev/null
 +++ b/test/optparse/optparse_setup.rb
 @@ -0,0 +1,85 @@
 +# frozen_string_literal: true
 +require 'test/unit'
 +require 'optparse'
 +
-+module TestOptionParser ; end
++class TestOptionParser < Test::Unit::TestCase ; end
 +
 +module OptionParserDummy
 +  class DummyOutput < String
@@ -109,7 +110,7 @@ index 5c3fbdb10c..802482302d 100644
    def setup
      super
 diff --git a/test/optparse/test_autoconf.rb b/test/optparse/test_autoconf.rb
-index 3be4a4c598..d720606329 100644
+index 45f2ba09b2..50a07fad77 100644
 --- a/test/optparse/test_autoconf.rb
 +++ b/test/optparse/test_autoconf.rb
 @@ -1,10 +1,11 @@
@@ -400,7 +401,7 @@ index 8acfdb2161..2d9dbf6d7f 100644
      super
      @opt.def_option("-x [VAL]") {|x| @flag = x}
 diff --git a/test/optparse/test_reqarg.rb b/test/optparse/test_reqarg.rb
-index b2e4755f80..e136c65d94 100644
+index b2e4755f80..ab7bfa5c65 100644
 --- a/test/optparse/test_reqarg.rb
 +++ b/test/optparse/test_reqarg.rb
 @@ -1,15 +1,18 @@
@@ -455,22 +456,20 @@ index b2e4755f80..e136c65d94 100644
      def setup
        super
        @opt.def_option("-xVAL", "--option=VAL") {|x| @flag = x}
-@@ -81,8 +84,11 @@ def test_hyphenize
+@@ -81,7 +84,10 @@ def test_hyphenize
      assert_equal("foo4", @flag)
    end
  
 -  class TestOptionParser::WithPattern < TestOptionParser
--    def test_pattern
 +  class TestOptionParser::WithPattern < Test::Unit::TestCase
 +
-+  include OptionParserSetup
++    include OptionParserSetup
 +
-+  def test_pattern
+     def test_pattern
        pat = num = nil
        @opt.def_option("--pattern=VAL", /(\w+)(?:\s*:\s*(\w+))?/) {|x, y, z| pat = [x, y, z]}
-       @opt.def_option("-T NUM", /\A[1-4]\z/) {|n| num = n}
 diff --git a/test/optparse/test_summary.rb b/test/optparse/test_summary.rb
-index b743aa00c1..35a2eb0a3e 100644
+index 67b05672d4..c0d2fa92e7 100644
 --- a/test/optparse/test_summary.rb
 +++ b/test/optparse/test_summary.rb
 @@ -1,7 +1,10 @@
@@ -488,19 +487,24 @@ index b743aa00c1..35a2eb0a3e 100644
      r = nil
      o = OptionParser.new do |opts|
 diff --git a/test/optparse/test_zsh_completion.rb b/test/optparse/test_zsh_completion.rb
-index c548d4af8a..2824e09cf7 100644
+index c548d4af8a..41fa798fc5 100644
 --- a/test/optparse/test_zsh_completion.rb
 +++ b/test/optparse/test_zsh_completion.rb
-@@ -1,6 +1,5 @@
+@@ -1,10 +1,7 @@
 -# frozen_string_literal: false
 -require 'test/unit'
 -require 'optparse'
 +# frozen_string_literal: true
 +require_relative 'optparse_setup'
  
- class TestOptionParser < Test::Unit::TestCase
- end
-@@ -14,7 +13,7 @@ def setup
+-class TestOptionParser < Test::Unit::TestCase
+-end
+-class TestOptionParser::ZshCompletion < Test::Unit::TestCase
++class TestOptionParser::Main::ZshCompletion < Test::Unit::TestCase
+   def setup
+     @opt = OptionParser.new
+     @opt.define("-z", "zzz") {}
+@@ -14,7 +11,7 @@ def setup
    end
  
    def test_compsys
