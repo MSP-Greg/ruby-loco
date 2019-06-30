@@ -2,7 +2,7 @@ Patch by MSP-Greg
 Add shared util.rb file with create_ssl_ctx method
 Removes duplicated code in ftp, imap, & smtp
 diff --git a/test/net/ftp/test_ftp.rb b/test/net/ftp/test_ftp.rb
-index a5219644bb..1127d85649 100644
+index 39f1220dbb..be1d27aac4 100644
 --- a/test/net/ftp/test_ftp.rb
 +++ b/test/net/ftp/test_ftp.rb
 @@ -6,6 +6,7 @@
@@ -23,7 +23,7 @@ index a5219644bb..1127d85649 100644
  
    def setup
      @thread = nil
-@@ -1721,7 +1719,7 @@ def test_tls_with_ca_file
+@@ -1724,7 +1722,7 @@ def test_tls_with_ca_file
            begin
              Net::FTP.new(SERVER_NAME,
                           :port => port,
@@ -32,7 +32,7 @@ index a5219644bb..1127d85649 100644
            rescue SystemCallError
              skip $!
            end
-@@ -1746,7 +1744,7 @@ def test_tls_post_connection_check
+@@ -1749,7 +1747,7 @@ def test_tls_post_connection_check
            # so the following code should raise a SSLError.
            Net::FTP.new(SERVER_ADDR,
                         :port => port,
@@ -41,7 +41,7 @@ index a5219644bb..1127d85649 100644
          end
        end
      end
-@@ -1763,14 +1761,7 @@ def test_active_private_data_connection
+@@ -1766,14 +1764,7 @@ def test_active_private_data_connection
            sock.print("220 (test_ftp).\r\n")
            commands.push(sock.gets)
            sock.print("234 AUTH success.\r\n")
@@ -57,7 +57,7 @@ index a5219644bb..1127d85649 100644
            sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
            sock.sync_close = true
            begin
-@@ -1809,7 +1800,7 @@ def test_active_private_data_connection
+@@ -1812,7 +1803,7 @@ def test_active_private_data_connection
        end
        ftp = Net::FTP.new(SERVER_NAME,
                           port: port,
@@ -66,7 +66,7 @@ index a5219644bb..1127d85649 100644
                           passive: false)
        begin
          assert_equal("AUTH TLS\r\n", commands.shift)
-@@ -1847,14 +1838,7 @@ def test_passive_private_data_connection
+@@ -1850,14 +1841,7 @@ def test_passive_private_data_connection
            sock.print("220 (test_ftp).\r\n")
            commands.push(sock.gets)
            sock.print("234 AUTH success.\r\n")
@@ -82,7 +82,7 @@ index a5219644bb..1127d85649 100644
            sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
            sock.sync_close = true
            begin
-@@ -1893,7 +1877,7 @@ def test_passive_private_data_connection
+@@ -1896,7 +1880,7 @@ def test_passive_private_data_connection
        end
        ftp = Net::FTP.new(SERVER_NAME,
                           port: port,
@@ -91,7 +91,7 @@ index a5219644bb..1127d85649 100644
                           passive: true)
        begin
          assert_equal("AUTH TLS\r\n", commands.shift)
-@@ -1929,14 +1913,7 @@ def test_active_clear_data_connection
+@@ -1932,14 +1916,7 @@ def test_active_clear_data_connection
            sock.print("220 (test_ftp).\r\n")
            commands.push(sock.gets)
            sock.print("234 AUTH success.\r\n")
@@ -107,7 +107,7 @@ index a5219644bb..1127d85649 100644
            sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
            sock.sync_close = true
            begin
-@@ -1967,7 +1944,7 @@ def test_active_clear_data_connection
+@@ -1970,7 +1947,7 @@ def test_active_clear_data_connection
        end
        ftp = Net::FTP.new(SERVER_NAME,
                           port: port,
@@ -116,7 +116,7 @@ index a5219644bb..1127d85649 100644
                           private_data_connection: false,
                           passive: false)
        begin
-@@ -1998,14 +1975,7 @@ def test_passive_clear_data_connection
+@@ -2001,14 +1978,7 @@ def test_passive_clear_data_connection
            sock.print("220 (test_ftp).\r\n")
            commands.push(sock.gets)
            sock.print("234 AUTH success.\r\n")
@@ -132,7 +132,7 @@ index a5219644bb..1127d85649 100644
            sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
            sock.sync_close = true
            begin
-@@ -2036,7 +2006,7 @@ def test_passive_clear_data_connection
+@@ -2039,7 +2009,7 @@ def test_passive_clear_data_connection
        end
        ftp = Net::FTP.new(SERVER_NAME,
                           port: port,
@@ -141,7 +141,7 @@ index a5219644bb..1127d85649 100644
                           private_data_connection: false,
                           passive: true)
        begin
-@@ -2071,7 +2041,7 @@ def test_tls_connect_timeout
+@@ -2074,7 +2044,7 @@ def test_tls_connect_timeout
          assert_raise(Net::OpenTimeout) do
            Net::FTP.new(SERVER_NAME,
                         port: port,
@@ -150,7 +150,7 @@ index a5219644bb..1127d85649 100644
                         ssl_handshake_timeout: 0.1)
          end
          @thread.join
-@@ -2090,14 +2060,7 @@ def test_abort_tls
+@@ -2093,14 +2063,7 @@ def test_abort_tls
        sock.print("220 (test_ftp).\r\n")
        commands.push(sock.gets)
        sock.print("234 AUTH success.\r\n")
@@ -166,7 +166,7 @@ index a5219644bb..1127d85649 100644
        sock = OpenSSL::SSL::SSLSocket.new(sock, ctx)
        sock.sync_close = true
        sock.accept
-@@ -2118,7 +2081,7 @@ def test_abort_tls
+@@ -2121,7 +2084,7 @@ def test_abort_tls
        begin
          ftp = Net::FTP.new(SERVER_NAME,
                             port: server.port,
@@ -175,7 +175,7 @@ index a5219644bb..1127d85649 100644
          assert_equal("AUTH TLS\r\n", commands.shift)
          assert_equal("PBSZ 0\r\n", commands.shift)
          assert_equal("PROT P\r\n", commands.shift)
-@@ -2394,14 +2357,7 @@ def tls_test
+@@ -2397,14 +2360,7 @@ def tls_test
          sock.print("220 (test_ftp).\r\n")
          commands.push(sock.gets)
          sock.print("234 AUTH success.\r\n")
@@ -192,7 +192,7 @@ index a5219644bb..1127d85649 100644
          sock.sync_close = true
          begin
 diff --git a/test/net/imap/test_imap.rb b/test/net/imap/test_imap.rb
-index bdae8f28e4..42d50bf05b 100644
+index b97be4ffb3..f1c0df1d0c 100644
 --- a/test/net/imap/test_imap.rb
 +++ b/test/net/imap/test_imap.rb
 @@ -2,11 +2,9 @@
@@ -235,7 +235,7 @@ index bdae8f28e4..42d50bf05b 100644
          imap
        end
      rescue SystemCallError
-@@ -700,14 +698,7 @@ def test_append_fail
+@@ -699,14 +697,7 @@ def test_append_fail
    def imaps_test
      server = create_tcp_server
      port = server.addr[1]
@@ -251,7 +251,7 @@ index bdae8f28e4..42d50bf05b 100644
      ssl_server = OpenSSL::SSL::SSLServer.new(server, ctx)
      started = false
      ths = Thread.start do
-@@ -749,14 +740,7 @@ def starttls_test
+@@ -748,14 +739,7 @@ def starttls_test
          sock.print("* OK test server\r\n")
          sock.gets
          sock.print("RUBY0001 OK completed\r\n")
@@ -268,7 +268,7 @@ index bdae8f28e4..42d50bf05b 100644
          sock.sync_close = true
          sock.accept
 diff --git a/test/net/smtp/test_smtp.rb b/test/net/smtp/test_smtp.rb
-index 23e1542d8f..8906ff0b88 100644
+index 90c92e06f8..cc440dda2b 100644
 --- a/test/net/smtp/test_smtp.rb
 +++ b/test/net/smtp/test_smtp.rb
 @@ -2,12 +2,10 @@
