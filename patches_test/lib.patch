@@ -4,10 +4,10 @@ a) turns on verbose
 b) adjusts assertions count so that tests, regardless of manner run, show similar results.
 c) adds assertion total by test to each line of output
 index 25fd15d093..a49c3b97a2 100644
-diff --git a/test/lib/minitest/unit.rb b/test/lib/minitest/unit.rb
+diff --git a/tool/lib/minitest/unit.rb b/tool/lib/minitest/unit.rb
 index d922a5fc41..797025986e 100644
---- a/test/lib/minitest/unit.rb
-+++ b/test/lib/minitest/unit.rb
+--- a/tool/lib/minitest/unit.rb
++++ b/tool/lib/minitest/unit.rb
 @@ -3,7 +3,7 @@
  
  require "optparse"
@@ -159,10 +159,10 @@ index d922a5fc41..797025986e 100644
        @help = orig_args.map { |s| s =~ /[\s|&<>$()]/ ? s.inspect : s }.join " "
  
        options
-diff --git a/test/lib/test/unit.rb b/test/lib/test/unit.rb
+diff --git a/tool/lib/test/unit.rb b/tool/lib/test/unit.rb
 index 3df6774d61..54f3d32505 100644
---- a/test/lib/test/unit.rb
-+++ b/test/lib/test/unit.rb
+--- a/tool/lib/test/unit.rb
++++ b/tool/lib/test/unit.rb
 @@ -3,11 +3,11 @@
    gem 'minitest', '< 5.0.0' if defined? Gem
  rescue Gem::LoadError
@@ -266,10 +266,10 @@ index 3df6774d61..54f3d32505 100644
        end
      end
  
-diff --git a/test/lib/tracepointchecker.rb b/test/lib/tracepointchecker.rb
+diff --git a/tool/lib/tracepointchecker.rb b/tool/lib/tracepointchecker.rb
 index 47822ecef5..a3ec586103 100644
---- a/test/lib/tracepointchecker.rb
-+++ b/test/lib/tracepointchecker.rb
+--- a/tool/lib/tracepointchecker.rb
++++ b/tool/lib/tracepointchecker.rb
 @@ -1,4 +1,9 @@
  # frozen_string_literal: true
 +
@@ -280,10 +280,10 @@ index 47822ecef5..a3ec586103 100644
  module TracePointChecker
    STATE = {
      count: 0,
-diff --git a/test/lib/zombie_hunter.rb b/test/lib/zombie_hunter.rb
+diff --git a/tool/lib/zombie_hunter.rb b/tool/lib/zombie_hunter.rb
 index 33bc467941..dad1e04758 100644
---- a/test/lib/zombie_hunter.rb
-+++ b/test/lib/zombie_hunter.rb
+--- a/tool/lib/zombie_hunter.rb
++++ b/tool/lib/zombie_hunter.rb
 @@ -1,5 +1,9 @@
  # frozen_string_literal: true
  
