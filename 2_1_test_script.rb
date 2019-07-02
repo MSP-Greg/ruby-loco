@@ -69,7 +69,7 @@ module TestScript
     results_str  = ''.dup
     r = []
     sum_test_all = ''
-    logs.each { |fn|
+    logs.each do |fn|
       str = clean_file fn
 
       case fn
@@ -78,7 +78,14 @@ module TestScript
       when 'test_basic.log'         ; r[3] = log_basic(str)
       when 'test_bootstrap_err.log' ; r[4] = log_btest(str)
       end
-    }
+    end
+    # no test-all log
+    if r[0].nil?
+      @@failures += 1
+      r[0] = "test-all   UNKNOWN see log\n\n"
+      sum_test_all = ''
+    end
+    
     results_str << r.join('')
 
     sp = ' ' * @@failures.to_s.length
