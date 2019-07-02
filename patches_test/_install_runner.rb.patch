@@ -1,12 +1,12 @@
 Patch by MSP-Greg
 Allows using runner.rb from install
 diff --git a/test/runner.rb b/test/runner.rb
-index d8b44644f7..b8d212f5a3 100644
+index db2084949e..905066423b 100644
 --- a/test/runner.rb
 +++ b/test/runner.rb
-@@ -5,12 +5,19 @@
- $LOAD_PATH << src_testdir
- $LOAD_PATH.unshift "#{src_testdir}/lib"
+@@ -6,12 +6,19 @@
+ tool_dir = File.join src_testdir, "..", "tool"
+ $LOAD_PATH.unshift "#{tool_dir}/lib"
  
 -# Get bundled gems on load path
 -Dir.glob("#{src_testdir}/../gems/*/*.gemspec")
@@ -25,7 +25,7 @@ index d8b44644f7..b8d212f5a3 100644
 +end
  
 -require 'test/unit'
-+require_relative 'lib/test/unit'
++require_relative '../tool/lib/test/unit'
  
  module Gem
  end
