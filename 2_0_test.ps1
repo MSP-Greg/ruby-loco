@@ -103,6 +103,8 @@ function CLI-Test {
   $exit_code += [int](0 + $LastExitCode)
   Write-Host "irb  --version:" $(irb --version)
   $exit_code += [int](0 + $LastExitCode)
+  Write-Host "racc --version:" $(racc --version)
+  $exit_code += [int](0 + $LastExitCode)
   Write-Host "rake --version:" $(rake --version)
   $exit_code += [int](0 + $LastExitCode)
   Write-Host "rdoc --version:" $(rdoc --version)
