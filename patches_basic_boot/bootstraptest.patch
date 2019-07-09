@@ -1,10 +1,10 @@
 Patch by MSP-Greg
 Attempts to fix issues when run on 'busy' Appveyor systems
 diff --git a/bootstraptest/runner.rb b/bootstraptest/runner.rb
-index 58619fae7e..f2b50e1743 100755
+index 4e9196ef3d..9b9bb1eda4 100755
 --- a/bootstraptest/runner.rb
 +++ b/bootstraptest/runner.rb
-@@ -399,9 +399,15 @@ def assert_finish(timeout_seconds, testsrc, message = '')
+@@ -395,9 +395,15 @@ def assert_finish(timeout_seconds, testsrc, message = '')
        end
        if io.respond_to?(:read_nonblock)
          if IO.select([io], nil, nil, diff)
@@ -41,7 +41,7 @@ index 89c00d0b88..b65476fbe0 100644
    Thread.new {
      w << "ab"
 diff --git a/bootstraptest/test_thread.rb b/bootstraptest/test_thread.rb
-index d16295de8b..e4b49c5a0b 100644
+index 03fb441441..080918d03b 100644
 --- a/bootstraptest/test_thread.rb
 +++ b/bootstraptest/test_thread.rb
 @@ -358,7 +358,7 @@ def m

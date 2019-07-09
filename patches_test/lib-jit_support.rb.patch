@@ -2,8 +2,8 @@ Patch by MSP-Greg
 lower timeout time
 diff --git a/test/lib/jit_support.rb b/test/lib/jit_support.rb
 index 3877c6ec7e..5d624640bf 100644
---- a/tool/lib/jit_support.rb
-+++ b/tool/lib/jit_support.rb
+--- a/test/lib/jit_support.rb
++++ b/test/lib/jit_support.rb
 @@ -1,7 +1,7 @@
  require 'rbconfig'
  
