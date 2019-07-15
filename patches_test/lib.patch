@@ -3,7 +3,6 @@ Added -a --assert parameter for test-all
 a) turns on verbose
 b) adjusts assertions count so that tests, regardless of manner run, show similar results.
 c) adds assertion total by test to each line of output
-index 25fd15d093..a49c3b97a2 100644
 diff --git a/tool/lib/minitest/unit.rb b/tool/lib/minitest/unit.rb
 index d922a5fc41..797025986e 100644
 --- a/tool/lib/minitest/unit.rb
@@ -160,7 +159,7 @@ index d922a5fc41..797025986e 100644
  
        options
 diff --git a/tool/lib/test/unit.rb b/tool/lib/test/unit.rb
-index 3df6774d61..54f3d32505 100644
+index d237a9a0e9..71b00f2a7f 100644
 --- a/tool/lib/test/unit.rb
 +++ b/tool/lib/test/unit.rb
 @@ -3,11 +3,11 @@
@@ -172,7 +171,7 @@ index 3df6774d61..54f3d32505 100644
 +require_relative '../minitest/unit'
 +require_relative 'unit/assertions'
  require_relative '../envutil'
- require_relative '../../../tool/colorize'
+ require_relative '../colorize'
 -require 'test/unit/testcase'
 +require_relative 'unit/testcase'
  require 'optparse'
@@ -242,7 +241,7 @@ index 3df6774d61..54f3d32505 100644
          options[:job_status] ||= :replace if @tty && !@verbose
          case options[:color]
          when :always
-@@ -1084,13 +1096,17 @@ def puke klass, meth, e
+@@ -1094,13 +1106,17 @@ def puke klass, meth, e
          # TODO:
          #   this overriding is for minitest feature that skip messages are
          #   hidden when not verbose (-v), note this is temporally.
