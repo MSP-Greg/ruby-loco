@@ -199,10 +199,11 @@ function Test-All {
   # for rubygems/test_bundled_ca.rb
   $env:TEST_SSL = '1'
 
-  $args = "-rdevkit runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `
-    " -a --show-skip --retry --job-status=normal --timeout-scale=1.5"
+  $env:RUBYOPT  = "--disable=gems -w"
 
-  $env:RUBYOPT = "--disable=gems -w"
+  # --test-target-dir=. must be first argument after runner.rb
+  $args = "-rdevkit ../tool/test/runner.rb --test-target-dir=. -X ./excludes -n !/memory_leak/ -j $jobs" + `
+    " -a --show-skip --retry --job-status=normal --timeout-scale=1.5"
 
   Run-Proc `
     -exe    $ruby_exe `

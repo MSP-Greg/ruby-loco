@@ -1,11 +1,21 @@
 Patch by MSP-Greg
 Allows using runner.rb from install
-diff --git a/test/runner.rb b/test/runner.rb
-index db2084949e..905066423b 100644
---- a/test/runner.rb
-+++ b/test/runner.rb
-@@ -6,12 +6,19 @@
- tool_dir = File.join src_testdir, "..", "tool"
+diff --git a/tool/test/runner.rb b/tool/test/runner.rb
+index db23ae2d33..40ce694387 100644
+--- a/tool/test/runner.rb
++++ b/tool/test/runner.rb
+@@ -9,8 +9,7 @@
+   case opt
+   when /\A--test-target-dir=(.*?)\z/
+     src_testdir = File.realpath($1)
+-  else
+-    raise "unknown runner option: #{ opt }"
++    break
+   end
+ end
+ 
+@@ -19,12 +18,19 @@
+ $LOAD_PATH << src_testdir
  $LOAD_PATH.unshift "#{tool_dir}/lib"
  
 -# Get bundled gems on load path
@@ -16,8 +26,8 @@ index db2084949e..905066423b 100644
 +abi = RbConfig::CONFIG['ruby_version']
 +if Dir.exist? (gem_dir = "#{RbConfig::TOPDIR}/lib/ruby/gems/#{abi}/gems")
 +  Dir.glob("#{gem_dir}/*")
-+    .reject {|f| f =~ /\/(minitest|test-unit|power_assert)-/ }
-+    .each {|f| $LOAD_PATH.unshift f }
++    .reject { |f| f[/\/(minitest|test-unit|power_assert)-/] || !Dir.exist?("#{f}/lib") }
++    .each   { |f| $LOAD_PATH.unshift "#{f}/lib" }
 +else
 +  Dir.glob("#{src_testdir}/../gems/*/*.gemspec")
 +    .reject {|f| f =~ /minitest|test-unit|power_assert/ }
@@ -25,7 +35,7 @@ index db2084949e..905066423b 100644
 +end
  
 -require 'test/unit'
-+require_relative '../tool/lib/test/unit'
++require_relative '../lib/test/unit'
  
  module Gem
  end
