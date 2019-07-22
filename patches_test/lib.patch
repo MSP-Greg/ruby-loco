@@ -159,7 +159,7 @@ index d922a5fc41..797025986e 100644
  
        options
 diff --git a/tool/lib/test/unit.rb b/tool/lib/test/unit.rb
-index d237a9a0e9..71b00f2a7f 100644
+index 1034a993b0..bb71445c21 100644
 --- a/tool/lib/test/unit.rb
 +++ b/tool/lib/test/unit.rb
 @@ -3,11 +3,11 @@
@@ -241,7 +241,7 @@ index d237a9a0e9..71b00f2a7f 100644
          options[:job_status] ||= :replace if @tty && !@verbose
          case options[:color]
          when :always
-@@ -1094,13 +1106,17 @@ def puke klass, meth, e
+@@ -1091,13 +1103,17 @@ def puke klass, meth, e
          # TODO:
          #   this overriding is for minitest feature that skip messages are
          #   hidden when not verbose (-v), note this is temporally.

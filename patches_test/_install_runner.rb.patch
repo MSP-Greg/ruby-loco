@@ -1,20 +1,10 @@
 Patch by MSP-Greg
 Allows using runner.rb from install
 diff --git a/tool/test/runner.rb b/tool/test/runner.rb
-index db23ae2d33..40ce694387 100644
+index 20ae9aa1a3..b13a0c976a 100644
 --- a/tool/test/runner.rb
 +++ b/tool/test/runner.rb
-@@ -9,8 +9,7 @@
-   case opt
-   when /\A--test-target-dir=(.*?)\z/
-     src_testdir = File.realpath($1)
--  else
--    raise "unknown runner option: #{ opt }"
-+    break
-   end
- end
- 
-@@ -19,12 +18,19 @@
+@@ -17,12 +17,19 @@
  $LOAD_PATH << src_testdir
  $LOAD_PATH.unshift "#{tool_dir}/lib"
  
