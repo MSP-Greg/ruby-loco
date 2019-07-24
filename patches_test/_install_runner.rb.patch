@@ -1,7 +1,7 @@
 Patch by MSP-Greg
 Allows using runner.rb from install
 diff --git a/tool/test/runner.rb b/tool/test/runner.rb
-index 20ae9aa1a3..b13a0c976a 100644
+index f8769857ad..02d967026f 100644
 --- a/tool/test/runner.rb
 +++ b/tool/test/runner.rb
 @@ -17,12 +17,19 @@
@@ -27,5 +27,5 @@ index 20ae9aa1a3..b13a0c976a 100644
 -require 'test/unit'
 +require_relative '../lib/test/unit'
  
- module Gem
- end
+ ENV["GEM_SKIP"] = ENV["GEM_HOME"] = ENV["GEM_PATH"] = "".freeze
+ 
