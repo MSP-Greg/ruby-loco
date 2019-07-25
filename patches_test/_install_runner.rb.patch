@@ -1,15 +1,15 @@
 Patch by MSP-Greg
 Allows using runner.rb from install
-diff --git a/tool/test/runner.rb b/tool/test/runner.rb
-index f8769857ad..02d967026f 100644
---- a/tool/test/runner.rb
-+++ b/tool/test/runner.rb
-@@ -17,12 +17,19 @@
- $LOAD_PATH << src_testdir
- $LOAD_PATH.unshift "#{tool_dir}/lib"
+diff --git a/test/runner.rb b/test/runner.rb
+index 3e2e1316b1..8bce1495ef 100644
+--- a/test/runner.rb
++++ b/test/runner.rb
+@@ -3,9 +3,16 @@
+ # Should be done in rubygems test files?
+ ENV["GEM_SKIP"] = ENV["GEM_HOME"] = ENV["GEM_PATH"] = "".freeze
  
 -# Get bundled gems on load path
--Dir.glob("#{src_testdir}/../gems/*/*.gemspec")
+-Dir.glob("#{__dir__}/../gems/*/*.gemspec")
 -  .reject {|f| f =~ /minitest|test-unit|power_assert/ }
 -  .map {|f| $LOAD_PATH.unshift File.join(File.dirname(f), "lib") }
 +# Get bundled gems on load path, check whether running from install
@@ -19,13 +19,10 @@ index f8769857ad..02d967026f 100644
 +    .reject { |f| f[/\/(minitest|test-unit|power_assert)-/] || !Dir.exist?("#{f}/lib") }
 +    .each   { |f| $LOAD_PATH.unshift "#{f}/lib" }
 +else
-+  Dir.glob("#{src_testdir}/../gems/*/*.gemspec")
++  Dir.glob("#{__dir__}/../gems/*/*.gemspec")
 +    .reject {|f| f =~ /minitest|test-unit|power_assert/ }
-+    .each {|f| $LOAD_PATH.unshift File.join(File.dirname(f), "lib") }
++    .map {|f| $LOAD_PATH.unshift File.join(File.dirname(f), "lib") }
 +end
  
--require 'test/unit'
-+require_relative '../lib/test/unit'
- 
- ENV["GEM_SKIP"] = ENV["GEM_HOME"] = ENV["GEM_PATH"] = "".freeze
+ require_relative '../tool/test/runner'
  
