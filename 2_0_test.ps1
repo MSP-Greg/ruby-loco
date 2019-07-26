@@ -263,7 +263,7 @@ Write-Host $($dash * 92) -ForegroundColor $fc
 ruby -ropenssl -e "puts RUBY_DESCRIPTION, OpenSSL::OPENSSL_LIBRARY_VERSION"
 
 Write-Host $($dash * 74) Install `'tz`' gems -ForegroundColor $fc
-gem install `"timezone:>=1.3.2`" `"tzinfo:>=2.0.0`" `"tzinfo-data:>=1.2018.7`" --no-document --conservative --norc
+gem install `"timezone:>=1.3.2`" `"tzinfo:>=2.0.0`" `"tzinfo-data:>=1.2018.7`" --no-document --conservative --norc --no-user-install
 
 # could not make the below work in a function, $exit_code was not set WHY WHY?
 # CLI-Test
