@@ -25,7 +25,7 @@ $env:path = "$msys2\usr\bin;C:\Ruby25-x64\bin;C:\Program Files\7-Zip;C:\Program 
 $pre = "mingw-w64-x86_64-"
 $fc  = 'Yellow'
 
-#—————————————————————————————————————————————————————————————————————————— Check-Exit
+#——————————————————————————————————————————————————————————————————— Check-Exit
 # checks whether to exit
 function Check-Exit($msg, $pop) {
   if ($LastExitCode -and $LastExitCode -ne 0) {
@@ -35,7 +35,7 @@ function Check-Exit($msg, $pop) {
   }
 }
 
-#——————————————————————————————————————————————————————————————————————————— Check_SHA
+#——————————————————————————————————————————————————————————————————— Check_SHA
 # checks SHA512 from file, script variable & Appveyor message
 function Check-SHA($path, $file, $uri_dl, $sha_local) {
   $uri_bld = $uri_dl -replace '/artifacts$', ''
@@ -64,7 +64,7 @@ function Check-SHA($path, $file, $uri_dl, $sha_local) {
   }
 }
 
-#———————————————————————————————————————————————————————————————————————— Update MSYS2
+#——————————————————————————————————————————————————————————————————— Update MSYS2
 
 <#—————————————————————————————————————————————— 30-Aug-2018 Fully updated on Appveyor
 # Only use below for really outdated systems, as it wil perform a full update
@@ -79,8 +79,10 @@ pacman.exe -S --noconfirm --needed --noprogressbar base 2> $null
 # Check-Exit 'Cannot update base'
 #>
 
+# Some issue with needing to update before toolchain.  Check whether it can move
+# back to after toolchain update
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends 1" -ForegroundColor Yellow
-$tools = "___python3 ___readline ___sqlite3".replace('___', $pre)
+$tools = "___readline".replace('___', $pre)
 pacman.exe -Sy --noconfirm --needed --noprogressbar $tools.split(' ')
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW toolchain" -ForegroundColor $fc
@@ -88,14 +90,14 @@ pacman.exe -S --noconfirm --needed --noprogressbar --nodeps $($pre + 'toolchain'
 Check-Exit 'Cannot update toolchain'
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends 2" -ForegroundColor Yellow
-$tools = "___gdbm ___gmp ___libffi ___openssl ___pdcurses ___ragel ___zlib".replace('___', $pre)
+$tools = "___gdbm ___gmp ___libffi ___openssl ___ragel ___zlib".replace('___', $pre)
 pacman.exe -S --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
 
 # As of Sept-2018 libyaml is not installed on Appveyor
 # pacman -Rdd --noconfirm mingw-w64-x86_64-libyaml
 
 <#
-#————————————————————————————————————————————————————————————————————————— Add GPG key
+#——————————————————————————————————————————————————————————————————— Add GPG key
 Write-Host "$($dash * 63) Adding GPG key" -ForegroundColor Yellow
 Write-Host "try retrieving & signing key" -ForegroundColor Yellow
 
@@ -120,7 +122,7 @@ if ( !(Test-Path -Path $pkgs -PathType Container) ) {
 }
 
 <# USE STANDARD MSYS2 1.1.1 package see line 87 ($tools = ... )
-#————————————————————————————————————————————————————————————————————————— Add openssl
+#——————————————————————————————————————————————————————————————————— Add openssl
 Write-Host "$($dash * 63) Install custom openssl" -ForegroundColor Yellow
 Write-Host "Installing $openssl"
 
