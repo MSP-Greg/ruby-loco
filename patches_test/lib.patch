@@ -4,7 +4,7 @@ a) turns on verbose
 b) adjusts assertions count so that tests, regardless of manner run, show similar results.
 c) adds assertion total by test to each line of output
 diff --git a/tool/lib/minitest/unit.rb b/tool/lib/minitest/unit.rb
-index d922a5fc41..797025986e 100644
+index a384ddc17c..f4cfd17bee 100644
 --- a/tool/lib/minitest/unit.rb
 +++ b/tool/lib/minitest/unit.rb
 @@ -3,7 +3,7 @@
@@ -120,7 +120,7 @@ index d922a5fc41..797025986e 100644
      end
  
      def location e # :nodoc:
-@@ -999,7 +1027,7 @@ def puke klass, meth, e
+@@ -1002,7 +1030,7 @@ def puke klass, meth, e
        e = case e
            when MiniTest::Skip then
              @skips += 1
@@ -129,7 +129,7 @@ index d922a5fc41..797025986e 100644
              "Skipped:\n#{klass}##{meth} [#{location e}]:\n#{e.message}\n"
            when MiniTest::Assertion then
              @failures += 1
-@@ -1017,6 +1045,7 @@ def initialize # :nodoc:
+@@ -1020,6 +1048,7 @@ def initialize # :nodoc:
        @report = []
        @errors = @failures = @skips = 0
        @verbose = false
@@ -137,7 +137,7 @@ index d922a5fc41..797025986e 100644
        @mutex = Thread::Mutex.new
        @info_signal = Signal.list['INFO']
        @repeat_count = nil
-@@ -1051,6 +1080,11 @@ def process_args args = [] # :nodoc:
+@@ -1054,6 +1083,11 @@ def process_args args = [] # :nodoc:
            options[:verbose] = true
          end
  
@@ -149,7 +149,7 @@ index d922a5fc41..797025986e 100644
          opts.on '-n', '--name PATTERN', "Filter test names on pattern (e.g. /foo/)" do |a|
            options[:filter] = a
          end
-@@ -1068,6 +1102,8 @@ def process_args args = [] # :nodoc:
+@@ -1071,6 +1105,8 @@ def process_args args = [] # :nodoc:
        srand options[:seed]
  
        self.verbose = options[:verbose]
@@ -159,7 +159,7 @@ index d922a5fc41..797025986e 100644
  
        options
 diff --git a/tool/lib/test/unit.rb b/tool/lib/test/unit.rb
-index 1034a993b0..bb71445c21 100644
+index 37c17babb4..bd1a2ca138 100644
 --- a/tool/lib/test/unit.rb
 +++ b/tool/lib/test/unit.rb
 @@ -3,11 +3,11 @@
@@ -241,7 +241,7 @@ index 1034a993b0..bb71445c21 100644
          options[:job_status] ||= :replace if @tty && !@verbose
          case options[:color]
          when :always
-@@ -1091,13 +1103,17 @@ def puke klass, meth, e
+@@ -1103,13 +1115,17 @@ def puke klass, meth, e
          # TODO:
          #   this overriding is for minitest feature that skip messages are
          #   hidden when not verbose (-v), note this is temporally.
