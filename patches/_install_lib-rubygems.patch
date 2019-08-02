@@ -1,10 +1,10 @@
 Patch by MSP-greg
 allows RubyGems tests to be run from install folder
 diff --git a/lib/rubygems/installer.rb b/lib/rubygems/installer.rb
-index 76c3bcf1d7..164c6bf525 100644
+index b230ce7bed..045e1c9ec2 100644
 --- a/lib/rubygems/installer.rb
 +++ b/lib/rubygems/installer.rb
-@@ -706,10 +706,13 @@ def process_options # :nodoc:
+@@ -711,10 +711,13 @@ def process_options # :nodoc:
  
    def check_that_user_bin_dir_is_in_path # :nodoc:
      user_bin_dir = @bin_dir || Gem.bindir(gem_home)
