@@ -81,17 +81,18 @@ pacman.exe -S --noconfirm --needed --noprogressbar base 2> $null
 
 # Some issue with needing to update before toolchain.  Check whether it can move
 # back to after toolchain update
-Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends 1" -ForegroundColor Yellow
-$tools = "___readline".replace('___', $pre)
-pacman.exe -Sy --noconfirm --needed --noprogressbar $tools.split(' ')
+#Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends 1" -ForegroundColor Yellow
+#$tools = "___readline".replace('___', $pre)
+#pacman.exe -Sy --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW toolchain" -ForegroundColor $fc
 pacman.exe -S --noconfirm --needed --noprogressbar --nodeps $($pre + 'toolchain') 2> $null
 Check-Exit 'Cannot update toolchain'
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends 2" -ForegroundColor Yellow
-$tools = "___gdbm ___gmp ___libffi ___openssl ___ragel ___zlib".replace('___', $pre)
+$tools = "___gdbm ___gmp ___libffi ___openssl ___ragel ___readline ___zlib".replace('___', $pre)
 pacman.exe -S --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
+Check-Exit 'Cannot update dependencies'
 
 # As of Sept-2018 libyaml is not installed on Appveyor
 # pacman -Rdd --noconfirm mingw-w64-x86_64-libyaml
