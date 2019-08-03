@@ -44,7 +44,7 @@ class << self
   # Copies correct dll files from MSYS2 location to package dir.
   def copy_dll_files
     pkg_pre = (ARCH == '64' ? 'mingw-w64-x86_64' : 'mingw-w64-i686')
-    pkgs = 'gcc-libs gdbm libffi openssl readline zlib'
+    pkgs = 'gcc-libs gdbm libffi openssl readline'
     dll_files, lib_files = find_dlls pkgs, pkg_pre
 
     # get mingw bin path for arch

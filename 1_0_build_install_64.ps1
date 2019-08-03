@@ -230,6 +230,9 @@ Set-Variables
 Set-Variables-Local
 Set-Env
 
+ren "$d_msys2/mingw$bits/lib/libyaml.dll.a" "libyaml.dll.a__"
+ren "$d_msys2/mingw$bits/lib/libz.dll.a" "libz.dll.a__"
+
 Apply-Patches "patches"
 
 Create-Folders
