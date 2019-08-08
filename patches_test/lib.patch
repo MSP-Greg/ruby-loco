@@ -4,7 +4,7 @@ a) turns on verbose
 b) adjusts assertions count so that tests, regardless of manner run, show similar results.
 c) adds assertion total by test to each line of output
 diff --git a/tool/lib/minitest/unit.rb b/tool/lib/minitest/unit.rb
-index a384ddc17c..f4cfd17bee 100644
+index bd244d8e06..4b3bc43df8 100644
 --- a/tool/lib/minitest/unit.rb
 +++ b/tool/lib/minitest/unit.rb
 @@ -3,7 +3,7 @@
@@ -16,7 +16,7 @@ index a384ddc17c..f4cfd17bee 100644
  
  ##
  # Minimal (mostly drop-in) replacement for test-unit.
-@@ -743,6 +743,7 @@ class Unit # :nodoc:
+@@ -744,6 +744,7 @@ class Unit # :nodoc:
      attr_accessor :start_time                         # :nodoc:
      attr_accessor :help                               # :nodoc:
      attr_accessor :verbose                            # :nodoc:
@@ -24,7 +24,7 @@ index a384ddc17c..f4cfd17bee 100644
      attr_writer   :options                            # :nodoc:
  
      ##
-@@ -883,8 +884,8 @@ def _run_anything type
+@@ -884,8 +885,8 @@ def _run_anything type
  
          results = _run_suites suites, type
  
@@ -35,7 +35,7 @@ index a384ddc17c..f4cfd17bee 100644
          test_count      += @test_count
          assertion_count += @assertion_count
          t = Time.now - start
-@@ -893,7 +894,8 @@ def _run_anything type
+@@ -894,7 +895,8 @@ def _run_anything type
            puts
            puts
          end
@@ -45,7 +45,7 @@ index a384ddc17c..f4cfd17bee 100644
               [(@repeat_count ? "(#{count}/#{@repeat_count}) " : ""), type,
                 t, @test_count.fdiv(t), @assertion_count.fdiv(t)]
        end while @repeat_count && count < @repeat_count &&
-@@ -917,6 +919,7 @@ def _run_anything type
+@@ -918,6 +920,7 @@ def _run_anything type
      #
  
      def _run_suites suites, type
@@ -53,7 +53,7 @@ index a384ddc17c..f4cfd17bee 100644
        suites.map { |suite| _run_suite suite, type }
      end
  
-@@ -938,18 +941,40 @@ def _run_suite suite, type
+@@ -939,18 +942,40 @@ def _run_suite suite, type
  
        leakchecker = LeakChecker.new
  
@@ -101,7 +101,7 @@ index a384ddc17c..f4cfd17bee 100644
          $stdout.flush
  
          unless defined?(RubyVM::MJIT) && RubyVM::MJIT.enabled? # compiler process is wrongly considered as leak
-@@ -959,7 +984,7 @@ def _run_suite suite, type
+@@ -960,7 +985,7 @@ def _run_suite suite, type
          inst._assertions
        }
  
@@ -110,7 +110,7 @@ index a384ddc17c..f4cfd17bee 100644
      end
  
      ##
-@@ -980,6 +1005,9 @@ def _run_suite suite, type
+@@ -981,6 +1006,9 @@ def _run_suite suite, type
      # error or failure.
  
      def record suite, method, assertions, time, error
@@ -120,7 +120,7 @@ index a384ddc17c..f4cfd17bee 100644
      end
  
      def location e # :nodoc:
-@@ -1002,7 +1030,7 @@ def puke klass, meth, e
+@@ -1003,7 +1031,7 @@ def puke klass, meth, e
        e = case e
            when MiniTest::Skip then
              @skips += 1
@@ -129,7 +129,7 @@ index a384ddc17c..f4cfd17bee 100644
              "Skipped:\n#{klass}##{meth} [#{location e}]:\n#{e.message}\n"
            when MiniTest::Assertion then
              @failures += 1
-@@ -1020,6 +1048,7 @@ def initialize # :nodoc:
+@@ -1021,6 +1049,7 @@ def initialize # :nodoc:
        @report = []
        @errors = @failures = @skips = 0
        @verbose = false
@@ -137,7 +137,7 @@ index a384ddc17c..f4cfd17bee 100644
        @mutex = Thread::Mutex.new
        @info_signal = Signal.list['INFO']
        @repeat_count = nil
-@@ -1054,6 +1083,11 @@ def process_args args = [] # :nodoc:
+@@ -1055,6 +1084,11 @@ def process_args args = [] # :nodoc:
            options[:verbose] = true
          end
  
@@ -149,7 +149,7 @@ index a384ddc17c..f4cfd17bee 100644
          opts.on '-n', '--name PATTERN', "Filter test names on pattern (e.g. /foo/)" do |a|
            options[:filter] = a
          end
-@@ -1071,6 +1105,8 @@ def process_args args = [] # :nodoc:
+@@ -1072,6 +1106,8 @@ def process_args args = [] # :nodoc:
        srand options[:seed]
  
        self.verbose = options[:verbose]
