@@ -1,0 +1,12 @@
+diff --git a/lib/readline.rb b/lib/readline.rb
+index 690441e05c..3cf2bd4feb 100644
+--- a/lib/readline.rb
++++ b/lib/readline.rb
+@@ -2,5 +2,7 @@
+   require 'readline.so'
+ rescue LoadError
+   require 'reline'
++  Reline.input = STDIN
++  Reline.output = STDOUT
+   Readline = Reline
+ end
