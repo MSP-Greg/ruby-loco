@@ -9,7 +9,7 @@ index e6e2b79344..e76e989e6a 100644
        exe_file = File.expand_path("../../../libexec/bundle", __FILE__) unless File.exist?(exe_file)
  
 +      # mess for finding the real file when testing from source
-+      exe_file = "#{RbConfig::TOPDIR}/lib/ruby/gems/" \
++      exe_file = "#{RbConfig::CONFIG['rubylibprefix']}/gems/" \
 +        "#{RbConfig::CONFIG['ruby_version']}/gems/bundler-#{VERSION}/libexec/bundle" unless File.exist?(exe_file)
 +
        # bundler is a default gem, exe path is separate
