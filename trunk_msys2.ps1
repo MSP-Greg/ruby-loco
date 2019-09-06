@@ -86,12 +86,12 @@ pacman.exe -S --noconfirm --needed --noprogressbar base 2> $null
 #pacman.exe -Sy --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW toolchain" -ForegroundColor $fc
-pacman.exe -S --noconfirm --needed --noprogressbar --nodeps $($pre + 'toolchain') 2> $null
+pacman.exe -Sy --noconfirm --noprogressbar --needed $($pre + 'toolchain') 2> $null
 Check-Exit 'Cannot update toolchain'
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends 2" -ForegroundColor Yellow
-$tools = "___gdbm ___gettext ___gmp ___libffi ___libyaml ___openssl ___ragel ___readline ___termcap ___zlib".replace('___', $pre)
-pacman.exe -S --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
+$tools = "___gdbm ___gmp ___libffi ___libyaml ___openssl ___ragel ___readline ___zlib".replace('___', $pre)
+pacman.exe -S --noconfirm --noprogressbar --needed $tools.split(' ') 2> $null
 Check-Exit 'Cannot update dependencies'
 
 # As of Sept-2018 libyaml is not installed on Appveyor
