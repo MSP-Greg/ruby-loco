@@ -223,6 +223,8 @@ function Test-All {
 function MSpec {
   $env:path = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
+  $env:RUBYOPT  = "--disable=did_you_mean"
+
   Run-Proc `
     -exe    "ruby.exe" `
     -e_args "-rdevkit ../mspec/bin/mspec -j -V" `
@@ -231,6 +233,8 @@ function MSpec {
     -Title  "test-mspec" `
     -Dir    "$d_ruby/spec/ruby" `
     -TimeLimit 240
+
+  Remove-Item env:\RUBYOPT
 }
 
 #————————————————————————————————————————————————————————————————————————— setup

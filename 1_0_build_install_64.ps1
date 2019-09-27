@@ -24,6 +24,23 @@ function Apply-Patches($p_dir) {
   Write-Host ''
 }
 
+#————————————————————————————————————————————————————————————————— Apply-Install-Patches
+# Applies patches in install folder
+function Apply-Install-Patches($p_dir) {
+  $patch_exe = "$d_msys2/usr/bin/patch.exe"
+  Push-Location "$d_repo/$p_dir"
+  [string[]]$patches = Get-ChildItem -Include *.patch -Path . -Recurse |
+    select -expand name
+  Pop-Location
+  Push-Location "$d_install"
+  foreach ($p in $patches) {
+    Write-Host $($dash * 55) $p -ForegroundColor $fc
+    & $patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p"
+  }
+  Pop-Location
+  Write-Host ''
+}
+
 #———————————————————————————————————————————————————————————————— Print-Time-Log
 function Print-Time-Log {
   $diff = New-TimeSpan -Start $script:time_start -End $script:time_old
@@ -295,6 +312,9 @@ $build_files = "$d_zips/ext_build_files.7z"
 &$7z a $build_files config.log .ext\include\x64-mingw32\ruby\*.h ext\**\Makefile ext\**\*.h ext\**\*.log ext\**\*.mk 1> $null
 if ($is_av) { Push-AppveyorArtifact $build_files -DeploymentName "Ext build files" }
 Pop-Location
+
+# apply patches to install folder
+Apply-Install-Patches "patches_install"
 
 # apply patches for testing
 Apply-Patches "patches_basic_boot"
