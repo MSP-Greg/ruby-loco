@@ -314,7 +314,7 @@ if ($is_av) { Push-AppveyorArtifact $build_files -DeploymentName "Ext build file
 Pop-Location
 
 # apply patches to install folder
-Apply-Install-Patches "patches_install"
+# Apply-Install-Patches "patches_install"
 
 # apply patches for testing
 Apply-Patches "patches_basic_boot"
