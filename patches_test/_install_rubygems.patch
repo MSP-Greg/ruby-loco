@@ -4,7 +4,7 @@ diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
 index 86ad90c540..932160aba7 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
-@@ -906,7 +906,7 @@ def test_self_platforms
+@@ -940,7 +940,7 @@ def test_self_platforms
    end
  
    def test_self_prefix
@@ -13,7 +13,7 @@ index 86ad90c540..932160aba7 100644
    end
  
    def test_self_prefix_libdir
-@@ -1579,7 +1579,13 @@ def test_auto_activation_of_used_gemdeps_file
+@@ -1613,7 +1613,13 @@ def test_auto_activation_of_used_gemdeps_file
      assert_equal expected_specs, Gem.use_gemdeps.sort_by { |s| s.name }
    end
  

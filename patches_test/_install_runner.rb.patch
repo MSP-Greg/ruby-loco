@@ -1,28 +1,16 @@
-Patch by MSP-Greg
-Allows using runner.rb from install
 diff --git a/test/runner.rb b/test/runner.rb
-index 3e2e1316b1..8bce1495ef 100644
+index 3e2e1316b1..18111e45ab 100644
 --- a/test/runner.rb
 +++ b/test/runner.rb
-@@ -3,9 +3,16 @@
- # Should be done in rubygems test files?
+@@ -4,7 +4,10 @@
  ENV["GEM_SKIP"] = ENV["GEM_HOME"] = ENV["GEM_PATH"] = "".freeze
  
--# Get bundled gems on load path
+ # Get bundled gems on load path
 -Dir.glob("#{__dir__}/../gems/*/*.gemspec")
--  .reject {|f| f =~ /minitest|test-unit|power_assert/ }
--  .map {|f| $LOAD_PATH.unshift File.join(File.dirname(f), "lib") }
-+# Get bundled gems on load path, check whether running from install
-+abi = RbConfig::CONFIG['ruby_version']
-+if Dir.exist? (gem_dir = "#{RbConfig::TOPDIR}/lib/ruby/gems/#{abi}/gems")
-+  Dir.glob("#{gem_dir}/*")
-+    .reject { |f| f[/\/(minitest|test-unit|power_assert)-/] || !Dir.exist?("#{f}/lib") }
-+    .each   { |f| $LOAD_PATH.unshift "#{f}/lib" }
-+else
-+  Dir.glob("#{__dir__}/../gems/*/*.gemspec")
-+    .reject {|f| f =~ /minitest|test-unit|power_assert/ }
-+    .map {|f| $LOAD_PATH.unshift File.join(File.dirname(f), "lib") }
-+end
- 
- require_relative '../tool/test/runner'
++
++gems = "#{RbConfig::CONFIG['rubylibdir'].sub('/ruby/', '/ruby/gems/')}/gems"
++
++Dir.glob("#{gems}/*/*.gemspec")
+   .reject {|f| f =~ /minitest|test-unit|power_assert/ }
+   .map {|f| $LOAD_PATH.unshift File.join(File.dirname(f), "lib") }
  

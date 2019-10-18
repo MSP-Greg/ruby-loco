@@ -86,7 +86,9 @@ pacman.exe -S --noconfirm --needed --noprogressbar base 2> $null
 #pacman.exe -Sy --noconfirm --needed --noprogressbar $tools.split(' ') 2> $null
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW toolchain" -ForegroundColor $fc
-pacman.exe -Sy --noconfirm --noprogressbar --needed $($pre + 'toolchain') 2> $null
+#pacman.exe -Sy --noconfirm --noprogressbar --needed $($pre + 'toolchain') 2> $null
+$tools = " ___binutils ___isl ___libiconv ___mpc ___windows-default-manifest ___libwinpthread ___winpthreads  ___gcc-libs ___gcc".replace('___', $pre)
+pacman.exe -Syd --noconfirm --noprogressbar --needed $tools.split(' ') 2> $null
 Check-Exit 'Cannot update toolchain'
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends 2" -ForegroundColor Yellow

@@ -44,7 +44,7 @@ diff --git a/bootstraptest/test_thread.rb b/bootstraptest/test_thread.rb
 index 3ff55bab11..9592e452bb 100644
 --- a/bootstraptest/test_thread.rb
 +++ b/bootstraptest/test_thread.rb
-@@ -337,7 +337,7 @@ def m
+@@ -334,7 +334,7 @@ def m
  
  assert_normal_exit %q{
    Thread.new("foo", &Object.method(:class_eval)).join

@@ -4,7 +4,8 @@ diff --git a/spec/mspec/lib/mspec.rb b/spec/mspec/lib/mspec.rb
 index 42d590c99a..3795b06a0c 100644
 --- a/spec/mspec/lib/mspec.rb
 +++ b/spec/mspec/lib/mspec.rb
-@@ -1,10 +1,10 @@
+@@ -1,8 +1,8 @@
+-require 'mspec/utils/format'
 -require 'mspec/matchers'
 -require 'mspec/expectations'
 -require 'mspec/mocks'
@@ -12,6 +13,7 @@ index 42d590c99a..3795b06a0c 100644
 -require 'mspec/guards'
 -require 'mspec/helpers'
 -require 'mspec/version'
++require_relative 'mspec/utils/format'
 +require_relative 'mspec/matchers'
 +require_relative 'mspec/expectations'
 +require_relative 'mspec/mocks'
@@ -19,9 +21,6 @@ index 42d590c99a..3795b06a0c 100644
 +require_relative 'mspec/guards'
 +require_relative 'mspec/helpers'
 +require_relative 'mspec/version'
- 
- # If the implementation on which the specs are run cannot
- # load pp from the standard library, add a pp.rb file that
 diff --git a/spec/mspec/lib/mspec/commands/mkspec.rb b/spec/mspec/lib/mspec/commands/mkspec.rb
 index 7a943aa1fe..9e58fdb683 100755
 --- a/spec/mspec/lib/mspec/commands/mkspec.rb
@@ -58,7 +57,7 @@ index cb0193f42d..d7c005199b 100644
  
  
  class MSpecCI < MSpecScript
-@@ -68,7 +68,7 @@ def run
+@@ -69,7 +69,7 @@ def run
      tags = ["fails", "critical", "unstable", "incomplete", "unsupported"]
      tags += Array(config[:ci_xtags])
  
@@ -100,7 +99,7 @@ index 8bc3382e91..2b7431e18c 100644
  
  
  class MSpecTag < MSpecScript
-@@ -97,7 +97,7 @@ def options(argv=ARGV)
+@@ -98,7 +98,7 @@ def options(argv=ARGV)
    end
  
    def register

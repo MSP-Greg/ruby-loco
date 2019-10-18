@@ -6,10 +6,10 @@ index 3877c6ec7e..5d624640bf 100644
 +++ b/test/lib/jit_support.rb
 @@ -1,7 +1,7 @@
  require 'rbconfig'
- 
+
  module JITSupport
 -  JIT_TIMEOUT = 600 # 10min for each...
 +  JIT_TIMEOUT = 60 # 1 min for each...
    JIT_SUCCESS_PREFIX = 'JIT success \(\d+\.\dms\)'
+   JIT_COMPACTION_PREFIX = 'JIT compaction \(\d+\.\dms\)'
    UNSUPPORTED_COMPILERS = [
-     %r[\Aicc\b],

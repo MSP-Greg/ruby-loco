@@ -15,7 +15,7 @@ index 355ea171ee..8f99406d65 100644
    else
      abort <<MESSAGE
  mkmf.rb can't find header files for ruby at #{$hdrdir}/ruby.h
-@@ -457,7 +461,7 @@ def create_tmpsrc(src)
+@@ -461,7 +465,7 @@ def create_tmpsrc(src)
    def have_devel?
      unless defined? $have_devel
        $have_devel = true
