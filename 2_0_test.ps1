@@ -200,7 +200,7 @@ function Test-All {
   $env:TEST_SSL = '1'
 
   #$env:RUBYOPT  = "--disable=gems -w"
-  $env:RUBYOPT  = "--disable=did_you_mean -w"
+  #$env:RUBYOPT  = "--disable=did_you_mean -w"
 
   $args = "-rdevkit ./runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `
     " -a --show-skip --retry --job-status=normal --timeout-scale=1.5"
