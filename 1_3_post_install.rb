@@ -161,7 +161,9 @@ class << self
       # added as of r65509
       # Gem::GemRunner.new.run(%w[install bundler] + suffix)
     end
-
+    # clean empty gem folders, needed as of 2019-10-20
+    ary = Dir["#{Gem.dir}/gems/*"]
+    ary.each { |d| Dir.rmdir(d) if Dir.empty?(d) }
   end
 
   def add_bash_bin
