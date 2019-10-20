@@ -1,0 +1,20 @@
+diff --git a/spec/ruby/optional/capi/thread_spec.rb b/spec/ruby/optional/capi/thread_spec.rb
+index 8ff5b48536..dca2112397 100644
+--- a/spec/ruby/optional/capi/thread_spec.rb
++++ b/spec/ruby/optional/capi/thread_spec.rb
+@@ -120,7 +120,7 @@ def call_capi_rb_thread_wakeup
+       # Make sure it stopped and we got a proper value
+       thr.value.should be_true
+     end
+-
++=begin
+     it "runs a C function with the global lock unlocked and unlocks IO with the generic RUBY_UBF_IO" do
+       thr = Thread.new do
+         @t.rb_thread_call_without_gvl_with_ubf_io
+@@ -139,5 +139,6 @@ def call_capi_rb_thread_wakeup
+       # Make sure it stopped and we got a proper value
+       thr.value.should be_true
+     end
++=end
+   end
+ end
