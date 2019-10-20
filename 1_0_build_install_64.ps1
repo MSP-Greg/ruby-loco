@@ -230,8 +230,8 @@ function Set-Env {
   # used in Ruby scripts
   $env:D_MSYS2  = $d_msys2
 
-  $env:CFLAGS   = "-march=$march -mtune=generic -O3 -pipe"
-  $env:CXXFLAGS = "-march=$march -mtune=generic -O3 -pipe"
+  $env:CFLAGS   = "-D_FORTIFY_SOURCE=2 -O3 -march=$march -mtune=generic -pipe"
+  $env:CXXFLAGS = "-D_FORTIFY_SOURCE=2 -O3 -march=$march -mtune=generic -pipe"
   $env:CPPFLAGS = "-D_FORTIFY_SOURCE=2 -D__USE_MINGW_ANSI_STDIO=1 -DFD_SETSIZE=2048"
   $env:LDFLAGS  = "-fstack-protector -pipe -s"
 }

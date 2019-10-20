@@ -1,0 +1,35 @@
+From e18174d2e36f9eec8d2e8be42142666bdd20cfa1 Mon Sep 17 00:00:00 2001
+From: MSP-Greg <MSP-Greg@users.noreply.github.com>
+Date: Sat, 19 Oct 2019 17:23:18 -0500
+Subject: [PATCH] test_exception - fix with & w/o did_you_mean
+
+See Ruby issue 16263
+---
+ test/ruby/test_exception.rb | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/test/ruby/test_exception.rb b/test/ruby/test_exception.rb
+index e5c38091ac5d..7ced9a9eba6e 100644
+--- a/test/ruby/test_exception.rb
++++ b/test/ruby/test_exception.rb
+@@ -995,15 +995,18 @@ def test_nomethod_error_new_receiver
+     error = NoMethodError.new("Message", :foo)
+     assert_raise(ArgumentError) {error.receiver}
+ 
++    msg = Object.const_defined?(:DidYouMean) ?
++      "Message\nDid you mean?  for" : "Message"
++
+     error = NoMethodError.new("Message", :foo, receiver: receiver)
+-    assert_equal(["Message", :foo, receiver],
++    assert_equal([msg, :foo, receiver],
+                  [error.message, error.name, error.receiver])
+ 
+     error = NoMethodError.new("Message", :foo, [1, 2])
+     assert_raise(ArgumentError) {error.receiver}
+ 
+     error = NoMethodError.new("Message", :foo, [1, 2], receiver: receiver)
+-    assert_equal(["Message", :foo, [1, 2], receiver],
++    assert_equal([msg, :foo, [1, 2], receiver],
+                  [error.message, error.name, error.args, error.receiver])
+ 
+     error = NoMethodError.new("Message", :foo, [1, 2], true)
