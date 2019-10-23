@@ -1,0 +1,13 @@
+diff --git a/lib/reline/windows.rb b/lib/reline/windows.rb
+index 3425c13477..aef3073a7e 100644
+--- a/lib/reline/windows.rb
++++ b/lib/reline/windows.rb
+@@ -136,7 +136,7 @@ def self.getc
+     else
+       case input
+       when 0x00
+-        alt = false
++        meta = false
+         @@output_buf.push(input)
+         input = getwch
+         @@output_buf.push(*input)
