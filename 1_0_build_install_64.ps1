@@ -233,7 +233,7 @@ function Set-Env {
   $env:CFLAGS   = "-D_FORTIFY_SOURCE=2 -O3 -march=$march -mtune=generic -pipe"
   $env:CXXFLAGS = "-D_FORTIFY_SOURCE=2 -O3 -march=$march -mtune=generic -pipe"
   $env:CPPFLAGS = "-D_FORTIFY_SOURCE=2 -D__USE_MINGW_ANSI_STDIO=1 -DFD_SETSIZE=2048"
-  $env:LDFLAGS  = "-fstack-protector -pipe -s"
+  $env:LDFLAGS  = "-l:libssp.a -l:libyaml.a -l:libz.a -fstack-protector -pipe -s"
 }
 
 #——————————————————————————————————————————————————————————————————— start build
@@ -249,6 +249,7 @@ Set-Env
 
 ren "$d_msys2/mingw$bits/lib/libyaml.dll.a" "libyaml.dll.a__"
 ren "$d_msys2/mingw$bits/lib/libz.dll.a" "libz.dll.a__"
+ren "$d_msys2/mingw$bits/lib/gcc/x86_64-w64-mingw32/9.2.0/libssp.dll.a" "libssp.dll.a__"
 
 Apply-Patches "patches"
 
@@ -289,6 +290,10 @@ Time-Log "$make -j$jobs"
 # Run "$make -f GNUMakefile DESTDIR=$d_repo_u install-nodoc"
 Run "$make DESTDIR=$d_repo_u install-nodoc"
 Time-Log "$make install"
+
+ren "$d_msys2/mingw$bits/lib/libyaml.dll.a__" "libyaml.dll.a"
+ren "$d_msys2/mingw$bits/lib/libz.dll.a__" "libz.dll.a"
+ren "$d_msys2/mingw$bits/lib/gcc/x86_64-w64-mingw32/9.2.0/libssp.dll.a__" "libssp.dll.a"
 
 cd $d_repo
 
