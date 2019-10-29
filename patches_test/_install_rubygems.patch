@@ -1,10 +1,10 @@
 Patch by MSP-Greg
 Allows running Core RubyGems tests from installed Ruby
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index 86ad90c540..932160aba7 100644
+index 23f8249e34..b19256ca9e 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
-@@ -940,7 +940,7 @@ def test_self_platforms
+@@ -944,7 +944,7 @@ def test_self_platforms
    end
  
    def test_self_prefix
@@ -13,7 +13,7 @@ index 86ad90c540..932160aba7 100644
    end
  
    def test_self_prefix_libdir
-@@ -1613,7 +1613,13 @@ def test_auto_activation_of_used_gemdeps_file
+@@ -1617,7 +1617,13 @@ def test_auto_activation_of_used_gemdeps_file
      assert_equal expected_specs, Gem.use_gemdeps.sort_by { |s| s.name }
    end
  
@@ -29,7 +29,7 @@ index 86ad90c540..932160aba7 100644
    BUNDLER_FULL_NAME = "bundler-#{Bundler::VERSION}".freeze
  
 diff --git a/test/rubygems/test_gem_commands_environment_command.rb b/test/rubygems/test_gem_commands_environment_command.rb
-index 074df19e52..7104f6db7d 100644
+index 5dd0fc7521..e83c093cf9 100644
 --- a/test/rubygems/test_gem_commands_environment_command.rb
 +++ b/test/rubygems/test_gem_commands_environment_command.rb
 @@ -26,7 +26,8 @@ def test_execute
@@ -43,7 +43,7 @@ index 074df19e52..7104f6db7d 100644
                   @ui.output
      assert_match %r|GIT EXECUTABLE: #{@cmd.send(:git_path)}|, @ui.output
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
-index d9ee5f8468..6cd6233bed 100644
+index 37f990ea1a..5290e2d2be 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
 @@ -502,8 +502,13 @@ def test_update_rubygems_arguments
