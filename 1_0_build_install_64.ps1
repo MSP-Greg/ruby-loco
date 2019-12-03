@@ -229,6 +229,8 @@ function Set-Env {
 
   # used in Ruby scripts
   $env:D_MSYS2  = $d_msys2
+  
+  $env:MSYS_NO_PATHCONV = 1
 
   $env:CFLAGS   = "-D_FORTIFY_SOURCE=2 -O3 -march=$march -mtune=generic -fstack-protector-strong -pipe"
   $env:CXXFLAGS = "-D_FORTIFY_SOURCE=2 -O3 -march=$march -mtune=generic -pipe"
