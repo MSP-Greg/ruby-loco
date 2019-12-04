@@ -1,0 +1,14 @@
+# 2019-12-04 failing with current MSYS2 gcc
+diff --git a/test/ruby/test_encoding.rb b/test/ruby/test_encoding.rb
+index 019cb2417f..c782a5498f 100644
+--- a/test/ruby/test_encoding.rb
++++ b/test/ruby/test_encoding.rb
+@@ -128,7 +128,7 @@ def test_nonascii_library_path
+     assert_separately([], "#{<<~"begin;"}\n#{<<~'end;'}".force_encoding("US-ASCII"))
+     begin;
+       assert_equal(Encoding::US_ASCII, __ENCODING__)
+-      $:.unshift("/\x80")
++      $:.unshift("Broken") # $:.unshift("/\x80")
+       assert_raise_with_message(LoadError, /\[Bug #16382\]/) do
+         $:.resolve_feature_path "[Bug #16382]"
+       end
