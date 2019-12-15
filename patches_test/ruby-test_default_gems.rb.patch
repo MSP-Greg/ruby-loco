@@ -1,6 +1,7 @@
 Patch by MSP-Greg
 uses gemspecs in ruby under test, not srcdir
-index 3c4aea1561..1359fce817 100644
+diff --git a/test/ruby/test_default_gems.rb b/test/ruby/test_default_gems.rb
+index 3c4aea1561..4db846fe10 100644
 --- a/test/ruby/test_default_gems.rb
 +++ b/test/ruby/test_default_gems.rb
 @@ -4,9 +4,14 @@
@@ -11,7 +12,7 @@ index 3c4aea1561..1359fce817 100644
 -    srcdir = File.expand_path('../../..', __FILE__)
 -    Dir.glob("#{srcdir}/{lib,ext}/**/*.gemspec").map do |src|
 +    skip "git not found" unless system("git", "--version", %i[out err]=>IO::NULL)
-+    if Dir.exist?(dflt_dir = Gem::BasicSpecification.default_specifications_dir)
++    if Dir.exist?(dflt_dir = Gem.default_specifications_dir)
 +      spec_glob = "#{dflt_dir}/*.gemspec"
 +    else
 +      srcdir = File.expand_path('../../..', __FILE__)
