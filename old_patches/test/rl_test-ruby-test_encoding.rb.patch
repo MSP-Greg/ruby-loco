@@ -1,4 +1,5 @@
 # 2019-12-04 failing with current MSYS2 gcc
+# fixed 04e95f8985 2019-12-16
 diff --git a/test/ruby/test_encoding.rb b/test/ruby/test_encoding.rb
 index 019cb2417f..c782a5498f 100644
 --- a/test/ruby/test_encoding.rb
