@@ -192,7 +192,7 @@ index 2504a48d0a..3e0ee6974b 100644
          sock.sync_close = true
          begin
 diff --git a/test/net/imap/test_imap.rb b/test/net/imap/test_imap.rb
-index b97be4ffb3..f1c0df1d0c 100644
+index 33b305e116..7a888b3012 100644
 --- a/test/net/imap/test_imap.rb
 +++ b/test/net/imap/test_imap.rb
 @@ -2,11 +2,9 @@
@@ -235,7 +235,7 @@ index b97be4ffb3..f1c0df1d0c 100644
          imap
        end
      rescue SystemCallError
-@@ -699,14 +697,7 @@ def test_append_fail
+@@ -708,14 +706,7 @@ def test_append_fail
    def imaps_test
      server = create_tcp_server
      port = server.addr[1]
@@ -251,7 +251,7 @@ index b97be4ffb3..f1c0df1d0c 100644
      ssl_server = OpenSSL::SSL::SSLServer.new(server, ctx)
      started = false
      ths = Thread.start do
-@@ -748,14 +739,7 @@ def starttls_test
+@@ -757,14 +748,7 @@ def starttls_test
          sock.print("* OK test server\r\n")
          sock.gets
          sock.print("RUBY0001 OK completed\r\n")
@@ -301,23 +301,3 @@ index 90c92e06f8..cc440dda2b 100644
        begin
          sock = nil
          Thread.start do
-diff --git a/test/net/utils.rb b/test/net/utils.rb
-index e69de29bb2..d026e7f172 100644
---- a/test/net/utils.rb
-+++ b/test/net/utils.rb
-@@ -0,0 +1,15 @@
-+# frozen_string_literal: true
-+
-+module Net::TestUtils
-+  CA_FILE     = File.join(__dir__, "fixtures/cacert.pem")
-+  SERVER_KEY  = File.join(__dir__, "fixtures/server.key")
-+  SERVER_CERT = File.join(__dir__, "fixtures/server.crt")
-+
-+  def self.create_ssl_ctx
-+    ctx = OpenSSL::SSL::SSLContext.new
-+    ctx.ca_file = CA_FILE
-+    ctx.key  = OpenSSL::PKey::RSA.new( File.read(SERVER_KEY) )
-+    ctx.cert = OpenSSL::X509::Certificate.new( File.read(SERVER_CERT) )
-+    ctx
-+  end
-+end
