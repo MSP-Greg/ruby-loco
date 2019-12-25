@@ -93,7 +93,7 @@ pacman.exe -Syd --noconfirm --noprogressbar --needed $tools.split(' ') 2> $null
 Check-Exit 'Cannot update toolchain'
 
 Write-Host "$($dash * 63) Updating MSYS2 / MinGW ruby depends 2" -ForegroundColor Yellow
-$tools = "___gdbm ___gmp ___libffi ___libyaml ___openssl ___ragel ___readline ___zlib".replace('___', $pre)
+$tools = "___dlfcn ___gdbm ___gmp ___libffi ___libyaml ___openssl ___ragel ___readline ___zlib".replace('___', $pre)
 pacman.exe -S --noconfirm --noprogressbar --needed $tools.split(' ') 2> $null
 Check-Exit 'Cannot update dependencies'
 
