@@ -20,6 +20,7 @@ function Remove-Read-Only($path) {
 # set base variables, including MSYS2 location and bit related varis
 function Set-Variables {
   if ($env:Appveyor -eq 'True') {
+    # } elseif ($env:GITHUB_ACTIONS -eq 'true') {
     $script:is_av     = $true
     $script:d_msys2   = "C:/msys64"
     $script:d_git     =  "$env:ProgramFiles/Git"
