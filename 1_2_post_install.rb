@@ -23,7 +23,7 @@ module PostInstall2
 
   D_MSYS2 = ENV['D_MSYS2']
   D_RI2   = File.join __dir__, 'rubyinstaller2'
-  D_RL    = File.join __dir__, 'ruby_readline'
+  # -REMOVE rbreadline- D_RL    = File.join __dir__, 'ruby_readline'
   D_RUBY  = File.join __dir__, 'ruby'
 
   COL_WID = 36
@@ -34,7 +34,7 @@ class << self
   def run
     copy_dll_files
     add_priv_assm
-    add_rb_readline
+    # -REMOVE rbreadline- add_rb_readline
     copy_ssl_files
     add_licenses
   end

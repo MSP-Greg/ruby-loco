@@ -17,7 +17,7 @@ install:
   # Update MSYS2 / MinGW and install OpenSSL
   - ps: |
       git clone -q --depth=5  --no-tags --branch=master https://github.com/oneclick/rubyinstaller2.git    ./rubyinstaller2
-      git clone -q --depth=5  --no-tags --branch=master https://github.com/ConnorAtherton/rb-readline.git ./ruby_readline
+      # git clone -q --depth=5  --no-tags --branch=master https://github.com/ConnorAtherton/rb-readline.git ./ruby_readline
       git clone -q --depth=10 --no-tags --branch=master https://github.com/ruby/ruby.git                  ./ruby
       # cd ruby ; git checkout -qf b009de13bf4bb7c96964c404fb56b3503db777fd ; cd ..
       $env:path = "C:\Ruby25-x64\bin;$env:path"

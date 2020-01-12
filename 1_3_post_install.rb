@@ -25,7 +25,7 @@ module PostInstall3
 
   D_MSYS2 = ENV['D_MSYS2']
   D_RI2   = File.join __dir__, 'rubyinstaller2'
-  D_RL    = File.join __dir__, 'ruby_readline'
+  # -REMOVE rbreadline- D_RL    = File.join __dir__, 'ruby_readline'
   D_RUBY  = File.join __dir__, 'ruby'
 
   # internal version like 2.5.0

@@ -253,7 +253,7 @@ $env:path = "$d_install/bin;$base_path"
 
 #————————————————————————————————————————————————————————————————— start testing
 # test using readline.so, not rb-readline
-ren "$d_install/lib/ruby/site_ruby/readline.rb" "readline.rb_"
+# -REMOVE rbreadline- ren "$d_install/lib/ruby/site_ruby/readline.rb" "readline.rb_"
 
 # PATH is set in each test function
 
@@ -297,6 +297,8 @@ Test-All
 sleep 5
 MSpec
 
-ren "$d_install/lib/ruby/site_ruby/readline.rb_" "readline.rb"
+ren "$d_install/lib/ruby/$abi/x64-mingw32/readline.so" "readline.so_"
+
+# -REMOVE rbreadline- ren "$d_install/lib/ruby/site_ruby/readline.rb_" "readline.rb"
 
 Finish
