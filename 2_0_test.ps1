@@ -133,7 +133,7 @@ function Finish {
     Remove-Item -Path $file -Force -ErrorAction SilentlyContinue
   }
 
-  $env:path = "$d_install/bin;$d_repo/git/cmd;$base_path"
+  $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
   # seems to be needed for proper dash encoding in 2_1_test_script.rb
   [Console]::OutputEncoding = New-Object -typename System.Text.UTF8Encoding
@@ -153,7 +153,7 @@ function Finish {
 
 #————————————————————————————————————————————————————————————————————— BasicTest
 function BasicTest {
-  $env:path = "$d_install/bin;$base_path"
+  $env:PATH = "$d_install/bin;$base_path"
   Run-Proc `
     -exe    "ruby.exe" `
     -e_args "--disable=gems ruby_runner.rb -r -v --tty=no" `
@@ -166,7 +166,7 @@ function BasicTest {
 
 #————————————————————————————————————————————————————————————————— BootStrapTest
 function BootStrapTest {
-  $env:path = "$d_install/bin;$base_path"
+  $env:PATH = "$d_install/bin;$base_path"
 
   Run-Proc `
     -exe    $ruby_exe `
@@ -193,7 +193,7 @@ function Test-All {
                   "$ruby_so/-test-/win32/dln/dlntest.dll"
   }
 
-  $env:path = "$d_install/bin;$d_repo/git/cmd;$base_path"
+  $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
   $env:RUBY_FORCE_TEST_JIT = '1'
   $env:RUBYGEMS_TEST_PATH  = "$d_repo/ruby/test/rubygems"
   # for rubygems/test_bundled_ca.rb
@@ -221,7 +221,7 @@ function Test-All {
 
 #————————————————————————————————————————————————————————————————————————— MSpec
 function MSpec {
-  $env:path = "$d_install/bin;$d_repo/git/cmd;$base_path"
+  $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
   $env:RUBYOPT  = "--disable=did_you_mean"
 
@@ -249,7 +249,9 @@ $ruby_exe  = "$d_install/bin/ruby.exe"
 $abi       = &$ruby_exe -e "print RbConfig::CONFIG['ruby_version']"
 $script:time_info = ''
 
-$env:path = "$d_install/bin;$base_path"
+$env:PATH = "$d_install/bin;$base_path"
+
+if ($env:DESTDIR) { Remove-Item env:\DESTDIR }
 
 #————————————————————————————————————————————————————————————————— start testing
 # test using readline.so, not rb-readline

@@ -225,7 +225,7 @@ function Set-Variables-Local {
 #——————————————————————————————————————————————————————————————————————— Set-Env
 # Set ENV, including gcc flags
 function Set-Env {
-  $env:path = "$ruby_path;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
+  $env:PATH = "$ruby_path;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
 
   # used in Ruby scripts
   $env:D_MSYS2  = $d_msys2
@@ -273,7 +273,7 @@ cd $d_build
 Time-Log "start"
 
 $config_args = "--build=$chost --host=$chost --target=$chost --with-out-ext=pty,syslog"
-Run "sh -c `"../ruby/configure --disable-install-doc --prefix=/$install $config_args`""
+Run "sh -c `"../ruby/configure --disable-install-doc --prefix=$d_install $config_args`""
 Time-Log "configure"
 
 # download gems & unicode files
@@ -289,9 +289,8 @@ Write-Host "SOURCE_DATE_EPOCH = $env:SOURCE_DATE_EPOCH" -ForegroundColor $fc
 Run "$make -j$jobs 2>&1" $true
 Time-Log "$make -j$jobs"
 
-# Run "$make -f GNUMakefile DESTDIR=$d_repo_u install-nodoc"
-Run "$make DESTDIR=$d_repo_u install-nodoc"
-Time-Log "$make install"
+Run "$make install-nodoc"
+Time-Log "$make install-nodoc"
 
 ren "$d_msys2/mingw$bits/lib/libyaml.dll.a__" "libyaml.dll.a"
 ren "$d_msys2/mingw$bits/lib/libz.dll.a__" "libz.dll.a"
@@ -303,7 +302,7 @@ cd $d_repo
 ruby 1_2_post_install.rb $bits $install
 
 # run with new ruby (gem install, exc)
-$env:path = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
+$env:PATH = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
 ruby 1_3_post_install.rb $bits $install
 Time-Log "post install processing"
 

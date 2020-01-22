@@ -33,11 +33,9 @@ function Set-Variables {
   }
 
   $script:d_repo   = $PSScriptRoot.replace('\', '/')
-  # below is a *nix style path, ie, 'C:\' becomes '/c/'
+  # below is a *nix style path, ie, 'C:\' becomes '/C/'
   $script:d_repo_u = if ($d_repo -cmatch "\A[A-Z]:") {
-    $t = $d_repo.replace(':', '')
-    $t = '/' + $t.substring(0,1).ToLower() + $t.substring(1, $t.length-1)
-    $t
+    '/' + $d_repo.replace(':', '')
   } else { $d_repo }
 
   if ($bits -eq 32) {
