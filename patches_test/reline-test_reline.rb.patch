@@ -1,0 +1,15 @@
+# fix test so it passed both parallel and serial
+# see https://github.com/ruby/ruby/pull/2854
+diff --git a/test/reline/test_reline.rb b/test/reline/test_reline.rb
+index d6a6e21ceb..71c40d8550 100644
+--- a/test/reline/test_reline.rb
++++ b/test/reline/test_reline.rb
+@@ -269,6 +269,7 @@ def test_may_req_ambiguous_char_width
+   end
+ 
+   def get_reline_encoding
+-    RUBY_PLATFORM =~ /mswin|mingw/ ? Encoding::UTF_8 : Encoding::default_external
++    (RUBY_PLATFORM.match? /mswin|mingw/ and !STDOUT.tty?) ?
++      Encoding::UTF_8 : Encoding::default_external
+   end
+ end
