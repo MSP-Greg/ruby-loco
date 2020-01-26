@@ -219,6 +219,33 @@ function Test-All {
   # Remove-Item -Path "$d_install/lib/ruby/$abi/$rarch/-test-" -Recurse
 }
 
+#—————————————————————————————————————————————————————————————————————— Test-All
+function Test-Reline {
+  # Standard Ruby CI doesn't run this test, remove for better comparison
+  # $remove_test = "$d_ruby/test/ruby/enc/test_case_comprehensive.rb"
+  # if (Test-Path -Path $remove_test -PathType Leaf) { Remove-Item -Path $remove_test }
+
+  $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
+
+  $env:RUBYOPT  = "--disable=gems,did_you_mean"
+
+  $args = "./runner.rb -v --show-skip reline"
+
+  Run-Proc `
+    -exe    $ruby_exe `
+    -e_args $args `
+    -StdOut "test_reline.log" `
+    -StdErr "test_reline_err.log" `
+    -Title  "test-reline" `
+    -Dir    "$d_ruby/test" `
+    -TimeLimit 200
+
+  Remove-Item env:\RUBYOPT
+
+  # comment out below to allow full testing of Appveyor artifact
+  # Remove-Item -Path "$d_install/lib/ruby/$abi/$rarch/-test-" -Recurse
+}
+
 #————————————————————————————————————————————————————————————————————————— MSpec
 function MSpec {
   $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
@@ -297,6 +324,9 @@ BootStrapTest
 sleep 2
 Test-All
 sleep 5
+Test-Reline
+sleep 5
+
 MSpec
 
 ren "$d_install/lib/ruby/$abi/x64-mingw32/readline.so" "readline.so_"
