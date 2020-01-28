@@ -238,7 +238,7 @@ function Test-Reline {
     -StdErr "test_reline_err.log" `
     -Title  "test-reline" `
     -Dir    "$d_ruby/test" `
-    -TimeLimit 200
+    -TimeLimit 20
 
   Remove-Item env:\RUBYOPT
 
