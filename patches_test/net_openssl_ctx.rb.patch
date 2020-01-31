@@ -163,7 +163,7 @@ index 204bfb7ad3..8140bd2b07 100644
  
      http.start
 diff --git a/test/net/imap/test_imap.rb b/test/net/imap/test_imap.rb
-index 03692c233a..8159fedb66 100644
+index 6c6a657552..df104ef44e 100644
 --- a/test/net/imap/test_imap.rb
 +++ b/test/net/imap/test_imap.rb
 @@ -2,11 +2,10 @@
@@ -180,7 +180,7 @@ index 03692c233a..8159fedb66 100644
  
    def setup
      @do_not_reverse_lookup = Socket.do_not_reverse_lookup
-@@ -748,14 +747,7 @@ def test_append_fail
+@@ -757,14 +756,7 @@ def test_append_fail
    def imaps_test
      server = create_tcp_server
      port = server.addr[1]
@@ -196,7 +196,7 @@ index 03692c233a..8159fedb66 100644
      ssl_server = OpenSSL::SSL::SSLServer.new(server, ctx)
      started = false
      ths = Thread.start do
-@@ -797,14 +789,7 @@ def starttls_test
+@@ -806,14 +798,7 @@ def starttls_test
          sock.print("* OK test server\r\n")
          sock.gets
          sock.print("RUBY0001 OK completed\r\n")
