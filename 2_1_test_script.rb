@@ -39,7 +39,8 @@ module TestScript
     R_BRANCH = branch[/[^\/]+\Z/].strip
   }
 
-  IS_AV  = /true/i =~ ENV['APPVEYOR']                  # Appveyor build vs local
+  IS_AV      = ENV['APPVEYOR'].match? /true/i
+  IS_ACTIONS = ENC['GITHUB_ACTIONS'].match? /true/i
 
   DASH = case ENV['PS_ENC']
     when 'utf-8'
@@ -111,7 +112,7 @@ module TestScript
     Dir.chdir __dir__
     zip_save
 
-    if IS_AV
+    if IS_AV && !IS_ACTIONS
       `appveyor AddMessage -Message \"Summary - All Tests\" -Details \"#{results_str}\"`
 
       unless sum_test_all.empty?
@@ -357,7 +358,7 @@ module TestScript
 
     `7z.exe a ./zips/ruby_#{r_suffix}.7z #{z_files}`
     sha512 = Digest::SHA512.file("#{D_ZIPS}/ruby_#{r_suffix}.7z").hexdigest
-    if IS_AV
+    if IS_AV && !IS_ACTIONS
       `appveyor AddMessage ruby_#{r_suffix}.7z_SHA512 -Details #{sha512}`
       `appveyor PushArtifact ./zips/ruby_#{r_suffix}.7z -DeploymentName \"Ruby Trunk Build#{r_msg}\"`
     end
