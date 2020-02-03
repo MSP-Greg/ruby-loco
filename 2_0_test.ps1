@@ -281,9 +281,6 @@ $env:PATH = "$d_install/bin;$base_path"
 if ($env:DESTDIR) { Remove-Item env:\DESTDIR }
 
 #————————————————————————————————————————————————————————————————— start testing
-# test using readline.so, not rb-readline
-# -REMOVE rbreadline- ren "$d_install/lib/ruby/site_ruby/readline.rb" "readline.rb_"
-
 # PATH is set in each test function
 
 # assumes symlink folder exists, some tests may not be happy with a space in
@@ -330,7 +327,5 @@ sleep 5
 MSpec
 
 ren "$d_install/lib/ruby/$abi/x64-mingw32/readline.so" "readline.so_"
-
-# -REMOVE rbreadline- ren "$d_install/lib/ruby/site_ruby/readline.rb_" "readline.rb"
 
 Finish

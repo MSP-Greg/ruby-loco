@@ -41,6 +41,22 @@ function Apply-Install-Patches($p_dir) {
   Write-Host ''
 }
 
+#————————————————————————————————————————————————————————————————— Files-Hide
+# Hides files for compiling/linking
+function Files-Hide($files) {
+  foreach ($f in $files) {
+    if (Test-Path -Path $f -PathType Leaf ) { ren $f ($f + '__') }
+  }
+}
+
+#————————————————————————————————————————————————————————————————— Files-Unhide
+# UnHides files previously hidden
+function Files-Unhide($files) {
+  foreach ($f in $files) {
+    if (Test-Path -Path "$f__" -PathType Leaf ) { ren ($f + '__') $f }
+  }
+}
+
 #———————————————————————————————————————————————————————————————— Print-Time-Log
 function Print-Time-Log {
   $diff = New-TimeSpan -Start $script:time_start -End $script:time_old
@@ -229,7 +245,7 @@ function Set-Env {
 
   # used in Ruby scripts
   $env:D_MSYS2  = $d_msys2
-  
+
   $env:MSYS_NO_PATHCONV = 1
 
   $env:CFLAGS   = "-D_FORTIFY_SOURCE=2 -O3 -march=$march -mtune=generic -fstack-protector-strong -pipe"
@@ -249,9 +265,13 @@ Set-Variables
 Set-Variables-Local
 Set-Env
 
-ren "$d_msys2/mingw$bits/lib/libyaml.dll.a" "libyaml.dll.a__"
-ren "$d_msys2/mingw$bits/lib/libz.dll.a" "libz.dll.a__"
-ren "$d_msys2/mingw$bits/lib/gcc/x86_64-w64-mingw32/9.2.0/libssp.dll.a" "libssp.dll.a__"
+$gcc_vers = ([regex]'\d\.\d\.\d').match($(gcc.exe --version)).value
+
+$files = "$d_msys2/mingw$bits/lib/libyaml.dll.a",
+         "$d_msys2/mingw$bits/lib/libz.dll.a",
+         "$d_msys2/mingw$bits/lib/gcc/x86_64-w64-mingw32/$gcc_vers/libssp.dll.a"
+
+Files-Hide $files
 
 Apply-Patches "patches"
 
@@ -292,9 +312,7 @@ Time-Log "$make -j$jobs"
 Run "$make install-nodoc"
 Time-Log "$make install-nodoc"
 
-ren "$d_msys2/mingw$bits/lib/libyaml.dll.a__" "libyaml.dll.a"
-ren "$d_msys2/mingw$bits/lib/libz.dll.a__" "libz.dll.a"
-ren "$d_msys2/mingw$bits/lib/gcc/x86_64-w64-mingw32/9.2.0/libssp.dll.a__" "libssp.dll.a"
+Files-Unhide $files
 
 cd $d_repo
 

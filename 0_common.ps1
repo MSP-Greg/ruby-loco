@@ -19,8 +19,15 @@ function Remove-Read-Only($path) {
 #————————————————————————————————————————————————————————————————— Set-Variables
 # set base variables, including MSYS2 location and bit related varis
 function Set-Variables {
-  if ($env:Appveyor -eq 'True') {
-    # } elseif ($env:GITHUB_ACTIONS -eq 'true') {
+  if ($env:GITHUB_ACTIONS -eq 'true') {
+    $script:is_actions = $true
+    $script:d_msys2   = "C:/msys64"
+    $script:d_git     = "$env:ProgramFiles/Git"
+    $script:7z        = "$env:ChocolateyInstall\bin\7z.exe"
+    $env:TMPDIR       =  $env:RUNNER_TEMP
+    $script:base_path =  $env:PATH -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;/ig', ''
+    $script:install   = "ruby-mingw"
+  } elseif ($env:Appveyor -eq 'True') {
     $script:is_av     = $true
     $script:d_msys2   = "C:/msys64"
     $script:d_git     =  "$env:ProgramFiles/Git"
@@ -28,9 +35,15 @@ function Set-Variables {
     $script:base_path = ("$env:ProgramFiles/7-Zip;" + `
       "$env:ProgramFiles/AppVeyor/BuildAgent;$d_git/cmd;" + `
       "$env:SystemRoot/system32;$env:ProgramFiles;$env:SystemRoot").replace('\', '/')
+    $script:install   = "install"
   } else {
+    $script:install   = "install"
     ./local.ps1
   }
+
+  $temp = $env:PATH -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
+
+  Write-Host ($temp -replace ';', "`n")
 
   $script:d_repo   = $PSScriptRoot.replace('\', '/')
   # below is a *nix style path, ie, 'C:\' becomes '/C/'
@@ -68,7 +81,6 @@ function Set-Variables {
   $script:d_ruby    = "$d_repo/ruby"
   $script:d_zips    = "$d_repo/zips"
 
-  $script:install   = "install"
   $script:d_install = "$d_repo/$install"
 
   $script:jobs = $env:NUMBER_OF_PROCESSORS
