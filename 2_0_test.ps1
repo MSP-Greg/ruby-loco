@@ -5,6 +5,11 @@ time, so if a test freezes, it can be stopped.
 
 $exit_code = 0
 
+if ($env:GITHUB_ACTIONS -eq 'true') {
+  [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding("IBM437")
+  [Console]::InputEncoding  = [System.Text.Encoding]::GetEncoding("IBM437")
+}
+
 #————————————————————————————————————————————————————————————————————— Kill-Proc
 # Kills a process by first looping thru child & grandchild processes and
 # stopping them, then stops passed process
