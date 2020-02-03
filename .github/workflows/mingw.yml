@@ -28,7 +28,7 @@ jobs:
           git config --system core.autocrlf false
           git config --system core.eol lf
 
-      - name: repo checkout
+      - name: Checkout ruby-loco
         uses: actions/checkout@v2
 
       - name: Checkout ruby
@@ -43,15 +43,11 @@ jobs:
           repository: oneclick/rubyinstaller2
           path: rubyinstaller2
 
-      - name: load ruby
-        uses: eregon/use-ruby-action@v1
-        with:
-          ruby-version: 2.7
 
       - name: Set up Ruby & MSYS2
         uses: MSP-Greg/actions-ruby@master
         with:
-          ruby-version: 2.6.x
+          ruby-version: 2.7.x
           base: update
           mingw: gdbm gmp libffi libyaml openssl ragel readline
           msys2: automake1.16 bison
