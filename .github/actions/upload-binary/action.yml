@@ -1,0 +1,10 @@
+name: 'Upload Ruby binary'
+description: 'Upload Ruby binary'
+author: 'MSP-Greg'
+inputs:
+  ruby_path:
+    description: 'path to ruby root folder (TOPDIR)'
+    default: ''
+runs:
+  using: 'node12'
+  main: 'index.js'

@@ -8,7 +8,7 @@
 module TestScript
   if ARGV.length == 0
     ARCH = '64'
-    D_INSTALL = File.join __dir__, 'install'
+    D_INSTALL = File.join __dir__, (IS_ACTIONS ? 'ruby-mingw' : 'install')
   elsif ARGV[0] == '32' || ARGV[0] == '64'
     ARCH = ARGV[0]
   else
@@ -19,7 +19,7 @@ module TestScript
   if ARGV.length == 3 && !ARGV[1].nil? && ARGV[1] != ''
     D_INSTALL = File.join __dir__, ARGV[1]
   elsif ARGV.length == 1
-    D_INSTALL = File.join __dir__, 'install'
+    D_INSTALL = File.join __dir__, (IS_ACTIONS ? 'ruby-mingw' : 'install')
   end
 
   if ARGV.length == 3 && !ARGV[2].nil? && ARGV[2] != '' && (t = ARGV[2].to_i)
@@ -40,7 +40,7 @@ module TestScript
   }
 
   IS_AV      = ENV['APPVEYOR'].match? /true/i
-  IS_ACTIONS = ENC['GITHUB_ACTIONS'].match? /true/i
+  IS_ACTIONS = ENV['GITHUB_ACTIONS'].match? /true/i
 
   DASH = case ENV['PS_ENC']
     when 'utf-8'
@@ -89,9 +89,17 @@ module TestScript
     
     results_str << r.join('')
 
+    if IS_ACTIONS
+      build = "Run No #{ENV['GITHUB_RUN_NUMBER']}"
+      run   = "Run Id #{ENV['GITHUB_RUN_ID']}"
+    else
+      build = "Build No #{ENV['APPVEYOR_BUILD_NUMBER']}"
+      run   = "Job Id #{ENV['APPVEYOR_JOB_ID']}"
+    end
+
     sp = ' ' * @@failures.to_s.length
     results_str = "#{@@failures} Total Failures/Errors                           " \
-                  "Build No #{ENV['APPVEYOR_BUILD_NUMBER']}    Job Id #{ENV['APPVEYOR_JOB_ID']}\n" \
+                  "#{build}    #{run}\n" \
                   "#{sp} #{RUBY_DESCRIPTION}\n" \
                   "#{sp} #{Time.now.getutc}\n\n" \
                   "#{results_str}\n" \
@@ -110,7 +118,7 @@ module TestScript
     end
 
     Dir.chdir __dir__
-    zip_save
+    zip_save unless IS_ACTIONS
 
     if IS_AV && !IS_ACTIONS
       `appveyor AddMessage -Message \"Summary - All Tests\" -Details \"#{results_str}\"`
@@ -358,7 +366,7 @@ module TestScript
 
     `7z.exe a ./zips/ruby_#{r_suffix}.7z #{z_files}`
     sha512 = Digest::SHA512.file("#{D_ZIPS}/ruby_#{r_suffix}.7z").hexdigest
-    if IS_AV && !IS_ACTIONS
+    if IS_AV
       `appveyor AddMessage ruby_#{r_suffix}.7z_SHA512 -Details #{sha512}`
       `appveyor PushArtifact ./zips/ruby_#{r_suffix}.7z -DeploymentName \"Ruby Trunk Build#{r_msg}\"`
     end

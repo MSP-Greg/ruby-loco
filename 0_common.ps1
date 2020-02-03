@@ -27,7 +27,7 @@ function Set-Variables {
     $env:TMPDIR       =  $env:RUNNER_TEMP
     $script:base_path =  $env:PATH -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
     $script:install   = "ruby-mingw"
-    Write-Host ($base_path -replace ';', "`n")
+    # Write-Host ($base_path -replace ';', "`n")
   } elseif ($env:Appveyor -eq 'True') {
     $script:is_av     = $true
     $script:d_msys2   = "C:/msys64"
