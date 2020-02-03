@@ -25,7 +25,7 @@ function Set-Variables {
     $script:d_git     = "$env:ProgramFiles/Git"
     $script:7z        = "$env:ChocolateyInstall\bin\7z.exe"
     $env:TMPDIR       =  $env:RUNNER_TEMP
-    $script:base_path =  $env:PATH -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;/ig', ''
+    $script:base_path =  $env:PATH -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
     $script:install   = "ruby-mingw"
     Write-Host ($base_path -replace ';', "`n")
   } elseif ($env:Appveyor -eq 'True') {

@@ -143,10 +143,13 @@ function Create-Folders {
 #——————————————————————————————————————————————————————————————————————————— Run
 # Run a command and check for error
 function Run($exec, $silent = $false) {
+  $orig = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
   Write-Line "$exec"
   if ($silent) { iex $exec -ErrorAction SilentlyContinue }
   else         { iex $exec }
   Check-Exit $exec
+  $ErrorActionPreference = $orig
 }
 
 #——————————————————————————————————————————————————————————————————— Strip-Build
