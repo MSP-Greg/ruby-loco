@@ -27,6 +27,7 @@ function Set-Variables {
     $env:TMPDIR       =  $env:RUNNER_TEMP
     $script:base_path =  $env:PATH -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;/ig', ''
     $script:install   = "ruby-mingw"
+    Write-Host ($base_path -replace ';', "`n")
   } elseif ($env:Appveyor -eq 'True') {
     $script:is_av     = $true
     $script:d_msys2   = "C:/msys64"
@@ -40,10 +41,6 @@ function Set-Variables {
     $script:install   = "install"
     ./local.ps1
   }
-
-  $temp = $env:PATH -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
-
-  Write-Host ($temp -replace ';', "`n")
 
   $script:d_repo   = $PSScriptRoot.replace('\', '/')
   # below is a *nix style path, ie, 'C:\' becomes '/C/'
