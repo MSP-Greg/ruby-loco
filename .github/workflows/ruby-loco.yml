@@ -25,8 +25,13 @@ jobs:
         run: |
           git config --system core.autocrlf false
           git config --system core.eol lf
+
+      - name: Checkout ruby-loco
+        uses: actions/checkout@v2
+
+      - name: get ruby and rubyinstaller2
+        run: |
           $gh = 'https://github.com'
-          git clone -q --depth=1 --no-tags --branch=actions $gh/MSP-Greg/ruby-loco.git      .
           git clone -q --depth=1 --no-tags --branch=master  $gh/oneclick/rubyinstaller2.git ./rubyinstaller2
           git clone -q --depth=1 --no-tags --branch=master  $gh/ruby/ruby.git               ./ruby
 
