@@ -34,7 +34,6 @@ class << self
   def run
     copy_dll_files
     add_priv_assm
-    # -REMOVE rbreadline- add_rb_readline
     copy_ssl_files
     add_licenses
   end
@@ -112,18 +111,6 @@ EOT
     }
   end
 
-  def add_rb_readline
-    # add readline patch
-    Dir.chdir(D_RL) { |d|
-      patch_exe = File.join D_MSYS2, "usr", "bin", "patch.exe"
-      patch = `#{patch_exe} -p1 -N --no-backup-if-mismatch -i #{__dir__}/patches/__readline_warnings.patch`
-    }
-    src = File.join(D_RL, "lib")
-    pkg_dest = File.join D_INSTALL, 'lib', 'ruby', 'site_ruby'
-    Dir.mkdir_p pkg_dest unless Dir.exist? pkg_dest
-    FileUtils.copy_entry src, pkg_dest, preserve: true
-  end
-
   def copy_ssl_files
     Dir.chdir(D_RI2) { |d|
       require_relative "rubyinstaller2/lib/ruby_installer/build/ca_cert_file.rb"
@@ -162,6 +149,8 @@ EOT
   def add_licenses
     #IO.copy_stream("#{D_RUBY}/LEGAL"     , "#{D_INSTALL}/LEGAL Ruby")
     #IO.copy_stream("#{D_RI2}/LICENSE.txt", "#{D_INSTALL}/LICENSE Ruby Installer.txt")
+    cp "#{D_RUBY}/BSDL"      , "#{D_INSTALL}/BSDL"
+    cp "#{D_RUBY}/COPYING"   , "#{D_INSTALL}/COPYING Ruby"
     cp "#{D_RUBY}/LEGAL"     , "#{D_INSTALL}/LEGAL Ruby"
     cp "#{D_RI2}/LICENSE.txt", "#{D_INSTALL}/LICENSE Ruby Installer.txt"
   end
@@ -193,7 +182,7 @@ EOT
     while !pkgs.empty? do
       depends = []
       files = `pacman.exe -Ql #{pkgs.join(' ')} | grep dll$`
-      files.each_line { |dll|
+      files.each_line(chomp: true) { |dll|
         if    dll.match? re_bin ; bin_dlls << dll.sub(re_bin, '')
         elsif dll.match? re_lib ; lib_dlls << dll.sub(re_lib, '')
         else

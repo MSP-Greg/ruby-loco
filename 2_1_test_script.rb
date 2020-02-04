@@ -39,8 +39,8 @@ module TestScript
     R_BRANCH = branch[/[^\/]+\Z/].strip
   }
 
-  IS_AV      = ENV['APPVEYOR'].match? /true/i
-  IS_ACTIONS = ENV['GITHUB_ACTIONS'].match? /true/i
+  IS_AV      = ENV.fetch('APPVEYOR'      , '').match? /true/i
+  IS_ACTIONS = ENV.fetch('GITHUB_ACTIONS', '').match? /true/i
 
   DASH = case ENV['PS_ENC']
     when 'utf-8'

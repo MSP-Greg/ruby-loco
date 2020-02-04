@@ -22280,7 +22280,7 @@ const path   = __webpack_require__(622)
 const core   = __webpack_require__(276)
 const { GitHub, context } = __webpack_require__(327)
 
-const tarExt = '.tar.lzma'
+const tarExt = '.7z'
 
 // returns updated release body, returns updated body
 const updateBody = (body, chksum, fn, rubyDesc) => {
@@ -22300,15 +22300,15 @@ const sha512 = fn => {
   })
 }
 
-const createLZMA = async fn => {
+const create7z = async fn => {
   const origPath = process.env.PATH
 
-  process.env.PATH = `C:/msys64/usr/bin;${origPath}`
+  process.env.PATH = `C:/Program Files/7-Zip;${origPath}`
 
-  const dir  = path.dirname(fn)
   const file = path.basename(fn)
+  console.log(`7z a ${file}${tarExt} ${file}`)
 
-  child_process.execSync(`tar -C ${dir} --lzma -cf ${file}${tarExt} ${file}/`)
+  child_process.execSync(`7z a ${file}${tarExt} ${file}`)
 
   process.env.PATH = origPath
 
@@ -22335,11 +22335,11 @@ const run = async () => {
 
     console.log(`Processing ${rubyDesc}`)
 
-    console.time('Create LZMA')
+    console.time('Create 7z')
 
-    const { rubyTar, checksum } = await createLZMA(rubyPath)
+    const { rubyTar, checksum } = await create7z(rubyPath)
 
-    console.timeEnd('Create LZMA')
+    console.timeEnd('Create 7z')
 
     const github = new GitHub(process.env.GITHUB_TOKEN)
 

@@ -5,10 +5,8 @@ time, so if a test freezes, it can be stopped.
 
 $exit_code = 0
 
-if ($env:GITHUB_ACTIONS -eq 'true') {
-  [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding("IBM437")
-  [Console]::InputEncoding  = [System.Text.Encoding]::GetEncoding("IBM437")
-}
+$enc_input  = [Console]::InputEncoding
+$enc_output = [Console]::OutputEncoding
 
 #————————————————————————————————————————————————————————————————————— Kill-Proc
 # Kills a process by first looping thru child & grandchild processes and
@@ -68,6 +66,11 @@ function Run-Proc {
   $start = Get-Date
   $status = ''
 
+  if ($is_actions) {
+    [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding('IBM437')
+    [Console]::InputEncoding  = [System.Text.Encoding]::GetEncoding('IBM437')
+  }
+
   $proc = Start-Process $exe -ArgumentList $e_args `
     -RedirectStandardOutput $d_logs/$StdOut `
     -RedirectStandardError  $d_logs/$StdErr `
@@ -85,6 +88,12 @@ function Run-Proc {
   }
   $diff = New-TimeSpan -Start $start -End $(Get-Date)
   $msg = "Test Time  {0,8:n1}" -f @($diff.TotalSeconds)
+
+  if ($is_actions) {
+    [Console]::OutputEncoding = $enc_output
+    [Console]::InputEncoding  = $enc_input
+  }
+
   Write-Host $msg -NoNewLine
   if ($proc.ExitCode -eq 0) {
     EchoC " passed" grn
@@ -102,21 +111,15 @@ function CLI-Test {
   Write-Host $($dash * 80) -ForegroundColor $fc
   ruby -ropenssl -e "puts RUBY_DESCRIPTION, OpenSSL::OPENSSL_LIBRARY_VERSION"
 
-  Write-Host "bundle version:" $(bundle version)
-  $exit_code += [int](0 + $LastExitCode)
-  Write-Host "gem  --version:" $(gem --version)
-  $exit_code += [int](0 + $LastExitCode)
-  Write-Host "irb  --version:" $(irb --version)
-  $exit_code += [int](0 + $LastExitCode)
-  Write-Host "racc --version:" $(racc --version)
-  $exit_code += [int](0 + $LastExitCode)
-  Write-Host "rake --version:" $(rake --version)
-  $exit_code += [int](0 + $LastExitCode)
-  Write-Host "rdoc --version:" $(rdoc --version)
-  $exit_code += [int](0 + $LastExitCode)
-  Write-Host "ridk   version:"
+  echo "bundle version: $(bundle version)" ; $exit_code += [int](0 + $LastExitCode)
+  echo "gem  --version: $(gem --version)"  ; $exit_code += [int](0 + $LastExitCode)
+  echo "irb  --version: $(irb --version)"  ; $exit_code += [int](0 + $LastExitCode)
+  echo "racc --version: $(racc --version)" ; $exit_code += [int](0 + $LastExitCode)
+  echo "rake --version: $(rake --version)" ; $exit_code += [int](0 + $LastExitCode)
+  echo "rdoc --version: $(rdoc --version)" ; $exit_code += [int](0 + $LastExitCode)
+  echo "ridk   version:"
   ridk version
-  Write-Host "----------------------------------------------------------- $exit_code"
+  Write-Host "$($dash * 40) $exit_code"
 }
 
 #———————————————————————————————————————————————————————————————————————— Finish
@@ -144,7 +147,7 @@ function Finish {
   [Console]::OutputEncoding = New-Object -typename System.Text.UTF8Encoding
 
   # used in 2_1_test_script.rb
-  $env:PS_ENC = [Console]::OutputEncoding.HeaderName
+  $env:PS_ENC = [Console]::OutputEncoding.WebName.toUpper()
 
   cd $d_repo
   # script checks test results, determines whether build is good or not,
@@ -152,7 +155,11 @@ function Finish {
   ruby.exe 2_1_test_script.rb $bits $install $exit_code
   $exit += ($LastExitCode -and $LastExitCode -ne 0)
   ruby.exe -v -ropenssl -e "puts 'Build    ' + OpenSSL::OPENSSL_VERSION, 'Runtime  ' + OpenSSL::OPENSSL_LIBRARY_VERSION"
-  Write-Host "Build worker image: $env:APPVEYOR_BUILD_WORKER_IMAGE"
+  if ($is_actions) {
+    echo "Actions ImageVersion: $env:ImageVersion"
+  } elseif ($is_av) {
+    echo "Build worker image: $env:APPVEYOR_BUILD_WORKER_IMAGE"
+  }
   if ($exit -ne 0) { exit 1 }
 }
 
@@ -294,31 +301,26 @@ $env:GIT = "$d_repo/git/cmd/git.exe"
 
 $m_start = Get-Date
 
-Write-Host $($dash * 92) -ForegroundColor $fc
+EchoC $($dash * 92) yel
 ruby -ropenssl -e "puts RUBY_DESCRIPTION, OpenSSL::OPENSSL_LIBRARY_VERSION"
 
-Write-Host $($dash * 74) Install `'tz`' gems -ForegroundColor $fc
+EchoC "$($dash * 74) Install `'tz`' gems" yel
 gem install `"timezone:>=1.3.2`" `"tzinfo:>=2.0.0`" `"tzinfo-data:>=1.2018.7`" --no-document --conservative --norc --no-user-install
 
 # could not make the below work in a function, $exit_code was not set WHY WHY?
 # CLI-Test
-Write-Host $($dash * 74) CLI Test -ForegroundColor $fc
-Write-Host "bundle version:" $(bundle version)
-$exit_code += [int](0 + $LastExitCode)
-Write-Host "gem  --version:" $(gem --version)
-$exit_code += [int](0 + $LastExitCode)
-Write-Host "irb  --version:" $(irb --version)
-$exit_code += [int](0 + $LastExitCode)
-Write-Host "racc --version:" $(racc --version)
-$exit_code += [int](0 + $LastExitCode)
-Write-Host "rake --version:" $(rake --version)
-$exit_code += [int](0 + $LastExitCode)
-Write-Host "rdoc --version:" $(rdoc --version)
-$exit_code += [int](0 + $LastExitCode)
-Write-Host "ridk   version:"
+EchoC "$($dash * 74) CLI Test" yel
+echo "bundle version: $(bundle version)" ; $exit_code += [int](0 + $LastExitCode)
+echo "gem  --version: $(gem --version)"  ; $exit_code += [int](0 + $LastExitCode)
+echo "irb  --version: $(irb --version)"  ; $exit_code += [int](0 + $LastExitCode)
+echo "racc --version: $(racc --version)" ; $exit_code += [int](0 + $LastExitCode)
+echo "rake --version: $(rake --version)" ; $exit_code += [int](0 + $LastExitCode)
+echo "rdoc --version: $(rdoc --version)" ; $exit_code += [int](0 + $LastExitCode)
+echo "ridk   version:"
 ridk version
 
-Write-Host `n$($dash * 74) Runs Tests -ForegroundColor $fc
+echo ''
+EchoC "$($dash * 74) Runs Tests" yel
 
 BasicTest
 sleep 2

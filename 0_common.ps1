@@ -9,7 +9,7 @@ $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $clr = @{
   'red' = [char]0x001B + '[31;1m'
   'grn' = [char]0x001B + '[32;1m'
-  'yel' = [char]0x001B + '[33m'
+  'yel' = [char]0x001B + '[93m'
   'blu' = [char]0x001B + '[34;1m'
   'mag' = [char]0x001B + '[35;1m'
   'cyn' = [char]0x001B + '[36;1m'
@@ -67,9 +67,6 @@ function Set-Variables {
 
   $script:chost   = "$carch-w64-mingw32"
 
-  #$script:make = "mingw32-make.exe"
-  $script:make = "make"
-
   # below two items appear in MSYS2 shell printenv
   $env:MSYSTEM_CARCH = $carch
   $env:MSYSTEM_CHOST = $chost
@@ -113,14 +110,11 @@ function EchoC($text, $color) {
   echo $(Color $text $color)
 }
 
-#———————————————————————————————————————————————————————————————————— Write-Line
-# Write 80 dash line then msg in color $fc
-function Write-Line($msg) { EchoC "$dl`n$msg" yel }
-
 #—————————————————————————————————————————————————————————————————————— Enc-Info
 # Dump misc encoding info to console
 function Enc-Info {
-  EchoC "`n$($dash * 8) Encoding $($dash * 8)" yel
+  echo ''
+  EchoC "$($dash * 8) Encoding $($dash * 8)" yel
   echo "PS Console  $([Console]::OutputEncoding.HeaderName)"
   echo "PS Output   $($OutputEncoding.HeaderName)"
   iex "ruby.exe -e `"['external','filesystem','internal','locale'].each { |e| puts e.ljust(12) + Encoding.find(e).to_s }`""
