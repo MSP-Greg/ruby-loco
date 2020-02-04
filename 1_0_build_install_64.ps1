@@ -315,7 +315,7 @@ Time-Log "$make -j$jobs update-unicode, $make -j$jobs update-gems"
 Remove-Read-Only $d_ruby
 Remove-Read-Only $d_build
 
-EchoC "SOURCE_DATE_EPOCH = $env:SOURCE_DATE_EPOCH" yel
+echo "SOURCE_DATE_EPOCH = $env:SOURCE_DATE_EPOCH"
 Run "$make -j$jobs 2>&1" $true
 Time-Log "$make -j$jobs"
 

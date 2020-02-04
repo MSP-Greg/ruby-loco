@@ -9,11 +9,12 @@ $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $clr = @{
   'red' = [char]0x001B + '[31;1m'
   'grn' = [char]0x001B + '[32;1m'
-  'yel' = [char]0x001B + '[33;1m'
+  'yel' = [char]0x001B + '[33m'
   'blu' = [char]0x001B + '[34;1m'
   'mag' = [char]0x001B + '[35;1m'
   'cyn' = [char]0x001B + '[36;1m'
   'wht' = [char]0x001B + '[37;1m'
+  'gry' = [char]0x001B + '[90;1m'
 }
 
 #—————————————————————————————————————————————————————————————— Remove-Read-Only
