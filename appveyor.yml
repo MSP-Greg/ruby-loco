@@ -1,5 +1,10 @@
 ---
 # clear cache 2019-08-07
+
+branches:
+  only:
+    - master
+
 image: Visual Studio 2017
 
 deploy: off
