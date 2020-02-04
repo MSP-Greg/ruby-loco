@@ -17,7 +17,7 @@ function Apply-Patches($p_dir) {
   Push-Location "$d_ruby"
   foreach ($p in $patches) {
     if ($p.StartsWith("__")) { continue }
-    Write-Host $($dash * 55) $p -ForegroundColor $fc
+    EchoC "$($dash * 55) $p" yel
     & $patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p"
   }
   Pop-Location
@@ -34,7 +34,7 @@ function Apply-Install-Patches($p_dir) {
   Pop-Location
   Push-Location "$d_install"
   foreach ($p in $patches) {
-    Write-Host $($dash * 55) $p -ForegroundColor $fc
+    EchoC "$($dash * 55) $p" yel
     & $patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p"
   }
   Pop-Location
@@ -62,7 +62,7 @@ function Print-Time-Log {
   $diff = New-TimeSpan -Start $script:time_start -End $script:time_old
   $script:time_info += ("{0:mm}:{0:ss} {1}" -f @($diff, "Total"))
 
-  Write-Host $($dash * 80) -ForegroundColor $fc
+  EchoC $($dash * 80) yel
   Write-Host $script:time_info
   $fn = "$d_logs/time_log_build.log"
   [IO.File]::WriteAllText($fn, $script:time_info, $UTF8)
@@ -89,7 +89,7 @@ function Time-Log($msg) {
 function Check-Exit($msg, $pop) {
   if ($LastExitCode -and $LastExitCode -ne 0) {
     if ($pop) { Pop-Location }
-    Write-Line "Failed - $msg" -ForegroundColor $fc
+    EchoC "Failed - $msg" yel
     exit 1
   }
 }
@@ -145,11 +145,18 @@ function Create-Folders {
 function Run($exec, $silent = $false) {
   $orig = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
-  Write-Line "$exec"
+
+  if ($is_actions) {
+    echo "##[group]$(color $exec yel)"
+  } else {
+    echo "$exec"
+  }
+  
   if ($silent) { iex $exec -ErrorAction SilentlyContinue }
   else         { iex $exec }
   Check-Exit $exec
   $ErrorActionPreference = $orig
+  if ($is_actions) { echo ::[endgroup] }
 }
 
 #——————————————————————————————————————————————————————————————————— Strip-Build
@@ -185,8 +192,8 @@ function Strip-Build {
   }
   $msg = "Build:   Stripped {0,2} dll files, {1,2} exe files, and {2,3} so files" -f `
     @($dlls.length, $exes.length, $sos.length)
-  Write-Host $($dash * 80) -ForegroundColor $fc
-  Write-Host $msg
+  EchoC $($dash * 80) yel
+  echo $msg
   Pop-Location
 }
 
@@ -227,8 +234,8 @@ function Strip-Install {
 
   $msg = "Install: Stripped {0,2} dll files, {1,2} exe files, and {2,3} so files" -f `
     @($dlls.length, $exes.length, $sos.length)
-  Write-Host $($dash * 80) -ForegroundColor $fc
-  Write-Host $msg
+  EchoC $($dash * 80) yel
+  echo $msg
   Pop-Location
 }
 
@@ -268,7 +275,7 @@ Set-Variables
 Set-Variables-Local
 Set-Env
 
-$gcc_vers = ([regex]'\d\.\d\.\d').match($(gcc.exe --version)).value
+$gcc_vers = ([regex]'\d+\.\d+\.\d+').match($(gcc.exe --version)).value
 
 $files = "$d_msys2/mingw$bits/lib/libyaml.dll.a",
          "$d_msys2/mingw$bits/lib/libz.dll.a",
@@ -308,7 +315,7 @@ Time-Log "$make -j$jobs update-unicode, $make -j$jobs update-gems"
 Remove-Read-Only $d_ruby
 Remove-Read-Only $d_build
 
-Write-Host "SOURCE_DATE_EPOCH = $env:SOURCE_DATE_EPOCH" -ForegroundColor $fc
+EchoC "SOURCE_DATE_EPOCH = $env:SOURCE_DATE_EPOCH" yel
 Run "$make -j$jobs 2>&1" $true
 Time-Log "$make -j$jobs"
 

@@ -21,26 +21,14 @@ jobs:
           restore-keys: |
             dl-cache-win-mingw
 
-      - name: git config
+      - name: git config & clone
         run: |
           git config --system core.autocrlf false
           git config --system core.eol lf
-
-      - name: Checkout ruby-loco
-        uses: actions/checkout@v2
-
-      - name: Checkout ruby
-        uses: actions/checkout@v2
-        with:
-          repository: ruby/ruby
-          path: ruby
-
-      - name: Checkout rubyinstaller2
-        uses: actions/checkout@v2
-        with:
-          repository: oneclick/rubyinstaller2
-          path: rubyinstaller2
-
+          $gh = 'https://github.com'
+          git clone -q --depth=1 --no-tags --branch=actions $gh/MSP-Greg/ruby-loco.git      .
+          git clone -q --depth=1 --no-tags --branch=master  $gh/oneclick/rubyinstaller2.git ./rubyinstaller2
+          git clone -q --depth=1 --no-tags --branch=master  $gh/ruby/ruby.git               ./ruby
 
       - name: Set up Ruby & MSYS2
         uses: MSP-Greg/actions-ruby@master

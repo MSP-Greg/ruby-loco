@@ -56,14 +56,14 @@ function Run-Proc {
          [string]$StdErr , [string]$e_args , [string]$Dir   , [int]$TimeLimit
   )
 
-  Write-Host "$($dash * 35) $Title" -ForegroundColor $fc
+  EchoC "$($dash * 35) $Title" yel
 
   if ($TimeLimit -eq $null -or $TimeLimit -eq 0 ) {
-    Write-Host "Need TimeLimit!"
+    echo "Need TimeLimit!"
     exit
   }
   $msg = "Time Limit {0,8:n1} s       {1}" -f @($TimeLimit, $(Get-Date -Format mm:ss))
-  Write-Host $msg
+  echo $msg
 
   $start = Get-Date
   $status = ''
@@ -78,7 +78,7 @@ function Run-Proc {
 
   Wait-Process -Id $proc.id -Timeout $TimeLimit -ea 0 -ev froze
   if ($froze) {
-    Write-Host "Exceeded time limit..." -ForegroundColor $fc
+    EchoC "Exceeded time limit..." yel
     $handle = $null
     Kill-Proc $proc
     $status = " (frozen)"
@@ -87,9 +87,9 @@ function Run-Proc {
   $msg = "Test Time  {0,8:n1}" -f @($diff.TotalSeconds)
   Write-Host $msg -NoNewLine
   if ($proc.ExitCode -eq 0) {
-    Write-Host " passed" -ForegroundColor Green
+    EchoC " passed" grn
   } else {
-    Write-Host " failed" -ForegroundColor Red
+    EchoC " failed" red
     $status = " (failed)"
   }
   $script:time_info += ("{0:mm}:{0:ss} {1}`n" -f @($diff, "$Title$status"))
@@ -140,7 +140,7 @@ function Finish {
 
   $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
-  # seems to be needed for proper dash encoding in 2_1_test_script.rb
+  # AppVeyor seems to be needed for proper dash encoding in 2_1_test_script.rb
   [Console]::OutputEncoding = New-Object -typename System.Text.UTF8Encoding
 
   # used in 2_1_test_script.rb

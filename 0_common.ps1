@@ -3,8 +3,18 @@ Sets variables used in 1_0_build_install_64.ps1 and 2_0_test.ps1
 If running locally, use ./local.ps1
 #>
 
-#
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+
+# color hash used by EchoC and Color functions
+$clr = @{
+  'red' = [char]0x001B + '[31;1m'
+  'grn' = [char]0x001B + '[32;1m'
+  'yel' = [char]0x001B + '[33;1m'
+  'blu' = [char]0x001B + '[34;1m'
+  'mag' = [char]0x001B + '[35;1m'
+  'cyn' = [char]0x001B + '[36;1m'
+  'wht' = [char]0x001B + '[37;1m'
+}
 
 #—————————————————————————————————————————————————————————————— Remove-Read-Only
 # removes readonly from folder and all child directories
@@ -88,16 +98,30 @@ function Set-Variables {
   $script:UTF8 = $(New-Object System.Text.UTF8Encoding $False)
 }
 
+#———————————————————————————————————————————————————————————————————— Color
+# Returns text in color
+function Color($text, $color) {
+  $rst = [char]0x001B + '[0m'
+  $c = $clr[$color.ToLower()]
+  "$c$text$rst"
+}
+
+#———————————————————————————————————————————————————————————————————— EchoC
+# Writes text in color
+function EchoC($text, $color) {
+  echo $(Color $text $color)
+}
+
 #———————————————————————————————————————————————————————————————————— Write-Line
 # Write 80 dash line then msg in color $fc
-function Write-Line($msg) { Write-Host "$dl`n$msg" -ForegroundColor $fc }
+function Write-Line($msg) { EchoC "$dl`n$msg" yel }
 
 #—————————————————————————————————————————————————————————————————————— Enc-Info
 # Dump misc encoding info to console
 function Enc-Info {
-  Write-Host "`n$($dash * 8) Encoding $($dash * 8)" -ForegroundColor $fc
-  Write-Host "PS Console  $([Console]::OutputEncoding.HeaderName)"
-  Write-Host "PS Output   $($OutputEncoding.HeaderName)"
+  EchoC "`n$($dash * 8) Encoding $($dash * 8)" yel
+  echo "PS Console  $([Console]::OutputEncoding.HeaderName)"
+  echo "PS Output   $($OutputEncoding.HeaderName)"
   iex "ruby.exe -e `"['external','filesystem','internal','locale'].each { |e| puts e.ljust(12) + Encoding.find(e).to_s }`""
-  Write-Host ''
+  echo ''
 }
