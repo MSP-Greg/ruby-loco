@@ -179,10 +179,11 @@ EOT
   end
 
   def find_dlls(pkgs, pkg_pre)
-    pacman = File.join D_MSYS2, "usr/bin/pacman"
+    orig_path = ENV['PATH']
+    ENV['PATH'] = "#{File.join D_MSYS2, 'usr/bin'};#{orig_path}"
     re_dep = /^Depends On +: +([^\r\n]+)/i
-    re_bin = /\A\/mingw#{ARCH}\/bin\//i
-    re_lib = /\A\/mingw#{ARCH}\/lib\//i
+    re_bin = /\A.+\/mingw#{ARCH}\/bin\//i
+    re_lib = /\A.+\/mingw#{ARCH}\/lib\//i
     bin_dlls = []
     lib_dlls = []
     pkg_files_added = []
@@ -191,16 +192,16 @@ EOT
 
     while !pkgs.empty? do
       depends = []
-      files = `#{pacman} -Ql #{pkgs.join(' ')}`
-      files.scan(/\S+.dll$/) { |dll|
-        if    re_bin =~ dll ; bin_dlls << dll.sub(re_bin, '')
-        elsif re_lib =~ dll ; lib_dlls << dll.sub(re_lib, '')
+      files = `pacman.exe -Ql #{pkgs.join(' ')} | grep dll$`
+      files.each_line { |dll|
+        if    dll.match? re_bin ; bin_dlls << dll.sub(re_bin, '')
+        elsif dll.match? re_lib ; lib_dlls << dll.sub(re_lib, '')
         else
           puts "#{dll.ljust(COL_WID)} Unknown dll location!"
         end
       }
       pkg_files_added += pkgs
-      if info = `#{pacman} -Qi #{pkgs.join(' ')}`
+      if info = `pacman.exe -Qi #{pkgs.join(' ')}`
         info.scan(re_dep) { |dep|
           next if /\ANone/ =~ dep[0]
           depends += dep[0].split(/\s+/)
@@ -209,7 +210,7 @@ EOT
           depends.uniq!
           depends.reject! { |e| pkg_files_added.include?(e) }
           unless depends.empty?
-            stdin, stdout, stderr = Open3.popen3("#{pacman} -Q #{depends.join(' ')}")
+            stdin, stdout, stderr = Open3.popen3("pacman -Q #{depends.join(' ')}")
             errs = stderr.read
             stdin.close ; stdout.close ; stderr.close
             if errs && !errs.strip.empty?
@@ -222,6 +223,7 @@ EOT
       end
       pkgs = depends
     end
+    ENV['PATH'] = orig_path
     [ ( bin_dlls.uniq.sort || [] ), ( lib_dlls.uniq.sort || [] ) ]
   end
 
