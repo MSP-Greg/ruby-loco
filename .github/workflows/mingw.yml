@@ -65,3 +65,183 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           ruby_path: ./ruby-mingw
+
+  mswin:
+    strategy:
+      matrix:
+        vs: [2019]
+      fail-fast: false
+    runs-on: windows-2019
+    env:
+      zlib_version: '1.2.11'
+      vc_setup: >
+        "C:\Program Files (x86)\Microsoft Visual Studio\${{ matrix.vs }}\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+      APPVEYOR: 'True'
+
+    steps:
+      - name: Cache - .downloaded-cache
+        uses: actions/cache@v1
+        with:
+          path: .downloaded-cache
+          key: dl-cache-win-${{ matrix.vs }}-${{ github.sha }}
+          restore-keys: |
+            dl-cache-win-${{ matrix.vs }}-
+
+      - name: Cache - chocolatey
+        uses: actions/cache@v1
+        with:
+          path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
+          key: chocolatey-${{ matrix.vs }}-${{ github.sha }}
+          restore-keys: |
+            chocolatey-${{ matrix.vs }}-
+
+      - name: Cache - vcpkg-download
+        uses: actions/cache@v1
+        with:
+          path: C:\vcpkg\downloads
+          key: vcpkg-download-${{ matrix.vs }}-${{ github.sha }}
+          restore-keys: |
+            vcpkg-download-${{ matrix.vs }}-
+
+      - name: Install libraries with vcpkg
+        run: |
+          vcpkg --triplet x64-windows install readline
+
+      - name: Install libraries with chocolatey
+        run: |
+          choco install --no-progress openssl winflexbison3
+
+      - name: git config
+        run: |
+          git config --system core.autocrlf false
+          git config --system core.eol lf
+
+      - name: repo checkout
+        uses: actions/checkout@v2
+
+      - name: Checkout ruby
+        run: |
+          git clone --single-branch --shallow-since=yesterday --branch=master https://github.com/ruby/ruby src
+
+      - name: actions-commit-info.sh
+        run: ./src/tool/actions-commit-info.sh
+        shell: bash
+        id: commit_info
+
+      - name: load ruby
+        uses: eregon/use-ruby-action@v1
+        with:
+          ruby-version: 2.7
+
+      - name: Configure
+        shell: cmd
+        run: |
+          mkdir .downloaded-cache
+          mklink /j %cd%\src\.downloaded-cache %cd%\.downloaded-cache
+          mkdir temp
+          mkdir install
+          set PRE=%cd%\ruby-mswin
+          mkdir build
+          cd build
+          call %vc_setup%
+          ../src/win32/configure.bat --disable-install-doc --prefix=%PRE% --without-ext=+,dbm,gdbm --enable-bundled-libffi --with-opt-dir=C:/vcpkg/installed/x64-windows --with-openssl-dir="C:/Program Files/OpenSSL-Win64"
+
+      - name: download unicode, gems, etc
+        shell: cmd
+        run: |
+          curl -fsSL -o zlib%zlib_version:.=%.zip --retry 10 https://zlib.net/zlib%zlib_version:.=%.zip
+          "C:\Program Files\7-Zip\7z.exe" x -o%cd%\src\ext\zlib zlib%zlib_version:.=%.zip
+          call %vc_setup%
+          cd build
+          nmake update-unicode
+          nmake update-gems
+          nmake up incs
+
+      - name: apply patches
+        run: |
+          cd src
+          patch.exe -p1 -N --no-backup-if-mismatch -i ../patches-mswin/win32-makefile.sub.patch
+          patch.exe -p1 -N --no-backup-if-mismatch -i ../patches-mswin/test-all.patch
+
+      - name: nmake
+        shell: cmd
+        run: |
+          call %vc_setup%
+          set PATH=C:\ProgramData\Chocolatey\bin;%PATH%
+          set YACC=win_bison
+          echo on
+          cd build
+          nmake
+
+      - name: mmake install
+        shell: cmd
+        run: |
+          set RD=%cd%
+          call %vc_setup%
+          cd build
+          nmake "DESTDIR=" install-nodoc
+
+      - name: nmake test
+        timeout-minutes: 4
+        shell: cmd
+        run: |
+          set TMPDIR=%cd%\temp
+          cd build
+          call %vc_setup%
+          nmake test
+
+      # copy dll files to bin folder, add bin to path
+      # ruby/test_time_tz.rb requires additional gems
+      - name: nmake test-all -j
+        timeout-minutes: 35
+        shell: cmd
+        run: |
+          del ruby-mswin\lib\x64-vcruntime140-ruby280-static.lib
+          copy C:\vcpkg\installed\x64-windows\bin\readline.dll            %cd%\ruby-mswin\bin\
+          copy "C:\Program Files\OpenSSL-Win64\bin\libcrypto-1_1-x64.dll" %cd%\ruby-mswin\bin\
+          copy "C:\Program Files\OpenSSL-Win64\bin\libssl-1_1-x64.dll"    %cd%\ruby-mswin\bin\
+          set GIT=git.exe
+          set /a JOBS=%NUMBER_OF_PROCESSORS%
+          set EXCL_N=--exclude test_syntax --exclude test_time_tz --exclude test_undef
+          set TMPDIR=%cd%\temp
+          call %vc_setup%
+          chcp 437
+          set PATH=%cd%\ruby-mswin\bin;%PATH%
+          cd build
+          nmake test-all "TESTOPTS=-j%JOBS% %EXCL_N% -v --timeout-scale=3.0 --retry --job-status=normal --show-skip"
+
+      - name: nmake test-all singles
+        timeout-minutes: 5
+        shell: cmd
+        run: |
+          set GIT=git.exe
+          set tr=../src/test/ruby
+          set TESTS=%tr%/test_syntax.rb %tr%/test_undef.rb
+          set TMPDIR=%cd%\temp
+          call %vc_setup%
+          chcp 437
+          set PATH=%cd%\ruby-mswin\bin;%PATH%
+          cd build
+          nmake test-all "TESTOPTS=-v --timeout-scale=3.0"
+
+      - name: test-spec from install
+        timeout-minutes: 5
+        shell: cmd
+        run: |
+          set TMPDIR=%cd%\temp
+          call %vc_setup%
+          chcp 437
+          set PATH=%cd%\ruby-mswin\bin;%PATH%
+          cd src/spec/ruby
+          ruby ../mspec/bin/mspec -j
+
+      - name: CLI Check
+        run: ./mswin_cli_test.ps1
+
+      - name: upload asset
+        timeout-minutes: 5
+        uses: ./.github/actions/upload-binary
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          ruby_path: ./ruby-mswin
