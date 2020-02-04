@@ -160,8 +160,8 @@ jobs:
       - name: apply patches
         run: |
           cd src
-          patch.exe -p1 -N --no-backup-if-mismatch -i ../patches-mswin/win32-makefile.sub.patch
-          patch.exe -p1 -N --no-backup-if-mismatch -i ../patches-mswin/test-all.patch
+          patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/win32-makefile.sub.patch
+          patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/test-all.patch
 
       - name: nmake
         shell: cmd
