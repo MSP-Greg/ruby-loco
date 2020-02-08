@@ -3,8 +3,19 @@ Sets variables used in 1_0_build_install_64.ps1 and 2_0_test.ps1
 If running locally, use ./local.ps1
 #>
 
-#
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+
+# color hash used by EchoC and Color functions
+$clr = @{
+  'red' = [char]0x001B + '[31;1m'
+  'grn' = [char]0x001B + '[32;1m'
+  'yel' = [char]0x001B + '[93m'
+  'blu' = [char]0x001B + '[34;1m'
+  'mag' = [char]0x001B + '[35;1m'
+  'cyn' = [char]0x001B + '[36;1m'
+  'wht' = [char]0x001B + '[37;1m'
+  'gry' = [char]0x001B + '[90;1m'
+}
 
 #—————————————————————————————————————————————————————————————— Remove-Read-Only
 # removes readonly from folder and all child directories
@@ -19,8 +30,16 @@ function Remove-Read-Only($path) {
 #————————————————————————————————————————————————————————————————— Set-Variables
 # set base variables, including MSYS2 location and bit related varis
 function Set-Variables {
-  if ($env:Appveyor -eq 'True') {
-    # } elseif ($env:GITHUB_ACTIONS -eq 'true') {
+  if ($env:GITHUB_ACTIONS -eq 'true') {
+    $script:is_actions = $true
+    $script:d_msys2   = "C:/msys64"
+    $script:d_git     = "$env:ProgramFiles/Git"
+    $script:7z        = "$env:ChocolateyInstall\bin\7z.exe"
+    $env:TMPDIR       =  $env:RUNNER_TEMP
+    $script:base_path =  $env:PATH -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
+    $script:install   = "ruby-mingw"
+    # Write-Host ($base_path -replace ';', "`n")
+  } elseif ($env:Appveyor -eq 'True') {
     $script:is_av     = $true
     $script:d_msys2   = "C:/msys64"
     $script:d_git     =  "$env:ProgramFiles/Git"
@@ -28,7 +47,9 @@ function Set-Variables {
     $script:base_path = ("$env:ProgramFiles/7-Zip;" + `
       "$env:ProgramFiles/AppVeyor/BuildAgent;$d_git/cmd;" + `
       "$env:SystemRoot/system32;$env:ProgramFiles;$env:SystemRoot").replace('\', '/')
+    $script:install   = "install"
   } else {
+    $script:install   = "install"
     ./local.ps1
   }
 
@@ -45,9 +66,6 @@ function Set-Variables {
   }
 
   $script:chost   = "$carch-w64-mingw32"
-
-  #$script:make = "mingw32-make.exe"
-  $script:make = "make"
 
   # below two items appear in MSYS2 shell printenv
   $env:MSYSTEM_CARCH = $carch
@@ -68,7 +86,6 @@ function Set-Variables {
   $script:d_ruby    = "$d_repo/ruby"
   $script:d_zips    = "$d_repo/zips"
 
-  $script:install   = "install"
   $script:d_install = "$d_repo/$install"
 
   $script:jobs = $env:NUMBER_OF_PROCESSORS
@@ -79,16 +96,27 @@ function Set-Variables {
   $script:UTF8 = $(New-Object System.Text.UTF8Encoding $False)
 }
 
-#———————————————————————————————————————————————————————————————————— Write-Line
-# Write 80 dash line then msg in color $fc
-function Write-Line($msg) { Write-Host "$dl`n$msg" -ForegroundColor $fc }
+#———————————————————————————————————————————————————————————————————— Color
+# Returns text in color
+function Color($text, $color) {
+  $rst = [char]0x001B + '[0m'
+  $c = $clr[$color.ToLower()]
+  "$c$text$rst"
+}
+
+#———————————————————————————————————————————————————————————————————— EchoC
+# Writes text in color
+function EchoC($text, $color) {
+  echo $(Color $text $color)
+}
 
 #—————————————————————————————————————————————————————————————————————— Enc-Info
 # Dump misc encoding info to console
 function Enc-Info {
-  Write-Host "`n$($dash * 8) Encoding $($dash * 8)" -ForegroundColor $fc
-  Write-Host "PS Console  $([Console]::OutputEncoding.HeaderName)"
-  Write-Host "PS Output   $($OutputEncoding.HeaderName)"
+  echo ''
+  EchoC "$($dash * 8) Encoding $($dash * 8)" yel
+  echo "PS Console  $([Console]::OutputEncoding.HeaderName)"
+  echo "PS Output   $($OutputEncoding.HeaderName)"
   iex "ruby.exe -e `"['external','filesystem','internal','locale'].each { |e| puts e.ljust(12) + Encoding.find(e).to_s }`""
-  Write-Host ''
+  echo ''
 }

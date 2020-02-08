@@ -34,7 +34,6 @@ class << self
   def run
     copy_dll_files
     add_priv_assm
-    # -REMOVE rbreadline- add_rb_readline
     copy_ssl_files
     add_licenses
   end
@@ -112,18 +111,6 @@ EOT
     }
   end
 
-  def add_rb_readline
-    # add readline patch
-    Dir.chdir(D_RL) { |d|
-      patch_exe = File.join D_MSYS2, "usr", "bin", "patch.exe"
-      patch = `#{patch_exe} -p1 -N --no-backup-if-mismatch -i #{__dir__}/patches/__readline_warnings.patch`
-    }
-    src = File.join(D_RL, "lib")
-    pkg_dest = File.join D_INSTALL, 'lib', 'ruby', 'site_ruby'
-    Dir.mkdir_p pkg_dest unless Dir.exist? pkg_dest
-    FileUtils.copy_entry src, pkg_dest, preserve: true
-  end
-
   def copy_ssl_files
     Dir.chdir(D_RI2) { |d|
       require_relative "rubyinstaller2/lib/ruby_installer/build/ca_cert_file.rb"
@@ -162,6 +149,8 @@ EOT
   def add_licenses
     #IO.copy_stream("#{D_RUBY}/LEGAL"     , "#{D_INSTALL}/LEGAL Ruby")
     #IO.copy_stream("#{D_RI2}/LICENSE.txt", "#{D_INSTALL}/LICENSE Ruby Installer.txt")
+    cp "#{D_RUBY}/BSDL"      , "#{D_INSTALL}/BSDL"
+    cp "#{D_RUBY}/COPYING"   , "#{D_INSTALL}/COPYING Ruby"
     cp "#{D_RUBY}/LEGAL"     , "#{D_INSTALL}/LEGAL Ruby"
     cp "#{D_RI2}/LICENSE.txt", "#{D_INSTALL}/LICENSE Ruby Installer.txt"
   end
@@ -179,10 +168,11 @@ EOT
   end
 
   def find_dlls(pkgs, pkg_pre)
-    pacman = File.join D_MSYS2, "usr/bin/pacman"
+    orig_path = ENV['PATH']
+    ENV['PATH'] = "#{File.join D_MSYS2, 'usr/bin'};#{orig_path}"
     re_dep = /^Depends On +: +([^\r\n]+)/i
-    re_bin = /\A\/mingw#{ARCH}\/bin\//i
-    re_lib = /\A\/mingw#{ARCH}\/lib\//i
+    re_bin = /\A.+\/mingw#{ARCH}\/bin\//i
+    re_lib = /\A.+\/mingw#{ARCH}\/lib\//i
     bin_dlls = []
     lib_dlls = []
     pkg_files_added = []
@@ -191,16 +181,16 @@ EOT
 
     while !pkgs.empty? do
       depends = []
-      files = `#{pacman} -Ql #{pkgs.join(' ')}`
-      files.scan(/\S+.dll$/) { |dll|
-        if    re_bin =~ dll ; bin_dlls << dll.sub(re_bin, '')
-        elsif re_lib =~ dll ; lib_dlls << dll.sub(re_lib, '')
+      files = `pacman.exe -Ql #{pkgs.join(' ')} | grep dll$`
+      files.each_line(chomp: true) { |dll|
+        if    dll.match? re_bin ; bin_dlls << dll.sub(re_bin, '')
+        elsif dll.match? re_lib ; lib_dlls << dll.sub(re_lib, '')
         else
           puts "#{dll.ljust(COL_WID)} Unknown dll location!"
         end
       }
       pkg_files_added += pkgs
-      if info = `#{pacman} -Qi #{pkgs.join(' ')}`
+      if info = `pacman.exe -Qi #{pkgs.join(' ')}`
         info.scan(re_dep) { |dep|
           next if /\ANone/ =~ dep[0]
           depends += dep[0].split(/\s+/)
@@ -209,7 +199,7 @@ EOT
           depends.uniq!
           depends.reject! { |e| pkg_files_added.include?(e) }
           unless depends.empty?
-            stdin, stdout, stderr = Open3.popen3("#{pacman} -Q #{depends.join(' ')}")
+            stdin, stdout, stderr = Open3.popen3("pacman -Q #{depends.join(' ')}")
             errs = stderr.read
             stdin.close ; stdout.close ; stderr.close
             if errs && !errs.strip.empty?
@@ -222,6 +212,7 @@ EOT
       end
       pkgs = depends
     end
+    ENV['PATH'] = orig_path
     [ ( bin_dlls.uniq.sort || [] ), ( lib_dlls.uniq.sort || [] ) ]
   end
 

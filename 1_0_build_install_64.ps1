@@ -17,7 +17,7 @@ function Apply-Patches($p_dir) {
   Push-Location "$d_ruby"
   foreach ($p in $patches) {
     if ($p.StartsWith("__")) { continue }
-    Write-Host $($dash * 55) $p -ForegroundColor $fc
+    EchoC "$($dash * 55) $p" yel
     & $patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p"
   }
   Pop-Location
@@ -34,11 +34,27 @@ function Apply-Install-Patches($p_dir) {
   Pop-Location
   Push-Location "$d_install"
   foreach ($p in $patches) {
-    Write-Host $($dash * 55) $p -ForegroundColor $fc
+    EchoC "$($dash * 55) $p" yel
     & $patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p"
   }
   Pop-Location
   Write-Host ''
+}
+
+#————————————————————————————————————————————————————————————————— Files-Hide
+# Hides files for compiling/linking
+function Files-Hide($f_ary) {
+  foreach ($f in $f_ary) {
+    if (Test-Path -Path $f -PathType Leaf ) { ren $f ($f + '__') }
+  }
+}
+
+#————————————————————————————————————————————————————————————————— Files-Unhide
+# UnHides files previously hidden
+function Files-Unhide($f_ary) {
+  foreach ($f in $f_ary) {
+    if (Test-Path -Path ($f + '__') -PathType Leaf ) { ren ($f + '__') $f }
+  }
 }
 
 #———————————————————————————————————————————————————————————————— Print-Time-Log
@@ -46,7 +62,7 @@ function Print-Time-Log {
   $diff = New-TimeSpan -Start $script:time_start -End $script:time_old
   $script:time_info += ("{0:mm}:{0:ss} {1}" -f @($diff, "Total"))
 
-  Write-Host $($dash * 80) -ForegroundColor $fc
+  EchoC $($dash * 80) yel
   Write-Host $script:time_info
   $fn = "$d_logs/time_log_build.log"
   [IO.File]::WriteAllText($fn, $script:time_info, $UTF8)
@@ -73,7 +89,7 @@ function Time-Log($msg) {
 function Check-Exit($msg, $pop) {
   if ($LastExitCode -and $LastExitCode -ne 0) {
     if ($pop) { Pop-Location }
-    Write-Line "Failed - $msg" -ForegroundColor $fc
+    EchoC "Failed - $msg" yel
     exit 1
   }
 }
@@ -126,11 +142,21 @@ function Create-Folders {
 
 #——————————————————————————————————————————————————————————————————————————— Run
 # Run a command and check for error
-function Run($exec, $silent = $false) {
-  Write-Line "$exec"
-  if ($silent) { iex $exec -ErrorAction SilentlyContinue }
-  else         { iex $exec }
-  Check-Exit $exec
+function Run($e_msg, $exec) {
+  $orig = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+
+  if ($is_actions) {
+    echo "##[group]$(color $e_msg yel)"
+  } else {
+    echo "$e_msg"
+  }
+  
+  &$exec
+
+  Check-Exit $eMsg
+  $ErrorActionPreference = $orig
+  if ($is_actions) { echo ::[endgroup] }
 }
 
 #——————————————————————————————————————————————————————————————————— Strip-Build
@@ -166,8 +192,8 @@ function Strip-Build {
   }
   $msg = "Build:   Stripped {0,2} dll files, {1,2} exe files, and {2,3} so files" -f `
     @($dlls.length, $exes.length, $sos.length)
-  Write-Host $($dash * 80) -ForegroundColor $fc
-  Write-Host $msg
+  EchoC $($dash * 80) yel
+  echo $msg
   Pop-Location
 }
 
@@ -208,8 +234,8 @@ function Strip-Install {
 
   $msg = "Install: Stripped {0,2} dll files, {1,2} exe files, and {2,3} so files" -f `
     @($dlls.length, $exes.length, $sos.length)
-  Write-Host $($dash * 80) -ForegroundColor $fc
-  Write-Host $msg
+  EchoC $($dash * 80) yel
+  echo $msg
   Pop-Location
 }
 
@@ -229,7 +255,7 @@ function Set-Env {
 
   # used in Ruby scripts
   $env:D_MSYS2  = $d_msys2
-  
+
   $env:MSYS_NO_PATHCONV = 1
 
   $env:CFLAGS   = "-D_FORTIFY_SOURCE=2 -O3 -march=$march -mtune=generic -fstack-protector-strong -pipe"
@@ -249,9 +275,13 @@ Set-Variables
 Set-Variables-Local
 Set-Env
 
-ren "$d_msys2/mingw$bits/lib/libyaml.dll.a" "libyaml.dll.a__"
-ren "$d_msys2/mingw$bits/lib/libz.dll.a" "libz.dll.a__"
-ren "$d_msys2/mingw$bits/lib/gcc/x86_64-w64-mingw32/9.2.0/libssp.dll.a" "libssp.dll.a__"
+$gcc_vers = ([regex]'\d+\.\d+\.\d+').match($(gcc.exe --version)).value
+
+$files = "$d_msys2/mingw$bits/lib/libyaml.dll.a",
+         "$d_msys2/mingw$bits/lib/libz.dll.a",
+         "$d_msys2/mingw$bits/lib/gcc/x86_64-w64-mingw32/$gcc_vers/libssp.dll.a"
+
+Files-Hide $files
 
 Apply-Patches "patches"
 
@@ -265,46 +295,44 @@ cd $d_ruby
 $ts = $(git log -1 --format=%at).Trim()
 if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") {
   $env:SOURCE_DATE_EPOCH = [String][int]$ts
+  # echo "SOURCE_DATE_EPOCH = $env:SOURCE_DATE_EPOCH"
 }
 
-Run "sh -c `"autoreconf -fi`""
+Run "sh -c `"autoreconf -fi`"" { sh -c "autoreconf -fi" }
 
 cd $d_build
 Time-Log "start"
 
 $config_args = "--build=$chost --host=$chost --target=$chost --with-out-ext=pty,syslog"
-Run "sh -c `"../ruby/configure --disable-install-doc --prefix=$d_install $config_args`""
+Run "sh -c `"../ruby/configure --disable-install-doc --prefix=$d_install $config_args`"" {
+  sh -c "../ruby/configure --disable-install-doc --prefix=$d_install $config_args"
+}
 Time-Log "configure"
 
 # download gems & unicode files
-Run "$make -j$jobs update-unicode"
-Run "$make -j$jobs update-gems"
-Time-Log "$make -j$jobs update-unicode, $make -j$jobs update-gems"
+Run "make -j$jobs update-unicode" { iex "make -j$jobs update-unicode" }
+Run "make -j$jobs update-gems"    { iex "make -j$jobs update-gems" }
+Time-Log "make -j$jobs update-unicode, make -j$jobs update-gems"
 
 # below sets some directories to normal in case they're set to read-only
 Remove-Read-Only $d_ruby
 Remove-Read-Only $d_build
 
-Write-Host "SOURCE_DATE_EPOCH = $env:SOURCE_DATE_EPOCH" -ForegroundColor $fc
-Run "$make -j$jobs 2>&1" $true
-Time-Log "$make -j$jobs"
+Run "make -j$jobs 2>&1" { iex "make -j$jobs 2>&1" }
+Time-Log "make -j$jobs"
 
-Run "$make install-nodoc"
-Time-Log "$make install-nodoc"
+Files-Unhide $files
 
-ren "$d_msys2/mingw$bits/lib/libyaml.dll.a__" "libyaml.dll.a"
-ren "$d_msys2/mingw$bits/lib/libz.dll.a__" "libz.dll.a"
-ren "$d_msys2/mingw$bits/lib/gcc/x86_64-w64-mingw32/9.2.0/libssp.dll.a__" "libssp.dll.a"
+Run "make install-nodoc" {
+  make install-nodoc
+  cd $d_repo
+  ruby 1_2_post_install.rb $bits $install
+  $env:PATH = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
+  ruby 1_3_post_install.rb $bits $install  
+}
+Time-Log "make install-nodoc"
 
-cd $d_repo
-
-# run with old ruby
-ruby 1_2_post_install.rb $bits $install
-
-# run with new ruby (gem install, exc)
-$env:PATH = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
-ruby 1_3_post_install.rb $bits $install
-Time-Log "post install processing"
+#Time-Log "post install processing"
 
 Strip-Build
 Strip-Install

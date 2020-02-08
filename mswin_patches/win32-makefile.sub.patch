@@ -1,0 +1,20 @@
+commit 7e5e689f3b129b43776a847539cf6799f23d16ea
+Author: MSP-Greg <MSP-Greg@users.noreply.github.com>
+Date:   Mon Jan 13 17:52:26 2020 -0600
+
+    win32/Makefile.sub - fix _INTEGRAL_MAX_BITS warning on newer VC
+
+diff --git a/win32/Makefile.sub b/win32/Makefile.sub
+index 326bd7fa7a..07c0daee3b 100644
+--- a/win32/Makefile.sub
++++ b/win32/Makefile.sub
+@@ -635,7 +635,9 @@ $(CONFIG_H): $(MKFILES) $(srcdir)/win32/Makefile.sub $(win_srcdir)/Makefile.sub
+ #define SIZEOF_LONG_LONG 0
+ !endif
+ #define SIZEOF___INT64 8
++!if $(MSC_VER) < 1910
+ #define _INTEGRAL_MAX_BITS 64
++!endif
+ !if $(LARGEFILE_SUPPORT)
+ #define SIZEOF_OFF_T 8
+ !else
