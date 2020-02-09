@@ -1,4 +1,4 @@
-name: ruby-loco
+name: mswin
 on:
   push:
     branches:

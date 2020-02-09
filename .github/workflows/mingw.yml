@@ -1,4 +1,4 @@
-name: ruby-loco
+name: mingw
 on:
   push:
     branches:
