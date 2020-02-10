@@ -131,7 +131,7 @@ jobs:
           copy "C:\Program Files\OpenSSL-Win64\bin\libcrypto-1_1-x64.dll" %cd%\ruby-mswin\bin\ruby_builtin_dlls\
           copy "C:\Program Files\OpenSSL-Win64\bin\libssl-1_1-x64.dll"    %cd%\ruby-mswin\bin\ruby_builtin_dlls\
           copy %cd%\mswin\ruby_builtin_dlls.manifest                      %cd%\ruby-mswin\bin\ruby_builtin_dlls\
-          ren  %cd%\ruby-mswin\bin\zlib1.dll                              %cd%\ruby-mswin\bin\ruby_builtin_dlls\zlib1.dll
+          move %cd%\ruby-mswin\bin\zlib1.dll                              %cd%\ruby-mswin\bin\ruby_builtin_dlls\zlib1.dll
           call %vc_setup%
           cd ruby-mswin\bin
           mt.exe -manifest ..\..\mswin\ruby-exe.xml  -outputresource:ruby.exe;1
