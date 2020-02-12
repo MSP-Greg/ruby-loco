@@ -187,7 +187,7 @@ jobs:
           ruby ../mspec/bin/mspec -j
 
       - name: CLI Check
-        run: ./mswin_cli_test.ps1
+        run: ./mswin/cli_test.ps1
 
       - name: copy misc files
         shell: cmd
