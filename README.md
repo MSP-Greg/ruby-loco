@@ -1,6 +1,8 @@
 ## ruby-loco
 
-![mingw](https://github.com/MSP-Greg/ruby-loco/workflows/mingw/badge.svg)  ![mswin](https://github.com/MSP-Greg/ruby-loco/workflows/mswin/badge.svg)  [![Build status](https://ci.appveyor.com/api/projects/status/0gif1tjb4lmtoro0?svg=true)](https://ci.appveyor.com/project/MSP-Greg/ruby-loco)
+[![mingw](https://github.com/MSP-Greg/ruby-loco/workflows/mingw/badge.svg)](https://github.com/MSP-Greg/ruby-loco/actions?query=workflow%3Amingw)
+[![mswin](https://github.com/MSP-Greg/ruby-loco/workflows/mswin/badge.svg)](https://github.com/MSP-Greg/ruby-loco/actions?query=workflow%3Amswin)
+[![mingw](https://ci.appveyor.com/api/projects/status/0gif1tjb4lmtoro0?svg=true)](https://ci.appveyor.com/project/MSP-Greg/ruby-loco)
 
 ### General
 
