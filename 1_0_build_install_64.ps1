@@ -261,7 +261,7 @@ function Set-Env {
   $env:CFLAGS   = "-D_FORTIFY_SOURCE=2 -O3 -march=$march -mtune=generic -fstack-protector-strong -pipe"
   $env:CXXFLAGS = "-D_FORTIFY_SOURCE=2 -O3 -march=$march -mtune=generic -pipe"
   $env:CPPFLAGS = "-D_FORTIFY_SOURCE=2 -D__USE_MINGW_ANSI_STDIO=1 -DFD_SETSIZE=2048"
-  $env:LDFLAGS  = "-l:libssp.a -l:libyaml.a -l:libz.a -fstack-protector-strong -pipe -s"
+  $env:LDFLAGS  = "-l:libssp.a -l:libz.a -fstack-protector-strong -pipe -s"
 }
 
 #——————————————————————————————————————————————————————————————————— start build
@@ -277,8 +277,7 @@ Set-Env
 
 $gcc_vers = ([regex]'\d+\.\d+\.\d+').match($(gcc.exe --version)).value
 
-$files = "$d_msys2/mingw$bits/lib/libyaml.dll.a",
-         "$d_msys2/mingw$bits/lib/libz.dll.a",
+$files = "$d_msys2/mingw$bits/lib/libz.dll.a",
          "$d_msys2/mingw$bits/lib/gcc/x86_64-w64-mingw32/$gcc_vers/libssp.dll.a"
 
 Files-Hide $files
