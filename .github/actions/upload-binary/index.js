@@ -21449,6 +21449,18 @@ const run = async () => {
     releases.data.forEach(e => assets.set(e.name, e.id))
 
     const releaseIdOld = assets.get(rubyTar)
+    
+    const releaseIdNewBad = assets.get(`new_${rubyTar}`)
+    
+    // release shouldn't exist, for cleaning
+    if ( releaseIdNewBad) {
+      console.log('  Delete bad new')
+      await github.repos.deleteReleaseAsset({
+        owner,
+        repo,
+        asset_id: releaseIdNewBad
+      })
+    }
 
     // Setup headers for API call
     // https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
