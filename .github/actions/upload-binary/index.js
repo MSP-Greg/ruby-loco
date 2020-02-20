@@ -21488,11 +21488,13 @@ const run = async () => {
     console.time('    Replace')
 
     if (releaseIdOld) {
-      console.log('  delete old')
-      await github.repos.deleteReleaseAsset({
+      console.log('  rename old')
+      await github.repos.updateReleaseAsset({
         owner,
         repo,
-        asset_id: releaseIdOld
+        asset_id: releaseIdOld,
+        name:  `old_${rubyTar}`,
+        label: `old_${rubyTar}`
       })
     }
 
@@ -21506,6 +21508,15 @@ const run = async () => {
     })
 
     console.timeEnd('    Replace')
+
+    if (releaseIdOld) {
+      console.log('  delete old')
+      await github.repos.deleteReleaseAsset({
+        owner,
+        repo,
+        asset_id: releaseIdOld
+      })
+    }
 
     console.time('Update Info')
 
