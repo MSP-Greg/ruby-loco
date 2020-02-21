@@ -124,7 +124,7 @@ index 2504a48d0a..24d43b7c90 100644
          sock.sync_close = true
          begin
 diff --git a/test/net/http/test_https.rb b/test/net/http/test_https.rb
-index 204bfb7ad3..8140bd2b07 100644
+index 64101b6bda..8140bd2b07 100644
 --- a/test/net/http/test_https.rb
 +++ b/test/net/http/test_https.rb
 @@ -4,23 +4,15 @@
@@ -141,14 +141,14 @@ index 204bfb7ad3..8140bd2b07 100644
  class TestNetHTTPS < Test::Unit::TestCase
    include TestNetHTTPUtils
 -
--  def self.fixture(key)
+-  def self.read_fixture(key)
 -    File.read(File.expand_path("../fixtures/#{key}", __dir__))
 -  end
 -
--  CA_CERT = OpenSSL::X509::Certificate.new(fixture("cacert.pem"))
--  SERVER_KEY = OpenSSL::PKey.read(fixture("server.key"))
--  SERVER_CERT = OpenSSL::X509::Certificate.new(fixture("server.crt"))
--  DHPARAMS = OpenSSL::PKey::DH.new(fixture("dhparams.pem"))
+-  CA_CERT = OpenSSL::X509::Certificate.new(read_fixture("cacert.pem"))
+-  SERVER_KEY = OpenSSL::PKey.read(read_fixture("server.key"))
+-  SERVER_CERT = OpenSSL::X509::Certificate.new(read_fixture("server.crt"))
+-  DHPARAMS = OpenSSL::PKey::DH.new(read_fixture("dhparams.pem"))
 -  TEST_STORE = OpenSSL::X509::Store.new.tap {|s| s.add_cert(CA_CERT) }
 +  include TestNetUtilsSSL
  
