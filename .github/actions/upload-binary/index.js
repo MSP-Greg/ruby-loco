@@ -4885,7 +4885,7 @@ const run = async () => {
 
     const releaseIdOld = assets.get(rubyTar)
     
-    const releaseIdNewBad = assets.get(`new_${rubyTar}`)
+    const releaseIdNewBad = assets.get(`new-${rubyTar}`)
     
     // release shouldn't exist, for cleaning
     if ( releaseIdNewBad) {
@@ -4906,15 +4906,14 @@ const run = async () => {
 
     console.time('  Upload 7z')
 
-    // Upload ruby file, use prefix 'new_', remove later
+    // Upload ruby file, use prefix 'new-', remove later
     // https://developer.github.com/v3/repos/releases/#upload-a-release-asset
     // https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
     const { data: { id: releaseIdNew }
     } = await octokit.repos.uploadReleaseAsset({
       url: uploadUrl,
       headers,
-      name: `new_${rubyTar}`,
-      label: `new_${rubyTar}`,
+      name: `new-${rubyTar}`,
       data: fs.readFileSync(rubyTar)
     })
 
@@ -4928,8 +4927,7 @@ const run = async () => {
         owner: owner,
         repo: repo,
         asset_id: releaseIdOld,
-        name:  `old_${rubyTar}`,
-        label: `old_${rubyTar}`
+        name: `old-${rubyTar}`
       })
     }
 
@@ -4938,8 +4936,7 @@ const run = async () => {
       owner: owner,
       repo: repo,
       asset_id: releaseIdNew,
-      name: rubyTar,
-      label: rubyTar
+      name: rubyTar
     })
 
     console.timeEnd('    Replace')
