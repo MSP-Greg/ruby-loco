@@ -6532,9 +6532,8 @@ const run = async () => {
 
     const releaseIdOld = assets.get(rubyTar)
     
-    const releaseIdNewBad = assets.get(`new-${rubyTar}`)
-    
     // release shouldn't exist, for cleaning
+    const releaseIdNewBad = assets.get(`new-${rubyTar}`)
     if ( releaseIdNewBad) {
       console.log('  Delete bad new')
       await octokit.repos.deleteReleaseAsset({
@@ -6545,23 +6544,22 @@ const run = async () => {
     }
 
     // Setup headers for API call
-    // https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
     const headers = {
       'content-type': assetContentType,
-      'content-length': fs.statSync(rubyTar).size //contentLength(rubyTar)
+      'content-length': fs.statSync(rubyTar).size
     }
 
     console.time('  Upload 7z')
 
     // Upload ruby file, use prefix 'new-', rename later
     // https://developer.github.com/v3/repos/releases/#upload-a-release-asset
-    // https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
+    // https://octokit.github.io/rest.js/v17#repos-upload-release-asset
     const { data: { id: releaseIdNew }
     } = await octokit.repos.uploadReleaseAsset({
       url: uploadUrl,
       headers,
       name: `new-${rubyTar}`,
-      data: fs.readFileSync(rubyTar)
+      data: fs.createReadStream(rubyTar)
     })
 
     console.timeEnd('  Upload 7z')
@@ -6608,7 +6606,7 @@ const run = async () => {
     })
 
     // Update Release body
-    // https://octokit.github.io/rest.js/#octokit-routes-repos-update-release
+    // https://octokit.github.io/rest.js/v17#repos-update-release-asset
     await octokit.repos.updateRelease({
       owner: owner,
       repo: repo,
