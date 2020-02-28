@@ -6454,7 +6454,7 @@ const updateBody = (body, chksum, fn, rubyDesc) => {
 
 // returns sha512 checksum
 const sha512 = fn => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve,) => {
     const hash = crypto.createHash('sha512')
     fs.createReadStream(fn)
       .on('data', data => hash.update(data))
