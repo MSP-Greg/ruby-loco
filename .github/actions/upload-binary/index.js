@@ -6531,7 +6531,7 @@ const run = async () => {
     releases.data.forEach(e => assets.set(e.name, e.id))
 
     const releaseIdOld = assets.get(rubyTar)
-    
+
     // release shouldn't exist, for cleaning
     const releaseIdNewBad = assets.get(`new-${rubyTar}`)
     if ( releaseIdNewBad) {
@@ -6554,13 +6554,15 @@ const run = async () => {
     // Upload ruby file, use prefix 'new-', rename later
     // https://developer.github.com/v3/repos/releases/#upload-a-release-asset
     // https://octokit.github.io/rest.js/v17#repos-upload-release-asset
+    let fileData = fs.readFileSync(rubyTar)
     const { data: { id: releaseIdNew }
     } = await octokit.repos.uploadReleaseAsset({
       url: uploadUrl,
       headers,
       name: `new-${rubyTar}`,
-      data: fs.createReadStream(rubyTar)
+      data: fileData
     })
+    fileData = null
 
     console.timeEnd('  Upload 7z')
 
