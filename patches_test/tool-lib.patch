@@ -4,7 +4,7 @@ a) turns on verbose
 b) adjusts assertions count so that tests, regardless of manner run, show similar results.
 c) adds assertion total by test to each line of output
 diff --git a/tool/lib/minitest/unit.rb b/tool/lib/minitest/unit.rb
-index 8569b2c495..c31ccfe3b5 100644
+index 3d1b796fdf..0b0ba4c6c8 100644
 --- a/tool/lib/minitest/unit.rb
 +++ b/tool/lib/minitest/unit.rb
 @@ -3,7 +3,7 @@
@@ -161,7 +161,7 @@ index 8569b2c495..c31ccfe3b5 100644
  
        options
 diff --git a/tool/lib/test/unit.rb b/tool/lib/test/unit.rb
-index 42d1d83442..d1b86d427b 100644
+index 130fcf07e1..0459233017 100644
 --- a/tool/lib/test/unit.rb
 +++ b/tool/lib/test/unit.rb
 @@ -3,11 +3,11 @@
@@ -179,7 +179,7 @@ index 42d1d83442..d1b86d427b 100644
  require 'optparse'
  
  # See Test::Unit
-@@ -84,7 +84,14 @@ def setup_options(opts, options)
+@@ -95,7 +95,14 @@ def setup_options(opts, options)
  
          opts.on '-v', '--verbose', "Verbose. Show progress processing files." do
            options[:verbose] = true
@@ -195,7 +195,7 @@ index 42d1d83442..d1b86d427b 100644
          end
  
          opts.on '-n', '--name PATTERN', "Filter test method names on pattern: /REGEXP/, !/REGEXP/ or STRING" do |a|
-@@ -459,7 +466,6 @@ def _run_parallel suites, type, result
+@@ -470,7 +477,6 @@ def _run_parallel suites, type, result
            warn "Error: parameter of -j option should be greater than 0."
            return
          end
@@ -203,7 +203,7 @@ index 42d1d83442..d1b86d427b 100644
          # Require needed thing for parallel running
          require 'timeout'
          @tasks = @files.dup # Array of filenames.
-@@ -512,7 +518,12 @@ def _run_parallel suites, type, result
+@@ -531,7 +537,12 @@ def _run_parallel suites, type, result
              suites.map! {|r| eval("::"+r[:testcase])}
              del_status_line or puts
              unless suites.empty?
@@ -217,7 +217,7 @@ index 42d1d83442..d1b86d427b 100644
                _run_suites(suites, type)
              end
              @options[:parallel] = parallel
-@@ -529,7 +540,7 @@ def _run_parallel suites, type, result
+@@ -548,7 +559,7 @@ def _run_parallel suites, type, result
              if @options[:retry]
                @errors   += rep.map{|x| x[:result][0] }.inject(:+)
                @failures += rep.map{|x| x[:result][1] }.inject(:+)
@@ -226,7 +226,7 @@ index 42d1d83442..d1b86d427b 100644
              end
            end
            unless @warnings.empty?
-@@ -589,7 +600,7 @@ def setup_options(opts, options)
+@@ -608,7 +619,7 @@ def setup_options(opts, options)
  
        def _run_suites(suites, type)
          result = super
@@ -235,7 +235,7 @@ index 42d1d83442..d1b86d427b 100644
          report.sort_by!{|r| r.start_with?("Skipped:") ? 0 : \
                             (r.start_with?("Failure:") ? 1 : 2) }
          failed(nil)
-@@ -703,6 +714,7 @@ def output
+@@ -722,6 +733,7 @@ def output
        end
  
        def _prepare_run(suites, type)
@@ -243,7 +243,7 @@ index 42d1d83442..d1b86d427b 100644
          options[:job_status] ||= :replace if @tty && !@verbose
          case options[:color]
          when :always
-@@ -1127,13 +1139,17 @@ def puke klass, meth, e
+@@ -1146,13 +1158,17 @@ def puke klass, meth, e
          # TODO:
          #   this overriding is for minitest feature that skip messages are
          #   hidden when not verbose (-v), note this is temporally.
