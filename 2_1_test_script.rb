@@ -348,6 +348,10 @@ module TestScript
     if IS_AV
       `appveyor PushArtifact ./zips/#{fn_log} -DeploymentName \"Test logs\"`
     end
+    if IS_ACTIONS
+      desc = "#{R_BRANCH}_#{date}_#{RUBY_REVISION[0,10]}_#{RbConfig::CONFIG['build_os'][/[a-z]+/]}_test_logs"
+      puts "::set-env name=TEST_LOGS::#{desc}"
+    end
     puts "Saved #{fn_log}"
     puts
   end

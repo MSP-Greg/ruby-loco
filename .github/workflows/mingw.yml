@@ -63,5 +63,5 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v1
         with:
-          name: Logs mingw
+          name: ${{ env.TEST_LOGS }}
           path: ./logs
