@@ -118,7 +118,7 @@ module TestScript
     end
 
     Dir.chdir __dir__
-    zip_save unless IS_ACTIONS
+    zip_save
 
     if IS_AV && !IS_ACTIONS
       `appveyor AddMessage -Message \"Summary - All Tests\" -Details \"#{results_str}\"`
@@ -338,21 +338,21 @@ module TestScript
   end
 
   def zip_save
-    puts "#{YELLOW}#{DASH * PUTS_LEN} Saving Artifacts#{RESET}"
-    push_artifacts
     date = RUBY_DESCRIPTION[/\((\d{4}-\d{2}-\d{2})/, 1]
-    fn_log = "zlogs_#{R_BRANCH}_#{date}_#{RUBY_REVISION[0,10]}.7z"
-
-    `attrib +r *.log`
-    `7z.exe a ./zips/#{fn_log} ./logs/*.log`
-    if IS_AV
+    if IS_AV && !IS_ACTIONS
+      puts "#{YELLOW}#{DASH * PUTS_LEN} Saving Artifacts#{RESET}"
+      push_artifacts
+      fn_log = "zlogs_#{R_BRANCH}_#{date}_#{RUBY_REVISION[0,10]}.7z"
+      `attrib +r *.log`
+      `7z.exe a ./zips/#{fn_log} ./logs/*.log`
       `appveyor PushArtifact ./zips/#{fn_log} -DeploymentName \"Test logs\"`
+      puts "Saved #{fn_log}"
     end
     if IS_ACTIONS
       desc = "#{R_BRANCH}_#{date}_#{RUBY_REVISION[0,10]}_#{RbConfig::CONFIG['build_os'][/[a-z]+/]}_test_logs"
       puts "::set-env name=TEST_LOGS::#{desc}"
+      puts "log name is #{desc}"
     end
-    puts "Saved #{fn_log}"
     puts
   end
 
@@ -370,10 +370,8 @@ module TestScript
 
     `7z.exe a ./zips/ruby_#{r_suffix}.7z #{z_files}`
     sha512 = Digest::SHA512.file("#{D_ZIPS}/ruby_#{r_suffix}.7z").hexdigest
-    if IS_AV
-      `appveyor AddMessage ruby_#{r_suffix}.7z_SHA512 -Details #{sha512}`
-      `appveyor PushArtifact ./zips/ruby_#{r_suffix}.7z -DeploymentName \"Ruby Trunk Build#{r_msg}\"`
-    end
+    `appveyor AddMessage ruby_#{r_suffix}.7z_SHA512 -Details #{sha512}`
+    `appveyor PushArtifact ./zips/ruby_#{r_suffix}.7z -DeploymentName \"Ruby Trunk Build#{r_msg}\"`
     puts "Saved ruby_#{r_suffix}.7z"
   end
 
