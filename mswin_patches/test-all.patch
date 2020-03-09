@@ -1,12 +1,9 @@
-commit 95b281ec3f8f1597d0e53b0a2e426e928f12ced4
-Author: MSP-Greg <MSP-Greg@users.noreply.github.com>
-Date:   Mon Jan 13 17:53:32 2020 -0600
-
-    Three mingw and/or mswin test-all fixes
+    Four mingw and/or mswin test-all fixes
     
     test/resolv/test_dns.rb
     test/ruby/test_thread.rb
     test/ruby/test_thread_queue.rb
+    test/socket/test_addrinfo.rb
 
 diff --git a/test/resolv/test_dns.rb b/test/resolv/test_dns.rb
 index 70d5067750..e813d039d2 100644
@@ -56,3 +53,20 @@ index 41e6865ed4..ea7229bd91 100644
      end
  
      assert_in_out_err([], <<-INPUT, %w(INT INT exit), [])
+diff --git a/test/socket/test_addrinfo.rb b/test/socket/test_addrinfo.rb
+index 92b61ea99e..ab8e08e8cd 100644
+--- a/test/socket/test_addrinfo.rb
++++ b/test/socket/test_addrinfo.rb
+@@ -367,7 +367,11 @@ def random_port
+   end
+ 
+   def errors_addrinuse
+-    [Errno::EADDRINUSE]
++    if ENV['CI'] && RUBY_PLATFORM.include?('mingw')
++      [Errno::EADDRINUSE, Errno::EACCES]
++    else
++      [Errno::EADDRINUSE]
++    end
+   end
+ 
+   def test_connect_from
