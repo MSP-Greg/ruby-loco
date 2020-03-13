@@ -25,21 +25,15 @@ class << self
 
   def revision
     Dir.chdir( File.join(__dir__, 'ruby') ) { |d|
+
+      str = %x[ruby tool/file2lastrev.rb --revision.h]
+      File.write('revision.h', str, mode: 'wb:utf-8')
+
+      svn = %x[git log -n1 --format=%H][0,10]
+
       branch = `git branch`[/^\* (.+)/, 1].sub(')', '')[/[^ \/]+\Z/]
       # set branch to trunk if it's a commit
       branch = 'master' if /\A[0-9a-f]{7}\Z/ =~ branch
-
-      # Get svn from commit info, write to revision.h
-      if svn = %x[git log -n1 --format=%H][0,10]
-        File.open('revision.h', 'wb:utf-8') { |f|
-          f.write "#define RUBY_REVISION #{svn}\n" \
-                  "#define RUBY_BRANCH_NAME \"#{branch}\"\n"
-        }
-      else
-        File.open('revision.h', 'wb:utf-8') { |f|
-          f.write "#define RUBY_BRANCH_NAME \"#{branch}\"\n"
-        }
-      end
 
       # open version.h and get ruby info
       version, title = nil, nil
