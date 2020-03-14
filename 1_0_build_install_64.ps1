@@ -355,3 +355,17 @@ Apply-Patches "patches_spec"
 Apply-Patches "patches_test"
 
 Remove-Item Env:\SOURCE_DATE_EPOCH
+
+# Fix rake bin files
+
+$content = [IO.File]::ReadAllText("$d_install/bin/racc", $UTF8)
+$content = $content -replace 'racc', 'rake'
+[IO.File]::WriteAllText("$d_install/bin/rake", $content, $UTF8)
+
+$content = [IO.File]::ReadAllText("$d_install/bin/racc.cmd", $UTF8)
+$content = $content -replace 'racc', 'rake'
+[IO.File]::WriteAllText("$d_install/bin/rake.cmd", $content, $UTF8)
+
+if (Test-Path -Path "$d_install/bin/rake.bat" -PathType Leaf ) { 
+  Remove-Item -Path "$d_install/bin/rake.bat"
+}
