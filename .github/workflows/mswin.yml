@@ -87,7 +87,7 @@ jobs:
           call %vc_setup%
           ../src/win32/configure.bat --disable-install-doc --prefix=%PRE% --without-ext=+,dbm,gdbm --enable-bundled-libffi --with-opt-dir=C:/vcpkg/installed/x64-windows --with-openssl-dir="C:/Program Files/OpenSSL-Win64"
 
-      - name: download unicode, extlibs
+      - name: download unicode, extlibs, zlib
         shell: cmd
         run: |
           curl -fsSL -o zlib%zlib_version:.=%.zip --retry 10 https://zlib.net/zlib%zlib_version:.=%.zip
