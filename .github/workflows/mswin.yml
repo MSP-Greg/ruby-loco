@@ -87,16 +87,14 @@ jobs:
           call %vc_setup%
           ../src/win32/configure.bat --disable-install-doc --prefix=%PRE% --without-ext=+,dbm,gdbm --enable-bundled-libffi --with-opt-dir=C:/vcpkg/installed/x64-windows --with-openssl-dir="C:/Program Files/OpenSSL-Win64"
 
-      - name: download unicode, gems, etc
+      - name: download unicode, extlibs
         shell: cmd
         run: |
           curl -fsSL -o zlib%zlib_version:.=%.zip --retry 10 https://zlib.net/zlib%zlib_version:.=%.zip
           "C:\Program Files\7-Zip\7z.exe" x -o%cd%\src\ext\zlib zlib%zlib_version:.=%.zip
           call %vc_setup%
           cd build
-          nmake update-unicode
-          nmake update-gems
-          nmake up incs
+          nmake update-unicode extract-extlibs
 
       - name: apply patches
         run: |
