@@ -36,11 +36,10 @@ jobs:
           git clone -q --depth=1 --no-tags --branch=master  $gh/ruby/ruby.git               ./ruby
 
       - name: Set up Ruby & MSYS2
-        uses: MSP-Greg/actions-ruby@master
+        uses: MSP-Greg/setup-ruby-pkgs@v1
         with:
-          ruby-version: 2.7.x
-          base: update
-          mingw: gdbm gmp libffi libyaml openssl ragel readline
+          ruby-version: 2.7
+          mingw: _upgrade_ gcc gdbm gmp libffi libyaml openssl ragel readline
           msys2: automake1.16 bison
 
       - name: build & install
