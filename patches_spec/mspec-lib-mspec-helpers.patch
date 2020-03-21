@@ -1,18 +1,21 @@
 Patch by MSP-Greg
 On Windows, put temp folders in windows temp folder
-** Use IO.copy_stream for copying files - removed, see r66147
 diff --git a/spec/mspec/lib/mspec/helpers/tmp.rb b/spec/mspec/lib/mspec/helpers/tmp.rb
-index 4e1273dcfe..38a6f7de71 100644
+index 5062991d63..1a9ef96323 100644
 --- a/spec/mspec/lib/mspec/helpers/tmp.rb
 +++ b/spec/mspec/lib/mspec/helpers/tmp.rb
-@@ -1,11 +1,22 @@
--# Creates a temporary directory in the current working directory
--# for temporary files created while running the specs. All specs
--# should clean up any temporary files created so that the temp
--# directory is empty when the process exits.
+@@ -1,11 +1,29 @@
 +# frozen_string_literal: true
++
+ # Creates a temporary directory in the current working directory
+ # for temporary files created while running the specs. All specs
+ # should clean up any temporary files created so that the temp
+ # directory is empty when the process exits.
  
--SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp")
+ SPEC_TEMP_DIR_PID = Process.pid
+-SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp/#{SPEC_TEMP_DIR_PID}")
+-SPEC_TEMP_UNIQUIFIER = "0"
++
 +# Creates a temporary directory in the current working directory
 +# (or the Windows temp directory) for temporary files created while
 +# running the specs. All specs should clean up any temporary files
@@ -28,9 +31,8 @@ index 4e1273dcfe..38a6f7de71 100644
 +else
 +  SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp")
 +end
- 
--SPEC_TEMP_UNIQUIFIER = "0"
++
 +SPEC_TEMP_UNIQUIFIER = "0".dup
  
- SPEC_TEMP_DIR_PID = Process.pid
- 
+ at_exit do
+   begin
