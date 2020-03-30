@@ -62,7 +62,7 @@ index 92b61ea99e..ab8e08e8cd 100644
  
    def errors_addrinuse
 -    [Errno::EADDRINUSE]
-+    if ENV['CI'] && RUBY_PLATFORM.include?('mingw')
++    if ENV['CI'] && RUBY_PLATFORM.match?(/mingw|mswin/)
 +      [Errno::EADDRINUSE, Errno::EACCES]
 +    else
 +      [Errno::EADDRINUSE]

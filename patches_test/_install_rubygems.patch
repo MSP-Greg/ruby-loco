@@ -29,19 +29,22 @@ index 2890e13dfb..ce0c4a79db 100644
    BUNDLER_FULL_NAME = "bundler-#{Bundler::VERSION}".freeze
  
 diff --git a/test/rubygems/test_gem_commands_environment_command.rb b/test/rubygems/test_gem_commands_environment_command.rb
-index 5dd0fc7521..e83c093cf9 100644
+index 12ec8dd6b2..27b07db01b 100644
 --- a/test/rubygems/test_gem_commands_environment_command.rb
 +++ b/test/rubygems/test_gem_commands_environment_command.rb
-@@ -26,7 +26,8 @@ def test_execute
-     assert_match %r|RUBY VERSION: \d+\.\d+\.\d+ \(.*\) \[.*\]|, @ui.output
-     assert_match %r|INSTALLATION DIRECTORY: #{Regexp.escape @gemhome}|,
+@@ -26,7 +26,11 @@ def test_execute
+     assert_match %r{RUBY VERSION: \d+\.\d+\.\d+ \(.*\) \[.*\]}, @ui.output
+     assert_match %r{INSTALLATION DIRECTORY: #{Regexp.escape @gemhome}},
                   @ui.output
--    assert_match %r|RUBYGEMS PREFIX: |, @ui.output
-+# Gem.prefix is nil for ruby-loco
-+#    assert_match %r|RUBYGEMS PREFIX: |, @ui.output
-     assert_match %r|RUBY EXECUTABLE:.*#{RbConfig::CONFIG['ruby_install_name']}|,
+-    assert_match %r{RUBYGEMS PREFIX: }, @ui.output
++    if Gem.prefix.nil?
++      refute_match %r{RUBYGEMS PREFIX: }, @ui.output
++    else
++      assert_match %r{RUBYGEMS PREFIX: }, @ui.output
++    end
+     assert_match %r{RUBY EXECUTABLE:.*#{RbConfig::CONFIG['ruby_install_name']}},
                   @ui.output
-     assert_match %r|GIT EXECUTABLE: #{@cmd.send(:git_path)}|, @ui.output
+     assert_match %r{GIT EXECUTABLE: #{@cmd.send(:git_path)}}, @ui.output
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
 index 340c658b9d..117d884d86 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb

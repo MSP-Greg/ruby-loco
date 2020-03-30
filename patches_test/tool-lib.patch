@@ -4,7 +4,7 @@ a) turns on verbose
 b) adjusts assertions count so that tests, regardless of manner run, show similar results.
 c) adds assertion total by test to each line of output
 diff --git a/tool/lib/minitest/unit.rb b/tool/lib/minitest/unit.rb
-index 3d1b796fdf..0b0ba4c6c8 100644
+index c85b41e5fc..c1c60fa6fd 100644
 --- a/tool/lib/minitest/unit.rb
 +++ b/tool/lib/minitest/unit.rb
 @@ -3,7 +3,7 @@
@@ -16,7 +16,7 @@ index 3d1b796fdf..0b0ba4c6c8 100644
  
  ##
  # Minimal (mostly drop-in) replacement for test-unit.
-@@ -746,6 +746,7 @@ class Unit # :nodoc:
+@@ -756,6 +756,7 @@ class Unit # :nodoc:
      attr_accessor :start_time                         # :nodoc:
      attr_accessor :help                               # :nodoc:
      attr_accessor :verbose                            # :nodoc:
@@ -24,7 +24,7 @@ index 3d1b796fdf..0b0ba4c6c8 100644
      attr_writer   :options                            # :nodoc:
  
      ##
-@@ -890,8 +891,8 @@ def _run_anything type
+@@ -900,8 +901,8 @@ def _run_anything type
  
          results = _run_suites suites, type
  
@@ -35,7 +35,7 @@ index 3d1b796fdf..0b0ba4c6c8 100644
          test_count      += @test_count
          assertion_count += @assertion_count
          t = Time.now - start
-@@ -900,7 +901,8 @@ def _run_anything type
+@@ -910,7 +911,8 @@ def _run_anything type
            puts
            puts
          end
@@ -45,7 +45,7 @@ index 3d1b796fdf..0b0ba4c6c8 100644
               [(@repeat_count ? "(#{@@current_repeat_count}/#{@repeat_count}) " : ""), type,
                 t, @test_count.fdiv(t), @assertion_count.fdiv(t)]
        end while @repeat_count && @@current_repeat_count < @repeat_count &&
-@@ -924,6 +926,7 @@ def _run_anything type
+@@ -934,6 +936,7 @@ def _run_anything type
      #
  
      def _run_suites suites, type
@@ -53,7 +53,7 @@ index 3d1b796fdf..0b0ba4c6c8 100644
        suites.map { |suite| _run_suite suite, type }
      end
  
-@@ -945,19 +948,41 @@ def _run_suite suite, type
+@@ -955,19 +958,41 @@ def _run_suite suite, type
  
        leakchecker = LeakChecker.new
  
@@ -102,7 +102,7 @@ index 3d1b796fdf..0b0ba4c6c8 100644
            $stdout.flush
  
            unless defined?(RubyVM::MJIT) && RubyVM::MJIT.enabled? # compiler process is wrongly considered as leak
-@@ -966,7 +991,8 @@ def _run_suite suite, type
+@@ -976,7 +1001,8 @@ def _run_suite suite, type
  
            inst._assertions
          }
@@ -112,7 +112,7 @@ index 3d1b796fdf..0b0ba4c6c8 100644
        end
  
        if ENV["LEAK_CHECKER_TRACE_OBJECT_ALLOCATION"]
-@@ -995,6 +1021,9 @@ def _run_suite suite, type
+@@ -1005,6 +1031,9 @@ def _run_suite suite, type
      # error or failure.
  
      def record suite, method, assertions, time, error
@@ -122,7 +122,7 @@ index 3d1b796fdf..0b0ba4c6c8 100644
      end
  
      def location e # :nodoc:
-@@ -1017,7 +1046,7 @@ def puke klass, meth, e
+@@ -1027,7 +1056,7 @@ def puke klass, meth, e
        e = case e
            when MiniTest::Skip then
              @skips += 1
@@ -131,7 +131,7 @@ index 3d1b796fdf..0b0ba4c6c8 100644
              "Skipped:\n#{klass}##{meth} [#{location e}]:\n#{e.message}\n"
            when MiniTest::Assertion then
              @failures += 1
-@@ -1035,6 +1064,7 @@ def initialize # :nodoc:
+@@ -1045,6 +1074,7 @@ def initialize # :nodoc:
        @report = []
        @errors = @failures = @skips = 0
        @verbose = false
@@ -139,7 +139,7 @@ index 3d1b796fdf..0b0ba4c6c8 100644
        @mutex = Thread::Mutex.new
        @info_signal = Signal.list['INFO']
        @repeat_count = nil
-@@ -1069,6 +1099,11 @@ def process_args args = [] # :nodoc:
+@@ -1079,6 +1109,11 @@ def process_args args = [] # :nodoc:
            options[:verbose] = true
          end
  
@@ -151,7 +151,7 @@ index 3d1b796fdf..0b0ba4c6c8 100644
          opts.on '-n', '--name PATTERN', "Filter test names on pattern (e.g. /foo/)" do |a|
            options[:filter] = a
          end
-@@ -1086,6 +1121,8 @@ def process_args args = [] # :nodoc:
+@@ -1096,6 +1131,8 @@ def process_args args = [] # :nodoc:
        srand options[:seed]
  
        self.verbose = options[:verbose]
@@ -161,7 +161,7 @@ index 3d1b796fdf..0b0ba4c6c8 100644
  
        options
 diff --git a/tool/lib/test/unit.rb b/tool/lib/test/unit.rb
-index 130fcf07e1..0459233017 100644
+index 376ca8d3d4..1fdc2204f9 100644
 --- a/tool/lib/test/unit.rb
 +++ b/tool/lib/test/unit.rb
 @@ -3,11 +3,11 @@
