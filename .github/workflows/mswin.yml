@@ -15,8 +15,6 @@ jobs:
     runs-on: windows-2019
     env:
       zlib_version: '1.2.11'
-      vc_setup: >
-        "C:\Program Files (x86)\Microsoft Visual Studio\${{ matrix.vs }}\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
       APPVEYOR: 'True'
 
     steps:
@@ -44,14 +42,6 @@ jobs:
           restore-keys: |
             vcpkg-download-${{ matrix.vs }}-
 
-      - name: Install libraries with vcpkg
-        run: |
-          vcpkg --triplet x64-windows install readline
-
-      - name: Install libraries with chocolatey
-        run: |
-          choco install --no-progress openssl winflexbison3
-
       - name: git config
         run: |
           git config --system core.autocrlf false
@@ -70,9 +60,11 @@ jobs:
         id: commit_info
 
       - name: load ruby
-        uses: ruby/setup-ruby@v1
+        uses: MSP-Greg/setup-ruby-pkgs@v1
         with:
-          ruby-version: 2.7
+          ruby-version: mswin
+          choco: openssl
+          vcpkg: readline
 
       - name: Configure
         shell: cmd
@@ -84,15 +76,13 @@ jobs:
           set PRE=%cd%\ruby-mswin
           mkdir build
           cd build
-          call %vc_setup%
-          ../src/win32/configure.bat --disable-install-doc --prefix=%PRE% --without-ext=+,dbm,gdbm --enable-bundled-libffi --with-opt-dir=C:/vcpkg/installed/x64-windows --with-openssl-dir="C:/Program Files/OpenSSL-Win64"
+          ../src/win32/configure.bat --disable-install-doc --prefix=%PRE% --without-ext=+,dbm,gdbm --enable-bundled-libffi --with-opt-dir=C:/vcpkg/installed/x64-windows %SSL_DIR%
 
       - name: download unicode, extlibs, zlib
         shell: cmd
         run: |
           curl -fsSL -o zlib%zlib_version:.=%.zip --retry 10 https://zlib.net/zlib%zlib_version:.=%.zip
           "C:\Program Files\7-Zip\7z.exe" x -o%cd%\src\ext\zlib zlib%zlib_version:.=%.zip
-          call %vc_setup%
           cd build
           nmake update-unicode extract-extlibs
 
@@ -103,20 +93,12 @@ jobs:
           patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/ssl_1.1.1e_eol.patch
 
       - name: nmake
-        shell: cmd
-        run: |
-          call %vc_setup%
-          set PATH=C:\ProgramData\Chocolatey\bin;%PATH%
-          set YACC=win_bison
-          echo on
+        run:  |
           cd build
           nmake
 
       - name: mmake install
-        shell: cmd
         run: |
-          set RD=%cd%
-          call %vc_setup%
           cd build
           nmake "DESTDIR=" install-nodoc
 
@@ -125,12 +107,11 @@ jobs:
         run: |
           del ruby-mswin\lib\x64-vcruntime140-ruby280-static.lib
           mkdir ruby-mswin\bin\ruby_builtin_dlls
-          copy C:\vcpkg\installed\x64-windows\bin\readline.dll            %cd%\ruby-mswin\bin\ruby_builtin_dlls\
-          copy "C:\Program Files\OpenSSL-Win64\bin\libcrypto-1_1-x64.dll" %cd%\ruby-mswin\bin\ruby_builtin_dlls\
-          copy "C:\Program Files\OpenSSL-Win64\bin\libssl-1_1-x64.dll"    %cd%\ruby-mswin\bin\ruby_builtin_dlls\
-          copy %cd%\mswin\ruby_builtin_dlls.manifest                      %cd%\ruby-mswin\bin\ruby_builtin_dlls\
-          move %cd%\ruby-mswin\bin\zlib1.dll                              %cd%\ruby-mswin\bin\ruby_builtin_dlls\zlib1.dll
-          call %vc_setup%
+          copy C:\vcpkg\installed\x64-windows\bin\readline.dll %cd%\ruby-mswin\bin\ruby_builtin_dlls\
+          copy "C:/openssl-win\bin\libcrypto-1_1-x64.dll"      %cd%\ruby-mswin\bin\ruby_builtin_dlls\
+          copy "C:/openssl-win\bin\libssl-1_1-x64.dll"         %cd%\ruby-mswin\bin\ruby_builtin_dlls\
+          copy %cd%\mswin\ruby_builtin_dlls.manifest           %cd%\ruby-mswin\bin\ruby_builtin_dlls\
+          move %cd%\ruby-mswin\bin\zlib1.dll                   %cd%\ruby-mswin\bin\ruby_builtin_dlls\zlib1.dll
           cd ruby-mswin\bin
           mt.exe -manifest ..\..\mswin\ruby-exe.xml  -outputresource:ruby.exe;1
           mt.exe -manifest ..\..\mswin\ruby-exe.xml  -outputresource:rubyw.exe;1
@@ -139,9 +120,7 @@ jobs:
         timeout-minutes: 4
         shell: cmd
         run: |
-          set TMPDIR=%cd%\temp
           cd build
-          call %vc_setup%
           set PATH=%cd%\ruby-mswin\bin;%cd%\ruby-mswin\bin\ruby_builtin_dlls;%PATH%
           nmake test
 
@@ -153,8 +132,6 @@ jobs:
         run: |
           set /a JOBS=%NUMBER_OF_PROCESSORS%
           set EXCL_N=--exclude test_syntax --exclude test_time_tz --exclude test_undef
-          set TMPDIR=%cd%\temp
-          call %vc_setup%
           chcp 437
           set PATH=%cd%\ruby-mswin\bin;%cd%\ruby-mswin\bin\ruby_builtin_dlls;%PATH%
           cd build
@@ -166,8 +143,6 @@ jobs:
         run: |
           set tr=../src/test/ruby
           set TESTS=%tr%/test_syntax.rb %tr%/test_undef.rb
-          set TMPDIR=%cd%\temp
-          call %vc_setup%
           chcp 437
           set PATH=%cd%\ruby-mswin\bin;%cd%\ruby-mswin\bin\ruby_builtin_dlls;%PATH%
           cd build
@@ -177,8 +152,6 @@ jobs:
         timeout-minutes: 5
         shell: cmd
         run: |
-          set TMPDIR=%cd%\temp
-          call %vc_setup%
           chcp 437
           set PATH=%cd%\ruby-mswin\bin;%PATH%
           cd src/spec/ruby
