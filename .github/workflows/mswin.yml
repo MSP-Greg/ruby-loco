@@ -72,12 +72,11 @@ jobs:
         run: |
           mkdir .downloaded-cache
           mklink /j %cd%\src\.downloaded-cache %cd%\.downloaded-cache
-          mkdir temp
           mkdir install
           set PRE=%cd%\ruby-mswin
           mkdir build
           cd build
-          ../src/win32/configure.bat --disable-install-doc --prefix=%PRE% --without-ext=+,dbm,gdbm --enable-bundled-libffi %OPT_DIR% %SSL_DIR%
+          ../src/win32/configure.bat --disable-install-doc --prefix=%PRE% --without-ext=+,dbm,gdbm --enable-bundled-libffi %OPT_DIR:\=/% %SSL_DIR:\=/%
 
       - name: download unicode, extlibs, zlib
         shell: cmd
