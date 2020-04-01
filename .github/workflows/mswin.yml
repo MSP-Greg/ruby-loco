@@ -63,6 +63,7 @@ jobs:
         uses: MSP-Greg/setup-ruby-pkgs@v1
         with:
           ruby-version: mswin
+          mswin: bison
           choco: openssl
           vcpkg: readline
 
@@ -76,7 +77,7 @@ jobs:
           set PRE=%cd%\ruby-mswin
           mkdir build
           cd build
-          ../src/win32/configure.bat --disable-install-doc --prefix=%PRE% --without-ext=+,dbm,gdbm --enable-bundled-libffi --with-opt-dir=C:/vcpkg/installed/x64-windows %SSL_DIR%
+          ../src/win32/configure.bat --disable-install-doc --prefix=%PRE% --without-ext=+,dbm,gdbm --enable-bundled-libffi %OPT_DIR% %SSL_DIR%
 
       - name: download unicode, extlibs, zlib
         shell: cmd
