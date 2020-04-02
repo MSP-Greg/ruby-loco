@@ -90,7 +90,6 @@ jobs:
         run: |
           cd src
           patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/test-all.patch
-          patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/ssl_1.1.1e_eol.patch
 
       - name: nmake
         run:  |
