@@ -84,7 +84,7 @@ jobs:
           curl -fsSL -o zlib%zlib_version:.=%.zip --retry 10 https://zlib.net/zlib%zlib_version:.=%.zip
           "C:\Program Files\7-Zip\7z.exe" x -o%cd%\src\ext\zlib zlib%zlib_version:.=%.zip
           cd build
-          nmake update-unicode extract-extlibs
+          nmake extract-extlibs
 
       - name: apply patches
         run: |

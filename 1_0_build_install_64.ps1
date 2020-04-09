@@ -309,8 +309,8 @@ Run "sh -c `"../ruby/configure --disable-install-doc --prefix=$d_install $config
 Time-Log "configure"
 
 # download gems & unicode files
-Run "make -j$jobs update-unicode" { iex "make -j$jobs update-unicode" }
-Time-Log "make -j$jobs update-unicode"
+# Run "make -j$jobs update-unicode" { iex "make -j$jobs update-unicode" }
+# Time-Log "make -j$jobs update-unicode"
 
 # below sets some directories to normal in case they're set to read-only
 Remove-Read-Only $d_ruby
