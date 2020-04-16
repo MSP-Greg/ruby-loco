@@ -349,7 +349,8 @@ module TestScript
       puts "Saved #{fn_log}"
     end
     if IS_ACTIONS
-      desc = "#{R_BRANCH}_#{date}_#{RUBY_REVISION[0,10]}_#{RbConfig::CONFIG['build_os'][/[a-z]+/]}_test_logs"
+      run_no = ENV['GITHUB_RUN_NUMBER'].rjust 4, '0'
+      desc = "#{R_BRANCH}_#{date}_#{run_no}_#{RUBY_REVISION[0,10]}_#{RbConfig::CONFIG['build_os'][/[a-z]+/]}"
       puts "::set-env name=TEST_LOGS::#{desc}"
       puts "log name is #{desc}"
     end
