@@ -20,7 +20,7 @@ https://github.com/MSP-Greg/ruby-loco/releases/download/ruby-master/ruby-mswin.7
 
 Note that if any of the Ruby test suites fail, the build will not be uploaded.  Hence, the links will provide the most recent build that passed.
 
-The builds can be used in GitHub Actions CI by using the [ruby/setup-ruby](https://github.com/ruby/setup-ruby) action or the [MSP-Greg/setup-ruby-pkgs](https://github.com/MSP-Greg/setup-ruby-pkgs) action, which also helps with cross-platform package installation.
+The builds can be used in GitHub Actions CI by using the [ruby/setup-ruby](https://github.com/ruby/setup-ruby/blob/master/README.md) action or the [MSP-Greg/setup-ruby-pkgs](https://github.com/MSP-Greg/setup-ruby-pkgs/blob/master/README.md) action, which also helps with cross-platform package installation.
 
 The repo can be used to build Ruby locally.  At present, only MinGW builds are supported.  See (WIP) [Local Use](https://github.com/MSP-Greg/ruby-loco/blob/master/Local-Use.md).
 
