@@ -4,7 +4,7 @@ on:
     branches:
       - 'master'
   schedule:
-    - cron: '0 3,9,16 * * *'
+    - cron: '56 2,8,15 * * *'
 
 jobs:
   mingw:
