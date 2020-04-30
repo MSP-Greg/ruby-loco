@@ -4,7 +4,7 @@ on:
     branches:
       - 'master'
   schedule:
-    - cron: '56 2,8,15 * * *'
+    - cron: '59 2,8,15 * * *'
 
 jobs:
   mswin:

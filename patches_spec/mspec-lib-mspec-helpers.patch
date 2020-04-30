@@ -1,38 +1,18 @@
 Patch by MSP-Greg
 On Windows, put temp folders in windows temp folder
 diff --git a/spec/mspec/lib/mspec/helpers/tmp.rb b/spec/mspec/lib/mspec/helpers/tmp.rb
-index 5062991d63..1a9ef96323 100644
+index df242f73c1..7b2e155e46 100644
 --- a/spec/mspec/lib/mspec/helpers/tmp.rb
 +++ b/spec/mspec/lib/mspec/helpers/tmp.rb
-@@ -1,11 +1,29 @@
-+# frozen_string_literal: true
-+
- # Creates a temporary directory in the current working directory
- # for temporary files created while running the specs. All specs
- # should clean up any temporary files created so that the temp
- # directory is empty when the process exits.
- 
- SPEC_TEMP_DIR_PID = Process.pid
--SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp/#{SPEC_TEMP_DIR_PID}")
--SPEC_TEMP_UNIQUIFIER = "0"
-+
-+# Creates a temporary directory in the current working directory
-+# (or the Windows temp directory) for temporary files created while
-+# running the specs. All specs should clean up any temporary files
-+# created so that the temp directory is empty when the process exits.
-+
-+if /mswin|mingw/ =~ RUBY_PLATFORM
-+  temp_dir = ENV['TMPDIR'] || ENV['TEMP'] || ENV['TMP']
-+  if temp_dir and (temp_dir = temp_dir.dup.gsub("\\", "/")) and Dir.exist?(temp_dir)
-+    SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp", temp_dir)
-+  else
-+    SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp")
-+  end
-+else
-+  SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp")
-+end
-+
-+SPEC_TEMP_UNIQUIFIER = "0".dup
- 
- at_exit do
-   begin
+@@ -8,7 +8,10 @@
+ if tmpdir = ENV['SPEC_TEMP_DIR']
+   temppath = File.realdirpath(tmpdir) + "/"
+ else
+-  tmpdir = File.realdirpath("rubyspec_temp")
++  env_tmp = ENV['TMPDIR']
++  tmpdir = ( env_tmp && Dir.exist?(env_tmp)) ?
++    File.realdirpath('rubyspec_temp', env_tmp) :
++    File.realdirpath('rubyspec_temp')
+   temppath = tmpdir + "/#{SPEC_TEMP_DIR_PID}"
+   SPEC_TEMP_DIR_LIST << tmpdir
+ end
