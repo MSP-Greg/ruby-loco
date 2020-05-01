@@ -36,5 +36,4 @@ I started working with building and testing MSYS2/MinGW Ruby in 2016, and what c
 
 At first, its main purpose was to run full testing on MinGW master builds, as at the time, that was not done in ruby/ruby.  The code was updated to create a full binary build and moved to AppVeyor.  It also began to be used for gem CI.
 
-Recently, an mswin (msvc) build was added to allow CI testing. 
-
+Today, GitHub Actions mingw and mswin builds are done, Appveyor is still used for a mingw build. 
