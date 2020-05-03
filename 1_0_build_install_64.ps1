@@ -9,19 +9,23 @@ For local use, set items in local.ps1
 #————————————————————————————————————————————————————————————————— Apply-Patches
 # Applies patches
 function Apply-Patches($p_dir) {
-  $patch_exe = "$d_msys2/usr/bin/patch.exe"
-  Push-Location "$d_repo/$p_dir"
-  [string[]]$patches = Get-ChildItem -Include *.patch -Path . -Recurse |
-    select -expand name
-  Pop-Location
-  Push-Location "$d_ruby"
-  foreach ($p in $patches) {
-    if ($p.StartsWith("__")) { continue }
-    EchoC "$($dash * 55) $p" yel
-    & $patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p"
+  if (Test-Path -Path $p_dir -PathType Container ) {
+    $patch_exe = "$d_msys2/usr/bin/patch.exe"
+    Push-Location "$d_repo/$p_dir"
+    [string[]]$patches = Get-ChildItem -Include *.patch -Path . -Recurse |
+      select -expand name
+    Pop-Location
+    if ($patches.length -ne 0) {
+      Push-Location "$d_ruby"
+      foreach ($p in $patches) {
+        if ($p.StartsWith("__")) { continue }
+        EchoC "$($dash * 55) $p" yel
+        & $patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p"
+      }
+      Pop-Location
+    }
+    Write-Host ''
   }
-  Pop-Location
-  Write-Host ''
 }
 
 #————————————————————————————————————————————————————————————————— Apply-Install-Patches
@@ -274,6 +278,9 @@ cd $PSScriptRoot
 Set-Variables
 Set-Variables-Local
 Set-Env
+
+Write-Host "TEMP   = $env:TEMP"
+Write-Host "TMPDIR = $env:TMPDIR"
 
 $gcc_vers = ([regex]'\d+\.\d+\.\d+').match($(gcc.exe --version)).value
 

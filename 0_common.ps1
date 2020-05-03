@@ -48,6 +48,7 @@ function Set-Variables {
       "$env:ProgramFiles/AppVeyor/BuildAgent;$d_git/cmd;" + `
       "$env:SystemRoot/system32;$env:ProgramFiles;$env:SystemRoot").replace('\', '/')
     $script:install   = "install"
+    $env:TMPDIR       = $env:TEMP
   } else {
     $script:install   = "install"
     ./local.ps1

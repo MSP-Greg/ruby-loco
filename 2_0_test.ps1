@@ -263,6 +263,7 @@ function MSpec {
   $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
   $env:RUBYOPT  = "--disable=did_you_mean"
+  $env:SPEC_TEMP_DIR = "$env:TMPDIR/rubyspec_temp"
 
   Run-Proc `
     -exe    "ruby.exe" `
