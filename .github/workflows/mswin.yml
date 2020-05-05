@@ -14,7 +14,6 @@ jobs:
       fail-fast: false
     runs-on: windows-2019
     env:
-      zlib_version: '1.2.11'
       APPVEYOR: 'True'
 
     steps:
@@ -79,10 +78,10 @@ jobs:
           ../src/win32/configure.bat --disable-install-doc --prefix=%PRE% --without-ext=+,dbm,gdbm --enable-bundled-libffi %OPT_DIR:\=/% %SSL_DIR:\=/%
 
       - name: download unicode, extlibs, zlib
-        shell: cmd
         run: |
-          curl -fsSL -o zlib%zlib_version:.=%.zip --retry 10 https://zlib.net/zlib%zlib_version:.=%.zip
-          "C:\Program Files\7-Zip\7z.exe" x -o%cd%\src\ext\zlib zlib%zlib_version:.=%.zip
+          $zlib = 'zlib1211.zip'
+          curl -fsSL -o $zlib --retry 10 https://zlib.net/$zlib
+          &'C:\Program Files\7-Zip\7z.exe' x -osrc/ext/zlib $zlib
           cd build
           nmake update-unicode extract-extlibs
 
@@ -102,18 +101,19 @@ jobs:
           nmake "DESTDIR=" install-nodoc
 
       - name: misc install
-        shell: cmd
         run: |
+          $repo = $pwd
           del ruby-mswin\lib\x64-vcruntime140-ruby280-static.lib
-          mkdir ruby-mswin\bin\ruby_builtin_dlls
-          copy C:\vcpkg\installed\x64-windows\bin\readline.dll %cd%\ruby-mswin\bin\ruby_builtin_dlls\
-          copy "C:/openssl-win\bin\libcrypto-1_1-x64.dll"      %cd%\ruby-mswin\bin\ruby_builtin_dlls\
-          copy "C:/openssl-win\bin\libssl-1_1-x64.dll"         %cd%\ruby-mswin\bin\ruby_builtin_dlls\
-          copy %cd%\mswin\ruby_builtin_dlls.manifest           %cd%\ruby-mswin\bin\ruby_builtin_dlls\
-          move %cd%\ruby-mswin\bin\zlib1.dll                   %cd%\ruby-mswin\bin\ruby_builtin_dlls\zlib1.dll
-          cd ruby-mswin\bin
-          mt.exe -manifest ..\..\mswin\ruby-exe.xml  -outputresource:ruby.exe;1
-          mt.exe -manifest ..\..\mswin\ruby-exe.xml  -outputresource:rubyw.exe;1
+          mkdir ruby-mswin\bin\ruby_builtin_dlls 2>&1>$null
+          cd ruby-mswin\bin\ruby_builtin_dlls
+          Copy-Item C:\vcpkg\installed\x64-windows\bin\readline.dll
+          Copy-Item C:\openssl-win\bin\libcrypto-1_1-x64.dll
+          Copy-Item C:\openssl-win\bin\libssl-1_1-x64.dll
+          Copy-Item $repo\mswin\ruby_builtin_dlls.manifest
+          Move-Item -Path ..\zlib1.dll
+          cd ..
+          mt.exe -manifest $repo\mswin\ruby-exe.xml -outputresource:ruby.exe;1
+          mt.exe -manifest $repo\mswin\ruby-exe.xml -outputresource:rubyw.exe;1
 
       - name: nmake test
         timeout-minutes: 4
@@ -161,11 +161,13 @@ jobs:
         run: ./mswin/cli_test.ps1
 
       - name: copy misc files
-        shell: cmd
         run: |
-          copy %cd%\src\BSDL    %cd%\ruby-mswin\BSDL
-          copy %cd%\src\COPYING %cd%\ruby-mswin\COPYING
-          copy %cd%\src\LEGAL   %cd%\ruby-mswin\LEGAL
+          cd ruby-mswin
+          Copy-Item ../src/BSDL
+          Copy-Item ../src/COPYING
+          Copy-Item ../src/LEGAL
+          $arch = $(./bin/ruby -e "STDOUT.write RbConfig::CONFIG['archdir']")
+          Rename-Item -Path $arch/readline.so -NewName $arch/readline.so_
 
       - name: upload asset
         timeout-minutes: 5
