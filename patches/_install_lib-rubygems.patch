@@ -1,22 +1,27 @@
-Patch by MSP-greg
+Patch by MSP-Greg
 allows RubyGems tests to be run from install folder
 diff --git a/lib/rubygems/installer.rb b/lib/rubygems/installer.rb
-index abb7048b00..0960f4bbfe 100644
+index cf676854dc..0ebb87909d 100644
 --- a/lib/rubygems/installer.rb
 +++ b/lib/rubygems/installer.rb
-@@ -707,10 +707,13 @@ def process_options # :nodoc:
+@@ -709,8 +709,6 @@ def check_that_user_bin_dir_is_in_path # :nodoc:
+     return if self.class.path_warning
  
-   def check_that_user_bin_dir_is_in_path # :nodoc:
      user_bin_dir = @bin_dir || Gem.bindir(gem_home)
--    user_bin_dir = user_bin_dir.gsub(File::SEPARATOR, File::ALT_SEPARATOR) if
+-    user_bin_dir = user_bin_dir.tr(File::SEPARATOR, File::ALT_SEPARATOR) if
 -      File::ALT_SEPARATOR
  
      path = ENV['PATH']
+     if Gem.win_platform?
+@@ -718,6 +716,11 @@ def check_that_user_bin_dir_is_in_path # :nodoc:
+       user_bin_dir = user_bin_dir.downcase
+     end
+ 
 +    if File::ALT_SEPARATOR
 +      user_bin_dir = user_bin_dir.tr(File::SEPARATOR, File::ALT_SEPARATOR)
-+      path = path.gsub(File::SEPARATOR, File::ALT_SEPARATOR)
++      path = path.tr(File::SEPARATOR, File::ALT_SEPARATOR)
 +    end
 +
-     if Gem.win_platform?
-       path = path.downcase
-       user_bin_dir = user_bin_dir.downcase
+     path = path.split(File::PATH_SEPARATOR)
+ 
+     unless path.include? user_bin_dir

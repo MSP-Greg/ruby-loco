@@ -4,7 +4,7 @@ diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
 index 5f70a2ac6b..da4df4eae5 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
-@@ -936,7 +936,7 @@ def test_self_platforms
+@@ -948,7 +948,7 @@ def test_self_platforms
    end
  
    def test_self_prefix
@@ -13,21 +13,6 @@ index 5f70a2ac6b..da4df4eae5 100644
    end
  
    def test_self_prefix_libdir
-@@ -1622,7 +1622,13 @@ def test_auto_activation_of_used_gemdeps_file
-     assert_equal expected_specs, Gem.use_gemdeps.sort_by { |s| s.name }
-   end
- 
--  LIB_PATH = File.expand_path "../../../lib".dup.tap(&Gem::UNTAINT), __FILE__.dup.tap(&Gem::UNTAINT)
-+  if defined? :RbConfig
-+    t = RbConfig::CONFIG['rubylibdir']
-+    LIB_PATH = File.exist?( File.join t, 'rubygems.rb') ? t :
-+      File.expand_path("../../../lib".dup.tap(&Gem::UNTAINT), __FILE__.dup.tap(&Gem::UNTAINT))
-+  else
-+    LIB_PATH = File.expand_path("../../../lib".dup.tap(&Gem::UNTAINT), __FILE__.dup.tap(&Gem::UNTAINT))
-+  end
-   BUNDLER_LIB_PATH = File.expand_path $LOAD_PATH.find {|lp| File.file?(File.join(lp, "bundler.rb")) }.dup.tap(&Gem::UNTAINT)
-   BUNDLER_FULL_NAME = "bundler-#{Bundler::VERSION}".freeze
- 
 diff --git a/test/rubygems/test_gem_commands_environment_command.rb b/test/rubygems/test_gem_commands_environment_command.rb
 index 12ec8dd6b2..27b07db01b 100644
 --- a/test/rubygems/test_gem_commands_environment_command.rb
