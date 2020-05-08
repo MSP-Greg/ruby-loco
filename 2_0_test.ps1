@@ -211,9 +211,7 @@ function Test-All {
   # for rubygems/test_bundled_ca.rb
   $env:TEST_SSL = '1'
 
-  $env:RUBYOPT  = "--disable=gems,did_you_mean"
-
-  $args = "-rdevkit ./runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `
+  $args = "--disable=gems -rdevkit ./runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `
     " -a --show-skip --retry --job-status=normal --timeout-scale=1.5"
 
   Run-Proc `
@@ -224,8 +222,6 @@ function Test-All {
     -Title  "test-all" `
     -Dir    "$d_ruby/test" `
     -TimeLimit 2100
-
-  Remove-Item env:\RUBYOPT
 
   # comment out below to allow full testing of Appveyor artifact
   # Remove-Item -Path "$d_install/lib/ruby/$abi/$rarch/-test-" -Recurse
