@@ -83,7 +83,9 @@ jobs:
           curl -fsSL -o $zlib --retry 10 https://zlib.net/$zlib
           &'C:\Program Files\7-Zip\7z.exe' x -osrc/ext/zlib $zlib
           cd build
-          nmake update-unicode extract-extlibs
+          # libffi is causing error
+          nmake extract-extlibs
+          nmake update-unicode
 
       - name: apply patches
         run: |
@@ -95,7 +97,7 @@ jobs:
           cd build
           nmake
 
-      - name: mmake install
+      - name: nmake install
         run: |
           cd build
           nmake "DESTDIR=" install-nodoc
