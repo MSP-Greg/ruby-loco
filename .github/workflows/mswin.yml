@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Cache - .downloaded-cache
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: .downloaded-cache
           key: dl-cache-win-${{ matrix.vs }}-${{ github.sha }}
@@ -26,7 +26,7 @@ jobs:
             dl-cache-win-${{ matrix.vs }}-
 
       - name: Cache - chocolatey
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
           key: chocolatey-${{ matrix.vs }}-${{ github.sha }}
@@ -34,7 +34,7 @@ jobs:
             chocolatey-${{ matrix.vs }}-
 
       - name: Cache - vcpkg-download
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: C:\vcpkg\downloads
           key: vcpkg-download-${{ matrix.vs }}-${{ github.sha }}
