@@ -17,9 +17,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .downloaded-cache
-          key: dl-cache-win-mingw-${{ github.sha }}
-          restore-keys: |
-            dl-cache-win-mingw
+          key: dl-cache-win-mingw
 
       - name: git config & clone
         run: |

@@ -21,25 +21,19 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .downloaded-cache
-          key: dl-cache-win-${{ matrix.vs }}-${{ github.sha }}
-          restore-keys: |
-            dl-cache-win-${{ matrix.vs }}-
+          key: dl-cache-win-mswin-${{ matrix.vs }}
 
       - name: Cache - chocolatey
         uses: actions/cache@v2
         with:
           path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
-          key: chocolatey-${{ matrix.vs }}-${{ github.sha }}
-          restore-keys: |
-            chocolatey-${{ matrix.vs }}-
+          key: chocolatey-${{ matrix.vs }}
 
       - name: Cache - vcpkg-download
         uses: actions/cache@v2
         with:
           path: C:\vcpkg\downloads
-          key: vcpkg-download-${{ matrix.vs }}-${{ github.sha }}
-          restore-keys: |
-            vcpkg-download-${{ matrix.vs }}-
+          key: vcpkg-download-${{ matrix.vs }}
 
       - name: git config
         run: |
