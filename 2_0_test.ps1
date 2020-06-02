@@ -258,7 +258,7 @@ function Test-Reline {
 function MSpec {
   $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
-  $env:RUBYOPT  = "--disable=did_you_mean"
+  # $env:RUBYOPT  = "--disable=did_you_mean"
   $env:SPEC_TEMP_DIR = "$env:TMPDIR/rubyspec_temp"
 
   Run-Proc `
@@ -270,7 +270,7 @@ function MSpec {
     -Dir    "$d_ruby/spec/ruby" `
     -TimeLimit 240
 
-  Remove-Item env:\RUBYOPT
+  # Remove-Item env:\RUBYOPT
 }
 
 #————————————————————————————————————————————————————————————————————————— setup
