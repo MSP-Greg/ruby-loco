@@ -22,10 +22,10 @@ index 70d5067750..e813d039d2 100644
          raise Timeout::Error
        end
 diff --git a/test/ruby/test_thread.rb b/test/ruby/test_thread.rb
-index f8127d8786..da387367d3 100644
+index 30a3cc784e..565714f519 100644
 --- a/test/ruby/test_thread.rb
 +++ b/test/ruby/test_thread.rb
-@@ -1321,6 +1321,9 @@ def test_thread_setname_in_initialize
+@@ -1322,6 +1322,9 @@ def test_thread_setname_in_initialize
    end
  
    def test_thread_interrupt_for_killed_thread
@@ -36,7 +36,7 @@ index f8127d8786..da387367d3 100644
  
      # prevent SIGABRT from slow shutdown with MJIT
 diff --git a/test/ruby/test_thread_queue.rb b/test/ruby/test_thread_queue.rb
-index 41e6865ed4..ea7229bd91 100644
+index 13c839ab50..cc7fa8e1fa 100644
 --- a/test/ruby/test_thread_queue.rb
 +++ b/test/ruby/test_thread_queue.rb
 @@ -557,11 +557,8 @@ def test_queue_close_multi_multi
@@ -54,14 +54,18 @@ index 41e6865ed4..ea7229bd91 100644
  
      assert_in_out_err([], <<-INPUT, %w(INT INT exit), [])
 diff --git a/test/socket/test_addrinfo.rb b/test/socket/test_addrinfo.rb
-index 92b61ea99e..ab8e08e8cd 100644
+index d516c772d9..8ea3220c09 100644
 --- a/test/socket/test_addrinfo.rb
 +++ b/test/socket/test_addrinfo.rb
-@@ -367,7 +367,11 @@ def random_port
+@@ -367,10 +367,12 @@ def random_port
    end
  
    def errors_addrinuse
--    [Errno::EADDRINUSE]
+-    errs = [Errno::EADDRINUSE]
+-    # MinGW fails with "Errno::EACCES: Permission denied - bind(2) for 0.0.0.0:49721"
+-    errs << Errno::EACCES if /mingw/ =~ RUBY_PLATFORM
+-    errs
++    # Actions Window fails with "Errno::EACCES: Permission denied - bind(2) for 0.0.0.0:49721"
 +    if ENV['CI'] && RUBY_PLATFORM.match?(/mingw|mswin/)
 +      [Errno::EADDRINUSE, Errno::EACCES]
 +    else
