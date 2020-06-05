@@ -1,0 +1,23 @@
+When running with install folder, no need to add additional paths
+diff --git a/test/rubygems/test_require.rb b/test/rubygems/test_require.rb
+index 5b11b5cebb..342b237c17 100644
+--- a/test/rubygems/test_require.rb
++++ b/test/rubygems/test_require.rb
+@@ -477,7 +477,7 @@ def test_realworld_default_gem
+       require "json"
+       puts Gem.loaded_specs["json"]
+     RUBY
+-    output = Gem::Util.popen(*ruby_with_rubygems_in_load_path, "-e", cmd).strip
++    output = Gem::Util.popen('ruby', "-e", cmd).strip
+     assert $?.success?
+     refute_empty output
+   end
+@@ -498,7 +498,7 @@ def test_realworld_upgraded_default_gem
+     RUBY
+     File.write(path, code)
+ 
+-    output = Gem::Util.popen({ 'GEM_HOME' => @gemhome }, *ruby_with_rubygems_in_load_path, path).strip
++    output = Gem::Util.popen({ 'GEM_HOME' => @gemhome }, 'ruby', path).strip
+     assert $?.success?
+     refute_empty output
+     assert_equal "999.99.9", output.lines[0].chomp
