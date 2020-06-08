@@ -3,7 +3,6 @@
     test/resolv/test_dns.rb
     test/ruby/test_thread.rb
     test/ruby/test_thread_queue.rb
-    test/socket/test_addrinfo.rb
 
 diff --git a/test/resolv/test_dns.rb b/test/resolv/test_dns.rb
 index 70d5067750..e813d039d2 100644
@@ -53,24 +52,3 @@ index 13c839ab50..cc7fa8e1fa 100644
      end
  
      assert_in_out_err([], <<-INPUT, %w(INT INT exit), [])
-diff --git a/test/socket/test_addrinfo.rb b/test/socket/test_addrinfo.rb
-index d516c772d9..8ea3220c09 100644
---- a/test/socket/test_addrinfo.rb
-+++ b/test/socket/test_addrinfo.rb
-@@ -367,10 +367,12 @@ def random_port
-   end
- 
-   def errors_addrinuse
--    errs = [Errno::EADDRINUSE]
--    # MinGW fails with "Errno::EACCES: Permission denied - bind(2) for 0.0.0.0:49721"
--    errs << Errno::EACCES if /mingw/ =~ RUBY_PLATFORM
--    errs
-+    # Actions Window fails with "Errno::EACCES: Permission denied - bind(2) for 0.0.0.0:49721"
-+    if ENV['CI'] && RUBY_PLATFORM.match?(/mingw|mswin/)
-+      [Errno::EADDRINUSE, Errno::EACCES]
-+    else
-+      [Errno::EADDRINUSE]
-+    end
-   end
- 
-   def test_connect_from
