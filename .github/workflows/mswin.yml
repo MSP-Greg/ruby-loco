@@ -111,6 +111,8 @@ jobs:
           cd ..
           mt.exe -manifest $repo\mswin\ruby-exe.xml -outputresource:ruby.exe;1
           mt.exe -manifest $repo\mswin\ruby-exe.xml -outputresource:rubyw.exe;1
+          cd $repo
+          ruby-mswin\bin\ruby.exe mswin\copy_bash_scripts.rb
 
       - name: nmake test
         timeout-minutes: 4
