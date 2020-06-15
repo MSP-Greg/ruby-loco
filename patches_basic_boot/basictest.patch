@@ -35,7 +35,7 @@ index 0000000000..9642d5d3de
 +  ENV.delete 'RUBYOPT'
 +end
 diff --git a/basictest/test.rb b/basictest/test.rb
-index 25d52ca1ef..9e7284f7d2 100755
+index a2eb107bce..44ba58a1b1 100755
 --- a/basictest/test.rb
 +++ b/basictest/test.rb
 @@ -10,6 +10,7 @@ def initialize
@@ -63,7 +63,7 @@ index 25d52ca1ef..9e7284f7d2 100755
    end
  
    def passed_string
-@@ -1965,22 +1969,22 @@ module EvTest
+@@ -1962,22 +1966,22 @@ module EvTest
  
  test_check "system"
  test_ok(`echo foobar` == "foobar\n")
@@ -90,7 +90,7 @@ index 25d52ca1ef..9e7284f7d2 100755
  
  tmp = open(script_tmp, "w")
  tmp.print "this is a leading junk\n";
-@@ -1990,8 +1994,8 @@ module EvTest
+@@ -1987,8 +1991,8 @@ module EvTest
  tmp.print "this is a trailing junk\n";
  tmp.close
  
@@ -101,7 +101,7 @@ index 25d52ca1ef..9e7284f7d2 100755
  
  tmp = open(script_tmp, "w")
  for i in 1..5
-@@ -1999,7 +2003,7 @@ module EvTest
+@@ -1996,7 +2000,7 @@ module EvTest
  end
  tmp.close
  
