@@ -171,7 +171,7 @@ class << self
     Dir.chdir BINDIR do
       bash_bins = Dir["*"].select { |fn| !Dir.exist?(fn) && File.extname(fn).empty? }
       bash_bins.each { |fn|
-        str = File.read(fn, mode: 'rb:UTF-8').sub /^#![^\n]+ruby/, "#! ruby"
+        str = File.read(fn, mode: 'rb:UTF-8').sub(/^#![^\n]+ruby/, '#!/usr/bin/env ruby')
         File.write fn, str, mode: 'wb:UTF-8'
       }
     end
@@ -179,7 +179,7 @@ class << self
     Dir.chdir "#{D_RUBY}/bin" do
       bash_bins = Dir["*"]
       bash_bins.each { |fn|
-        str = File.read(fn, mode: 'rb:UTF-8').sub /\A#![^\n]+ruby$/, "#! ruby"
+        str = File.read(fn, mode: 'rb:UTF-8').sub(/\A#![^\n]+ruby$/, '#!/usr/bin/env ruby')
         File.write "#{BINDIR}/#{fn}", str, mode: 'wb:UTF-8'
       }
     end

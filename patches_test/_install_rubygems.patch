@@ -1,7 +1,7 @@
 Patch by MSP-Greg
 Allows running Core RubyGems tests from installed Ruby
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index 5f70a2ac6b..da4df4eae5 100644
+index aef00cd761..2199f853c0 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
 @@ -948,7 +948,7 @@ def test_self_platforms
@@ -31,10 +31,10 @@ index 12ec8dd6b2..27b07db01b 100644
                   @ui.output
      assert_match %r{GIT EXECUTABLE: #{@cmd.send(:git_path)}}, @ui.output
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
-index efaa621634..507424e559 100644
+index bd06c84107..a88a342e6a 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
-@@ -546,8 +546,11 @@ def test_update_rubygems_arguments
+@@ -565,8 +565,11 @@ def test_update_rubygems_arguments
  
      arguments = @cmd.update_rubygems_arguments
  
