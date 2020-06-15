@@ -17,7 +17,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .downloaded-cache
-          key: dl-cache-win-mingw
+          key: dl-cache-win-mingw-${{ env.GITHUB_RUN_NUMBER }}
+          restore-keys: dl-cache-win-mingw-
 
       - name: git config & clone
         run: |
@@ -41,9 +42,11 @@ jobs:
           msys2: automake1.16 bison
 
       - name: build & install
+        timeout-minutes: 30
         run:  ./1_0_build_install_64.ps1
 
       - name: test
+        timeout-minutes: 40
         run:  ./2_0_test.ps1
         env:
           APPVEYOR: 'True'

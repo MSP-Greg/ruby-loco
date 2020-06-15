@@ -88,6 +88,7 @@ jobs:
           patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/test-all_open_port.patch
 
       - name: nmake
+        timeout-minutes: 20
         run:  |
           cd build
           nmake
@@ -125,7 +126,7 @@ jobs:
       # copy dll files to bin folder, add bin to path
       # ruby/test_time_tz.rb requires additional gems
       - name: nmake test-all -j
-        timeout-minutes: 35
+        timeout-minutes: 30
         shell: cmd
         run: |
           set /a JOBS=%NUMBER_OF_PROCESSORS%

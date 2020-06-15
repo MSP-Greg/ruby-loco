@@ -171,16 +171,16 @@ class << self
     Dir.chdir BINDIR do
       bash_bins = Dir["*"].select { |fn| !Dir.exist?(fn) && File.extname(fn).empty? }
       bash_bins.each { |fn|
-        str = File.binread(fn).sub /\A[^\n]+ruby/, "#! ruby"
-        File.open(fn, "wb") { |f| f.write str }
+        str = File.read(fn, mode: 'rb:UTF-8').sub /^#![^\n]+ruby/, "#! ruby"
+        File.write fn, str, mode: 'wb:UTF-8'
       }
     end
     # copy ruby/bin bash scripts & fix
     Dir.chdir "#{D_RUBY}/bin" do
       bash_bins = Dir["*"]
       bash_bins.each { |fn|
-        str = File.binread(fn).sub /\A#![^\n]+ruby$/, "#! ruby"
-        File.open("#{BINDIR}/#{fn}", "wb") { |f| f.write str }
+        str = File.read(fn, mode: 'rb:UTF-8').sub /\A#![^\n]+ruby$/, "#! ruby"
+        File.write "#{BINDIR}/#{fn}", str, mode: 'wb:UTF-8'
       }
     end
   end
