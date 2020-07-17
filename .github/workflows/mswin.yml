@@ -45,7 +45,8 @@ jobs:
 
       - name: Checkout ruby
         run: |
-          git clone --single-branch --shallow-since=yesterday --branch=master https://github.com/ruby/ruby src
+          $gh = 'https://github.com'
+          git clone -q --depth=1 --no-tags --branch=master $gh/ruby/ruby.git src
 
       - name: actions-commit-info.sh
         run: ./src/tool/actions-commit-info.sh
