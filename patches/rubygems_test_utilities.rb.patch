@@ -1,0 +1,13 @@
+diff --git a/lib/rubygems/test_utilities.rb b/lib/rubygems/test_utilities.rb
+index 81b34f3abc..53c888d066 100644
+--- a/lib/rubygems/test_utilities.rb
++++ b/lib/rubygems/test_utilities.rb
+@@ -40,7 +40,7 @@ def initialize
+   end
+ 
+   def find_data(path, nargs = 3)
+-    return File.read path.path if URI === path and 'file' == path.scheme
++    return Gem.read_binary path.path if URI === path and 'file' == path.scheme
+ 
+     if URI === path and "URI::#{path.scheme.upcase}" != path.class.name
+       raise ArgumentError,
