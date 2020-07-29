@@ -268,7 +268,7 @@ function MSpec {
     -StdErr "test_mspec_err.log" `
     -Title  "test-mspec" `
     -Dir    "$d_ruby/spec/ruby" `
-    -TimeLimit 300
+    -TimeLimit 360
 
   # Remove-Item env:\RUBYOPT
 }
