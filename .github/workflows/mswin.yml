@@ -102,7 +102,7 @@ jobs:
       - name: misc install
         run: |
           $repo = $pwd
-          del ruby-mswin\lib\x64-vcruntime140-ruby280-static.lib
+          del ruby-mswin\lib\x64-vcruntime140-ruby300-static.lib
           mkdir ruby-mswin\bin\ruby_builtin_dlls 2>&1>$null
           cd ruby-mswin\bin\ruby_builtin_dlls
           Copy-Item C:\vcpkg\installed\x64-windows\bin\readline.dll
