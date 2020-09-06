@@ -4,7 +4,7 @@ diff --git a/configure.ac b/configure.ac
 index d4dbbf81fb..e3664b1903 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -734,8 +734,8 @@ AS_IF([test "$GCC" = yes], [
+@@ -777,8 +777,8 @@ AS_IF([test "$GCC" = yes], [
      # suppress annoying -Wstrict-overflow warnings
      RUBY_TRY_CFLAGS(-fno-strict-overflow, [RUBY_APPEND_OPTION(XCFLAGS, -fno-strict-overflow)])
  

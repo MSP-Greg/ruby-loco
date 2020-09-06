@@ -4,7 +4,7 @@ diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
 index aef00cd761..2199f853c0 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
-@@ -948,7 +948,7 @@ def test_self_platforms
+@@ -947,7 +947,7 @@ def test_self_platforms
    end
  
    def test_self_prefix
@@ -17,7 +17,7 @@ diff --git a/test/rubygems/test_gem_commands_environment_command.rb b/test/rubyg
 index 12ec8dd6b2..27b07db01b 100644
 --- a/test/rubygems/test_gem_commands_environment_command.rb
 +++ b/test/rubygems/test_gem_commands_environment_command.rb
-@@ -26,7 +26,11 @@ def test_execute
+@@ -25,7 +25,11 @@ def test_execute
      assert_match %r{RUBY VERSION: \d+\.\d+\.\d+ \(.*\) \[.*\]}, @ui.output
      assert_match %r{INSTALLATION DIRECTORY: #{Regexp.escape @gemhome}},
                   @ui.output
@@ -34,7 +34,7 @@ diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/t
 index bd06c84107..a88a342e6a 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
-@@ -565,8 +565,11 @@ def test_update_rubygems_arguments
+@@ -564,8 +564,11 @@ def test_update_rubygems_arguments
  
      arguments = @cmd.update_rubygems_arguments
  
