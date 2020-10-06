@@ -48,11 +48,6 @@ jobs:
           $gh = 'https://github.com'
           git clone -q --depth=1 --no-tags --branch=master $gh/ruby/ruby.git src
 
-      - name: actions-commit-info.sh
-        run: ./src/tool/actions-commit-info.sh
-        shell: bash
-        id: commit_info
-
       - name: load ruby
         uses: MSP-Greg/setup-ruby-pkgs@v1
         with:
