@@ -351,7 +351,7 @@ module TestScript
     if IS_ACTIONS
       run_no = ENV['GITHUB_RUN_NUMBER'].rjust 4, '0'
       desc = "#{R_BRANCH}_#{date}_#{run_no}_#{RUBY_REVISION[0,10]}_#{RbConfig::CONFIG['build_os'][/[a-z]+/]}"
-      puts "::set-env name=TEST_LOGS::#{desc}"
+      File.write ENV['GITHUB_ENV'], "TEST_LOGS=#{desc}\n", mode: 'ab:UTF-8'
       puts "log name is #{desc}"
     end
     puts
