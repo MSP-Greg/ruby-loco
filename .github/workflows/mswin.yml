@@ -94,7 +94,7 @@ jobs:
           cd build
           nmake "DESTDIR=" install-nodoc
 
-      - name: misc install
+      - name: misc install, ruby -v
         run: |
           $repo = $pwd
           del ruby-mswin\lib\x64-vcruntime140-ruby300-static.lib
@@ -109,7 +109,7 @@ jobs:
           mt.exe -manifest $repo\mswin\ruby-exe.xml -outputresource:ruby.exe;1
           mt.exe -manifest $repo\mswin\ruby-exe.xml -outputresource:rubyw.exe;1
           cd $repo
-          ruby-mswin\bin\ruby.exe mswin\copy_bash_scripts.rb
+          ruby-mswin\bin\ruby.exe -v mswin\copy_bash_scripts.rb
 
       - name: nmake test
         timeout-minutes: 4
