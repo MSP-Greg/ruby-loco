@@ -18,7 +18,7 @@ index 65bd1e9..50301b9 100644
 +              # need to check for version constraint
 +              # below dummy to remove error message
 +              current = vers
-+              deps.sub!(d, '')
++              deps = deps.sub d, ''
 +            end
 +          }
 +        end
