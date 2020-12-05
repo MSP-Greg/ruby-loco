@@ -2,9 +2,10 @@ name: mingw
 on:
   push:
     branches:
-      - 'master'
+      - '*'
   schedule:
     - cron: '58 2,8,15 * * *'
+  workflow_dispatch:
 
 jobs:
   mingw:

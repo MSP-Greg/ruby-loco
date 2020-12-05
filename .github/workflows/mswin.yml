@@ -2,9 +2,10 @@ name: mswin
 on:
   push:
     branches:
-      - 'master'
+      - '*'
   schedule:
     - cron: '59 2,8,15 * * *'
+  workflow_dispatch:
 
 jobs:
   mswin:
