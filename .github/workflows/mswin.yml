@@ -118,6 +118,7 @@ jobs:
         run: |
           cd build
           set PATH=%cd%\ruby-mswin\bin;%cd%\ruby-mswin\bin\ruby_builtin_dlls;%PATH%
+          set BUNDLER_VERSION=
           nmake test
 
       # copy dll files to bin folder, add bin to path
@@ -130,6 +131,7 @@ jobs:
           set EXCL_N=--exclude test_jit --exclude test_syntax --exclude test_time_tz --exclude test_undef
           chcp 437
           set PATH=%cd%\ruby-mswin\bin;%cd%\ruby-mswin\bin\ruby_builtin_dlls;%PATH%
+          set BUNDLER_VERSION=
           cd build
           nmake test-all "TESTOPTS=-j%JOBS% %EXCL_N% -v --timeout-scale=3.0 --retry --job-status=normal --show-skip"
 
@@ -141,6 +143,7 @@ jobs:
           set TESTS=%tr%/test_jit.rb %tr%/test_syntax.rb %tr%/test_time_tz.rb %tr%/test_undef.rb
           chcp 437
           set PATH=%cd%\ruby-mswin\bin;%cd%\ruby-mswin\bin\ruby_builtin_dlls;%PATH%
+          set BUNDLER_VERSION=
           cd build
           nmake test-all "TESTOPTS=-v --timeout-scale=3.0"
 
@@ -150,6 +153,7 @@ jobs:
         run: |
           chcp 437
           set PATH=%cd%\ruby-mswin\bin;%PATH%
+          set BUNDLER_VERSION=
           cd src/spec/ruby
           ruby ../mspec/bin/mspec -j
 

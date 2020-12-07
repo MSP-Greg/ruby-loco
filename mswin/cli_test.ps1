@@ -1,3 +1,5 @@
+if ($env:BUNDLER_VERSION) { Remove-Item env:\BUNDLER_VERSION }
+
 $path = $env:PATH -Replace "[^;]+[Rr]uby[^;]+;",  ''
 $env:PATH = "$pwd/ruby-mswin/bin;$path"
 

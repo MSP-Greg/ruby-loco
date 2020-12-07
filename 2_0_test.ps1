@@ -229,10 +229,6 @@ function Test-All {
 
 #—————————————————————————————————————————————————————————————————————— Test-All
 function Test-Reline {
-  # Standard Ruby CI doesn't run this test, remove for better comparison
-  # $remove_test = "$d_ruby/test/ruby/enc/test_case_comprehensive.rb"
-  # if (Test-Path -Path $remove_test -PathType Leaf) { Remove-Item -Path $remove_test }
-
   $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
   $env:RUBYOPT  = "--disable=gems,did_you_mean"
@@ -249,17 +245,11 @@ function Test-Reline {
     -TimeLimit 20
 
   Remove-Item env:\RUBYOPT
-
-  # comment out below to allow full testing of Appveyor artifact
-  # Remove-Item -Path "$d_install/lib/ruby/$abi/$rarch/-test-" -Recurse
 }
 
 #————————————————————————————————————————————————————————————————————————— MSpec
 function MSpec {
   $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
-
-  # $env:RUBYOPT  = "--disable=did_you_mean"
-  # $env:SPEC_TEMP_DIR = "$env:TMPDIR/rubyspec_temp"
 
   Run-Proc `
     -exe    "ruby.exe" `
@@ -269,8 +259,6 @@ function MSpec {
     -Title  "test-mspec" `
     -Dir    "$d_ruby/spec/ruby" `
     -TimeLimit 360
-
-  # Remove-Item env:\RUBYOPT
 }
 
 #————————————————————————————————————————————————————————————————————————— setup
@@ -288,6 +276,7 @@ $script:time_info = ''
 $env:PATH = "$d_install/bin;$base_path"
 
 if ($env:DESTDIR) { Remove-Item env:\DESTDIR }
+if ($env:BUNDLER_VERSION) { Remove-Item env:\BUNDLER_VERSION }
 
 #————————————————————————————————————————————————————————————————— start testing
 # PATH is set in each test function
