@@ -253,7 +253,7 @@ function MSpec {
 
   Run-Proc `
     -exe    "ruby.exe" `
-    -e_args "-rdevkit ../mspec/bin/mspec -j -fd" `
+    -e_args "-rdevkit -I$d_ruby/tool/test ../mspec/bin/mspec -j -fd" `
     -StdOut "test_mspec.log" `
     -StdErr "test_mspec_err.log" `
     -Title  "test-mspec" `
