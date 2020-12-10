@@ -155,7 +155,7 @@ jobs:
           set PATH=%cd%\ruby-mswin\bin;%PATH%
           set BUNDLER_VERSION=
           cd src/spec/ruby
-          ruby -I../../tool/lib ../mspec/bin/mspec -j
+          ruby ../mspec/bin/mspec -j -I../../tool/lib
 
       - name: CLI Check
         run: ./mswin/cli_test.ps1
