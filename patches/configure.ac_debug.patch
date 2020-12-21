@@ -1,13 +1,13 @@
 Patch by MSP-Greg
 set 'lighter' debug flag, stripped later
 diff --git a/configure.ac b/configure.ac
-index d4dbbf81fb..e3664b1903 100644
+index dbd08321bd..307886c213 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -777,8 +777,8 @@ AS_IF([test "$GCC" = yes], [
+@@ -776,8 +776,8 @@ AS_IF([test "$GCC" = yes], [
      # suppress annoying -Wstrict-overflow warnings
      RUBY_TRY_CFLAGS(-fno-strict-overflow, [RUBY_APPEND_OPTION(XCFLAGS, -fno-strict-overflow)])
- 
+
 -    test "${debugflags+set}" || {RUBY_TRY_CFLAGS(-ggdb3, [debugflags=-ggdb3])}
 -    test "${debugflags+set}" || {RUBY_TRY_CFLAGS(-ggdb, [debugflags=-ggdb])}
 +    # test "${debugflags+set}" || {RUBY_TRY_CFLAGS(-ggdb3, [debugflags=-ggdb3])}
