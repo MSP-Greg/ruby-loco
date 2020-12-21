@@ -81,11 +81,11 @@ class << self
           end
         }
       }
-      Dir.chdir("lib/ruby/#{ABI}/rubygems/defaults") { |d|
-        patch_exe = File.join D_MSYS2, "usr", "bin", "patch.exe"
-        patch = `#{patch_exe} -p1 -N --no-backup-if-mismatch -i #{__dir__}/patches/__operating_system.rb.patch`
-        puts "#{COL_SPACE}#{patch}"
-      }
+      #Dir.chdir("lib/ruby/#{ABI}/rubygems/defaults") { |d|
+      #  patch_exe = File.join D_MSYS2, "usr", "bin", "patch.exe"
+      #  patch = `#{patch_exe} -p1 -N --no-backup-if-mismatch -i #{__dir__}/patches/__operating_system.rb.patch`
+      #  puts "#{COL_SPACE}#{patch}"
+      #}
     }
   end
 
