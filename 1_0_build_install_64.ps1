@@ -155,7 +155,7 @@ function Run($e_msg, $exec) {
   } else {
     echo "$e_msg"
   }
-  
+
   &$exec
 
   Check-Exit $eMsg
@@ -262,10 +262,10 @@ function Set-Env {
 
   $env:MSYS_NO_PATHCONV = 1
 
-  $env:CFLAGS   = "-D_FORTIFY_SOURCE=2 -O3 -march=$march -mtune=generic -fstack-protector-strong -pipe"
+  $env:CFLAGS   = "-march=$march -mtune=generic -O3 -pipe -fstack-protector-strong"
   $env:CXXFLAGS = "-D_FORTIFY_SOURCE=2 -O3 -march=$march -mtune=generic -pipe"
   $env:CPPFLAGS = "-D_FORTIFY_SOURCE=2 -D__USE_MINGW_ANSI_STDIO=1 -DFD_SETSIZE=2048"
-  $env:LDFLAGS  = "-l:libssp.a -l:libz.a -fstack-protector-strong -pipe -s"
+  $env:LDFLAGS  = "-l:libssp.a -l:libz.a -pipe -fstack-protector-strong -s"
 }
 
 #——————————————————————————————————————————————————————————————————— start build
@@ -333,7 +333,7 @@ Run "make install-nodoc" {
   cd $d_repo
   ruby 1_2_post_install.rb $bits $install
   $env:PATH = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
-  ruby 1_3_post_install.rb $bits $install  
+  ruby 1_3_post_install.rb $bits $install
 }
 Time-Log "make install-nodoc"
 
@@ -372,6 +372,6 @@ $content = [IO.File]::ReadAllText("$d_install/bin/racc.cmd", $UTF8)
 $content = $content -replace 'racc', 'rake'
 [IO.File]::WriteAllText("$d_install/bin/rake.cmd", $content, $UTF8)
 
-if (Test-Path -Path "$d_install/bin/rake.bat" -PathType Leaf ) { 
+if (Test-Path -Path "$d_install/bin/rake.bat" -PathType Leaf ) {
   Remove-Item -Path "$d_install/bin/rake.bat"
 }
