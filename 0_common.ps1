@@ -36,7 +36,7 @@ function Set-Variables {
     $script:d_git     = "$env:ProgramFiles/Git"
     $script:7z        = "$env:ChocolateyInstall\bin\7z.exe"
     $env:TMPDIR       =  $env:RUNNER_TEMP
-    $script:base_path =  $env:PATH -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
+    $script:base_path =  $env:Path -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
     $script:install   = "ruby-mingw"
     # Write-Host ($base_path -replace ';', "`n")
   } elseif ($env:Appveyor -eq 'True') {
@@ -91,7 +91,8 @@ function Set-Variables {
 
   $script:jobs = $env:NUMBER_OF_PROCESSORS
   $script:fc   = "Yellow"
-  $script:dash = "$([char]0x2015)"
+  #$script:dash = "$([char]0x2015)"
+  $script:dash = "─"
   $script:dl   = $($dash * 80)
 
   $script:UTF8 = $(New-Object System.Text.UTF8Encoding $False)

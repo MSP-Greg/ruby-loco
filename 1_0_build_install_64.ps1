@@ -255,7 +255,7 @@ function Set-Variables-Local {
 #——————————————————————————————————————————————————————————————————————— Set-Env
 # Set ENV, including gcc flags
 function Set-Env {
-  $env:PATH = "$ruby_path;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
+  $env:Path = "$ruby_path;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
 
   # used in Ruby scripts
   $env:D_MSYS2  = $d_msys2
@@ -332,7 +332,7 @@ Run "make install-nodoc" {
   make install-nodoc
   cd $d_repo
   ruby 1_2_post_install.rb $bits $install
-  $env:PATH = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
+  $env:Path = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
   ruby 1_3_post_install.rb $bits $install
 }
 Time-Log "make install-nodoc"
@@ -376,6 +376,13 @@ if (Test-Path -Path "$d_install/bin/racc.cmd" -PathType Leaf ) {
   [IO.File]::WriteAllText("$d_install/bin/rake.cmd", $content, $UTF8)
 }
 
-if (Test-Path -Path "$d_install/bin/rake.bat" -PathType Leaf ) {
+if ((Test-Path -Path "$d_install/bin/rake.cmd" -PathType Leaf ) -and
+    (Test-Path -Path "$d_install/bin/rake.bat" -PathType Leaf )) {
   Remove-Item -Path "$d_install/bin/rake.bat"
+}
+
+# below assumes bat files do not contain shell script name
+if (!(Test-Path -Path "$d_install/bin/rake.bat" -PathType Leaf )) {
+  $content = [IO.File]::ReadAllText("$d_install/bin/racc.bat", $UTF8)
+  [IO.File]::WriteAllText("$d_install/bin/rake.bat", $content, $UTF8)
 }
