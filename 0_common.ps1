@@ -91,8 +91,7 @@ function Set-Variables {
 
   $script:jobs = $env:NUMBER_OF_PROCESSORS
   $script:fc   = "Yellow"
-  #$script:dash = "$([char]0x2015)"
-  $script:dash = "─"
+  $script:dash = "$([char]0x2500)"
   $script:dl   = $($dash * 80)
 
   $script:UTF8 = $(New-Object System.Text.UTF8Encoding $False)

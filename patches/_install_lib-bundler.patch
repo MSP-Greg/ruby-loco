@@ -1,17 +1,17 @@
 patch by MSP-Greg
 adds code to find bundler bin stub in install folder
 diff --git a/lib/bundler/shared_helpers.rb b/lib/bundler/shared_helpers.rb
-index 6e83bc5ff4..93529983e6 100644
+index a56a3bff4b..0dc26a74ae 100644
 --- a/lib/bundler/shared_helpers.rb
 +++ b/lib/bundler/shared_helpers.rb
-@@ -293,6 +293,10 @@ def set_bundle_variables
+@@ -286,6 +286,10 @@ def set_bundle_variables
        # for Ruby core repository testing
        exe_file = File.expand_path("../../../libexec/bundle", __FILE__) unless File.exist?(exe_file)
- 
+
 +      # mess for finding the real file when testing from source
 +      exe_file = "#{RbConfig::CONFIG['rubylibprefix']}/gems/" \
 +        "#{RbConfig::CONFIG['ruby_version']}/gems/bundler-#{VERSION}/libexec/bundle" unless File.exist?(exe_file)
 +
        # bundler is a default gem, exe path is separate
        exe_file = Bundler.rubygems.bin_path("bundler", "bundle", VERSION) unless File.exist?(exe_file)
- 
+
