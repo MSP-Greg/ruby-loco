@@ -1,15 +1,16 @@
+# without this, intermittent failures in CI
+
 diff --git a/test/rdoc/test_rdoc_servlet.rb b/test/rdoc/test_rdoc_servlet.rb
-index c41c2c8ae7..740d33aa66 100644
+index c41c2c8ae7..8a2beb0e97 100644
 --- a/test/rdoc/test_rdoc_servlet.rb
 +++ b/test/rdoc/test_rdoc_servlet.rb
-@@ -1,6 +1,11 @@
+@@ -1,6 +1,10 @@
  # frozen_string_literal: true
  require_relative 'helper'
  
-+begin
-+  require 'webrick'
-+rescue
-+end
++require 'webrick' rescue nil
++require 'tsort'   rescue nil
++require 'json'    rescue nil
 +
  class TestRDocServlet < RDoc::TestCase
  
