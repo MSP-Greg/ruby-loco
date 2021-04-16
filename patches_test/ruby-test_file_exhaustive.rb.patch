@@ -1,9 +1,9 @@
 # extend timeout to pass Windows parallel CI
 diff --git a/test/ruby/test_file_exhaustive.rb b/test/ruby/test_file_exhaustive.rb
-index 0cb63c8f05..fde6e8d6ec 100644
+index 0ccf99312b..d4ebddbf23 100644
 --- a/test/ruby/test_file_exhaustive.rb
 +++ b/test/ruby/test_file_exhaustive.rb
-@@ -1391,7 +1391,8 @@ def test_flock_exclusive
+@@ -1396,7 +1396,8 @@ def test_flock_exclusive
        assert_separately(["-rtimeout", "-", regular_file], "#{<<~begin}#{<<~"end;"}")
        begin
          open(ARGV[0], "r") do |f|
@@ -13,7 +13,7 @@ index 0cb63c8f05..fde6e8d6ec 100644
              assert(!f.flock(File::LOCK_SH|File::LOCK_NB))
            end
          end
-@@ -1400,7 +1401,8 @@ def test_flock_exclusive
+@@ -1405,7 +1406,8 @@ def test_flock_exclusive
        begin
          open(ARGV[0], "r") do |f|
            assert_raise(Timeout::Error) do

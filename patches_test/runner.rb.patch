@@ -1,14 +1,10 @@
 diff --git a/test/runner.rb b/test/runner.rb
-index 3e2e1316b1..efa6a8f428 100644
+index d23d9f0bd2..3f84dea67f 100644
 --- a/test/runner.rb
 +++ b/test/runner.rb
-@@ -1,11 +1,22 @@
- # frozen_string_literal: true
- 
-+require 'rbconfig'
-+
- # Should be done in rubygems test files?
+@@ -4,9 +4,16 @@
  ENV["GEM_SKIP"] = ENV["GEM_HOME"] = ENV["GEM_PATH"] = "".freeze
+ ENV.delete("RUBY_CODESIGN")
  
 -# Get bundled gems on load path
 -Dir.glob("#{__dir__}/../gems/*/*.gemspec")
@@ -24,7 +20,5 @@ index 3e2e1316b1..efa6a8f428 100644
    .reject {|f| f =~ /minitest|test-unit|power_assert/ }
 -  .map {|f| $LOAD_PATH.unshift File.join(File.dirname(f), "lib") }
 +  .each {|f| $LOAD_PATH.unshift f[0..-2] }
-+
-+puts '', gem_dir, '', $LOAD_PATH, ''
  
  require_relative '../tool/test/runner'

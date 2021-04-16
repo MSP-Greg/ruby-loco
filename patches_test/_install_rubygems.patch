@@ -1,20 +1,20 @@
 Patch by MSP-Greg
 Allows running Core RubyGems tests from installed Ruby
-diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index aef00cd761..2199f853c0 100644
+diff --git a/test/rubygems/test_gem.rb b/tediff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
+index 8b028d3495..9f7d76c798 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
-@@ -947,7 +947,7 @@ def test_self_platforms
+@@ -1030,7 +1030,7 @@ def test_self_platforms
    end
-
+ 
    def test_self_prefix
 -    assert_equal PROJECT_DIR, Gem.prefix
 +    assert_nil Gem.prefix
    end
-
+ 
    def test_self_prefix_libdir
 diff --git a/test/rubygems/test_gem_commands_environment_command.rb b/test/rubygems/test_gem_commands_environment_command.rb
-index 12ec8dd6b2..27b07db01b 100644
+index a3edeb69bd..7f04924e6e 100644
 --- a/test/rubygems/test_gem_commands_environment_command.rb
 +++ b/test/rubygems/test_gem_commands_environment_command.rb
 @@ -25,7 +25,11 @@ def test_execute
@@ -31,13 +31,13 @@ index 12ec8dd6b2..27b07db01b 100644
                   @ui.output
      assert_match %r{GIT EXECUTABLE: #{@cmd.send(:git_path)}}, @ui.output
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
-index 749e9bee20..c41dc1e95c 100644
+index 9b590f0022..0a02663f7f 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
-@@ -612,8 +612,11 @@ def test_update_rubygems_arguments
-
+@@ -639,8 +639,11 @@ def test_update_rubygems_arguments
+ 
      arguments = @cmd.update_rubygems_arguments
-
+ 
 -    assert_equal '--prefix',           arguments.shift
 -    assert_equal Gem.prefix,           arguments.shift
 +    # asserts fail from install folder
