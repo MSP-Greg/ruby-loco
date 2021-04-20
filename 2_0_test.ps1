@@ -231,9 +231,7 @@ function Test-All {
 function Test-Reline {
   $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
-  $env:RUBYOPT  = "--disable=gems,did_you_mean"
-
-  $args = "./runner.rb -v --show-skip reline"
+  $args = "--disable=gems -rrbconfig ./runner.rb -v --show-skip reline"
 
   Run-Proc `
     -exe    $ruby_exe `
@@ -243,8 +241,6 @@ function Test-Reline {
     -Title  "test-reline" `
     -Dir    "$d_ruby/test" `
     -TimeLimit 20
-
-  Remove-Item env:\RUBYOPT
 }
 
 #————————————————————————————————————————————————————————————————————————— MSpec
