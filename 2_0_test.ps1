@@ -227,7 +227,7 @@ function Test-All {
   # Remove-Item -Path "$d_install/lib/ruby/$abi/$rarch/-test-" -Recurse
 }
 
-#—————————————————————————————————————————————————————————————————————— Test-All
+#——————————————————————————————————————————————————————————————————— Test-Reline
 function Test-Reline {
   $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
