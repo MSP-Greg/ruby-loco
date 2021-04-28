@@ -1,0 +1,151 @@
+diff --git a/test/net/http/test_https.rb b/test/net/http/test_https.rb
+index e9aee15bd3..31c33acacf 100644
+--- a/test/net/http/test_https.rb
++++ b/test/net/http/test_https.rb
+@@ -16,6 +16,7 @@ def self.read_fixture(key)
+     File.read(File.expand_path("../fixtures/#{key}", __dir__))
+   end
+
++  HOST = 'localhost'
+   CA_CERT = OpenSSL::X509::Certificate.new(read_fixture("cacert.pem"))
+   SERVER_KEY = OpenSSL::PKey.read(read_fixture("server.key"))
+   SERVER_CERT = OpenSSL::X509::Certificate.new(read_fixture("server.crt"))
+@@ -23,7 +24,7 @@ def self.read_fixture(key)
+   TEST_STORE = OpenSSL::X509::Store.new.tap {|s| s.add_cert(CA_CERT) }
+
+   CONFIG = {
+-    'host' => '127.0.0.1',
++    'host' => HOST,
+     'proxy_host' => nil,
+     'proxy_port' => nil,
+     'ssl_enable' => true,
+@@ -33,7 +34,7 @@ def self.read_fixture(key)
+   }
+
+   def test_get
+-    http = Net::HTTP.new("localhost", config("port"))
++    http = Net::HTTP.new(HOST, config("port"))
+     http.use_ssl = true
+     http.cert_store = TEST_STORE
+     certs = []
+@@ -48,12 +49,10 @@ def test_get
+     certs.zip([CA_CERT, SERVER_CERT][-certs.size..]) do |actual, expected|
+       assert_equal(expected.to_der, actual.to_der)
+     end
+-  rescue SystemCallError
+-    skip $!
+   end
+
+   def test_get_SNI
+-    http = Net::HTTP.new("localhost", config("port"))
++    http = Net::HTTP.new(HOST, config("port"))
+     http.ipaddr = config('host')
+     http.use_ssl = true
+     http.cert_store = TEST_STORE
+@@ -127,15 +126,13 @@ def test_get_SNI_failure
+   end
+
+   def test_post
+-    http = Net::HTTP.new("localhost", config("port"))
++    http = Net::HTTP.new(HOST, config("port"))
+     http.use_ssl = true
+     http.cert_store = TEST_STORE
+     data = config('ssl_private_key').to_der
+     http.request_post("/", data, {'content-type' => 'application/x-www-form-urlencoded'}) {|res|
+       assert_equal(data, res.body)
+     }
+-  rescue SystemCallError
+-    skip $!
+   end
+
+   def test_session_reuse
+@@ -143,7 +140,7 @@ def test_session_reuse
+     # See https://github.com/openssl/openssl/pull/5967 for details.
+     skip if OpenSSL::OPENSSL_LIBRARY_VERSION =~ /OpenSSL 1.1.0h/
+
+-    http = Net::HTTP.new("localhost", config("port"))
++    http = Net::HTTP.new(HOST, config("port"))
+     http.use_ssl = true
+     http.cert_store = TEST_STORE
+
+@@ -166,15 +163,13 @@ def test_session_reuse
+     assert_equal true, socket.session_reused?
+
+     http.finish
+-  rescue SystemCallError
+-    skip $!
+   end
+
+   def test_session_reuse_but_expire
+     # FIXME: The new_session_cb is known broken for clients in OpenSSL 1.1.0h.
+     skip if OpenSSL::OPENSSL_LIBRARY_VERSION =~ /OpenSSL 1.1.0h/
+
+-    http = Net::HTTP.new("localhost", config("port"))
++    http = Net::HTTP.new(HOST, config("port"))
+     http.use_ssl = true
+     http.cert_store = TEST_STORE
+
+@@ -190,8 +185,6 @@ def test_session_reuse_but_expire
+     assert_equal false, socket.session_reused?
+
+     http.finish
+-  rescue SystemCallError
+-    skip $!
+   end
+
+   if ENV["RUBY_OPENSSL_TEST_ALL"]
+@@ -206,14 +199,12 @@ def test_verify
+   end
+
+   def test_verify_none
+-    http = Net::HTTP.new("localhost", config("port"))
++    http = Net::HTTP.new(HOST, config("port"))
+     http.use_ssl = true
+     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+     http.request_get("/") {|res|
+       assert_equal($test_net_http_data, res.body)
+     }
+-  rescue SystemCallError
+-    skip $!
+   end
+
+   def test_skip_hostname_verification
+@@ -242,14 +233,10 @@ def test_fail_if_verify_hostname_is_true
+   end
+
+   def test_certificate_verify_failure
+-    http = Net::HTTP.new("localhost", config("port"))
++    http = Net::HTTP.new(HOST, config("port"))
+     http.use_ssl = true
+     ex = assert_raise(OpenSSL::SSL::SSLError){
+-      begin
+-        http.request_get("/") {|res| }
+-      rescue SystemCallError
+-        skip $!
+-      end
++      http.request_get("/") {|res| }
+     }
+     assert_match(/certificate verify failed/, ex.message)
+     unless /mswin|mingw/ =~ RUBY_PLATFORM
+@@ -279,10 +266,10 @@ def test_timeout_during_SSL_handshake
+     bug4246 = "expected the SSL connection to have timed out but have not. [ruby-core:34203]"
+
+     # listen for connections... but deliberately do not complete SSL handshake
+-    TCPServer.open('localhost', 0) {|server|
++    TCPServer.open(HOST, 0) {|server|
+       port = server.addr[1]
+
+-      conn = Net::HTTP.new('localhost', port)
++      conn = Net::HTTP.new(HOST, port)
+       conn.use_ssl = true
+       conn.read_timeout = 0.01
+       conn.open_timeout = 0.01
+@@ -297,7 +284,7 @@ def test_timeout_during_SSL_handshake
+   end
+
+   def test_min_version
+-    http = Net::HTTP.new("localhost", config("port"))
++    http = Net::HTTP.new(HOST, config("port"))
+     http.use_ssl = true
+     http.min_version = :TLS1
+     http.cert_store = TEST_STORE
