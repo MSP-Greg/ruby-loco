@@ -33,9 +33,9 @@ class << self
 
   def run
     copy_dll_files
-    add_priv_assm
     copy_ssl_files
     add_licenses
+    add_priv_assm
   end
 
   private
@@ -96,13 +96,9 @@ class << self
 EOT
       ['ruby.exe', 'rubyw.exe'].each { |fn|
         image = File.binread(fn)
-        image.gsub!(/<\?xml.*?<assembly.*?<\/assembly>\s+/m) { |m|
+        image.gsub!(/<\?xml.*?<assembly.*?<\/assembly>\s*/m) { |m|
           orig_len = m.bytesize
-          newm = m.gsub(/^\s*<\/assembly>/, "#{new}</assembly>")
-          # shorten to match original
-          newm.gsub!(/<!--The ID below indicates application support for/, '<!--') if newm.bytesize > orig_len
-          newm.gsub!(/^ *<!--.*?-->\n/m, "")                if newm.bytesize > orig_len
-          newm.gsub!(/^ +/, "")                             if newm.bytesize > orig_len
+          newm = m.gsub(/^  <!--   1 leave replacement.+<\/assembly>/m, "#{new}</assembly>").sub(/\0+\z/, '')
           raise "replacement manifest too big #{m.bytesize} < #{newm.bytesize}" if m.bytesize < newm.bytesize
           newm + " " * (orig_len - newm.bytesize)
         }

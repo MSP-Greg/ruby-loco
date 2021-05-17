@@ -18,7 +18,7 @@ Copy the file `local.ps1.sample`, remove `.sample`, then update its contents to 
 
 #### Build & Test
 
-Once the stup is done, just two simple commands:
+Once the setup is done, just two simple commands:
 
 This runs make and make install
 ```
