@@ -16,7 +16,7 @@ index ddd7cfe74d..84cd4098f0 100644
 
  ##
  # Minimal (mostly drop-in) replacement for test-unit.
-@@ -758,6 +758,7 @@ class Unit # :nodoc:
+@@ -762,6 +762,7 @@ class Unit # :nodoc:
      attr_accessor :start_time                         # :nodoc:
      attr_accessor :help                               # :nodoc:
      attr_accessor :verbose                            # :nodoc:
@@ -24,7 +24,7 @@ index ddd7cfe74d..84cd4098f0 100644
      attr_writer   :options                            # :nodoc:
 
      ##
-@@ -903,8 +904,8 @@ def _run_anything type
+@@ -907,8 +908,8 @@ def _run_anything type
 
          results = _run_suites suites, type
 
@@ -35,7 +35,7 @@ index ddd7cfe74d..84cd4098f0 100644
          test_count      += @test_count
          assertion_count += @assertion_count
          t = Time.now - start
-@@ -913,7 +914,8 @@ def _run_anything type
+@@ -917,7 +918,8 @@ def _run_anything type
            puts
            puts
          end
@@ -45,7 +45,7 @@ index ddd7cfe74d..84cd4098f0 100644
               [(@repeat_count ? "(#{@@current_repeat_count}/#{@repeat_count}) " : ""), type,
                 t, @test_count.fdiv(t), @assertion_count.fdiv(t)]
        end while @repeat_count && @@current_repeat_count < @repeat_count &&
-@@ -937,6 +939,7 @@ def _run_anything type
+@@ -941,6 +943,7 @@ def _run_anything type
      #
 
      def _run_suites suites, type
@@ -53,7 +53,7 @@ index ddd7cfe74d..84cd4098f0 100644
        suites.map { |suite| _run_suite suite, type }
      end
 
-@@ -958,19 +961,41 @@ def _run_suite suite, type
+@@ -962,19 +965,41 @@ def _run_suite suite, type
 
        leakchecker = LeakChecker.new
 
@@ -102,7 +102,7 @@ index ddd7cfe74d..84cd4098f0 100644
            $stdout.flush
 
            unless defined?(RubyVM::JIT) && RubyVM::JIT.enabled? # compiler process is wrongly considered as leak
-@@ -979,7 +1004,8 @@ def _run_suite suite, type
+@@ -983,7 +1008,8 @@ def _run_suite suite, type
 
            inst._assertions
          }
@@ -112,7 +112,7 @@ index ddd7cfe74d..84cd4098f0 100644
        end
 
        if ENV["LEAK_CHECKER_TRACE_OBJECT_ALLOCATION"]
-@@ -1008,6 +1034,9 @@ def _run_suite suite, type
+@@ -1012,6 +1038,9 @@ def _run_suite suite, type
      # error or failure.
 
      def record suite, method, assertions, time, error
@@ -122,7 +122,7 @@ index ddd7cfe74d..84cd4098f0 100644
      end
 
      def location e # :nodoc:
-@@ -1030,7 +1059,7 @@ def puke klass, meth, e
+@@ -1034,7 +1063,7 @@ def puke klass, meth, e
        e = case e
            when MiniTest::Skip then
              @skips += 1
@@ -131,7 +131,7 @@ index ddd7cfe74d..84cd4098f0 100644
              "Skipped:\n#{klass}##{meth} [#{location e}]:\n#{e.message}\n"
            when MiniTest::Assertion then
              @failures += 1
-@@ -1048,6 +1077,7 @@ def initialize # :nodoc:
+@@ -1052,6 +1081,7 @@ def initialize # :nodoc:
        @report = []
        @errors = @failures = @skips = 0
        @verbose = false
@@ -139,7 +139,7 @@ index ddd7cfe74d..84cd4098f0 100644
        @mutex = Thread::Mutex.new
        @info_signal = Signal.list['INFO']
        @repeat_count = nil
-@@ -1082,6 +1112,11 @@ def process_args args = [] # :nodoc:
+@@ -1086,6 +1116,11 @@ def process_args args = [] # :nodoc:
            options[:verbose] = true
          end
 
@@ -151,7 +151,7 @@ index ddd7cfe74d..84cd4098f0 100644
          opts.on '-n', '--name PATTERN', "Filter test names on pattern (e.g. /foo/)" do |a|
            options[:filter] = a
          end
-@@ -1099,6 +1134,8 @@ def process_args args = [] # :nodoc:
+@@ -1103,6 +1138,8 @@ def process_args args = [] # :nodoc:
        srand options[:seed]
 
        self.verbose = options[:verbose]
