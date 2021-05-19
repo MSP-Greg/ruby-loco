@@ -56,7 +56,7 @@ jobs:
         timeout-minutes: 5
         uses: ./.github/actions/upload-binary
         env:
-          GITHUB_TOKEN: ${{ secrets.RUBY_LOCO  }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           ruby_path: ./ruby-mingw
 
