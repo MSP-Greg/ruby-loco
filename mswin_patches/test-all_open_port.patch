@@ -1,6 +1,6 @@
 Fix random port issues when runnning Windows CI
 diff --git a/test/openssl/test_ssl.rb b/test/openssl/test_ssl.rb
-index 6095d545b5..f078489172 100644
+index 50a16029f5..5e9c22cd39 100644
 --- a/test/openssl/test_ssl.rb
 +++ b/test/openssl/test_ssl.rb
 @@ -86,11 +86,28 @@ def test_socket_open_with_context
@@ -18,7 +18,7 @@ index 6095d545b5..f078489172 100644
 +    # IANA suggests dynamic port for 49152 to 65535
 +    # http://www.iana.org/assignments/port-numbers
 +    begin
-+      port = rand(49152..65535)
++      port = rand(50_000..65_535)
 +    end while port_in_use? host, port
 +    port
 +  end
@@ -34,80 +34,35 @@ index 6095d545b5..f078489172 100644
          ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port, "127.0.0.1", random_port, context: ctx)
          ssl.sync_close = true
 diff --git a/test/socket/test_addrinfo.rb b/test/socket/test_addrinfo.rb
-index d516c772d9..51971341cd 100644
+index e068c6c216..3176b9061b 100644
 --- a/test/socket/test_addrinfo.rb
 +++ b/test/socket/test_addrinfo.rb
-@@ -360,17 +360,28 @@ def test_family_addrinfo
-     assert_raise(SocketError) { Addrinfo.tcp("0.0.0.0", 4649).family_addrinfo("::1", 80) }
+@@ -372,10 +372,8 @@ def random_port
    end
  
--  def random_port
-+  def port_in_use?(host, port)
-+    TCPServer.open(host, port).close
-+    false
-+  rescue Errno::EADDRINUSE, Errno::EACCES
-+    true
-+  end
-+
-+  def random_port(host = '127.0.0.1')
-     # IANA suggests dynamic port for 49152 to 65535
-     # http://www.iana.org/assignments/port-numbers
--    49152 + rand(65535-49152+1)
-+    begin
-+      port = rand(49152..65535)
-+    end while port_in_use? host, port
-+    port
-   end
- 
-+  private :port_in_use?, :random_port
-+
    def errors_addrinuse
 -    errs = [Errno::EADDRINUSE]
 -    # MinGW fails with "Errno::EACCES: Permission denied - bind(2) for 0.0.0.0:49721"
 -    errs << Errno::EACCES if /mingw/ =~ RUBY_PLATFORM
 -    errs
-+    # Window CI fails with "Errno::EACCES: Permission denied - bind(2) for 0.0.0.0:49721"
-+    (ENV['CI'] && RUBY_PLATFORM.match?(/mingw|mswin/)) ?
++    RUBY_PLATFORM.match?(/mingw|mswin/) ?
 +      [Errno::EADDRINUSE, Errno::EACCES] : [Errno::EADDRINUSE]
    end
  
    def test_connect_from
 diff --git a/test/socket/test_socket.rb b/test/socket/test_socket.rb
-index 77ce093101..5f852d3068 100644
+index 16c359eca1..5d8f179482 100644
 --- a/test/socket/test_socket.rb
 +++ b/test/socket/test_socket.rb
-@@ -160,19 +160,32 @@ def test_tcp_cloexec
-     }
-   end
- 
--  def random_port
-+  def port_in_use?(host, port)
-+    TCPServer.open(host, port).close
-+    false
-+  rescue Errno::EADDRINUSE, Errno::EACCES
-+    true
-+  end
-+  private :port_in_use?
-+
-+  def random_port(host = '127.0.0.1')
-     # IANA suggests dynamic port for 49152 to 65535
-     # http://www.iana.org/assignments/port-numbers
-     case RUBY_PLATFORM
-     when /mingw|mswin/
--      rand(50000..65535)
-+      begin
-+        port = rand(50000..65535)
-+      end while port_in_use? host, port
-+      port
-     else
-       rand(49152..65535)
-     end
+@@ -172,10 +172,8 @@ def random_port
    end
  
    def errors_addrinuse
--    [Errno::EADDRINUSE]
-+    # Window CI fails with "Errno::EACCES: Permission denied - bind(2) for 0.0.0.0:49721"
-+    (ENV['CI'] && RUBY_PLATFORM.match?(/mingw|mswin/)) ?
+-    errs = [Errno::EADDRINUSE]
+-    # MinGW fails with "Errno::EACCES: Permission denied - bind(2) for 0.0.0.0:49721"
+-    errs << Errno::EACCES if /mingw/ =~ RUBY_PLATFORM
+-    errs
++    RUBY_PLATFORM.match?(/mingw|mswin/) ?
 +      [Errno::EADDRINUSE, Errno::EACCES] : [Errno::EADDRINUSE]
    end
  
