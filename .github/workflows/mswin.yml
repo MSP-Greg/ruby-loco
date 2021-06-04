@@ -70,6 +70,10 @@ jobs:
 
       - name: download unicode, extlibs, zlib
         run: |
+          # copy current cert file to mswin location
+          curl -fsSL -o ruby-mingw.7z --retry 10 https://github.com/MSP-Greg/ruby-loco/releases/download/ruby-master/ruby-mingw.7z
+          7z e ruby-mingw.7z -ossl ruby-mingw/ssl/cert.pem
+          Copy-Item ./ssl/cert.pem "C:/Program Files/Common Files/SSL/cert.pem"
           $zlib = 'zlib1211.zip'
           curl -fsSL -o $zlib --retry 10 https://zlib.net/$zlib
           &'C:\Program Files\7-Zip\7z.exe' x -osrc/ext/zlib $zlib
