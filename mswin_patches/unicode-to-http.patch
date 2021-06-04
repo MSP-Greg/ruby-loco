@@ -1,0 +1,13 @@
+diff --git a/tool/downloader.rb b/tool/downloader.rb
+index d0cf52e4e5..9a89010b03 100644
+--- a/tool/downloader.rb
++++ b/tool/downloader.rb
+@@ -71,7 +71,7 @@ def self.download(name, dir = nil, since = true, options = {})
+ 
+   class Unicode < self
+     INDEX = {}  # cache index file information across files in the same directory
+-    UNICODE_PUBLIC = "https://www.unicode.org/Public/"
++    UNICODE_PUBLIC = "http://www.unicode.org/Public/"
+ 
+     def self.download(name, dir = nil, since = true, options = {})
+       options = options.dup

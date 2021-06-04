@@ -68,6 +68,11 @@ jobs:
           cd build
           ../src/win32/configure.bat --disable-install-doc --prefix=%PRE% --without-ext=+,dbm,gdbm --enable-bundled-libffi %OPT_DIR:\=/% %SSL_DIR:\=/%
 
+      - name: unicode to http
+        run: |
+          cd src
+          patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/unicode-to-http.patch
+
       - name: download unicode, extlibs, zlib
         run: |
           # copy current cert file to mswin location
