@@ -85,7 +85,7 @@ jobs:
           cd build
           # libffi is causing error
           nmake extract-extlibs
-          nmake update-unicode
+          # nmake update-unicode
 
       - name: apply patches
         run: |
