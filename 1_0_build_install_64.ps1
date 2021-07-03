@@ -362,7 +362,7 @@ Apply-Patches "patches_test"
 
 Remove-Item Env:\SOURCE_DATE_EPOCH
 
-# Fix rake bin files
+# Fix bin files
 
 if (Test-Path -Path "$d_install/bin/racc" -PathType Leaf ) {
   $content = [IO.File]::ReadAllText("$d_install/bin/racc", $UTF8)
@@ -385,4 +385,12 @@ if ((Test-Path -Path "$d_install/bin/rake.cmd" -PathType Leaf ) -and
 if (!(Test-Path -Path "$d_install/bin/rake.bat" -PathType Leaf )) {
   $content = [IO.File]::ReadAllText("$d_install/bin/racc.bat", $UTF8)
   [IO.File]::WriteAllText("$d_install/bin/rake.bat", $content, $UTF8)
+}
+
+
+$ruby_exe  = "$d_install/bin/ruby.exe"
+$ruby_v = &$ruby_exe -v
+
+if (-not ($ruby_v -cmatch "x64-mingw32\]\z")) {
+  throw("Ruby may have assembly issue, won't start")
 }

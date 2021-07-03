@@ -95,14 +95,25 @@ class << self
   <file name='#{libruby}'/>
 EOT
       ['ruby.exe', 'rubyw.exe'].each { |fn|
-        image = File.binread(fn)
-        image.gsub!(/<\?xml.*?<assembly.*?<\/assembly>\s*/m) { |m|
+        image = File.binread fn
+        image.sub!(/<\?xml.*?<assembly.*?<\/assembly>\s*/m) { |m|
+
           orig_len = m.bytesize
-          newm = m.gsub(/^  <!--   1 leave replacement.+<\/assembly>/m, "#{new}</assembly>").sub(/\0+\z/, '')
-          raise "replacement manifest too big #{m.bytesize} < #{newm.bytesize}" if m.bytesize < newm.bytesize
+          newm = m.sub(/^<\/assembly>/m, "#{new}</assembly>").sub(/\0+\z/, '')
+
+          newm.gsub!(/The ID below indicates application support for/, 'support') if orig_len < newm.bytesize
+          newm.gsub!(/--support/, '--') if orig_len < newm.bytesize
+          newm.gsub!(/^ +<!-- Windows (Vista|7).+?\/>\n/m, '')
+
+          # rubyw.exe only ?
+          newm.gsub!(/^ +<!-- +\d leave replacement +-->\n/, '')
+
+STDOUT.puts "\n\n#{fn} old\n#{m}\n#{fn} new\n#{newm}\n\n"
+
+          raise "#{fn} replacement manifest too big #{orig_len} < #{newm.bytesize}" if orig_len < newm.bytesize
           newm + " " * (orig_len - newm.bytesize)
         }
-        File.binwrite(fn, image)
+        File.binwrite fn, image
       }
     }
   end
