@@ -39,7 +39,7 @@ jobs:
         uses: MSP-Greg/setup-ruby-pkgs@v1
         with:
           ruby-version: mingw
-          mingw: _upgrade_ gmp libffi openssl ragel readline
+          mingw: _upgrade_ gdbm gmp libffi openssl ragel readline
           msys2: automake1.16 bison
 
       - name: build & install
