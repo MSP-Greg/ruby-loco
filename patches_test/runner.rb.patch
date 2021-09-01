@@ -1,5 +1,5 @@
 diff --git a/test/runner.rb b/test/runner.rb
-index d23d9f0bd2..3f84dea67f 100644
+index a24cfa31c6..3f84dea67f 100644
 --- a/test/runner.rb
 +++ b/test/runner.rb
 @@ -4,9 +4,16 @@
@@ -7,7 +7,7 @@ index d23d9f0bd2..3f84dea67f 100644
  ENV.delete("RUBY_CODESIGN")
  
 -# Get bundled gems on load path
--Dir.glob("#{__dir__}/../gems/*/*.gemspec")
+-Dir.glob("#{__dir__}/../.bundle/gems/*/*.gemspec")
 +# Get bundled gems on load path, try install dir first
 +gem_dir = "#{RbConfig::CONFIG.values_at('rubylibprefix', 'ruby_version').join('/gems/')}/gems"
 +unless Dir.exist? gem_dir

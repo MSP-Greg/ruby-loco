@@ -1,8 +1,8 @@
 diff --git a/tool/downloader.rb b/tool/downloader.rb
-index d0cf52e4e5..9a89010b03 100644
+index d09afc5ad7..72730800aa 100644
 --- a/tool/downloader.rb
 +++ b/tool/downloader.rb
-@@ -71,7 +71,7 @@ def self.download(name, dir = nil, since = true, options = {})
+@@ -76,7 +76,7 @@ def self.download(name, dir = nil, since = true, options = {})
  
    class Unicode < self
      INDEX = {}  # cache index file information across files in the same directory

@@ -1,5 +1,5 @@
 diff --git a/test/openssl/test_ssl.rb b/test/openssl/test_ssl.rb
-index 50a16029f5..5e9c22cd39 100644
+index 5dccac5fac..c22c7f7f7e 100644
 --- a/test/openssl/test_ssl.rb
 +++ b/test/openssl/test_ssl.rb
 @@ -86,11 +86,28 @@ def test_socket_open_with_context
@@ -50,10 +50,10 @@ index e068c6c216..3176b9061b 100644
  
    def test_connect_from
 diff --git a/test/socket/test_socket.rb b/test/socket/test_socket.rb
-index 16c359eca1..5d8f179482 100644
+index 9807db3674..ab7eddf7fc 100644
 --- a/test/socket/test_socket.rb
 +++ b/test/socket/test_socket.rb
-@@ -172,10 +172,8 @@ def random_port
+@@ -176,10 +176,8 @@ def random_port
    end
  
    def errors_addrinuse
