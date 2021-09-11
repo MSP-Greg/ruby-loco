@@ -212,7 +212,7 @@ function Test-All {
   $env:TEST_SSL = '1'
 
   $args = "--disable=gems -rdevkit ./runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `
-    " -a --show-skip --retry --job-status=normal --timeout-scale=1.5"
+    " -v --show-skip --retry --job-status=normal --timeout-scale=1.5"
 
   Run-Proc `
     -exe    $ruby_exe `
