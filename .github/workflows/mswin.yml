@@ -22,7 +22,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .downloaded-cache
-          key: dl-cache-win-mswin-${{ matrix.vs }}
+          key: dl-cache-win-mswin-${{ env.GITHUB_RUN_ID }}
 
       - name: Cache - chocolatey
         uses: actions/cache@v2
