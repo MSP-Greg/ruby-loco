@@ -269,9 +269,6 @@ function Set-Env {
 }
 
 #——————————————————————————————————————————————————————————————————— start build
-# defaults to 64 bit
-$script:bits = if ($args.length -eq 1 -and $args[0] -eq 32) { 32 } else { 64 }
-
 cd $PSScriptRoot
 
 . ./0_common.ps1
@@ -284,8 +281,8 @@ Write-Host "TMPDIR = $env:TMPDIR"
 
 $gcc_vers = ([regex]'\d+\.\d+\.\d+').match($(gcc.exe --version)).value
 
-$files = "$d_msys2/mingw$bits/lib/libz.dll.a",
-         "$d_msys2/mingw$bits/lib/gcc/x86_64-w64-mingw32/$gcc_vers/libssp.dll.a"
+$files = "$d_msys2$env:MINGW_PREFIX/lib/libz.dll.a",
+         "$d_msys2$env:MINGW_PREFIX/lib/gcc/x86_64-w64-mingw32/$gcc_vers/libssp.dll.a"
 
 Files-Hide $files
 
@@ -331,9 +328,9 @@ Files-Unhide $files
 Run "make install-nodoc" {
   make install-nodoc
   cd $d_repo
-  ruby 1_2_post_install.rb $bits $install
+  ruby 1_2_post_install.rb
   $env:Path = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
-  ruby 1_3_post_install.rb $bits $install
+  ruby 1_3_post_install.rb
 }
 Time-Log "make install-nodoc"
 
@@ -348,7 +345,7 @@ Print-Time-Log
 # save extension build files
 Push-Location $d_build
 $build_files = "$d_zips/ext_build_files.7z"
-&$7z a $build_files config.log .ext\include\x64-mingw32\ruby\*.h ext\**\Makefile ext\**\*.h ext\**\*.log ext\**\*.mk 1> $null
+&$7z a $build_files config.log .ext\include\$rarch\ruby\*.h ext\**\Makefile ext\**\*.h ext\**\*.log ext\**\*.mk 1> $null
 if ($is_av) { Push-AppveyorArtifact $build_files -DeploymentName "Ext build files" }
 Pop-Location
 
@@ -391,6 +388,6 @@ if (!(Test-Path -Path "$d_install/bin/rake.bat" -PathType Leaf )) {
 $ruby_exe  = "$d_install/bin/ruby.exe"
 $ruby_v = &$ruby_exe -v
 
-if (-not ($ruby_v -cmatch "x64-mingw32\]\z")) {
+if (-not ($ruby_v -cmatch "$rarch\]\z")) {
   throw("Ruby may have assembly issue, won't start")
 }

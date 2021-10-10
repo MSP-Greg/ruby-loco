@@ -30,6 +30,30 @@ function Remove-Read-Only($path) {
 #————————————————————————————————————————————————————————————————— Set-Variables
 # set base variables, including MSYS2 location and bit related varis
 function Set-Variables {
+  if ($bits -eq 32) { $env:MSYSTEM = "MINGW32" }
+
+  Switch ($env:MSYSTEM) {
+    "UCRT64"  {
+      $script:install = "ruby-ucrt"
+      $env:MINGW_PREFIX = "/ucrt64"
+      $env:MINGW_PACKAGE_PREFIX = "mingw-w64-ucrt-x86_64"
+      $script:march = "x86-64" ; $script:carch = "x86_64" ; $script:rarch = "x64-mingw-ucrt"
+    }
+    "MINGW32" {
+      $script:install = "ruby-mingw32"
+      $env:MINGW_PREFIX = "/mingw32"
+      $env:MINGW_PACKAGE_PREFIX = "mingw-w64-i686"
+      $script:march = "i686"   ; $script:carch = "i686"   ; $script:rarch = "i386-mingw32"
+    }
+    default   {
+      $env:MSYSTEM = "MINGW64"
+      $script:install = "ruby-mingw"
+      $env:MINGW_PREFIX = "/mingw64"
+      $env:MINGW_PACKAGE_PREFIX = "mingw-w64-x86_64"
+      $script:march = "x86-64" ; $script:carch = "x86_64" ; $script:rarch = "x64-mingw32"
+    }
+  }
+
   if ($env:GITHUB_ACTIONS -eq 'true') {
     $script:is_actions = $true
     $script:d_msys2   = "C:/msys64"
@@ -37,7 +61,6 @@ function Set-Variables {
     $script:7z        = "$env:ChocolateyInstall\bin\7z.exe"
     $env:TMPDIR       =  $env:RUNNER_TEMP
     $script:base_path =  $env:Path -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
-    $script:install   = "ruby-mingw"
     # Write-Host ($base_path -replace ';', "`n")
   } elseif ($env:Appveyor -eq 'True') {
     $script:is_av     = $true
@@ -47,10 +70,8 @@ function Set-Variables {
     $script:base_path = ("$env:ProgramFiles/7-Zip;" + `
       "$env:ProgramFiles/AppVeyor/BuildAgent;$d_git/cmd;" + `
       "$env:SystemRoot/system32;$env:ProgramFiles;$env:SystemRoot").replace('\', '/')
-    $script:install   = "install"
     $env:TMPDIR       = $env:TEMP
   } else {
-    $script:install   = "install"
     ./local.ps1
   }
 
@@ -60,36 +81,28 @@ function Set-Variables {
     '/' + $d_repo.replace(':', '')
   } else { $d_repo }
 
-  if ($bits -eq 32) {
-    $script:march = "i686"   ; $script:carch = "i686"   ; $script:rarch = "i386-mingw32"
-  } else {
-    $script:march = "x86-64" ; $script:carch = "x86_64" ; $script:rarch = "x64-mingw32"
-  }
-
   $script:chost   = "$carch-w64-mingw32"
 
   # below two items appear in MSYS2 shell printenv
   $env:MSYSTEM_CARCH = $carch
   $env:MSYSTEM_CHOST = $chost
-  $env:MSYSTEM = "MINGW$bits"
 
   # not sure if below are needed, maybe just for makepkg scripts.  See
   # https://github.com/Alexpux/MSYS2-packages/blob/master/pacman/makepkg_mingw64.conf
   # https://github.com/Alexpux/MSYS2-packages/blob/master/pacman/makepkg_mingw32.conf
   $env:CARCH        = $carch
   $env:CHOST        = $chost
-  $env:MINGW_PREFIX = "/mingw$bits"
 
   # below are folder shortcuts
   $script:d_build   = "$d_repo/build"
   $script:d_logs    = "$d_repo/logs"
-  $script:d_mingw   = "$d_msys2/mingw$bits/bin"
+  $script:d_mingw   = "$d_msys2$env:MINGW_PREFIX/bin"
   $script:d_ruby    = "$d_repo/ruby"
   $script:d_zips    = "$d_repo/zips"
 
   $script:d_install = "$d_repo/$install"
 
-  $script:jobs = $env:NUMBER_OF_PROCESSORS
+  $script:jobs = (([int]$env:NUMBER_OF_PROCESSORS, 10) | Measure-Object -Minimum).Minimum
   $script:fc   = "Yellow"
   $script:dash = "$([char]0x2500)"
   $script:dl   = $($dash * 80)

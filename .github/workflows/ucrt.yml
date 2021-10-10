@@ -1,14 +1,14 @@
-name: mingw
+name: ucrt
 on:
   push:
     branches:
       - '*'
   schedule:
-    - cron: '45 2,8,15 * * *'
+    - cron: '55 2,8,15 * * *'
   workflow_dispatch:
 
 jobs:
-  mingw:
+  ucrt:
     strategy:
       fail-fast: false
     runs-on: windows-2019
@@ -18,8 +18,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .downloaded-cache
-          key: dl-cache-win-mingw-${{ env.GITHUB_RUN_ID }}
-          restore-keys: dl-cache-win-mingw-
+          key: dl-cache-win-ucrt-${{ env.GITHUB_RUN_ID }}
+          restore-keys: dl-cache-win-ucrt-
 
       - name: git config & clone
         run: |
@@ -38,7 +38,7 @@ jobs:
       - name: Set up Ruby & MSYS2
         uses: MSP-Greg/setup-ruby-pkgs@win-ucrt-1
         with:
-          ruby-version: mingw
+          ruby-version: head
           mingw: _upgrade_ gmp libffi openssl ragel readline
           msys2: automake1.16 bison
           setup-ruby-ref: MSP-Greg/ruby-setup-ruby/win-ucrt-1
@@ -59,7 +59,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          ruby_path: ./ruby-mingw
+          ruby_path: ./ruby-ucrt
 
       - name: save log artifact
         if: success() || failure()

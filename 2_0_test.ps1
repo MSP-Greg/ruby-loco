@@ -152,7 +152,7 @@ function Finish {
   cd $d_repo
   # script checks test results, determines whether build is good or not,
   # saves artifacts and adds messages to build
-  ruby.exe 2_1_test_script.rb $bits $install $exit_code
+  ruby.exe 2_1_test_script.rb $install $exit_code
   $exit += ($LastExitCode -and $LastExitCode -ne 0)
   ruby.exe -v -ropenssl -e "puts 'Build    ' + OpenSSL::OPENSSL_VERSION, 'Runtime  ' + OpenSSL::OPENSSL_LIBRARY_VERSION"
   if ($is_actions) {
@@ -258,9 +258,6 @@ function MSpec {
 }
 
 #————————————————————————————————————————————————————————————————————————— setup
-# defaults to 64 bit
-$bits = if ($args.length -eq 1 -and $args[0] -eq 32) { 32 } else { 64 }
-
 cd $PSScriptRoot
 . ./0_common.ps1
 Set-Variables
@@ -315,6 +312,6 @@ sleep 5
 
 MSpec
 
-ren "$d_install/lib/ruby/$abi/x64-mingw32/readline.so" "readline.so_"
+ren "$d_install/lib/ruby/$abi/$rarch/readline.so" "readline.so_"
 
 Finish

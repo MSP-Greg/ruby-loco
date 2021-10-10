@@ -4,20 +4,13 @@
 require 'fileutils'
 
 module PostInstall3
-  if ARGV.length == 0
-    ARCH = '64'
-    D_INSTALL = File.join __dir__, 'install'
-  elsif ARGV[0] == '32' || ARGV[0] == '64'
-    ARCH = ARGV[0]
+  case ENV['MSYSTEM']
+  when 'UCRT64'
+    D_INSTALL = File.join __dir__, 'ruby-ucrt'
+  when 'MINGW32'
+    D_INSTALL = File.join __dir__, 'ruby-mingw32'
   else
-    puts "Incorrect first argument, must be '32' or '64'"
-    exit 1
-  end
-
-  if ARGV.length == 2 && !ARGV[1].nil?  && ARGV[1] != ''
-    D_INSTALL = File.join __dir__, ARGV[1]
-  elsif ARGV.length == 1
-    D_INSTALL = File.join __dir__, 'install'
+    D_INSTALL = File.join __dir__, 'ruby-mingw'
   end
 
   COL_WID = 36

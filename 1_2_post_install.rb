@@ -5,23 +5,21 @@ require 'open3'
 require 'fileutils'
 
 module PostInstall2
-  if ARGV.length == 0
-    ARCH = '64'
-    D_INSTALL = File.join __dir__, 'install'
-  elsif ARGV[0] == '32' || ARGV[0] == '64'
-    ARCH = ARGV[0]
+  case ENV['MSYSTEM']
+  when 'UCRT64'
+    D_INSTALL = File.join __dir__, 'ruby-ucrt'
+    DLL_FN = 'x64-ucrt-ruby'
+  when 'MINGW32'
+    D_INSTALL = File.join __dir__, 'ruby-mingw32'
+    DLL_FN = 'msvcrt-ruby'
   else
-    puts "Incorrect first argument, must be '32' or '64'"
-    exit 1
-  end
-
-  if ARGV.length == 2 && !ARGV[1].nil?  && ARGV[1] != ''
-    D_INSTALL = File.join __dir__, ARGV[1]
-  elsif ARGV.length == 1
-    D_INSTALL = File.join __dir__, 'install'
+    D_INSTALL = File.join __dir__, 'ruby-mingw'
+    DLL_FN = 'x64-msvcrt-ruby'
   end
 
   D_MSYS2 = ENV['D_MSYS2']
+  D_MINGW = "#{D_MSYS2}#{ENV['MINGW_PREFIX']}"
+
   D_RI2   = File.join __dir__, 'rubyinstaller2'
   # -REMOVE rbreadline- D_RL    = File.join __dir__, 'ruby_readline'
   D_RUBY  = File.join __dir__, 'ruby'
@@ -42,12 +40,12 @@ class << self
 
   # Copies correct dll files from MSYS2 location to package dir.
   def copy_dll_files
-    pkg_pre = (ARCH == '64' ? 'mingw-w64-x86_64' : 'mingw-w64-i686')
-    pkgs = 'dlfcn gcc-libs gdbm libffi libyaml openssl readline'
+    pkg_pre = ENV['MINGW_PACKAGE_PREFIX']
+    pkgs = 'dlfcn gcc-libs libffi libyaml openssl readline'
     dll_files, lib_files = find_dlls pkgs, pkg_pre
 
     # get mingw bin path for arch
-    msys2_dll_bin_path = File.join D_MSYS2, "mingw#{ARCH}", "bin"
+    msys2_dll_bin_path = "#{D_MINGW}/bin"
 
     # create and add manifest
     dest = File.join D_INSTALL, 'bin', 'ruby_builtin_dlls'
@@ -68,7 +66,7 @@ class << self
     }
     dll_dirs = lib_files.map{ | fn| File.dirname(fn) }.uniq
     dll_dirs.each { |d|
-      src = File.join D_MSYS2, "mingw#{ARCH}", "lib", d
+      src = File.join D_MINGW, "lib", d
       if Dir.exist?(src)
         dest = File.join D_INSTALL, "lib", d
         Dir.mkdir dest unless Dir.exist? dest
@@ -82,7 +80,7 @@ class << self
 
   # Adds private assembly data to ruby.exe and rubyw.exe files
   def add_priv_assm
-    libruby_regex = /msvcrt-ruby\d+\.dll$/i
+    libruby_regex = /#{DLL_FN}\d+\.dll$/i
     bin_dir = File.join D_INSTALL, "bin"
     Dir.chdir(bin_dir) { |d|
       libruby = Dir['*.dll'].grep(libruby_regex)[0]
@@ -108,8 +106,6 @@ EOT
           # rubyw.exe only ?
           newm.gsub!(/^ +<!-- +\d leave replacement +-->\n/, '')
 
-STDOUT.puts "\n\n#{fn} old\n#{m}\n#{fn} new\n#{newm}\n\n"
-
           raise "#{fn} replacement manifest too big #{orig_len} < #{newm.bytesize}" if orig_len < newm.bytesize
           newm + " " * (orig_len - newm.bytesize)
         }
@@ -130,7 +126,7 @@ STDOUT.puts "\n\n#{fn} old\n#{m}\n#{fn} new\n#{newm}\n\n"
       cp "./resources/ssl/cacert.pem", "#{D_INSTALL}/ssl/cert.pem"
       puts "#{'installing ssl files:'.ljust(COL_WID)}cert.pem"
 
-      src = File.join D_MSYS2, "mingw#{ARCH}", "ssl", "openssl.cnf"
+      src = File.join D_MINGW, "ssl", "openssl.cnf"
       if File.exist?(src)
         #IO.copy_stream src, "#{D_INSTALL}/ssl/openssl.cnf"
         cp src, "#{D_INSTALL}/ssl/openssl.cnf"
@@ -178,8 +174,9 @@ STDOUT.puts "\n\n#{fn} old\n#{m}\n#{fn} new\n#{newm}\n\n"
     orig_path = ENV['PATH']
     ENV['PATH'] = "#{File.join D_MSYS2, 'usr/bin'};#{orig_path}"
     re_dep = /^Depends On +: +([^\r\n]+)/i
-    re_bin = /\A.+\/mingw#{ARCH}\/bin\//i
-    re_lib = /\A.+\/mingw#{ARCH}\/lib\//i
+    dir = ENV['MINGW_PREFIX'][1..-1]
+    re_bin = /\A\S+ \/#{dir}\/bin\//i
+    re_lib = /\A\S+ \/#{dir}\/lib\//i
     bin_dlls = []
     lib_dlls = []
     pkg_files_added = []
@@ -188,8 +185,9 @@ STDOUT.puts "\n\n#{fn} old\n#{m}\n#{fn} new\n#{newm}\n\n"
 
     while !pkgs.empty? do
       depends = []
-      files = `pacman.exe -Ql #{pkgs.join(' ')} | grep dll$`
+      files = `pacman.exe -Ql #{pkgs.join(' ')} | grep dll`
       files.each_line(chomp: true) { |dll|
+        next unless dll.end_with? '.dll'
         if    dll.match? re_bin ; bin_dlls << dll.sub(re_bin, '')
         elsif dll.match? re_lib ; lib_dlls << dll.sub(re_lib, '')
         else

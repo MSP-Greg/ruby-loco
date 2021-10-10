@@ -6,15 +6,6 @@
 
 module PreBuild
 
-  if ARGV.length == 0
-    ARCH = '64'
-  elsif ARGV[0] == '32' || ARGV[0] == '64'
-    ARCH = ARGV[0]
-  else
-    puts "Incorrect first argument, must be nil, '32' or '64'"
-    exit 1
-  end
-
 class << self
 
   def run
@@ -46,7 +37,13 @@ class << self
                   v_data[/^#define[ \t]+RUBY_RELEASE_MONTH[ \t]+(\d{1,2})/, 1].rjust(2,'0') + '-' +
                   v_data[/^#define[ \t]+RUBY_RELEASE_DAY[ \t]+(\d{1,2})/, 1].rjust(2,'0')
         patch = patch == '-1' ? 'dev' : "p#{patch}"
-        arch = ARCH == '64' ? '[x64-mingw32]' : '[i386-mingw32]'
+
+        arch = case ENV['MSYSTEM']
+          when 'UCRT64'  then '[x64-mingw-ucrt]'
+          when 'MINGW32' then '[i386-mingw32]'
+          else '[x64-mingw32]'
+          end
+
         # update for git commit time as date in RUBY_DESCRIPTION
         date = Time.at(%x[git log -n1 --format=%ct].to_i).utc.strftime('%FT%TZ')[0,10]
         title = "#{patch} (#{date} #{branch} #{svn}) #{arch}".sub(/ +\)/, ')')

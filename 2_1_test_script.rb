@@ -6,27 +6,16 @@
 # artifacts
 
 module TestScript
-  if ARGV.length == 0
-    ARCH = '64'
-    D_INSTALL = File.join __dir__, (IS_ACTIONS ? 'ruby-mingw' : 'install')
-  elsif ARGV[0] == '32' || ARGV[0] == '64'
-    ARCH = ARGV[0]
+  case ENV['MSYSTEM']
+  when 'UCRT64'
+    D_INSTALL = File.join __dir__, 'ruby_ucrt'
+  when 'MINGW32'
+    D_INSTALL = File.join __dir__, 'ruby_mingw32'
   else
-    puts "Incorrect first argument, must be '32' or '64'"
-    exit 1
+    D_INSTALL = File.join __dir__, 'ruby_mingw'
   end
 
-  if ARGV.length == 3 && !ARGV[1].nil? && ARGV[1] != ''
-    D_INSTALL = File.join __dir__, ARGV[1]
-  elsif ARGV.length == 1
-    D_INSTALL = File.join __dir__, (IS_ACTIONS ? 'ruby-mingw' : 'install')
-  end
-
-  if ARGV.length == 3 && !ARGV[2].nil? && ARGV[2] != '' && (t = ARGV[2].to_i)
-    @@cli_fails = t
-  else
-    @@cli_fails = 0
-  end
+  @@cli_fails = 0
 
   D_LOGS  = File.join __dir__, 'logs'
   D_RUBY  = File.join __dir__, 'ruby'
@@ -86,7 +75,7 @@ module TestScript
       r[0] = "test-all   UNKNOWN see log\n\n"
       sum_test_all = ''
     end
-    
+
     results_str << r.join('')
 
     if IS_ACTIONS
