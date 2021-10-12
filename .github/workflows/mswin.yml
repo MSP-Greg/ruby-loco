@@ -18,11 +18,21 @@ jobs:
       APPVEYOR: 'True'
 
     steps:
+      - name: git config
+        run: |
+          git config --system core.autocrlf false
+          git config --system core.eol lf
+
+      - name: Checkout ruby
+        run: |
+          $gh = 'https://github.com'
+          git clone -q --depth=1 --no-tags --branch=master $gh/ruby/ruby.git src
+
       - name: Cache - .downloaded-cache
         uses: actions/cache@v2
         with:
           path: .downloaded-cache
-          key: dl-cache-win-mswin-${{ env.GITHUB_RUN_ID }}
+          key: dl-cache-win-mswin-${{ hashFiles('src/gems/bundled_gems') }}
 
       - name: Cache - chocolatey
         uses: actions/cache@v2
@@ -36,18 +46,8 @@ jobs:
           path: C:\vcpkg\downloads
           key: vcpkg-download-${{ matrix.vs }}
 
-      - name: git config
-        run: |
-          git config --system core.autocrlf false
-          git config --system core.eol lf
-
       - name: repo checkout
         uses: actions/checkout@v2
-
-      - name: Checkout ruby
-        run: |
-          $gh = 'https://github.com'
-          git clone -q --depth=1 --no-tags --branch=master $gh/ruby/ruby.git src
 
       - name: load ruby
         uses: MSP-Greg/setup-ruby-pkgs@v1

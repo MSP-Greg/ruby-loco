@@ -14,20 +14,10 @@ jobs:
     runs-on: windows-2019
 
     steps:
-      - name: Cache - .downloaded-cache
-        uses: actions/cache@v2
-        with:
-          path: .downloaded-cache
-          key: dl-cache-win-ucrt-${{ env.GITHUB_RUN_ID }}
-          restore-keys: dl-cache-win-ucrt-
-
-      - name: git config & clone
+      - name: git config
         run: |
           git config --system core.autocrlf false
           git config --system core.eol lf
-
-      - name: Checkout ruby-loco
-        uses: actions/checkout@v2
 
       - name: get ruby and rubyinstaller2
         run: |
@@ -35,11 +25,20 @@ jobs:
           git clone -q --depth=1 --no-tags --branch=master  $gh/oneclick/rubyinstaller2.git ./rubyinstaller2
           git clone -q --depth=1 --no-tags --branch=master  $gh/ruby/ruby.git               ./ruby
 
+      - name: Cache - .downloaded-cache
+        uses: actions/cache@v2
+        with:
+          path: .downloaded-cache
+          key: dl-cache-win-ucrt-${{ hashFiles('ruby/gems/bundled_gems') }}
+          restore-keys: dl-cache-win-ucrt-
+
+      - name: Checkout ruby-loco
+        uses: actions/checkout@v2
+
       - name: Set up Ruby & MSYS2
         uses: MSP-Greg/setup-ruby-pkgs@win-ucrt-1
         with:
           ruby-version: head
-          mingw: _upgrade_ gmp libffi openssl ragel readline
           msys2: automake1.16 bison
           setup-ruby-ref: MSP-Greg/ruby-setup-ruby/win-ucrt-1
 
