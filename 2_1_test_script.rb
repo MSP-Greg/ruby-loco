@@ -255,7 +255,7 @@ module TestScript
   def errors_faults_parallel(log, type, abbrev)
     str = ''.dup
     faults = []
-    faults = log.scan(/^( *\d+ )([A-Z][^#\n]+#test_[^\n]+? = #{abbrev})/)
+    faults = log.scan(/^([A-Z][^#\n]+#test_[^\n]+? = #{abbrev})/)
     unless  faults.empty?
       t1 = faults.length
       msg = t1 == 1 ? "#{type}" : "#{type}s"
