@@ -19,6 +19,9 @@ jobs:
           git config --system core.autocrlf false
           git config --system core.eol lf
 
+      - name: Checkout ruby-loco
+        uses: actions/checkout@v2
+
       - name: get ruby and rubyinstaller2
         run: |
           $gh = 'https://github.com'
@@ -31,9 +34,6 @@ jobs:
           path: .downloaded-cache
           key: dl-cache-win-ucrt-${{ hashFiles('ruby/gems/bundled_gems') }}
           restore-keys: dl-cache-win-ucrt-
-
-      - name: Checkout ruby-loco
-        uses: actions/checkout@v2
 
       - name: Set up Ruby & MSYS2
         uses: MSP-Greg/setup-ruby-pkgs@win-ucrt-1
