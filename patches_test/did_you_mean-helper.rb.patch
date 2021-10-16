@@ -1,0 +1,14 @@
+# Load did_you_mean from install directory, not src
+diff --git a/test/did_you_mean/helper.rb b/test/did_you_mean/helper.rb
+index d8aa41c3d1..241c0114fc 100644
+--- a/test/did_you_mean/helper.rb
++++ b/test/did_you_mean/helper.rb
+@@ -16,7 +16,7 @@ class << self
+       # In this case we're being run from inside ruby core, and we want to
+       # include the experimental features in the test suite
+
+-      @root = File.expand_path('../../lib/did_you_mean', __dir__)
++      @root = File.join RbConfig::CONFIG['rubylibdir'], 'did_you_mean'
+       require_relative @root
+       # We are excluding experimental features for now.
+       # require_relative File.join(@root, 'experimental')
