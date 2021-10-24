@@ -357,7 +357,7 @@ Apply-Patches "patches_basic_boot"
 Apply-Patches "patches_spec"
 Apply-Patches "patches_test"
 
-Remove-Item Env:\SOURCE_DATE_EPOCH
+if (Test-Path Env:\SOURCE_DATE_EPOCH ) { Remove-Item Env:\SOURCE_DATE_EPOCH }
 
 # Fix bin files
 
