@@ -1,8 +1,8 @@
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index da6fdc54fa..4de31660ab 100644
+index 3c95982d4b..eb7d236003 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
-@@ -989,7 +989,7 @@ def test_self_platforms
+@@ -979,7 +979,7 @@ def test_self_platforms
    end
  
    def test_self_prefix
