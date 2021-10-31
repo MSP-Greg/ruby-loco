@@ -254,7 +254,7 @@ function MSpec {
     -StdErr "test_mspec_err.log" `
     -Title  "test-mspec" `
     -Dir    "$d_ruby/spec/ruby" `
-    -TimeLimit 360
+    -TimeLimit 400
 }
 
 #————————————————————————————————————————————————————————————————————————— setup
