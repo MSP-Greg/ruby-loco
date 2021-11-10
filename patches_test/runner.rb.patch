@@ -1,10 +1,10 @@
 diff --git a/test/runner.rb b/test/runner.rb
-index a24cfa31c6..3f84dea67f 100644
+index 1b1ae0956a..1e685fe1bf 100644
 --- a/test/runner.rb
 +++ b/test/runner.rb
-@@ -4,9 +4,16 @@
- ENV["GEM_SKIP"] = ENV["GEM_HOME"] = ENV["GEM_PATH"] = "".freeze
- ENV.delete("RUBY_CODESIGN")
+@@ -6,9 +6,16 @@
+ 
+ Warning[:experimental] = false
  
 -# Get bundled gems on load path
 -Dir.glob("#{__dir__}/../.bundle/gems/*/*.gemspec")

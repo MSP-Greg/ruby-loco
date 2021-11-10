@@ -1,11 +1,11 @@
 diff --git a/configure.ac b/configure.ac
-index e581d9ae12..dffc732b51 100644
+index 66a7a9e2b0..99aa7f70cf 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -834,8 +834,8 @@ AS_IF([test "$GCC" = yes], [
+@@ -836,8 +836,8 @@ AS_IF([test "$GCC" = yes], [
      # suppress annoying -Wstrict-overflow warnings
      RUBY_TRY_CFLAGS(-fno-strict-overflow, [RUBY_APPEND_OPTION(XCFLAGS, -fno-strict-overflow)])
-
+ 
 -    test "${debugflags+set}" || {RUBY_TRY_CFLAGS(-ggdb3, [debugflags=-ggdb3])}
 -    test "${debugflags+set}" || {RUBY_TRY_CFLAGS(-ggdb, [debugflags=-ggdb])}
 +    # test "${debugflags+set}" || {RUBY_TRY_CFLAGS(-ggdb3, [debugflags=-ggdb3])}
