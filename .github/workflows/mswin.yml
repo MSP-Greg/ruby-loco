@@ -133,7 +133,7 @@ jobs:
       # copy dll files to bin folder, add bin to path
       # ruby/test_time_tz.rb requires additional gems
       - name: nmake test-all -j
-        timeout-minutes: 30
+        timeout-minutes: 40
         shell: cmd
         run: |
           set /a JOBS=%NUMBER_OF_PROCESSORS%
@@ -157,7 +157,7 @@ jobs:
           nmake test-all "TESTOPTS=-v --timeout-scale=3.0"
 
       - name: test-spec from install
-        timeout-minutes: 5
+        timeout-minutes: 6
         shell: cmd
         run: |
           chcp 437
