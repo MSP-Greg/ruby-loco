@@ -11,7 +11,7 @@ jobs:
   ucrt:
     strategy:
       fail-fast: false
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
       - name: git config
@@ -36,11 +36,9 @@ jobs:
           restore-keys: dl-cache-win-ucrt-
 
       - name: Set up Ruby & MSYS2
-        uses: MSP-Greg/setup-ruby-pkgs@win-ucrt-1
+        uses: MSP-Greg/ruby-setup-ruby@win-ucrt-1
         with:
-          ruby-version: head
-          msys2: automake1.16 bison
-          setup-ruby-ref: MSP-Greg/ruby-setup-ruby/win-ucrt-1
+          ruby-version: ucrt
 
       - name: build & install
         timeout-minutes: 30
