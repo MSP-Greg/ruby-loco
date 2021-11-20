@@ -7,14 +7,14 @@ $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 
 # color hash used by EchoC and Color functions
 $clr = @{
-  'red' = [char]0x001B + '[31;1m'
-  'grn' = [char]0x001B + '[32;1m'
-  'yel' = [char]0x001B + '[93m'
-  'blu' = [char]0x001B + '[34;1m'
-  'mag' = [char]0x001B + '[35;1m'
-  'cyn' = [char]0x001B + '[36;1m'
-  'wht' = [char]0x001B + '[37;1m'
-  'gry' = [char]0x001B + '[90;1m'
+  'red' = '[31;1m'
+  'grn' = '[32;1m'
+  'yel' = '[93m'
+  'blu' = '[34;1m'
+  'mag' = '[35;1m'
+  'cyn' = '[36;1m'
+  'wht' = '[37;1m'
+  'gry' = '[90;1m'
 }
 
 #—————————————————————————————————————————————————————————————— Remove-Read-Only
@@ -60,6 +60,7 @@ function Set-Variables {
     $script:d_git     = "$env:ProgramFiles/Git"
     $script:7z        = "$env:ChocolateyInstall\bin\7z.exe"
     $env:TMPDIR       =  $env:RUNNER_TEMP
+    $script:jobs = 3
     $script:base_path =  $env:Path -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
     # Write-Host ($base_path -replace ';', "`n")
   } elseif ($env:Appveyor -eq 'True') {
@@ -67,10 +68,11 @@ function Set-Variables {
     $script:d_msys2   = "C:/msys64"
     $script:d_git     =  "$env:ProgramFiles/Git"
     $script:7z        =  "$env:ProgramFiles/7-Zip/7z.exe"
+    $env:TMPDIR       = $env:TEMP
+    $script:jobs = 2
     $script:base_path = ("$env:ProgramFiles/7-Zip;" + `
       "$env:ProgramFiles/AppVeyor/BuildAgent;$d_git/cmd;" + `
       "$env:SystemRoot/system32;$env:ProgramFiles;$env:SystemRoot").replace('\', '/')
-    $env:TMPDIR       = $env:TEMP
   } else {
     ./local.ps1
   }
@@ -102,7 +104,6 @@ function Set-Variables {
 
   $script:d_install = "$d_repo/$install"
 
-  $script:jobs = (([int]$env:NUMBER_OF_PROCESSORS, 10) | Measure-Object -Minimum).Minimum
   $script:fc   = "Yellow"
   $script:dash = "$([char]0x2500)"
   $script:dl   = $($dash * 80)
@@ -113,9 +114,8 @@ function Set-Variables {
 #———————————————————————————————————————————————————————————————————— Color
 # Returns text in color
 function Color($text, $color) {
-  $rst = [char]0x001B + '[0m'
   $c = $clr[$color.ToLower()]
-  "$c$text$rst"
+  "`e$c$text`e[0m"
 }
 
 #———————————————————————————————————————————————————————————————————— EchoC

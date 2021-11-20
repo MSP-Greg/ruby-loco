@@ -1,5 +1,7 @@
 $global:d_msys2   = "C:/msys64"
 $global:d_git     =  "$env:ProgramFiles/Git"
 $global:7z        =  "$env:ProgramFiles/7-Zip/7z.exe".replace('\', '/')
+# example for four core CPU
+$global:jobs = (([int]$env:NUMBER_OF_PROCESSORS, 6) | Measure-Object -Minimum).Minimum
 $global:base_path = ("$env:ProgramFiles/7-Zip;$d_git/cmd;" + `
   "$env:SystemRoot/system32;$env:ProgramFiles;$env:SystemRoot").replace('\', '/')
