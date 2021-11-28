@@ -104,6 +104,7 @@ function Run-Proc {
   $script:time_info += ("{0:mm}:{0:ss} {1}`n" -f @($diff, "$Title$status"))
   $handle = $null
   $proc   = $null
+  Stop-Process -Name ruby -Force -ErrorAction SilentlyContinue
 }
 
 #—————————————————————————————————————————————————————————————————————— CLI-Test
