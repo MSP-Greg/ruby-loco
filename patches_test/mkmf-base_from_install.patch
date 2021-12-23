@@ -1,10 +1,10 @@
 Patch by MSP-Greg
 allows running tests from standard ruby install
 diff --git a/test/mkmf/base.rb b/test/mkmf/base.rb
-index 80dec1421a..b4b5555f4e 100644
+index 4f67478a56..b88b7c2bed 100644
 --- a/test/mkmf/base.rb
 +++ b/test/mkmf/base.rb
-@@ -1,14 +1,20 @@
+@@ -1,12 +1,18 @@
  # frozen_string_literal: false
 -$extmk = true
  require 'rbconfig'
@@ -27,8 +27,20 @@ index 80dec1421a..b4b5555f4e 100644
 +else
 +  $extmk = false
  end
--
-+  
+ 
  require 'test/unit'
- require 'mkmf'
- require 'tmpdir'
+@@ -19,6 +25,14 @@
+ $INCFLAGS << " -I."
+ $extout_prefix = "$(extout)$(target_prefix)/"
+ 
++# when running tests parallel, may see "You have to install development tools first."
++if RUBY_PLATFORM.include? 'mingw'
++  begin
++    require 'devkit'
++  rescue LoadError
++  end
++end
++
+ class TestMkmf < Test::Unit::TestCase
+ end
+ 
