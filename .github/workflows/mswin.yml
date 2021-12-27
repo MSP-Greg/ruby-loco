@@ -50,6 +50,7 @@ jobs:
           key: vcpkg-download-${{ matrix.vs }}
 
       - name: load ruby
+        timeout-minutes: 10
         uses: MSP-Greg/setup-ruby-pkgs@v1
         with:
           ruby-version: mswin

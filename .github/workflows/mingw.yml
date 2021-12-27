@@ -23,6 +23,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: get ruby and rubyinstaller2
+        timeout-minutes: 5
         run: |
           $gh = 'https://github.com'
           git clone -q --depth=1 --no-tags --branch=master  $gh/oneclick/rubyinstaller2.git ./rubyinstaller2
@@ -36,6 +37,7 @@ jobs:
           restore-keys: dl-cache-win-mingw-
 
       - name: Set up Ruby & MSYS2
+        timeout-minutes: 5
         uses: MSP-Greg/ruby-setup-ruby@win-ucrt-1
         with:
           ruby-version: mingw
