@@ -282,7 +282,9 @@ Write-Host "TMPDIR = $env:TMPDIR"
 $gcc_vers = ([regex]'\d+\.\d+\.\d+').match($(gcc.exe --version)).value
 
 $files = "$d_msys2$env:MINGW_PREFIX/lib/libz.dll.a",
-         "$d_msys2$env:MINGW_PREFIX/lib/gcc/x86_64-w64-mingw32/$gcc_vers/libssp.dll.a"
+         "$d_msys2$env:MINGW_PREFIX/lib/gcc/x86_64-w64-mingw32/$gcc_vers/libssp.dll.a",
+         "C:/Windows/System32/libcrypto-1_1-x64.dll",
+         "C:/Windows/System32/libssl-1_1-x64.dll"
 
 Files-Hide $files
 
