@@ -1,17 +1,17 @@
 Patch by MSP-Greg
 uses gemspecs in ruby under test, not srcdir
 diff --git a/test/ruby/test_default_gems.rb b/test/ruby/test_default_gems.rb
-index 3c4aea1561..4db846fe10 100644
+index 467e5ecf83..2f87463f00 100644
 --- a/test/ruby/test_default_gems.rb
 +++ b/test/ruby/test_default_gems.rb
 @@ -4,9 +4,14 @@
  class TestDefaultGems < Test::Unit::TestCase
  
    def test_validate_gemspec
--    skip "git not found" unless system("git", "rev-parse", %i[out err]=>IO::NULL)
+-    omit "git not found" unless system("git", "rev-parse", %i[out err]=>IO::NULL)
 -    srcdir = File.expand_path('../../..', __FILE__)
 -    Dir.glob("#{srcdir}/{lib,ext}/**/*.gemspec").map do |src|
-+    skip "git not found" unless system("git", "--version", %i[out err]=>IO::NULL)
++    omit "git not found" unless system("git", "--version", %i[out err]=>IO::NULL)
 +    if Dir.exist?(dflt_dir = Gem.default_specifications_dir)
 +      spec_glob = "#{dflt_dir}/*.gemspec"
 +    else

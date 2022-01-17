@@ -1,5 +1,5 @@
 diff --git a/test/openssl/test_ssl.rb b/test/openssl/test_ssl.rb
-index 65dbe7ac24..0b27a42125 100644
+index a7607da073..01a5b652b9 100644
 --- a/test/openssl/test_ssl.rb
 +++ b/test/openssl/test_ssl.rb
 @@ -97,11 +97,28 @@ def test_socket_open_with_context
@@ -33,7 +33,7 @@ index 65dbe7ac24..0b27a42125 100644
          ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port, "127.0.0.1", random_port, context: ctx)
          ssl.sync_close = true
 diff --git a/test/socket/test_addrinfo.rb b/test/socket/test_addrinfo.rb
-index 5bd34cd5eb..74574db9a7 100644
+index bdf1f7649e..07c4127e66 100644
 --- a/test/socket/test_addrinfo.rb
 +++ b/test/socket/test_addrinfo.rb
 @@ -372,10 +372,8 @@ def random_port
@@ -50,10 +50,10 @@ index 5bd34cd5eb..74574db9a7 100644
  
    def test_connect_from
 diff --git a/test/socket/test_socket.rb b/test/socket/test_socket.rb
-index 9807db3674..ab7eddf7fc 100644
+index 2c945aa9b9..d48e5e2f75 100644
 --- a/test/socket/test_socket.rb
 +++ b/test/socket/test_socket.rb
-@@ -176,10 +176,8 @@ def random_port
+@@ -172,10 +172,8 @@ def random_port
    end
  
    def errors_addrinuse

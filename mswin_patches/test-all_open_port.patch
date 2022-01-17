@@ -1,9 +1,9 @@
 Fix random port issues when runnning Windows CI
 diff --git a/test/openssl/test_ssl.rb b/test/openssl/test_ssl.rb
-index 50a16029f5..5e9c22cd39 100644
+index a7607da073..01a5b652b9 100644
 --- a/test/openssl/test_ssl.rb
 +++ b/test/openssl/test_ssl.rb
-@@ -86,11 +86,28 @@ def test_socket_open_with_context
+@@ -97,11 +97,28 @@ def test_socket_open_with_context
      }
    end
  
@@ -34,7 +34,7 @@ index 50a16029f5..5e9c22cd39 100644
          ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port, "127.0.0.1", random_port, context: ctx)
          ssl.sync_close = true
 diff --git a/test/socket/test_addrinfo.rb b/test/socket/test_addrinfo.rb
-index e068c6c216..3176b9061b 100644
+index bdf1f7649e..07c4127e66 100644
 --- a/test/socket/test_addrinfo.rb
 +++ b/test/socket/test_addrinfo.rb
 @@ -372,10 +372,8 @@ def random_port
@@ -51,7 +51,7 @@ index e068c6c216..3176b9061b 100644
  
    def test_connect_from
 diff --git a/test/socket/test_socket.rb b/test/socket/test_socket.rb
-index 16c359eca1..5d8f179482 100644
+index 2c945aa9b9..d48e5e2f75 100644
 --- a/test/socket/test_socket.rb
 +++ b/test/socket/test_socket.rb
 @@ -172,10 +172,8 @@ def random_port
