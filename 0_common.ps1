@@ -7,8 +7,8 @@ $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 
 # color hash used by EchoC and Color functions
 $clr = @{
-  'red' = '[31;1m'
-  'grn' = '[32;1m'
+  'red' = '[91m'
+  'grn' = '[92m'
   'yel' = '[93m'
   'blu' = '[34;1m'
   'mag' = '[35;1m'

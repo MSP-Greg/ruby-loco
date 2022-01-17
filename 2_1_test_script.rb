@@ -46,7 +46,9 @@ module TestScript
       "\u2015".dup.force_encoding 'utf-8'
     end
 
-  YELLOW = "\e[33m"
+  YELLOW = "\e[93m"
+  RED    = "\e[91m"
+  GREEN  = "\e[92m"
   RESET  = "\e[0m"
   STRIPE_LEN = 55
   PUTS_LEN   = 74
@@ -90,13 +92,15 @@ module TestScript
       run   = "Job Id #{ENV['APPVEYOR_JOB_ID']}"
     end
 
+    cli = @@cli_fails == 0 ? "#{GREEN}CLI passed#{RESET}" : "#{RED}CLI FAILED!#{RESET}"
+
     sp = ' ' * @@failures.to_s.length
     results_str = "#{@@failures} Total Failures/Errors                           " \
                   "#{build}    #{run}\n" \
                   "#{sp} #{RUBY_DESCRIPTION}\n" \
                   "#{sp} #{Time.now.getutc}\n\n" \
                   "#{results_str}\n" \
-                  "#{@@cli_fails == 0 ? 'CLI passed' : 'CLI FAILED!'}\n"
+                  "#{cli}\n"
 
     puts "\n#{YELLOW}#{DASH * PUTS_LEN} Test Results#{RESET}"
     puts results_str
@@ -106,7 +110,7 @@ module TestScript
     unless sum_test_all.empty?
       puts "\n#{YELLOW}#{DASH * PUTS_LEN} Summary test-all#{RESET}"
       puts sum_test_all
-      sum_test_all = sum_test_all.gsub(/^\e\[33m|\e\[0m$/, '')
+      sum_test_all = sum_test_all.gsub(/^\e\[\d\dm|\e\[0m$/, '')
       File.binwrite(File.join(D_LOGS, "Summary_test-all.log"), sum_test_all)
     end
 
