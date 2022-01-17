@@ -15,7 +15,11 @@ module TestScript
     D_INSTALL = File.join __dir__, 'ruby-mingw'
   end
 
-  @@cli_fails = 0
+  if ARGV.length == 1 && (t = ARGV[0].to_i)
+    @@cli_fails = t
+  else
+    @@cli_fails = 0
+  end
 
   D_LOGS  = File.join __dir__, 'logs'
   D_RUBY  = File.join __dir__, 'ruby'

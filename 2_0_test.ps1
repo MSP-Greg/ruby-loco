@@ -153,7 +153,7 @@ function Finish {
   cd $d_repo
   # script checks test results, determines whether build is good or not,
   # saves artifacts and adds messages to build
-  ruby.exe 2_1_test_script.rb $install $exit_code
+  ruby.exe 2_1_test_script.rb $exit_code
   $exit += ($LastExitCode -and $LastExitCode -ne 0)
   ruby.exe -v -ropenssl -e "puts 'Build    ' + OpenSSL::OPENSSL_VERSION, 'Runtime  ' + OpenSSL::OPENSSL_LIBRARY_VERSION"
   if ($is_actions) {
