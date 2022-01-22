@@ -40,7 +40,7 @@ jobs:
         timeout-minutes: 5
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: mingw
+          ruby-version: '3.0'
 
       - name: build & install
         timeout-minutes: 30

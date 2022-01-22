@@ -40,7 +40,7 @@ jobs:
         timeout-minutes: 5
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ucrt
+          ruby-version: 3.1
 
       - name: build & install
         timeout-minutes: 30
