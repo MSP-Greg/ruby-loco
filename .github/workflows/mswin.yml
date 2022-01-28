@@ -112,8 +112,8 @@ jobs:
           mkdir ruby-mswin\bin\ruby_builtin_dlls 2>&1>$null
           cd ruby-mswin\bin\ruby_builtin_dlls
           Copy-Item C:\vcpkg\installed\x64-windows\bin\readline.dll
-          Copy-Item C:\openssl-win\bin\libcrypto-1_1-x64.dll
-          Copy-Item C:\openssl-win\bin\libssl-1_1-x64.dll
+          Copy-Item "C:\Program Files\OpenSSL-Win64\bin\libcrypto-1_1-x64.dll"
+          Copy-Item "C:\Program Files\OpenSSL-Win64\bin\libssl-1_1-x64.dll"
           Copy-Item $repo\mswin\ruby_builtin_dlls.manifest
           Move-Item -Path ..\zlib1.dll
           cd ..
