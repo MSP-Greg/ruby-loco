@@ -331,6 +331,19 @@ Run "make install-nodoc" {
   make install-nodoc
   cd $d_repo
   ruby 1_2_post_install.rb
+
+  $dll_path = "$d_install/bin/ruby_builtin_dlls"
+
+  if (!(Test-Path -Path $dll_path -PathType Container )) {
+    EchoC "Failed - no bin/ruby_builtin_dlls folder" red
+    exit 1
+  }
+
+  if (!(Test-Path -Path "$dll_path/ruby_builtin_dlls.manifest" -PathType Leaf )) {
+    EchoC "Failed - no bin/ruby_builtin_dlls/ruby_builtin_dlls.manifest file" red
+    exit 1
+  }
+
   $env:Path = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
   ruby 1_3_post_install.rb
 }
