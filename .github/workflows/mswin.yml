@@ -31,12 +31,6 @@ jobs:
           $gh = 'https://github.com'
           git clone -q --depth=1 --no-tags --branch=master $gh/ruby/ruby.git src
 
-      - name: Cache - .downloaded-cache
-        uses: actions/cache@v2
-        with:
-          path: .downloaded-cache
-          key: dl-cache-win-mswin-${{ hashFiles('src/gems/bundled_gems') }}
-
       - name: Cache - chocolatey
         uses: actions/cache@v2
         with:
@@ -46,8 +40,10 @@ jobs:
       - name: Cache - vcpkg-download
         uses: actions/cache@v2
         with:
-          path: C:\vcpkg\downloads
-          key: vcpkg-download-${{ matrix.vs }}
+          path: |
+            C:\vcpkg\downloads
+            C:\vcpkg\installed
+          key: vcpkg-${{ matrix.vs }}
 
       - name: load ruby
         timeout-minutes: 10
@@ -57,6 +53,12 @@ jobs:
           mswin: bison
           choco: openssl
           vcpkg: readline
+
+      - name: Cache - .downloaded-cache
+        uses: actions/cache@v2
+        with:
+          path: .downloaded-cache
+          key: dl-cache-win-mswin-${{ hashFiles('src/gems/bundled_gems') }}
 
       - name: Configure
         shell: cmd
@@ -108,7 +110,7 @@ jobs:
       - name: misc install, ruby -v
         run: |
           $repo = $pwd
-          del ruby-mswin\lib\x64-vcruntime140-ruby320-static.lib
+          del ruby-mswin\lib\x64-vcruntime140-ruby320*-static.lib
           mkdir ruby-mswin\bin\ruby_builtin_dlls 2>&1>$null
           cd ruby-mswin\bin\ruby_builtin_dlls
           Copy-Item C:\vcpkg\installed\x64-windows\bin\readline.dll
