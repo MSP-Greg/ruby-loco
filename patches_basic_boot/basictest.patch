@@ -35,7 +35,7 @@ index 0000000000..9642d5d3de
 +  ENV.delete 'RUBYOPT'
 +end
 diff --git a/basictest/test.rb b/basictest/test.rb
-index a2eb107bce..44ba58a1b1 100755
+index 95875b52a6..bac4cbbbb0 100755
 --- a/basictest/test.rb
 +++ b/basictest/test.rb
 @@ -10,6 +10,7 @@ def initialize
@@ -63,8 +63,8 @@ index a2eb107bce..44ba58a1b1 100755
    end
  
    def passed_string
-@@ -1962,22 +1966,22 @@ module EvTest
- 
+@@ -1964,22 +1968,22 @@ module EvTest
+ unless /wasi/ =~ RUBY_PLATFORM
  test_check "system"
  test_ok(`echo foobar` == "foobar\n")
 -test_ok(`./miniruby -e 'print "foobar"'` == 'foobar')
@@ -90,7 +90,7 @@ index a2eb107bce..44ba58a1b1 100755
  
  tmp = open(script_tmp, "w")
  tmp.print "this is a leading junk\n";
-@@ -1987,8 +1991,8 @@ module EvTest
+@@ -1989,8 +1993,8 @@ module EvTest
  tmp.print "this is a trailing junk\n";
  tmp.close
  
@@ -101,7 +101,7 @@ index a2eb107bce..44ba58a1b1 100755
  
  tmp = open(script_tmp, "w")
  for i in 1..5
-@@ -1996,7 +2000,7 @@ module EvTest
+@@ -1998,7 +2002,7 @@ module EvTest
  end
  tmp.close
  

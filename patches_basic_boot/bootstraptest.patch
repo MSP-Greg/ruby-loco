@@ -1,28 +1,28 @@
 Patch by MSP-Greg
-Attempts to fix issues when run on 'busy' Appveyor systems
+Attempts to fix issues when run on 'busy' CI systems
 diff --git a/bootstraptest/runner.rb b/bootstraptest/runner.rb
-index 94a90f5e95..f534f4dba2 100755
+index 3d42390254..8d163dbf65 100755
 --- a/bootstraptest/runner.rb
 +++ b/bootstraptest/runner.rb
-@@ -402,9 +402,15 @@ def assert_finish(timeout_seconds, testsrc, message = '')
-       end
-       if io.respond_to?(:read_nonblock)
-         if IO.select([io], nil, nil, diff)
-+          tries = 0
-           begin
-             io.read_nonblock(1024)
--          rescue Errno::EAGAIN, IO::WaitReadable, EOFError
-+          rescue IO::WaitReadable
-+            IO.select([io])
-+            tries += 1 
-+            break if tries > 3
-+            retry
-+          rescue Errno::EAGAIN, EOFError
-             break
-           end while true
+@@ -624,9 +624,15 @@ def assert_finish(timeout_seconds, testsrc, message = '')
          end
+         if io.respond_to?(:read_nonblock)
+           if IO.select([io], nil, nil, diff)
++            tries = 0
+             begin
+               io.read_nonblock(1024)
+-            rescue Errno::EAGAIN, IO::WaitReadable, EOFError
++            rescue IO::WaitReadable
++              IO.select([io])
++              tries += 1
++              break if tries > 3
++              retry
++            rescue Errno::EAGAIN, EOFError
+               break
+             end while true
+           end
 diff --git a/bootstraptest/test_io.rb b/bootstraptest/test_io.rb
-index 89c00d0b88..b65476fbe0 100644
+index 73deca8383..fb80d22b9d 100644
 --- a/bootstraptest/test_io.rb
 +++ b/bootstraptest/test_io.rb
 @@ -1,4 +1,4 @@
@@ -31,17 +31,8 @@ index 89c00d0b88..b65476fbe0 100644
    r, w = IO.pipe
    t1 = Thread.new { r.sysread(1) }
    t2 = Thread.new { r.sysread(1) }
-@@ -30,7 +30,7 @@
-   end
- }, '[ruby-dev:32566]'
- 
--assert_finish 1, %q{
-+assert_finish 3, %q{
-   r, w = IO.pipe
-   Thread.new {
-     w << "ab"
 diff --git a/bootstraptest/test_thread.rb b/bootstraptest/test_thread.rb
-index 38a55ff229..6a91a35fcd 100644
+index 5361828403..32ba739165 100644
 --- a/bootstraptest/test_thread.rb
 +++ b/bootstraptest/test_thread.rb
 @@ -335,7 +335,7 @@ def m
