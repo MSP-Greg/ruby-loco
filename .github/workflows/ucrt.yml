@@ -30,7 +30,7 @@ jobs:
           git clone -q --depth=1 --no-tags --branch=master  $gh/ruby/ruby.git               ./ruby
 
       - name: Set up Ruby & MSYS2
-        timeout-minutes: 5
+        timeout-minutes: 8
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.1
