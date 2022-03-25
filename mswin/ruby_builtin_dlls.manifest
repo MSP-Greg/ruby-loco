@@ -4,5 +4,6 @@
   <file name='libcrypto-1_1-x64.dll'/>
   <file name='libssl-1_1-x64.dll'/>
   <file name='readline.dll'/>
+  <file name='yaml.dll'/>
   <file name='zlib1.dll'/>
 </assembly>

@@ -52,7 +52,7 @@ jobs:
           ruby-version: mswin
           mswin: bison
           choco: openssl
-          vcpkg: readline
+          vcpkg: libyaml readline
 
       - name: Cache - .downloaded-cache
         uses: actions/cache@v2
@@ -113,6 +113,7 @@ jobs:
           del ruby-mswin\lib\x64-vcruntime140-ruby320*-static.lib
           mkdir ruby-mswin\bin\ruby_builtin_dlls 2>&1>$null
           cd ruby-mswin\bin\ruby_builtin_dlls
+          Copy-Item C:\vcpkg\installed\x64-windows\bin\yaml.dll
           Copy-Item C:\vcpkg\installed\x64-windows\bin\readline.dll
           Copy-Item "C:\Program Files\OpenSSL-Win64\bin\libcrypto-1_1-x64.dll"
           Copy-Item "C:\Program Files\OpenSSL-Win64\bin\libssl-1_1-x64.dll"
