@@ -1,10 +1,10 @@
 Patch by MSP-Greg
 Allows using mkmf.rb when running test-all tests from install
 diff --git a/lib/mkmf.rb b/lib/mkmf.rb
-index eabccd48eb..41049cb1f3 100644
+index 4ced064a8b..c743b253d1 100644
 --- a/lib/mkmf.rb
 +++ b/lib/mkmf.rb
-@@ -246,6 +246,10 @@ def map_dir(dir, map = nil)
+@@ -238,6 +238,10 @@ def map_dir(dir, map = nil)
    elsif File.exist?(($hdrdir = ($top_srcdir ||= topdir) + "/include")  + "/ruby.h")
      $topdir ||= RbConfig::CONFIG["topdir"]
      $arch_hdrdir = "$(extout)/include/$(arch)"
