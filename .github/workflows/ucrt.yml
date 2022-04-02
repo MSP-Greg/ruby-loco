@@ -47,7 +47,7 @@ jobs:
         run:  ./1_0_build_install_64.ps1
 
       - name: test
-        timeout-minutes: 50
+        timeout-minutes: 53
         run:  ./2_0_test.ps1
         env:
           APPVEYOR: 'True'
