@@ -24,7 +24,7 @@ jobs:
           git config --system core.eol lf
 
       - name: repo checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Checkout ruby
         run: |
@@ -32,13 +32,13 @@ jobs:
           git clone -q --depth=1 --no-tags --branch=master $gh/ruby/ruby.git src
 
       - name: Cache - chocolatey
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
           key: chocolatey-${{ matrix.vs }}
 
       - name: Cache - vcpkg-download
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             C:\vcpkg\downloads
@@ -55,7 +55,7 @@ jobs:
           vcpkg: libyaml readline
 
       - name: Cache - .downloaded-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: .downloaded-cache
           key: dl-cache-win-mswin-${{ hashFiles('src/gems/bundled_gems') }}

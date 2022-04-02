@@ -20,7 +20,7 @@ jobs:
           git config --system core.eol lf
 
       - name: Checkout ruby-loco
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: get ruby and rubyinstaller2
         timeout-minutes: 5
@@ -36,7 +36,7 @@ jobs:
           ruby-version: 3.1
 
       - name: Cache - .downloaded-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: .downloaded-cache
           key: dl-cache-win-ucrt-${{ hashFiles('ruby/gems/bundled_gems') }}
