@@ -107,22 +107,6 @@ function Run-Proc {
   Stop-Process -Name ruby -Force -ErrorAction SilentlyContinue
 }
 
-#—————————————————————————————————————————————————————————————————————— CLI-Test
-function CLI-Test {
-  Write-Host $($dash * 80) -ForegroundColor $fc
-  ruby -ropenssl -e "puts RUBY_DESCRIPTION, OpenSSL::OPENSSL_LIBRARY_VERSION"
-
-  echo "bundle version: $(bundle version)" ; $exit_code += [int](0 + $LastExitCode)
-  echo "gem  --version: $(gem --version)"  ; $exit_code += [int](0 + $LastExitCode)
-  echo "irb  --version: $(irb --version)"  ; $exit_code += [int](0 + $LastExitCode)
-  echo "racc --version: $(racc --version)" ; $exit_code += [int](0 + $LastExitCode)
-  echo "rake --version: $(rake --version)" ; $exit_code += [int](0 + $LastExitCode)
-  echo "rdoc --version: $(rdoc --version)" ; $exit_code += [int](0 + $LastExitCode)
-  echo "ridk   version:"
-  ridk version
-  Write-Host "$($dash * 40) $exit_code"
-}
-
 #———————————————————————————————————————————————————————————————————————— Finish
 # cleanup, save artifacts, etc
 function Finish {
@@ -287,7 +271,6 @@ ruby -ropenssl -e "puts RUBY_DESCRIPTION, OpenSSL::OPENSSL_LIBRARY_VERSION"
 EchoC "$($dash * 74) Install `'tz`' gems" yel
 gem install `"timezone:>=1.3.2`" `"tzinfo:>=2.0.0`" `"tzinfo-data:>=1.2018.7`" --no-document --conservative --norc --no-user-install
 
-# could not make the below work in a function, $exit_code was not set WHY WHY?
 # CLI-Test
 EchoC "$($dash * 74) CLI Test" yel
 echo "bundle version: $(bundle version)" ; $exit_code += [int](0 + $LastExitCode)
@@ -295,6 +278,7 @@ echo "gem  --version: $(gem --version)"  ; $exit_code += [int](0 + $LastExitCode
 echo "irb  --version: $(irb --version)"  ; $exit_code += [int](0 + $LastExitCode)
 echo "racc --version: $(racc --version)" ; $exit_code += [int](0 + $LastExitCode)
 echo "rake --version: $(rake --version)" ; $exit_code += [int](0 + $LastExitCode)
+echo "rbs  --version: $(rbs --version)"  ; $exit_code += [int](0 + $LastExitCode)
 echo "rdoc --version: $(rdoc --version)" ; $exit_code += [int](0 + $LastExitCode)
 echo "ridk   version:"
 ridk version

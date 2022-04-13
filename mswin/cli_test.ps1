@@ -9,14 +9,22 @@ $exit_code = 0
 
 Write-Host "bundle version:" $(bundle version)
 $exit_code += [int](0 + $LastExitCode)
+
 Write-Host "gem  --version:" $(gem --version)
 $exit_code += [int](0 + $LastExitCode)
+
 Write-Host "irb  --version:" $(irb --version)
 $exit_code += [int](0 + $LastExitCode)
+
 Write-Host "racc --version:" $(racc --version)
 $exit_code += [int](0 + $LastExitCode)
+
 Write-Host "rake --version:" $(rake --version)
 $exit_code += [int](0 + $LastExitCode)
+
+Write-Host "rbs  --version:" $(rbs --version)
+$exit_code += [int](0 + $LastExitCode)
+
 Write-Host "rdoc --version:" $(rdoc --version)
 $exit_code += [int](0 + $LastExitCode)
 
