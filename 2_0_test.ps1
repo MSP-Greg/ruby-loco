@@ -268,8 +268,8 @@ $m_start = Get-Date
 EchoC $($dash * 92) yel
 ruby -ropenssl -e "puts RUBY_DESCRIPTION, OpenSSL::OPENSSL_LIBRARY_VERSION"
 
-EchoC "$($dash * 74) Install rbs and `'tz`' gems" yel
-gem install rbs --no-document --norc --no-user-install
+EchoC "$($dash * 74) Install debug, rbs and `'tz`' gems" yel
+gem install debug rbs --no-document --norc --no-user-install
 gem install `"timezone:>=1.3.2`" `"tzinfo:>=2.0.0`" `"tzinfo-data:>=1.2018.7`" --no-document --conservative --norc --no-user-install
 
 # CLI-Test
