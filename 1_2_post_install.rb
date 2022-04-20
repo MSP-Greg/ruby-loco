@@ -41,7 +41,7 @@ class << self
   # Copies correct dll files from MSYS2 location to package dir.
   def copy_dll_files
     pkg_pre = ENV['MINGW_PACKAGE_PREFIX']
-    pkgs = 'dlfcn gcc-libs libffi libyaml openssl readline'
+    pkgs = 'dlfcn gcc-libs libffi libyaml openssl readline zlib'
     dll_files, lib_files = find_dlls pkgs, pkg_pre
 
     # get mingw bin path for arch
@@ -80,35 +80,12 @@ class << self
 
   # Adds private assembly data to ruby.exe and rubyw.exe files
   def add_priv_assm
-    libruby_regex = /#{DLL_FN}\d+\.dll$/i
     bin_dir = File.join D_INSTALL, "bin"
     Dir.chdir(bin_dir) { |d|
-      libruby = Dir['*.dll'].grep(libruby_regex)[0]
-      new = <<-EOT
-  <dependency>
-    <dependentAssembly>
-      <assemblyIdentity version='1.0.0.0' type='win32' name='ruby_builtin_dlls'/>
-    </dependentAssembly>
-  </dependency>
-  <file name='#{libruby}'/>
-EOT
       ['ruby.exe', 'rubyw.exe'].each { |fn|
         image = File.binread fn
-        image.sub!(/<\?xml.*?<assembly.*?<\/assembly>\s*/m) { |m|
-
-          orig_len = m.bytesize
-          newm = m.sub(/^<\/assembly>/m, "#{new}</assembly>").sub(/\0+\z/, '')
-
-          newm.gsub!(/The ID below indicates application support for/, 'support') if orig_len < newm.bytesize
-          newm.gsub!(/--support/, '--') if orig_len < newm.bytesize
-          newm.gsub!(/^ +<!-- Windows (Vista|7).+?\/>\n/m, '')
-
-          # rubyw.exe only ?
-          newm.gsub!(/^ +<!-- +\d leave replacement +-->\n/, '')
-
-          raise "#{fn} replacement manifest too big #{orig_len} < #{newm.bytesize}" if orig_len < newm.bytesize
-          newm + " " * (orig_len - newm.bytesize)
-        }
+        image.sub!(/^<!-- pendency>/  , '  <dependency>')
+        image.sub!(/^  <\/depende -->/, '  </dependency>')
         File.binwrite fn, image
       }
     }

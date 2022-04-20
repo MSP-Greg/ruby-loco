@@ -3,17 +3,29 @@
 
 # Code by MSP-Greg
 # Reads version.h and adds message to Appveyor build, updates revision.h
+# writes new ruby/win32/ruby.manifest file
 
 module PreBuild
 
 class << self
 
   def run
-    revision
+    abi_version = revision[/\A\d+\.\d+/].delete('.') << '0'
+    manifest = File.read('manifest_mingw.xml', mode: 'rb').dup
+    so_name = case ENV['MSYSTEM']
+      when 'UCRT64'  then "x64-ucrt-ruby#{abi_version}.dll"
+      when 'MINGW64' then "x64-msvcrt-ruby#{abi_version}.dll"
+      else
+        raise "Unknown ENV['MSYSTEM'] #{ENV['MSYSTEM']}"
+      end
+
+    manifest.sub! 'LIBRUBY_SO', so_name
+    File.write 'ruby/win32/ruby.manifest', manifest, mode: 'wb'
   end
 
   private
 
+  # returns version
   def revision
     Dir.chdir( File.join(__dir__, 'ruby') ) { |d|
 
@@ -64,6 +76,7 @@ class << self
         `appveyor UpdateBuild -Message \"#{title}\"`
       end
       puts title
+      version
     }
   end
 
