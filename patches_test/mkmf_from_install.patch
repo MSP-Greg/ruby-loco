@@ -1,0 +1,37 @@
+diff --git a/test/mkmf/base.rb b/test/mkmf/base.rb
+index 4f67478a56..1ada89c985 100644
+--- a/test/mkmf/base.rb
++++ b/test/mkmf/base.rb
+@@ -1,12 +1,26 @@
+ # frozen_string_literal: false
+-$extmk = true
+ require 'rbconfig'
+-RbConfig.fire_update!("top_srcdir", File.expand_path("../..", __dir__))
+-File.foreach(RbConfig::CONFIG["topdir"]+"/Makefile") do |line|
+-  if /^CC_WRAPPER\s*=\s*/ =~ line
+-    RbConfig.fire_update!('CC_WRAPPER', $'.strip)
+-    break
++
++# when running tests parallel, may see "You have to install development tools first."
++if RUBY_PLATFORM.include? 'mingw'
++  begin
++    require 'devkit'
++  rescue LoadError
++  end
++end
++
++# below is test for whether running from make or not
++if RbConfig::TOPDIR == File.dirname(RbConfig.method(:fire_update!).source_location[0])
++  $extmk = true
++  RbConfig.fire_update!("top_srcdir", File.expand_path("../..", __dir__))
++  File.foreach(RbConfig::CONFIG["topdir"]+"/Makefile") do |line|
++    if /^CC_WRAPPER\s*=\s*/ =~ line
++      RbConfig.fire_update!('CC_WRAPPER', $'.strip)
++      break
++    end
+   end
++else
++  $extmk = false
+ end
+ 
+ require 'test/unit'
