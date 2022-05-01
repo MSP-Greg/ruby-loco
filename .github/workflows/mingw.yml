@@ -35,6 +35,9 @@ jobs:
         with:
           ruby-version: '3.0'
 
+      - name: install rust
+        run: pacman -S --noconfirm --noprogressbar --needed mingw-w64-x86_64-rust
+
       - name: Cache - .downloaded-cache
         uses: actions/cache@v3
         with:
@@ -47,7 +50,7 @@ jobs:
         run:  ./1_0_build_install_64.ps1
 
       - name: test
-        timeout-minutes: 65
+        timeout-minutes: 70
         run:  ./2_0_test.ps1
         env:
           APPVEYOR: 'True'
