@@ -8,6 +8,10 @@ module CopyBashScripts
   class << self
 
     def run
+      # clean empty gem folders, needed as of 2019-10-20
+      ary = Dir["#{Gem.dir}/gems/*"]
+      ary.each { |d| Dir.rmdir(d) if Dir.empty?(d) }
+
       bins = Dir["#{SRC_DIR}/*"]
 
       bins.each do |fn|

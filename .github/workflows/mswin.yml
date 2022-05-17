@@ -103,7 +103,6 @@ jobs:
           Copy-Item .\ssl\cert.pem ruby-mswin\ssl\cert.pem
           Copy-Item "$env:VCPKG_INSTALLATION_ROOT\packages\openssl_x64-windows\openssl.cnf" ruby-mswin\ssl\openssl.cnf
           $env:Path = "$repo\ruby-mswin\bin;$repo\ruby-mswin\bin\ruby_builtin_dlls;$env:Path"
-          ruby-mswin/bin/gem install rbs --no-document --norc --no-user-install
           ruby-mswin/bin/ruby.exe -v mswin/copy_bash_scripts.rb
 
       - name: nmake test
