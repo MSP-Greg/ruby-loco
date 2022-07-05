@@ -1,5 +1,5 @@
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index cc4772a0c6..15beb47410 100644
+index 4d9644d5c9..330dc8fd8e 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
 @@ -988,7 +988,7 @@ def test_self_platforms
@@ -12,12 +12,12 @@ index cc4772a0c6..15beb47410 100644
  
    def test_self_prefix_libdir
 diff --git a/test/rubygems/test_gem_commands_environment_command.rb b/test/rubygems/test_gem_commands_environment_command.rb
-index 2bf80d8d85..767c5eed59 100644
+index eeddb2befe..10bacf1e63 100644
 --- a/test/rubygems/test_gem_commands_environment_command.rb
 +++ b/test/rubygems/test_gem_commands_environment_command.rb
-@@ -25,7 +25,11 @@ def test_execute
-     assert_match %r{RUBY VERSION: \d+\.\d+\.\d+ \(.*\) \[.*\]}, @ui.output
-     assert_match %r{INSTALLATION DIRECTORY: #{Regexp.escape @gemhome}},
+@@ -27,7 +27,11 @@ def test_execute
+                  @ui.output
+     assert_match %r{USER INSTALLATION DIRECTORY: #{Regexp.escape Gem.user_dir}},
                   @ui.output
 -    assert_match %r{RUBYGEMS PREFIX: }, @ui.output
 +    if Gem.prefix.nil?
@@ -29,10 +29,10 @@ index 2bf80d8d85..767c5eed59 100644
                   @ui.output
      assert_match %r{GIT EXECUTABLE: #{@cmd.send(:git_path)}}, @ui.output
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
-index c765e9a8df..fb7d2a0449 100644
+index b5e9f004d1..058cc71f1d 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
-@@ -698,8 +698,11 @@ def test_update_rubygems_arguments
+@@ -729,8 +729,11 @@ def test_update_rubygems_arguments
  
      arguments = @cmd.update_rubygems_arguments
  

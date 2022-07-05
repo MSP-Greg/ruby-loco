@@ -1,10 +1,10 @@
 diff --git a/lib/bundler/shared_helpers.rb b/lib/bundler/shared_helpers.rb
-index 405ade95dd..b4a365a434 100644
+index 8c4e26f074..a9a7f66025 100644
 --- a/lib/bundler/shared_helpers.rb
 +++ b/lib/bundler/shared_helpers.rb
 @@ -279,6 +279,10 @@ def set_bundle_variables
        # for Ruby core repository testing
-       exe_file = File.expand_path("../../../libexec/bundle", __FILE__) unless File.exist?(exe_file)
+       exe_file = File.expand_path("../../libexec/bundle", __dir__) unless File.exist?(exe_file)
  
 +      # mess for finding the real file when testing from source
 +      exe_file = "#{RbConfig::CONFIG['rubylibprefix']}/gems/" \
