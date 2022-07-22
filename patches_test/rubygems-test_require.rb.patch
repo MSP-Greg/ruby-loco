@@ -8,7 +8,7 @@ index 5b826d052b..1293cd41fe 100644
        puts Gem.loaded_specs["json"]
      RUBY
 -    output = Gem::Util.popen(*ruby_with_rubygems_in_load_path, "-e", cmd).strip
-+    output = Gem::Util.popen('ruby', "-e", cmd).strip
++    output = Gem::Util.popen("ruby", "-e", cmd).strip
      assert $?.success?
      refute_empty output
    end
@@ -16,8 +16,8 @@ index 5b826d052b..1293cd41fe 100644
      RUBY
      File.write(path, code)
  
--    output = Gem::Util.popen({ 'GEM_HOME' => @gemhome }, *ruby_with_rubygems_in_load_path, path).strip
-+    output = Gem::Util.popen({ 'GEM_HOME' => @gemhome }, 'ruby', path).strip
+-    output = Gem::Util.popen({ "GEM_HOME" => @gemhome }, *ruby_with_rubygems_in_load_path, path).strip
++    output = Gem::Util.popen({ "GEM_HOME" => @gemhome }, "ruby", path).strip
      assert $?.success?
      refute_empty output
      assert_equal "999.99.9", output.lines[0].chomp
