@@ -49,7 +49,6 @@ jobs:
           mkdir .downloaded-cache
           mklink /j %cd%\src\.downloaded-cache %cd%\.downloaded-cache
           mkdir install
-          mkdir install
           set PRE=%cd%\ruby-mswin
           mkdir build
           cd build
