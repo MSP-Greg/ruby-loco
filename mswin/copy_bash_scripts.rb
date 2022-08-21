@@ -24,6 +24,7 @@ module CopyBashScripts
       bash_bins.each do |fn|
         str = File.read(fn, mode: 'rb:UTF-8').sub(/\A.+?ruby$/m, '#!/usr/bin/env ruby')
         File.write fn, str, mode: 'wb:UTF-8'
+        File.chmod 755, fn
       end
 
       # below replaces code in cmd files with hard coded paths
