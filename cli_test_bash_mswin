@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+RUBY_BIN=$(dirname "$(which ruby)")
+
+PATH=${PATH/$RUBY_BIN:/}
+
+export PATH="${PWD}/ruby-mswin/bin:${PATH}"
+
+error=0
+
+printf "bundle version: "
+bundle version
+error=$((error + $?))
+
+printf "gem  --version: "
+gem --version
+error=$((error + $?))
+
+printf "irb  --version: "
+irb --version
+error=$((error + $?))
+
+printf "racc --version: "
+racc --version
+error=$((error + $?))
+
+printf "rake --version: "
+rake --version
+error=$((error + $?))
+
+printf "rbs  --version: "
+rbs --version
+error=$((error + $?))
+
+printf "rdoc --version: "
+rdoc --version
+error=$((error + $?))
+
+if [ "$error" != 0 ]; then exit 1; fi

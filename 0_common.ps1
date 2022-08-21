@@ -62,11 +62,12 @@ function Set-Variables {
     $script:base_path =  $env:Path -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
     $script:jobs      = 3
 
-    if (!(Test-Path -Path "$env:ChocolateyInstall\bin\7z.exe" -PathType Leaf )) {
-      $script:7z = "$env:ChocolateyInstall\bin\7z.exe"
-    } else {
+    if (Test-Path -Path "$env:ProgramFiles/7-Zip/7z.exe" -PathType Leaf ) {
       $script:7z =  "$env:ProgramFiles/7-Zip/7z.exe"
+    } else {
+      $script:7z = "$env:ChocolateyInstall\bin\7z.exe"
     }
+
     # Write-Host ($base_path -replace ';', "`n")
   } elseif ($env:Appveyor -eq 'True') {
     $script:is_av     = $true

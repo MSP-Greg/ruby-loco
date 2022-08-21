@@ -151,6 +151,10 @@ jobs:
       - name: CLI Check
         run: ./mswin/cli_test.ps1
 
+      - name: CLI Check Bash
+        shell: bash
+        run: ./cli_test_bash_mswin
+
       - name: copy misc files
         run: |
           cd ruby-mswin
