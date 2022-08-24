@@ -12,6 +12,8 @@ jobs:
     strategy:
       fail-fast: false
     runs-on: windows-2022
+    env:
+      RL_DIR: ruby-ucrt
 
     steps:
       - name: git config
@@ -55,13 +57,17 @@ jobs:
         env:
           APPVEYOR: 'True'
 
+      - name: CLI Check Bash
+        shell: bash
+        run: ./cli_test_bash
+
       - name: upload asset
         timeout-minutes: 5
         uses: ./.github/actions/upload-binary
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          ruby_path: ./ruby-ucrt
+          ruby_path: ./${{ env.RL_DIR }}
 
       - name: save log artifact
         if: success() || failure()

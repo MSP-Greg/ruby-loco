@@ -4,7 +4,7 @@ RUBY_BIN=$(dirname "$(which ruby)")
 
 PATH=${PATH/$RUBY_BIN:/}
 
-export PATH="${PWD}/ruby-mswin/bin:${PATH}"
+export PATH="${PWD}/${RL_DIR}/bin:${PATH}"
 
 error=0
 
