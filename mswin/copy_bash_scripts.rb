@@ -30,13 +30,8 @@ module CopyBashScripts
 
       # file permissions may not work on Windows, especially execute
       bash_bins.each do |fn|
-        File.open(fn, File::RDWR, 0755) do |fio|
-          ruby_code = fio.read.split(/^#![^\n]+ruby/,2).last.lstrip
-          fio.truncate 0
-          fio.seek 0
-          fio.write "#{bash_preamble}\n#{ruby_code}"
-          fio.chmod 0755
-        end
+        ruby_code = File.read(fn, mode: 'rb:UTF-8').split(/^#![^\n]+ruby/,2).last.lstrip
+        File.write fn, "#{bash_preamble}\n#{ruby_code}", mode: 'wb:UTF-8'
       end
 
       windows_bins = bins.select { |fn| File.extname(fn).match?(/\A\.bat|\A\.cmd/) }
@@ -47,11 +42,9 @@ module CopyBashScripts
         unless File.exist? bash_bin
           ruby_code = File.read(fn, mode: 'rb:UTF-8').split(/^#![^\n]+ruby/,2).last.lstrip
           File.write bash_bin, "#{bash_preamble}\n#{ruby_code}", mode: 'wb:UTF-8'
-          File.chmod 0755, bash_bin
         end
 
         File.write fn, windows_script, mode: 'wb:UTF-8'
-        File.chmod 0755, fn
       end
     end
   end
