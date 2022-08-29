@@ -102,7 +102,7 @@ jobs:
           Copy-Item .\ssl\cert.pem ${env:RL_DIR}\ssl\cert.pem
           Copy-Item "$env:VCPKG_INSTALLATION_ROOT\packages\openssl_x64-windows\openssl.cnf" ${env:RL_DIR}\ssl\openssl.cnf
           $env:Path = "$repo\${env:RL_DIR}\bin;$repo\${env:RL_DIR}\bin\ruby_builtin_dlls;$env:Path"
-          &"${env:RL_DIR}/bin/ruby.exe" -v mswin/copy_bash_scripts.rb
+          &"${env:RL_DIR}/bin/ruby.exe" -v 1_4_post_install_bin_files.rb
 
       - name: nmake test
         timeout-minutes: 4

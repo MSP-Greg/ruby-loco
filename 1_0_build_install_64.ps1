@@ -346,6 +346,8 @@ Run "make install-nodoc" {
 
   $env:Path = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
   ruby 1_3_post_install.rb
+  
+  ruby 1_4_post_install_bin_files.rb
 }
 Time-Log "make install-nodoc"
 
@@ -373,32 +375,6 @@ Apply-Patches "patches_spec"
 Apply-Patches "patches_test"
 
 if (Test-Path Env:\SOURCE_DATE_EPOCH ) { Remove-Item Env:\SOURCE_DATE_EPOCH }
-
-# Fix bin files
-
-if (Test-Path -Path "$d_install/bin/racc" -PathType Leaf ) {
-  $content = [IO.File]::ReadAllText("$d_install/bin/racc", $UTF8)
-  $content = $content -replace 'racc', 'rake'
-  [IO.File]::WriteAllText("$d_install/bin/rake", $content, $UTF8)
-}
-
-if (Test-Path -Path "$d_install/bin/racc.cmd" -PathType Leaf ) {
-  $content = [IO.File]::ReadAllText("$d_install/bin/racc.cmd", $UTF8)
-  $content = $content -replace 'racc', 'rake'
-  [IO.File]::WriteAllText("$d_install/bin/rake.cmd", $content, $UTF8)
-}
-
-if ((Test-Path -Path "$d_install/bin/rake.cmd" -PathType Leaf ) -and
-    (Test-Path -Path "$d_install/bin/rake.bat" -PathType Leaf )) {
-  Remove-Item -Path "$d_install/bin/rake.bat"
-}
-
-# below assumes bat files do not contain shell script name
-if (!(Test-Path -Path "$d_install/bin/rake.bat" -PathType Leaf )) {
-  $content = [IO.File]::ReadAllText("$d_install/bin/racc.bat", $UTF8)
-  [IO.File]::WriteAllText("$d_install/bin/rake.bat", $content, $UTF8)
-}
-
 
 $ruby_exe  = "$d_install/bin/ruby.exe"
 $ruby_v = &$ruby_exe -v

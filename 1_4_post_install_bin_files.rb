@@ -11,6 +11,7 @@ module CopyBashScripts
       ary.each { |d| Dir.rmdir(d) if Dir.empty?(d) }
 
       bash_preamble = <<~BASH.strip.rstrip
+        #!
         {
           bindir=$(dirname "$0")
           exec "$bindir/ruby" "-x" "$0" "$@"
