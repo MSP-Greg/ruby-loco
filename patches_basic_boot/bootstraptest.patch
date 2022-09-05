@@ -22,10 +22,11 @@ index 3d42390254..8d163dbf65 100755
              end while true
            end
 diff --git a/bootstraptest/test_io.rb b/bootstraptest/test_io.rb
-index 73deca8383..fb80d22b9d 100644
+index ff26497696..224ea67e33 100644
 --- a/bootstraptest/test_io.rb
 +++ b/bootstraptest/test_io.rb
-@@ -1,4 +1,4 @@
+@@ -1,5 +1,5 @@
+ /freebsd/ =~ RUBY_PLATFORM or
 -assert_finish 5, %q{
 +assert_finish 6, %q{
    r, w = IO.pipe

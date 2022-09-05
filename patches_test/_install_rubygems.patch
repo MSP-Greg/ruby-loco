@@ -29,10 +29,10 @@ index eeddb2befe..10bacf1e63 100644
                   @ui.output
      assert_match %r{GIT EXECUTABLE: #{@cmd.send(:git_path)}}, @ui.output
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
-index b5e9f004d1..058cc71f1d 100644
+index 58bc7576da..6a8f6abfcb 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
-@@ -729,8 +729,11 @@ def test_update_rubygems_arguments
+@@ -730,8 +730,11 @@ def test_update_rubygems_arguments
  
      arguments = @cmd.update_rubygems_arguments
  
