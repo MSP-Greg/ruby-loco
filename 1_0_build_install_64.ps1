@@ -331,6 +331,7 @@ Run "make install-nodoc" {
   make install-nodoc
   cd $d_repo
   ruby 1_2_post_install.rb
+  Check-Exit "'ruby 1_2_post_install.rb' failure"
 
   $dll_path = "$d_install/bin/ruby_builtin_dlls"
 
@@ -346,8 +347,10 @@ Run "make install-nodoc" {
 
   $env:Path = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
   ruby 1_3_post_install.rb
+  Check-Exit "'ruby 1_3_post_install.rb' failure"
   
   ruby 1_4_post_install_bin_files.rb
+  Check-Exit "'ruby 1_4_post_install_bin_files.rb' failure"
 }
 Time-Log "make install-nodoc"
 
