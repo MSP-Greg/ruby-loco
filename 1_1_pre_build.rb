@@ -45,9 +45,13 @@ class << self
         v_data = f.read
         version = v_data[/^#define[ \t]+RUBY_VERSION[ \t]+["']([\d\.]+)["']/, 1]
         patch   = v_data[/^#define[ \t]+RUBY_PATCHLEVEL[ \t]+(-?\d+)/, 1]
-        date    = v_data[/^#define[ \t]+RUBY_RELEASE_YEAR[ \t]+(\d{4})/, 1] + '-' +
+        begin
+          date  = v_data[/^#define[ \t]+RUBY_RELEASE_YEAR[ \t]+(\d{4})/, 1] + '-' +
                   v_data[/^#define[ \t]+RUBY_RELEASE_MONTH[ \t]+(\d{1,2})/, 1].rjust(2,'0') + '-' +
                   v_data[/^#define[ \t]+RUBY_RELEASE_DAY[ \t]+(\d{1,2})/, 1].rjust(2,'0')
+        rescue
+          date = `ruby tool/file2lastrev.rb --modified=%Y-%m-%d`
+        end
         patch = patch == '-1' ? 'dev' : "p#{patch}"
 
         arch = case ENV['MSYSTEM']
