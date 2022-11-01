@@ -69,6 +69,17 @@ jobs:
           cd src
           patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/test-all.patch
           patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/test-all_open_port.patch
+
+      - name: nmake incs
+        run:  |
+          cd build
+          nmake incs
+
+      - name: nmake extract-extlibs
+        run:  |
+          cd build
+          nmake extract-extlibs
+
       - name: nmake
         timeout-minutes: 20
         run:  |
