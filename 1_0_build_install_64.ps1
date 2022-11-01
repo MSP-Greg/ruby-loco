@@ -303,7 +303,9 @@ if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") {
   # echo "SOURCE_DATE_EPOCH = $env:SOURCE_DATE_EPOCH"
 }
 
-Run "sh -c `"autoreconf -fi`"" { sh -c "autoreconf -fi" }
+# Run "sh -c `"autoreconf -fi`"" { sh -c "autoreconf -fi" }
+
+Run "sh -c ./autogen.sh" { sh -c "./autogen.sh" }
 
 cd $d_build
 Time-Log "start"
@@ -314,13 +316,12 @@ Run "sh -c `"../ruby/configure --disable-install-doc --prefix=$d_install $config
 }
 Time-Log "configure"
 
-# download gems & unicode files
-#Run "make -j$jobs update-unicode" { iex "make -j$jobs update-unicode" }
-#Time-Log "make -j$jobs update-unicode"
-
 # below sets some directories to normal in case they're set to read-only
 Remove-Read-Only $d_ruby
 Remove-Read-Only $d_build
+
+Run "make incs -j$jobs 2>&1" { iex "make incs -j$jobs 2>&1" }
+Time-Log "make incs -j$jobs"
 
 Run "make -j$jobs 2>&1" { iex "make -j$jobs 2>&1" }
 Time-Log "make -j$jobs"
@@ -384,4 +385,5 @@ $ruby_v = &$ruby_exe -v
 
 if (-not ($ruby_v -cmatch "$rarch\]\z")) {
   throw("Ruby may have assembly issue, won't start")
-}
+} else {
+Write-Host $ruby_v
