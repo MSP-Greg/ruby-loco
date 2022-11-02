@@ -386,4 +386,5 @@ $ruby_v = &$ruby_exe -v
 if (-not ($ruby_v -cmatch "$rarch\]\z")) {
   throw("Ruby may have assembly issue, won't start")
 } else {
-Write-Host $ruby_v
+  Write-Host $ruby_v
+}
