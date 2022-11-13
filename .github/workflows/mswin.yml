@@ -69,6 +69,7 @@ jobs:
           cd src
           patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/test-all.patch
           patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/test-all_open_port.patch
+          patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/spec-big-dec-round.patch
 
       - name: nmake incs
         run:  |

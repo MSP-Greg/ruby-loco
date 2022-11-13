@@ -1,0 +1,12 @@
+diff --git a/spec/ruby/library/bigdecimal/round_spec.rb b/spec/ruby/library/bigdecimal/round_spec.rb
+index 501a1a7342..caf68afa04 100644
+--- a/spec/ruby/library/bigdecimal/round_spec.rb
++++ b/spec/ruby/library/bigdecimal/round_spec.rb
+@@ -229,6 +229,6 @@
+   end
+ 
+   it "raise for a non-existent round mode" do
+-    -> { @p1_50.round(0, :nonsense) }.should raise_error(ArgumentError, "invalid rounding mode")
++    -> { @p1_50.round(0, :nonsense) }.should raise_error(ArgumentError, "invalid rounding mode (nonsense)")
+   end
+ end
