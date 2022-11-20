@@ -1,0 +1,32 @@
+Change asserts to use install folder. not build folder
+diff --git a/test/irb/test_cmd.rb b/test/irb/test_cmd.rb
+index 4c39dc0d21..f646443dc3 100644
+--- a/test/irb/test_cmd.rb
++++ b/test/irb/test_cmd.rb
+@@ -633,7 +633,7 @@ def test_edit_with_constant
+         )
+ 
+         assert_empty err
+-        assert_match(/path: .*\/lib\/irb\.rb/, out)
++        assert_includes out, "path: #{RbConfig::CONFIG['rubylibdir']}/irb.rb"
+         assert_match("command: ': code'", out)
+       end
+ 
+@@ -643,7 +643,7 @@ def test_edit_with_class_method
+         )
+ 
+         assert_empty err
+-        assert_match(/path: .*\/lib\/irb\.rb/, out)
++        assert_includes out, "path: #{RbConfig::CONFIG['rubylibdir']}/irb.rb"
+         assert_match("command: ': code'", out)
+       end
+ 
+@@ -653,7 +653,7 @@ def test_edit_with_instance_method
+         )
+ 
+         assert_empty err
+-        assert_match(/path: .*\/lib\/irb\.rb/, out)
++        assert_includes out, "path: #{RbConfig::CONFIG['rubylibdir']}/irb.rb"
+         assert_match("command: ': code'", out)
+       end
+     end
