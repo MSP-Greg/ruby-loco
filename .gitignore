@@ -3,6 +3,7 @@
 /install/
 /ruby-mingw/
 /ruby-ucrt/
+/ruby-mswin/
 /ruby
 /rubyinstaller2
 /ruby_readline
