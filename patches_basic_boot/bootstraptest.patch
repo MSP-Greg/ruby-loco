@@ -1,10 +1,10 @@
 Patch by MSP-Greg
 Attempts to fix issues when run on 'busy' CI systems
 diff --git a/bootstraptest/runner.rb b/bootstraptest/runner.rb
-index 3d42390254..8d163dbf65 100755
+index f9b3e919b8..a5111614c1 100755
 --- a/bootstraptest/runner.rb
 +++ b/bootstraptest/runner.rb
-@@ -624,9 +624,15 @@ def assert_finish(timeout_seconds, testsrc, message = '')
+@@ -688,9 +688,15 @@ def assert_finish(timeout_seconds, testsrc, message = '')
          end
          if io.respond_to?(:read_nonblock)
            if IO.select([io], nil, nil, diff)
@@ -22,7 +22,7 @@ index 3d42390254..8d163dbf65 100755
              end while true
            end
 diff --git a/bootstraptest/test_io.rb b/bootstraptest/test_io.rb
-index ff26497696..224ea67e33 100644
+index 666e5a011b..7efb535ec4 100644
 --- a/bootstraptest/test_io.rb
 +++ b/bootstraptest/test_io.rb
 @@ -1,5 +1,5 @@
