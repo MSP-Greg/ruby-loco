@@ -1,0 +1,36 @@
+diff --git a/win32/ruby.manifest b/win32/ruby.manifest
+index 2bd495979b..b880e4ac2a 100644
+--- a/win32/ruby.manifest
++++ b/win32/ruby.manifest
+@@ -1,8 +1,29 @@
+ <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+-<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+-  <application xmlns="urn:schemas-microsoft-com:asm.v3">
++<assembly xmlns="urn:schemas-microsoft-com:asm.v3" manifestVersion="1.0">
++  <application>
+     <windowsSettings xmlns:ws2="http://schemas.microsoft.com/SMI/2016/WindowsSettings">
+       <ws2:longPathAware>true</ws2:longPathAware>
+     </windowsSettings>
+   </application>
++  <trustInfo>
++    <security>
++      <requestedPrivileges>
++        <requestedExecutionLevel level="asInvoker"/>
++      </requestedPrivileges>
++    </security>
++  </trustInfo>
++  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
++    <application>
++      <!-- Windows 8.1 -->
++      <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}"/>
++      <!-- Windows 10 -->
++      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}"/>
++    </application>
++  </compatibility>
++  <!--   1 leave replacement   -->
++  <!--   2 leave replacement   -->
++  <!--   3 leave replacement   -->
++  <!--   4 leave replacement   -->
++  <!--   5 leave replacement   -->
++  <!--   6 leave replacement   -->
+ </assembly>
