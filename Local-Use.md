@@ -1,31 +1,66 @@
 ## Local Building Instructions
 
-### MinGW
-
 #### Prerequisites
 
 1. Clone or fork of this repo
 
-2. At the root of the repo, a symlink of 'ruby' to the Ruby repo you want to use for source.
+2. A stand-alone Ruby in your path.
 
-3. Current MSYS2 installation
+3. Git for Windows.
 
-< More to come >
+3. At the root of the repo, a symlink of 'ruby' to the [Ruby repo](https://github.com/ruby/ruby)
+  you want to use for source.
+
+4. At the root of the repo, a symlink of 'rubyinstaller2' to the
+  [RubyInstaller2 repo](https://github.com/oneclick/rubyinstaller2) you want to use for
+  source.  This provides the 'ridk' runtime files and command for mingw & ucrt builds,
+  and provides the code to generate the SSL cert file used in all builds.
+
+5. Current MSYS2 installation. Normally, this would be installed at 'C:/msys64'.  The mingw
+  & ucrt builds compile using the MSYS2 compiler.  The mswin build uses `bison`, which is
+  a 'MSYS2' package.  Builds may also use `ragel`, which is a mingw or ucrt package.
+
+6. **mswin only** - mswin build uses the [Microsoft/vcpkg](https://github.com/Microsoft/vcpkg)
+  system.  Normally a fork/clone of the repository.  Standard location is 'C:/vcpkg'.
 
 #### Setup
 
 Copy the file `local.ps1.sample`, remove `.sample`, then update its contents to match your system.
 
+MSYS2 installation info is at https://www.msys2.org/
+
+The 'local_use' folder of this repo contains three PowerShell scripts to install MSYS2
+(mingw & ucrt) packages and vcpkg packages needed to build Ruby.  All must be started from
+the root folder of their respective system, ie, C:/msys64 or C:/vcpkg.
+
 #### Build & Test
 
 Once the setup is done, just two simple commands:
 
-This runs make and make install
+The below commands run make and make install.  The self-contained build is contained one of three folders:
+`ruby-ucrt`, `ruby-mswin`, or `ruby-mingw`, depending on the build selected.
 ```
-./1_0_build_install_64.ps1
+mingw or ucrt
+./1_0_build_install_64.ps1 <mingw|ucrt>
+
+mswin
+./1_0_mswin.ps1
 ```
 
 This runs all test suites:
 ```
-./2_0_test.ps1
+./2_0_test.ps1 <mingw|ucrt|mswin>
 ```
+
+#### Notes - General
+
+Patches are used in both the build/install step and the test step.  When working with the
+ruby/ruby repo, these should be 'cleaned' from the repo.  The patches are mainly used to
+allow testing from the install folder, and some are needed in ruby lib files for testing.
+
+The msys2 OpenSSL package is patched to reference the cert file relative to the exe file
+using it.  That is not the case for the vcpkg OpenSSL package.  Hence, the mswin build is
+patched to set the related OpenSSL env variables in the build.  So, if you have code that
+changes the env values, the original values should be restored, otherwise ssl connections
+cannot be validated.
+
