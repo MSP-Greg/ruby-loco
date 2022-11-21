@@ -3,8 +3,8 @@ on:
   push:
     branches:
       - '*'
-  schedule:
-    - cron: '50 1,8,15 * * *'
+#  schedule:
+#    - cron: '50 1,8,15 * * *'
   workflow_dispatch:
 
 jobs:
@@ -15,7 +15,6 @@ jobs:
       fail-fast: false
     runs-on: windows-${{ matrix.vs }}
     env:
-      APPVEYOR: 'True'
       RL_DIR: ruby-mswin
 
     steps:
@@ -27,10 +26,12 @@ jobs:
       - name: repo checkout
         uses: actions/checkout@v3
 
-      - name: Checkout ruby
+      - name: get ruby and rubyinstaller2
+        timeout-minutes: 5
         run: |
           $gh = 'https://github.com'
-          git clone -q --depth=1 --no-tags --branch=master $gh/ruby/ruby.git src
+          git clone -q --depth=1 --no-tags --branch=master  $gh/oneclick/rubyinstaller2.git ./rubyinstaller2
+          git clone -q --depth=1 --no-tags --branch=master  $gh/ruby/ruby.git               ./ruby
 
       - name: load ruby
         timeout-minutes: 12
@@ -42,139 +43,21 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .downloaded-cache
-          key: dl-cache-win-mswin-${{ hashFiles('src/gems/bundled_gems') }}
+          key: dl-cache-win-mswin-${{ hashFiles('ruby/gems/bundled_gems') }}
 
-      - name: Configure
-        shell: cmd
-        run: |
-          mkdir .downloaded-cache
-          mklink /j %cd%\src\.downloaded-cache %cd%\.downloaded-cache
-          mkdir install
-          set PRE=%cd%\%RL_DIR%
-          mkdir build
-          cd build
-          ../src/win32/configure.bat --disable-install-doc --prefix=%PRE% --without-ext=+,dbm,gdbm --with-opt-dir=C:/vcpkg/installed/x64-windows
+      - name: build & install
+        timeout-minutes: 30
+        run:  ./1_0_build_install_mswin.ps1
 
-      - name: ssl cert.pem
-        run: |
-          # copy current cert file to mswin location
-          curl -fsSL -o ruby-ucrt.7z --retry 10 https://github.com/MSP-Greg/ruby-loco/releases/download/ruby-master/ruby-ucrt.7z
-          &"C:\Program Files\7-zip\7z.exe" e ruby-ucrt.7z -ossl ruby-ucrt/ssl/cert.pem
-          Copy-Item .\ssl\cert.pem "C:\Program Files\Common Files\SSL\cert.pem"
-          Copy-Item .\ssl\cert.pem "$env:VCPKG_INSTALLATION_ROOT\packages\openssl_x64-windows\cert.pem"
-          cd build
-
-      - name: apply patches
-        run: |
-          cd src
-          patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/test-all.patch
-          patch.exe -p1 -N --no-backup-if-mismatch -i ../mswin_patches/test-all_open_port.patch
-
-      - name: nmake incs
-        run:  |
-          cd build
-          nmake incs
-
-      - name: nmake extract-extlibs
-        run:  |
-          cd build
-          nmake extract-extlibs
-
-      - name: nmake
-        timeout-minutes: 20
-        run:  |
-          cd build
-          nmake
-
-      - name: nmake install
-        run: |
-          $env:Path = "C:\vcpkg\installed\x64-windows\bin;$env:Path"
-          cd build
-          nmake "DESTDIR=" install-nodoc
-
-      - name: misc install, ruby -v
-        run: |
-          $repo = $pwd
-          del ${env:RL_DIR}\lib\x64-vcruntime140-ruby320-static.lib
-          mkdir ${env:RL_DIR}\bin\ruby_builtin_dlls 2>&1>$null
-          mkdir ${env:RL_DIR}\ssl                   2>&1>$null
-          cd ${env:RL_DIR}\bin\ruby_builtin_dlls
-          Copy-Item C:\vcpkg\installed\x64-windows\bin\libcrypto-3-x64.dll
-          Copy-Item C:\vcpkg\installed\x64-windows\bin\libssl-3-x64.dll
-          Copy-Item C:\vcpkg\installed\x64-windows\bin\libffi.dll
-          Copy-Item C:\vcpkg\installed\x64-windows\bin\yaml.dll
-          Copy-Item C:\vcpkg\installed\x64-windows\bin\readline.dll
-          Copy-Item C:\vcpkg\installed\x64-windows\bin\zlib1.dll
-          Copy-Item $repo\mswin\ruby_builtin_dlls.manifest
-          cd ..
-          mt.exe -manifest $repo\mswin\ruby-exe.xml -outputresource:ruby.exe;1
-          mt.exe -manifest $repo\mswin\ruby-exe.xml -outputresource:rubyw.exe;1
-          cd $repo
-          Copy-Item .\ssl\cert.pem ${env:RL_DIR}\ssl\cert.pem
-          Copy-Item "$env:VCPKG_INSTALLATION_ROOT\packages\openssl_x64-windows\openssl.cnf" ${env:RL_DIR}\ssl\openssl.cnf
-          $env:Path = "$repo\${env:RL_DIR}\bin;$repo\${env:RL_DIR}\bin\ruby_builtin_dlls;$env:Path"
-          &"${env:RL_DIR}/bin/ruby.exe" -v 1_4_post_install_bin_files.rb
-
-      - name: nmake test
-        timeout-minutes: 4
-        shell: cmd
-        run: |
-          cd build
-          set PATH=%cd%\%RL_DIR%\bin;%cd%\%RL_DIR%\bin\ruby_builtin_dlls;%PATH%
-          set BUNDLER_VERSION=
-          nmake test
-
-      # copy dll files to bin folder, add bin to path
-      # ruby/test_time_tz.rb requires additional gems
-      - name: nmake test-all -j
-        timeout-minutes: 40
-        shell: cmd
-        run: |
-          set /a JOBS=%NUMBER_OF_PROCESSORS%
-          set EXCL_N=--exclude test_mjit --exclude test_syntax --exclude test_time_tz --exclude test_undef  --exclude test_objspace
-          chcp 437
-          set PATH=%cd%\%RL_DIR%\bin;%cd%\%RL_DIR%\bin\ruby_builtin_dlls;%PATH%
-          set BUNDLER_VERSION=
-          cd build
-          nmake test-all "TESTOPTS=-j%JOBS% %EXCL_N% -v --timeout-scale=3.0 --retry --job-status=normal --show-skip"
-
-      - name: nmake test-all singles
-        timeout-minutes: 5
-        shell: cmd
-        run: |
-          set tr=../src/test/ruby
-          set TESTS=%tr%/test_mjit.rb ../src/test/objspace/test_objspace.rb %tr%/test_syntax.rb %tr%/test_time_tz.rb %tr%/test_undef.rb
-          chcp 437
-          set PATH=%cd%\%RL_DIR%\bin;%cd%\%RL_DIR%\bin\ruby_builtin_dlls;%PATH%
-          set BUNDLER_VERSION=
-          cd build
-          nmake test-all "TESTOPTS=-v --timeout-scale=3.0"
-
-      - name: test-spec from install
-        timeout-minutes: 6
-        shell: cmd
-        run: |
-          chcp 437
-          set PATH=%cd%\%RL_DIR%\bin;%PATH%
-          set BUNDLER_VERSION=
-          cd src/spec/ruby
-          ruby ../mspec/bin/mspec -j -I../../tool/lib
-
-      - name: CLI Check
-        run: ./mswin/cli_test.ps1
+      - name: test
+        timeout-minutes: 70
+        run:  ./2_0_test.ps1 mswin
+        env:
+          APPVEYOR: 'True'
 
       - name: CLI Check Bash
         shell: bash
         run: ./cli_test_bash
-
-      - name: copy misc files
-        run: |
-          cd ${env:RL_DIR}
-          Copy-Item ../src/BSDL
-          Copy-Item ../src/COPYING
-          Copy-Item ../src/LEGAL
-          $arch = $(./bin/ruby -e "STDOUT.write RbConfig::CONFIG['archdir']")
-          Rename-Item -Path $arch/readline.so -NewName $arch/readline.so_
 
       - name: upload asset
         timeout-minutes: 5
@@ -183,3 +66,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           ruby_path: ./${{ env.RL_DIR }}
+
+      - name: save log artifact
+        if: success() || failure()
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.TEST_LOGS }}
+          path: ./logs

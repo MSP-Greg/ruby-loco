@@ -3,8 +3,8 @@ on:
   push:
     branches:
       - '*'
-  schedule:
-    - cron: '45 1,8,15 * * *'
+#  schedule:
+#    - cron: '45 1,8,15 * * *'
   workflow_dispatch:
 
 jobs:
@@ -49,13 +49,11 @@ jobs:
 
       - name: build & install
         timeout-minutes: 30
-        run:  ./1_0_build_install_64.ps1
+        run:  ./1_0_build_install_msys2_64.ps1 mingw
 
       - name: test
         timeout-minutes: 70
-        run:  ./2_0_test.ps1
-        env:
-          APPVEYOR: 'True'
+        run:  ./2_0_test.ps1 mingw
 
       - name: CLI Check Bash
         shell: bash
