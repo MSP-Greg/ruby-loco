@@ -110,7 +110,7 @@ function Set-Variables {
     $script:is_actions = $true
     $script:d_msys2   = "C:/msys64"
     $script:d_git     = "$env:ProgramFiles/Git"
-    $script:d_vcpkg   =  $env:VCPKG_INSTALLATION_ROOT
+    $script:d_vcpkg   =  $env:VCPKG_INSTALLATION_ROOT.replace('\', '/')
     $env:TMPDIR       =  $env:RUNNER_TEMP
     $script:base_path =  $env:Path -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
     $script:jobs      = 3
