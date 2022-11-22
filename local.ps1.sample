@@ -1,7 +1,28 @@
 $global:d_msys2   = "C:/msys64"
 $global:d_git     =  "$env:ProgramFiles/Git"
+$global:d_vcpkg   =  "C:/vcpkg"
+# below is used by GitHub Actions and locally
+$env:VCPKG_INSTALLATION_ROOT = "C:/vcpkg"
 $global:7z        =  "$env:ProgramFiles/7-Zip/7z.exe".replace('\', '/')
-# example for four core CPU
+
+# limits parallel jobs to no more than 6
 $global:jobs = (([int]$env:NUMBER_OF_PROCESSORS, 6) | Measure-Object -Minimum).Minimum
-$global:base_path = ("$env:ProgramFiles/7-Zip;$d_git/cmd;" + `
-  "$env:SystemRoot/system32;$env:ProgramFiles;$env:SystemRoot").replace('\', '/')
+
+$global:orig_path = $env:Path
+
+if ($build_sys -eq "msys2") {
+  $global:base_path = ("$env:ProgramFiles/7-Zip;$d_git/cmd;" + `
+    "$env:SystemRoot/system32;$env:ProgramFiles;$env:SystemRoot").replace('\', '/')
+} else {
+  # mswin
+  $global:vcvars = "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+
+  if (!(Test-Path -Path $vcvars -PathType Leaf )) {
+    echo "File:`n$vcvars`ndoes not exist, please fix"
+    exit 1
+  }
+  Set-VCVars-Env
+  $global:base_path    = $env:Path.replace('\', '/')
+  $global:no_ruby_path = $base_path -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
+}
+
