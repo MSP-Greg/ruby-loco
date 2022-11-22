@@ -53,27 +53,20 @@ module CopyBashScripts
     end
 
     def fix_rbs_debug_ext
-      debug_gem = Dir.glob("#{Gem.default_dir}/gems/debug-*").first
-      debug_name = File.basename debug_gem
-      unless File.exist? "#{debug_gem}/lib/debug/debug.so"
-        ext_path = "#{Gem.default_dir}/extensions/#{RUBY_PLATFORM.tr '_', '-'}/" \
-          "#{RbConfig::CONFIG['ruby_version']}/#{debug_name}"
-        if File.exist? "#{ext_path}/debug/debug.so"
-          FileUtils.cp "#{ext_path}/debug/debug.so", "#{debug_gem}/lib/debug/debug.so"
-        end
-      end
-
-      rbs_gem = Dir.glob("#{Gem.default_dir}/gems/rbs-*").first
-      rbs_name = File.basename rbs_gem
-      unless File.exist? "#{rbs_gem}/lib/rbs_extension.so"
-        ext_path = "#{Gem.default_dir}/extensions/#{RUBY_PLATFORM.tr '_', '-'}/" \
-          "#{RbConfig::CONFIG['ruby_version']}/#{rbs_name}"
-        if File.exist? "#{ext_path}/rbs_extension.so"
-          FileUtils.cp "#{ext_path}/rbs_extension.so", "#{rbs_gem}/lib/rbs_extension.so"
+      [ {g_name: 'debug', g_so: 'debug/debug.so'},
+        {g_name: 'rbs'  , g_so: 'rbs_extension.so'}
+      ].each do |h|
+        gem_path = Dir.glob("#{Gem.default_dir}/gems/#{h[:g_name]}-*").first
+        gem_name = File.basename gem_path
+        unless File.exist? "#{gem_path}/lib/#{h[:g_so]}"
+          ext_path = "#{Gem.default_dir}/extensions/#{RUBY_PLATFORM.tr '_', '-'}/" \
+            "#{RbConfig::CONFIG['ruby_version']}/#{gem_name}/#{h[:g_so]}"
+          if File.exist? ext_path
+            FileUtils.cp ext_path, "#{gem_path}/lib/#{h[:g_so]}"
+          end
         end
       end
     end
-
   end
 end
 CopyBashScripts.run
