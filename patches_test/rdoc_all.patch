@@ -1,0 +1,71 @@
+# without this, intermittent failures in CI
+diff --git a/test/rdoc/support/test_case.rb b/test/rdoc/support/test_case.rb
+index 36009111e2..7617fc8471 100644
+--- a/test/rdoc/support/test_case.rb
++++ b/test/rdoc/support/test_case.rb
+@@ -13,7 +13,7 @@
+ require 'tmpdir'
+ require 'stringio'
+ 
+-require_relative '../../../lib/rdoc'
++require 'rdoc'
+ 
+ ##
+ # RDoc::TestCase is an abstract TestCase to provide common setup and teardown
+diff --git a/test/rdoc/test_rdoc_markdown.rb b/test/rdoc/test_rdoc_markdown.rb
+index dd6f312fa9..0dc621fe54 100644
+--- a/test/rdoc/test_rdoc_markdown.rb
++++ b/test/rdoc/test_rdoc_markdown.rb
+@@ -2,8 +2,8 @@
+ # frozen_string_literal: true
+ 
+ require_relative 'helper'
+-require_relative '../../lib/rdoc/markup/block_quote'
+-require_relative '../../lib/rdoc/markdown'
++require 'rdoc/markup/block_quote'
++require 'rdoc/markdown'
+ 
+ class TestRDocMarkdown < RDoc::TestCase
+ 
+diff --git a/test/rdoc/test_rdoc_markdown_test.rb b/test/rdoc/test_rdoc_markdown_test.rb
+index d4f894c924..0ecd000136 100644
+--- a/test/rdoc/test_rdoc_markdown_test.rb
++++ b/test/rdoc/test_rdoc_markdown_test.rb
+@@ -2,8 +2,8 @@
+ require_relative 'helper'
+ require 'pp'
+ 
+-require_relative '../../lib/rdoc'
+-require_relative '../../lib/rdoc/markdown'
++require 'rdoc'
++require 'rdoc/markdown'
+ 
+ class TestRDocMarkdownTest < RDoc::TestCase
+ 
+diff --git a/test/rdoc/test_rdoc_rubygems_hook.rb b/test/rdoc/test_rdoc_rubygems_hook.rb
+index 59a7ed0f89..9591ec42ef 100644
+--- a/test/rdoc/test_rdoc_rubygems_hook.rb
++++ b/test/rdoc/test_rdoc_rubygems_hook.rb
+@@ -2,7 +2,7 @@
+ require 'rubygems'
+ require 'fileutils'
+ require 'tmpdir'
+-require_relative '../../lib/rdoc/rubygems_hook'
++require 'rdoc/rubygems_hook'
+ require 'test/unit'
+ 
+ class TestRDocRubygemsHook < Test::Unit::TestCase
+diff --git a/test/rdoc/test_rdoc_servlet.rb b/test/rdoc/test_rdoc_servlet.rb
+index 7a5b15a6eb..965912c9d5 100644
+--- a/test/rdoc/test_rdoc_servlet.rb
++++ b/test/rdoc/test_rdoc_servlet.rb
+@@ -5,6 +5,9 @@
+ rescue LoadError
+ end
+ 
++require 'tsort' rescue nil
++require 'json'  rescue nil
++
+ class TestRDocServlet < RDoc::TestCase
+ 
+   def setup

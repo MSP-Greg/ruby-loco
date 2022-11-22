@@ -1,8 +1,8 @@
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index 4d9644d5c9..330dc8fd8e 100644
+index dd2440b068..43a9645c8d 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
-@@ -988,7 +988,7 @@ def test_self_platforms
+@@ -991,7 +991,7 @@ def test_self_platforms
    end
  
    def test_self_prefix
@@ -11,8 +11,17 @@ index 4d9644d5c9..330dc8fd8e 100644
    end
  
    def test_self_prefix_libdir
+@@ -2139,6 +2139,8 @@ def with_local_bundler_at(path)
+ 
+     # If bundler gemspec exists, pretend it's installed
+     bundler_gemspec = File.expand_path("../../bundler/bundler.gemspec", __dir__)
++    bundler_gemspec = File.expand_path("../../lib/bundler/bundler.gemspec", __dir__) unless File.exist?(bundler_gemspec)
++
+     if File.exist?(bundler_gemspec)
+       target_gemspec_location = "#{path}/specifications/bundler-#{Bundler::VERSION}.gemspec"
+ 
 diff --git a/test/rubygems/test_gem_commands_environment_command.rb b/test/rubygems/test_gem_commands_environment_command.rb
-index eeddb2befe..10bacf1e63 100644
+index 91ed774cb6..0c56c76d64 100644
 --- a/test/rubygems/test_gem_commands_environment_command.rb
 +++ b/test/rubygems/test_gem_commands_environment_command.rb
 @@ -27,7 +27,11 @@ def test_execute
@@ -29,7 +38,7 @@ index eeddb2befe..10bacf1e63 100644
                   @ui.output
      assert_match %r{GIT EXECUTABLE: #{@cmd.send(:git_path)}}, @ui.output
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
-index 58bc7576da..6a8f6abfcb 100644
+index 1b70eac9eb..e8900c1ed8 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
 @@ -730,8 +730,11 @@ def test_update_rubygems_arguments
@@ -46,3 +55,25 @@ index 58bc7576da..6a8f6abfcb 100644
      assert_equal "--no-document",      arguments.shift
      assert_equal "--previous-version", arguments.shift
      assert_equal Gem::VERSION,         arguments.shift
+diff --git a/test/rubygems/test_require.rb b/test/rubygems/test_require.rb
+index 222bdcfb28..433be477e6 100644
+--- a/test/rubygems/test_require.rb
++++ b/test/rubygems/test_require.rb
+@@ -451,7 +451,7 @@ def test_realworld_default_gem
+       require "json"
+       puts Gem.loaded_specs["json"]
+     RUBY
+-    output = Gem::Util.popen(*ruby_with_rubygems_in_load_path, "-e", cmd).strip
++    output = Gem::Util.popen("ruby", "-e", cmd).strip
+     assert $?.success?
+     refute_empty output
+   end
+@@ -471,7 +471,7 @@ def test_realworld_upgraded_default_gem
+     RUBY
+     File.write(path, code)
+ 
+-    output = Gem::Util.popen({ "GEM_HOME" => @gemhome }, *ruby_with_rubygems_in_load_path, path).strip
++    output = Gem::Util.popen({ "GEM_HOME" => @gemhome }, "ruby", path).strip
+     assert $?.success?
+     refute_empty output
+     assert_equal "999.99.9", output.lines[0].chomp

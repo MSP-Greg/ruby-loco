@@ -1,0 +1,34 @@
+diff --git a/test/ruby/test_require_lib.rb b/test/ruby/test_require_lib.rb
+index 95fa3f29e1..3530014740 100644
+--- a/test/ruby/test_require_lib.rb
++++ b/test/ruby/test_require_lib.rb
+@@ -1,14 +1,25 @@
+ # frozen_string_literal: false
+ require 'test/unit'
++require 'rbconfig'
+ 
+ class TestRequireLib < Test::Unit::TestCase
+   TEST_RATIO = ENV["TEST_REQUIRE_THREAD_RATIO"]&.tap {|s|break s.to_f} || 0.05 # testing all files needs too long time...
+ 
+-  Dir.glob(File.expand_path('../../lib/**/*.rb', __dir__)).each do |lib|
++  temp = RbConfig::CONFIG['rubylibdir']
++  files = if Dir.exist? temp
++    re_lib = ''
++    Dir.glob('**/*.rb', base: temp)
++  else
++    re_lib = '/lib/'
++    Dir.glob(File.expand_path('../../lib/**/*.rb', __dir__))
++  end
++
++  files.each do |lib|
+     # skip some problems
+-    next if %r!/lib/(?:bundler|rubygems)\b! =~ lib
+-    next if %r!/lib/(?:debug|mkmf)\.rb\z! =~ lib
+-    next if %r!/lib/irb/ext/tracer\.rb\z! =~ lib
++    next if %r!#{re_lib}(?:bundler|rubygems)\b! =~ lib
++    next if %r!#{re_lib}(?:debug|mkmf)\.rb\z! =~ lib
++    next if %r!#{re_lib}irb/ext/tracer\.rb\z! =~ lib
++
+     # skip many files that almost use no threads
+     next if TEST_RATIO < rand(0.0..1.0)
+     define_method "test_thread_size:#{lib}" do

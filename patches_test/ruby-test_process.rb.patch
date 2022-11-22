@@ -1,0 +1,50 @@
+diff --git a/test/ruby/test_process.rb b/test/ruby/test_process.rb
+index 10c4aadadf..6165c42d57 100644
+--- a/test/ruby/test_process.rb
++++ b/test/ruby/test_process.rb
+@@ -24,6 +24,10 @@ def self.windows?
+     return /mswin|mingw|bccwin/ =~ RUBY_PLATFORM
+   end
+ 
++  def mswin?
++    return RUBY_PLATFORM.include?("mswin")
++  end
++
+   def write_file(filename, content)
+     File.open(filename, "w") {|f|
+       f << content
+@@ -321,7 +325,11 @@ def test_execopts_env
+     end
+     cmd << '-e' << 'puts ENV.keys.map{|e|e.upcase}'
+     IO.popen(cmd) {|io|
+-      assert_equal("PATH\n", io.read)
++      if mswin?
++      assert_includes(io.read, "PATH\n")
++      else
++        assert_equal("PATH\n", io.read)
++      end
+     }
+ 
+     IO.popen([{"FOO"=>"BAR"}, *ENVCOMMAND]) {|io|
+@@ -445,10 +453,19 @@ def test_execopts_unsetenv_others
+     h = {}
+     MANDATORY_ENVS.each {|k| e = ENV[k] and h[k] = e}
+     IO.popen([h, *ENVCOMMAND, :unsetenv_others=>true]) {|io|
+-      assert_equal("", io.read)
++      if mswin?
++        str = io.read.lines.reject { |l| l.include? "SSL_"}.join('').strip
++        assert_equal("", str)
++      else
++        assert_equal("", io.read)
++      end
+     }
+     IO.popen([h.merge("A"=>"B"), *ENVCOMMAND, :unsetenv_others=>true]) {|io|
+-      assert_equal("A=B\n", io.read)
++      if mswin?
++        assert_includes(io.read, "A=B\n")
++      else
++        assert_equal("A=B\n", io.read)
++      end
+     }
+   end
+ 

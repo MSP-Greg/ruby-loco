@@ -1,8 +1,15 @@
 diff --git a/test/runner.rb b/test/runner.rb
-index 1b1ae0956a..1e685fe1bf 100644
+index 1b1ae0956a..85323e9cb5 100644
 --- a/test/runner.rb
 +++ b/test/runner.rb
-@@ -6,9 +6,16 @@
+@@ -1,14 +1,23 @@
+ # frozen_string_literal: true
+ 
++require 'rbconfig'
++
+ # Should be done in rubygems test files?
+ ENV["GEM_SKIP"] = ENV["GEM_HOME"] = ENV["GEM_PATH"] = "".freeze
+ ENV.delete("RUBY_CODESIGN")
  
  Warning[:experimental] = false
  
