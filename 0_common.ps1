@@ -155,6 +155,7 @@ function Set-Variables {
   $script:dash = "$([char]0x2500)"
   $script:dash_line = $($dash * 80)
   $script:dash_hdr  = $($dash * 74)
+  $script:dash_hdr2 = $($dash * 54)
 
   $script:UTF8 = $(New-Object System.Text.UTF8Encoding $False)
 }
@@ -183,28 +184,62 @@ function Enc-Info {
   echo ''
 }
 
+# Runs Apply-Patches from folder contained in array parameter
+#————————————————————————————————————————————————————————————————— Run-Patches
+function Run-Patches($ary_dir) {
+  $all_log = ''
+  $all_clr = 'grn'
+  foreach ($patch_dir in $ary_dir) {
+    $log, $p_clr = Apply-Patches($patch_dir)
+    if ($log -ne $null) { $all_log += $log }
+    if ($p_clr -eq 'red') { $all_clr = 'red' }
+    if ($p_clr -eq 'yel' -and $p_clr -ne 'red') {
+      $all_clr = 'yel'
+    }
+  }
+  if ($is_actions) {
+    echo "##[group]$(color "Apply Patches" $all_clr)"
+  } else {
+    echo "all_clr $all_clr"
+    $e_str = "$dash_hdr Apply Patches"
+    echo $(color $e_str $all_clr)
+  }
+  echo $all_log.TrimEnd()
+  if ($is_actions) { echo ::[endgroup] } else { echo '' }
+}
+
 #————————————————————————————————————————————————————————————————— Apply-Patches
 # Applies patches
 function Apply-Patches($p_dir) {
   if (Test-Path -Path $p_dir -PathType Container ) {
-    EchoC "$dash_hdr $p_dir" yel
     $patch_exe = "$d_msys2/usr/bin/patch.exe"
     Push-Location "$d_repo/$p_dir"
     [string[]]$patches = Get-ChildItem -Include *.patch -Path . -Recurse |
       select -expand name
     Pop-Location
+    $fix = 'grn'
     if ($patches.length -ne 0) {
       Push-Location "$d_ruby"
       foreach ($p in $patches) {
         if ($p.StartsWith("__")) { continue }
-        EchoC "$p" yel
-        $out = $(& $patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p")
-        $out -replace '^', '  '
-        echo ''
+        $patch_log = $(&$patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p" 2>&1) -replace '^', "`n  "
+        if ($patch_log -match 'offset|fuzz') {
+          if ($fix -eq 'grn') { $fix = 'yel'}
+          $log += $(EchoC "$p" yel)
+        } elseif ($patch_log -match 'failed') {
+          $log += $(EchoC "$p" red)
+          $fix = 'red'
+        } else {
+          $log += $p
+        }
+        $log += $patch_log + "`n`n"
       }
       Pop-Location
+      $log = $(EchoC "$dash_hdr2 $p_dir" $fix) + "`n" + $log
+      return @($log, $fix)
     }
   }
+  return @($null, $null)
 }
 
 #————————————————————————————————————————————————————————————————— Apply-Install-Patches

@@ -28,12 +28,12 @@ Set-Variables
 Set-Variables-Local
 $env:Path = "$ruby_path;$d_repo/git/cmd;$env:Path;$d_msys2/usr/bin;$d_mingw;"
 
-$files = "C:/Windows/System32/libcrypto-1_1-x64.dll",
-         "C:/Windows/System32/libssl-1_1-x64.dll"
+$files = 'C:/Windows/System32/libcrypto-1_1-x64.dll',
+         'C:/Windows/System32/libssl-1_1-x64.dll'
 
 Files-Hide $files
 
-Apply-Patches "mswin_patches"
+Run-Patches @('mswin_patches')
 
 Create-Folders
 
