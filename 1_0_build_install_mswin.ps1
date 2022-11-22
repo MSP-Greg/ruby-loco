@@ -59,9 +59,6 @@ Remove-Read-Only $d_build
 Run "nmake incs" { iex "nmake incs" }
 Time-Log "make incs"
 
-Run "nmake extract-extlibs" { iex "nmake extract-extlibs" }
-Time-Log "nmake extract-extlibs"
-
 $env:Path = "$d_vcpkg_install\bin;$env:Path"
 
 Run "nmake" { iex "nmake" }
