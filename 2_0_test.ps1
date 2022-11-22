@@ -134,6 +134,8 @@ function Finish {
   # used in 2_1_test_script.rb
   $env:PS_ENC = [Console]::OutputEncoding.WebName.toUpper()
 
+  EchoC "$dash_hdr Test Results" yel
+
   cd $d_repo
   # script checks test results, determines whether build is good or not,
   # saves artifacts and adds messages to build
@@ -145,6 +147,7 @@ function Finish {
   } elseif ($is_av) {
     echo "Build worker image: $env:APPVEYOR_BUILD_WORKER_IMAGE"
   }
+  $env:Path = $orig_path
   if ($exit -ne 0) { exit 1 }
 }
 
@@ -156,7 +159,7 @@ function BasicTest {
     -e_args "--disable=gems ruby_runner.rb -r -v --tty=no" `
     -StdOut "test_basic.log" `
     -StdErr "test_basic_err.log" `
-    -Title  "test-basic     (basictest)" `
+    -Title  "test-basic   (basictest)" `
     -Dir    "$d_ruby/basictest" `
     -TimeLimit 20
 }
@@ -170,7 +173,7 @@ function BootStrapTest {
     -e_args "--disable=gems runner.rb --ruby=`"$ruby_exe --disable=gems`" -v" `
     -StdOut "test_bootstrap.log" `
     -StdErr "test_bootstrap_err.log" `
-    -Title  "btest      (bootstraptest)" `
+    -Title  "btest        (bootstraptest)" `
     -Dir    "$d_ruby/bootstraptest" `
     -TimeLimit 200
 }
@@ -196,8 +199,18 @@ function Test-All {
   # for rubygems/test_bundled_ca.rb
   $env:TEST_SSL = '1'
 
-  $args = "--disable=gems -rdevkit ./runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `
-    " -v --show-skip --retry --job-status=normal --timeout-scale=1.5"
+  if ($build_sys -ne 'mswin') {
+    $args = "--disable=gems -rdevkit ./runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `
+      " -v --show-skip --retry --job-status=normal --timeout-scale=1.5"
+  } else {
+    $args = "--disable=gems ./runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `
+      " -v --show-skip --retry --job-status=normal --timeout-scale=1.5"
+  }
+
+  # find absolute path for ruby repo
+  $test_dir = ((Get-Item "$d_ruby").LinkType -eq $null) ?
+    "$d_ruby/test" : 
+    "$(Get-Item "$d_ruby" | Select-Object -ExpandProperty Target)/test"
 
   Run-Proc `
     -exe    $ruby_exe `
@@ -205,7 +218,7 @@ function Test-All {
     -StdOut "test_all.log" `
     -StdErr "test_all_err.log" `
     -Title  "test-all" `
-    -Dir    "$d_ruby/test" `
+    -Dir    "$test_dir" `
     -TimeLimit 3000
 
   # comment out below to allow full testing of Appveyor artifact
@@ -232,9 +245,15 @@ function Test-Reline {
 function MSpec {
   $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
+  if ($build_sys -ne 'mswin') {
+    $args = "-rdevkit ../mspec/bin/mspec -j -fd -I$d_ruby/tool/lib"
+  } else {
+    $args = "../mspec/bin/mspec -j -fd -I$d_ruby/tool/lib"
+  }
+
   Run-Proc `
     -exe    "ruby.exe" `
-    -e_args "-rdevkit ../mspec/bin/mspec -j -fd -I$d_ruby/tool/lib" `
+    -e_args $args `
     -StdOut "test_mspec.log" `
     -StdErr "test_mspec_err.log" `
     -Title  "test-mspec" `
@@ -244,14 +263,19 @@ function MSpec {
 
 #————————————————————————————————————————————————————————————————————————— setup
 cd $PSScriptRoot
-. ./0_common.ps1
+. ./0_common.ps1 $args
 Set-Variables
+
+# apply patches for testing
+Apply-Patches "patches_basic_boot"
+Apply-Patches "patches_spec"
+Apply-Patches "patches_test"
 
 $ruby_exe  = "$d_install/bin/ruby.exe"
 $abi       = &$ruby_exe -e "print RbConfig::CONFIG['ruby_version']"
 $script:time_info = ''
 
-$env:PATH = "$d_install/bin;$base_path"
+$env:PATH = "$d_install/bin;$no_ruby_path"
 
 if ($env:DESTDIR) { Remove-Item env:\DESTDIR }
 if ($env:BUNDLER_VERSION) { Remove-Item env:\BUNDLER_VERSION }
@@ -268,12 +292,11 @@ $m_start = Get-Date
 EchoC $($dash * 92) yel
 ruby -ropenssl -e "puts RUBY_DESCRIPTION, OpenSSL::OPENSSL_LIBRARY_VERSION"
 
-EchoC "$($dash * 74) Install debug, rbs and `'tz`' gems" yel
-gem install debug rbs --no-document --norc --no-user-install
+EchoC "$dash_hdr Install `'tz`' gems" yel
 gem install `"timezone:>=1.3.16`" `"tzinfo:>=2.0.4`" `"tzinfo-data:>=1.2022.1`" --no-document --conservative --norc --no-user-install
 
 # CLI-Test
-EchoC "$($dash * 74) CLI Test" yel
+EchoC "$dash_hdr CLI Test" yel
 echo "bundle version: $(bundle version)" ; $exit_code += [int](0 + $LastExitCode)
 echo "gem  --version: $(gem --version)"  ; $exit_code += [int](0 + $LastExitCode)
 echo "irb  --version: $(irb --version)"  ; $exit_code += [int](0 + $LastExitCode)
@@ -281,23 +304,33 @@ echo "racc --version: $(racc --version)" ; $exit_code += [int](0 + $LastExitCode
 echo "rake --version: $(rake --version)" ; $exit_code += [int](0 + $LastExitCode)
 echo "rbs  --version: $(rbs --version)"  ; $exit_code += [int](0 + $LastExitCode)
 echo "rdoc --version: $(rdoc --version)" ; $exit_code += [int](0 + $LastExitCode)
-echo "ridk   version:"
-ridk version
+if ($build_sys -ne 'mswin') {
+  echo "ridk   version:"
+  ridk version
+}
 
 echo ''
-EchoC "$($dash * 74) Runs Tests" yel
+EchoC "$dash_hdr Run Tests" yel
 
 BasicTest
 sleep 2
 BootStrapTest
 sleep 2
+
+if ($build_sys -ne 'mswin') {
+  if (Test-Path -Path $d_install/lib/ruby/$abi/$rarch/readline.so -PathType Leaf ) {
+    ren "$d_install/lib/ruby/$abi/$rarch/readline.so" "readline.so_"
+  }
+}
+
 Test-All
 sleep 5
 Test-Reline
 sleep 5
-
 MSpec
 
-ren "$d_install/lib/ruby/$abi/$rarch/readline.so" "readline.so_"
+if (Test-Path -Path $d_install/lib/ruby/$abi/$rarch/readline.so -PathType Leaf ) {
+  ren "$d_install/lib/ruby/$abi/$rarch/readline.so" "readline.so_"
+}
 
 Finish

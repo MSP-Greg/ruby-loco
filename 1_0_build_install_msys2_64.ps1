@@ -6,163 +6,6 @@ Assumes '7z             ' is installed at $env:ProgramFiles\7-Zip
 For local use, set items in local.ps1
 #>
 
-#————————————————————————————————————————————————————————————————— Apply-Patches
-# Applies patches
-function Apply-Patches($p_dir) {
-  if (Test-Path -Path $p_dir -PathType Container ) {
-    $patch_exe = "$d_msys2/usr/bin/patch.exe"
-    Push-Location "$d_repo/$p_dir"
-    [string[]]$patches = Get-ChildItem -Include *.patch -Path . -Recurse |
-      select -expand name
-    Pop-Location
-    if ($patches.length -ne 0) {
-      Push-Location "$d_ruby"
-      foreach ($p in $patches) {
-        if ($p.StartsWith("__")) { continue }
-        EchoC "$($dash * 55) $p" yel
-        & $patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p"
-      }
-      Pop-Location
-    }
-    Write-Host ''
-  }
-}
-
-#————————————————————————————————————————————————————————————————— Apply-Install-Patches
-# Applies patches in install folder
-function Apply-Install-Patches($p_dir) {
-  $patch_exe = "$d_msys2/usr/bin/patch.exe"
-  Push-Location "$d_repo/$p_dir"
-  [string[]]$patches = Get-ChildItem -Include *.patch -Path . -Recurse |
-    select -expand name
-  Pop-Location
-  Push-Location "$d_install"
-  foreach ($p in $patches) {
-    EchoC "$($dash * 55) $p" yel
-    & $patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p"
-  }
-  Pop-Location
-  Write-Host ''
-}
-
-#————————————————————————————————————————————————————————————————— Files-Hide
-# Hides files for compiling/linking
-function Files-Hide($f_ary) {
-  foreach ($f in $f_ary) {
-    if (Test-Path -Path $f -PathType Leaf ) { ren $f ($f + '__') }
-  }
-}
-
-#————————————————————————————————————————————————————————————————— Files-Unhide
-# UnHides files previously hidden
-function Files-Unhide($f_ary) {
-  foreach ($f in $f_ary) {
-    if (Test-Path -Path ($f + '__') -PathType Leaf ) { ren ($f + '__') $f }
-  }
-}
-
-#———————————————————————————————————————————————————————————————— Print-Time-Log
-function Print-Time-Log {
-  $diff = New-TimeSpan -Start $script:time_start -End $script:time_old
-  $script:time_info += ("{0:mm}:{0:ss} {1}" -f @($diff, "Total"))
-
-  EchoC $($dash * 80) yel
-  Write-Host $script:time_info
-  $fn = "$d_logs/time_log_build.log"
-  [IO.File]::WriteAllText($fn, $script:time_info, $UTF8)
-  if ($is_av) {
-    Add-AppveyorMessage -Message "Time Log Build" -Details $script:time_info
-  }
-}
-
-#—————————————————————————————————————————————————————————————————————— Time-Log
-function Time-Log($msg) {
-  if ($script:time_old) {
-    $time_new = Get-Date
-    $diff = New-TimeSpan -Start $time_old -End $time_new
-    $script:time_old = $time_new
-    $script:time_info += ("{0:mm}:{0:ss} {1}`n" -f @($diff, $msg))
-  } else {
-    $script:time_old   = Get-Date
-    $script:time_start = $script:time_old
-  }
-}
-
-#———————————————————————————————————————————————————————————————————— Check-Exit
-# checks whether to exit
-function Check-Exit($msg, $pop) {
-  if ($LastExitCode -and $LastExitCode -ne 0) {
-    if ($pop) { Pop-Location }
-    EchoC "Failed - $msg" yel
-    exit 1
-  }
-}
-
-#———————————————————————————————————————————————————————————————— Create-Folders
-# creates build, install, log, and git folders at same place as ruby repo folder
-# most of the code is for local builds, as the folders should be cleaned
-
-function Create-Folders {
-  # reset to read/write
-  (Get-Item $d_repo).Attributes = 'Normal'
-
-  # create (or clean) build & install
-  if (Test-Path -Path $d_build   -PathType Container ) {
-    Remove-Read-Only  $d_build
-    Remove-Item -Path $d_build   -Recurse
-  }
-
-  if (Test-Path -Path $d_install -PathType Container ) {
-    Remove-Read-Only  $d_install
-    Remove-Item -Path $d_install -Recurse
-  }
-
-  # Don't erase contents of log folder
-  if (Test-Path -Path $d_logs    -PathType Container ) {
-    Remove-Read-Only  $d_logs
-  } else {
-    New-Item    -Path $d_logs    -ItemType Directory 1> $null
-  }
-
-  # create git symlink, which RubyGems seems to want
-  if (!(Test-Path -Path $d_repo/git -PathType Container )) {
-        New-Item  -Path $d_repo/git -ItemType Junction -Value $d_git 1> $null
-  }
-
-  # Create download cache
-  $dlc = ".downloaded-cache"
-  if (!(Test-Path -Path $d_repo/$dlc -PathType Container )) {
-         New-Item -Path $d_repo/$dlc -ItemType Directory 1> $null
-  }
-
-  # create download cache symlink
-  if (!(Test-Path -Path $d_repo/ruby/$dlc -PathType Container )) {
-        New-Item  -Path $d_repo/ruby/$dlc -ItemType Junction -Value $d_repo/$dlc 1> $null
-  }
-
-  New-Item -Path $d_build   -ItemType Directory 1> $null
-  New-Item -Path $d_install -ItemType Directory 1> $null
-}
-
-#——————————————————————————————————————————————————————————————————————————— Run
-# Run a command and check for error
-function Run($e_msg, $exec) {
-  $orig = $ErrorActionPreference
-  $ErrorActionPreference = 'Continue'
-
-  if ($is_actions) {
-    echo "##[group]$(color $e_msg yel)"
-  } else {
-    echo "$e_msg"
-  }
-
-  &$exec
-
-  Check-Exit $eMsg
-  $ErrorActionPreference = $orig
-  if ($is_actions) { echo ::[endgroup] }
-}
-
 #——————————————————————————————————————————————————————————————————— Strip-Build
 # Strips dll & so files in build folder
 function Strip-Build {
@@ -196,7 +39,7 @@ function Strip-Build {
   }
   $msg = "Build:   Stripped {0,2} dll files, {1,2} exe files, and {2,3} so files" -f `
     @($dlls.length, $exes.length, $sos.length)
-  EchoC $($dash * 80) yel
+  EchoC $dash_line yel
   echo $msg
   Pop-Location
 }
@@ -238,13 +81,13 @@ function Strip-Install {
 
   $msg = "Install: Stripped {0,2} dll files, {1,2} exe files, and {2,3} so files" -f `
     @($dlls.length, $exes.length, $sos.length)
-  EchoC $($dash * 80) yel
+  EchoC $dash_line yel
   echo $msg
   Pop-Location
 }
 
-#————————————————————————————————————————————————————————————————— Set-Variables
-# set base variables, including MSYS2 location and bit related varis
+#————————————————————————————————————————————————————————————————— Set-Variables-Local
+# set variables only used in this script
 function Set-Variables-Local {
   $script:ruby_path = $(ruby.exe -e "puts RbConfig::CONFIG['bindir']").trim().replace('\', '/')
   $script:time_info = ''
@@ -271,7 +114,7 @@ function Set-Env {
 #——————————————————————————————————————————————————————————————————— start build
 cd $PSScriptRoot
 
-. ./0_common.ps1
+. ./0_common.ps1 $args
 Set-Variables
 Set-Variables-Local
 Set-Env
@@ -288,7 +131,7 @@ $files = "$d_msys2$env:MINGW_PREFIX/lib/libz.dll.a",
 
 Files-Hide $files
 
-Apply-Patches "patches"
+Apply-Patches "msys2_patches"
 
 Create-Folders
 
@@ -373,11 +216,6 @@ Pop-Location
 # apply patches to install folder
 # Apply-Install-Patches "patches_install"
 
-# apply patches for testing
-Apply-Patches "patches_basic_boot"
-Apply-Patches "patches_spec"
-Apply-Patches "patches_test"
-
 if (Test-Path Env:\SOURCE_DATE_EPOCH ) { Remove-Item Env:\SOURCE_DATE_EPOCH }
 
 $ruby_exe  = "$d_install/bin/ruby.exe"
@@ -388,3 +226,4 @@ if (-not ($ruby_v -cmatch "$rarch\]\z")) {
 } else {
   Write-Host $ruby_v
 }
+$env:Path = $orig_path
