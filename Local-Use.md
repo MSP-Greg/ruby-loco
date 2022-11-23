@@ -49,7 +49,7 @@ mingw or ucrt (defaults to ucrt)
 ./1_0_build_install_64.ps1 <mingw|ucrt> 
 
 mswin
-./1_0_mswin.ps1
+./1_0_build_install_mswin.ps1
 ```
 
 The below command runs all test suites:

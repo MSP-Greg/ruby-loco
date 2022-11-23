@@ -226,7 +226,7 @@ function Apply-Patches($p_dir) {
         if ($patch_log -match 'offset|fuzz') {
           if ($fix -eq 'grn') { $fix = 'yel'}
           $log += $(EchoC "$p" yel)
-        } elseif ($patch_log -match 'failed') {
+        } elseif ($patch_log -match 'FAILED') {
           $log += $(EchoC "$p" red)
           $fix = 'red'
         } else {
