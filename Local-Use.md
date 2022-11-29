@@ -1,5 +1,8 @@
 ## Local Building Instructions
 
+**Important Note:** ruby-loco is designed to build from the [ruby/ruby repo](https://github.com/ruby/ruby), not from
+tarballs downloaded from https://www.ruby-lang.org/en/downloads/.
+
 ### Prerequisites
 
 1. Clone or fork of this repo
