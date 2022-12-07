@@ -36,4 +36,6 @@ printf "rdoc --version: "
 rdoc --version
 error=$((error + $?))
 
+ruby -v
+
 if [ "$error" != 0 ]; then exit 1; fi
