@@ -68,20 +68,20 @@ function Set-Variables {
   if ($build_sys -eq "msys2" -or $env:MAKE -eq "make.exe") {
     Switch ($env:MSYSTEM) {
       "UCRT64"  {
-        $script:install = "ruby-ucrt"
+        $script:install = [string]::IsNullOrWhiteSpace($env:PRE) ? "ruby-ucrt" : $env:PRE
         $env:MINGW_PREFIX = "/ucrt64"
         $env:MINGW_PACKAGE_PREFIX = "mingw-w64-ucrt-x86_64"
         $script:march = "x86-64" ; $script:carch = "x86_64" ; $script:rarch = "x64-mingw-ucrt"
       }
       "MINGW32" {
-        $script:install = "ruby-mingw32"
+        $script:install = [string]::IsNullOrWhiteSpace($env:PRE) ? "ruby-mingw32" : $env:PRE
         $env:MINGW_PREFIX = "/mingw32"
         $env:MINGW_PACKAGE_PREFIX = "mingw-w64-i686"
         $script:march = "i686"   ; $script:carch = "i686"   ; $script:rarch = "i386-mingw32"
       }
       default   {
         $env:MSYSTEM = "MINGW64"
-        $script:install = "ruby-mingw"
+        $script:install = [string]::IsNullOrWhiteSpace($env:PRE) ? "ruby-mingw" : $env:PRE
         $env:MINGW_PREFIX = "/mingw64"
         $env:MINGW_PACKAGE_PREFIX = "mingw-w64-x86_64"
         $script:march = "x86-64" ; $script:carch = "x86_64" ; $script:rarch = "x64-mingw32"
@@ -101,7 +101,7 @@ function Set-Variables {
     $env:CHOST        = $chost
     $env:MAKE         = "make.exe"
   } else {
-    $script:install = "ruby-mswin"
+    $script:install = [string]::IsNullOrWhiteSpace($env:PRE) ? "ruby-mswin" : $env:PRE
     $script:rarch   = "x64-mswin64_140"
     $env:MAKE       = "nmake.exe"
   }

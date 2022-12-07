@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
     runs-on: windows-${{ matrix.vs }}
     env:
-      RL_DIR: ruby-mswin
+      PRE: ruby-mswin
 
     steps:
       - name: git config
@@ -65,7 +65,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          ruby_path: ./${{ env.RL_DIR }}
+          ruby_path: ./${{ env.PRE }}
 
       - name: save log artifact
         if: success() || failure()
