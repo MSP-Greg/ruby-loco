@@ -51,23 +51,6 @@ module CopyBashScripts
         File.write fn, windows_script, mode: 'wb:UTF-8'
       end
     end
-
-    def fix_rbs_debug_ext
-      [ {g_name: 'debug', g_so: 'debug/debug.so'},
-        {g_name: 'rbs'  , g_so: 'rbs_extension.so'}
-      ].each do |h|
-        gem_path = Dir.glob("#{Gem.default_dir}/gems/#{h[:g_name]}-*").first
-        gem_name = File.basename gem_path
-        unless File.exist? "#{gem_path}/lib/#{h[:g_so]}"
-          ext_path = "#{Gem.default_dir}/extensions/#{RUBY_PLATFORM.tr '_', '-'}/" \
-            "#{RbConfig::CONFIG['ruby_version']}/#{gem_name}/#{h[:g_so]}"
-          if File.exist? ext_path
-            FileUtils.cp ext_path, "#{gem_path}/lib/#{h[:g_so]}"
-          end
-        end
-      end
-    end
   end
 end
 CopyBashScripts.run
-CopyBashScripts.fix_rbs_debug_ext

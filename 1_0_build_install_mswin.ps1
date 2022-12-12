@@ -56,12 +56,12 @@ Time-Log "configure"
 Remove-Read-Only $d_ruby
 Remove-Read-Only $d_build
 
-Run "nmake incs" { iex "nmake incs" }
+Run "nmake incs" { nmake incs }
 Time-Log "make incs"
 
 $env:Path = "$d_vcpkg_install\bin;$env:Path"
 
-Run "nmake" { iex "nmake" }
+Run "nmake" { nmake }
 Time-Log "nmake"
 
 Files-Unhide $files
