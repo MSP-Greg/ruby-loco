@@ -1,5 +1,5 @@
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index dd2440b068..43a9645c8d 100644
+index ea8aebb785..d05258b286 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
 @@ -991,7 +991,7 @@ def test_self_platforms
@@ -11,7 +11,7 @@ index dd2440b068..43a9645c8d 100644
    end
  
    def test_self_prefix_libdir
-@@ -2139,6 +2139,8 @@ def with_local_bundler_at(path)
+@@ -2134,6 +2134,8 @@ def with_local_bundler_at(path)
  
      # If bundler gemspec exists, pretend it's installed
      bundler_gemspec = File.expand_path("../../bundler/bundler.gemspec", __dir__)
@@ -56,7 +56,7 @@ index 1b70eac9eb..e8900c1ed8 100644
      assert_equal "--previous-version", arguments.shift
      assert_equal Gem::VERSION,         arguments.shift
 diff --git a/test/rubygems/test_require.rb b/test/rubygems/test_require.rb
-index 222bdcfb28..433be477e6 100644
+index dff945f625..e8d24d9980 100644
 --- a/test/rubygems/test_require.rb
 +++ b/test/rubygems/test_require.rb
 @@ -451,7 +451,7 @@ def test_realworld_default_gem

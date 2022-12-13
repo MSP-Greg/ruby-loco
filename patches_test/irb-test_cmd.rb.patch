@@ -1,9 +1,9 @@
 Change asserts to use install folder. not build folder
 diff --git a/test/irb/test_cmd.rb b/test/irb/test_cmd.rb
-index 4c39dc0d21..f646443dc3 100644
+index 719a2bbf8f..ffa10bcb73 100644
 --- a/test/irb/test_cmd.rb
 +++ b/test/irb/test_cmd.rb
-@@ -633,7 +633,7 @@ def test_edit_with_constant
+@@ -664,7 +664,7 @@ def test_edit_with_constant
          )
  
          assert_empty err
@@ -12,7 +12,7 @@ index 4c39dc0d21..f646443dc3 100644
          assert_match("command: ': code'", out)
        end
  
-@@ -643,7 +643,7 @@ def test_edit_with_class_method
+@@ -674,7 +674,7 @@ def test_edit_with_class_method
          )
  
          assert_empty err
@@ -21,7 +21,7 @@ index 4c39dc0d21..f646443dc3 100644
          assert_match("command: ': code'", out)
        end
  
-@@ -653,7 +653,7 @@ def test_edit_with_instance_method
+@@ -684,7 +684,7 @@ def test_edit_with_instance_method
          )
  
          assert_empty err
