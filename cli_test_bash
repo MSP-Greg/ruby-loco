@@ -32,6 +32,10 @@ printf "rbs  --version: "
 rbs --version
 error=$((error + $?))
 
+printf "rdbg --version: "
+rdbg --version
+error=$((error + $?))
+
 printf "rdoc --version: "
 rdoc --version
 error=$((error + $?))

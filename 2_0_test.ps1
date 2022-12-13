@@ -301,6 +301,7 @@ echo "irb  --version: $(irb --version)"  ; $exit_code += [int](0 + $LastExitCode
 echo "racc --version: $(racc --version)" ; $exit_code += [int](0 + $LastExitCode)
 echo "rake --version: $(rake --version)" ; $exit_code += [int](0 + $LastExitCode)
 echo "rbs  --version: $(rbs --version)"  ; $exit_code += [int](0 + $LastExitCode)
+echo "rdbg --version: $(rdbg --version)" ; $exit_code += [int](0 + $LastExitCode)
 echo "rdoc --version: $(rdoc --version)" ; $exit_code += [int](0 + $LastExitCode)
 if ($build_sys -ne 'mswin') {
   echo "ridk   version:"
