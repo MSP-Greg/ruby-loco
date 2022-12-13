@@ -161,7 +161,7 @@ Run "sh -c ./autogen.sh" { sh -c "./autogen.sh" }
 cd $d_build
 Time-Log "start"
 
-$config_args = "--build=$chost --host=$chost --target=$chost --with-out-ext=pty,syslog"
+$config_args = "--build=$chost --host=$chost --target=$chost"
 Run "sh -c `"../ruby/configure --disable-install-doc --prefix=$d_install $config_args`"" {
   sh -c "../ruby/configure --disable-install-doc --prefix=$d_install $config_args"
 }
