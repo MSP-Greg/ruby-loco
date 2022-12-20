@@ -1,8 +1,8 @@
 diff --git a/test/ruby/test_process.rb b/test/ruby/test_process.rb
-index 10c4aadadf..6165c42d57 100644
+index 1d04d22631..38a51ef94f 100644
 --- a/test/ruby/test_process.rb
 +++ b/test/ruby/test_process.rb
-@@ -24,6 +24,10 @@ def self.windows?
+@@ -23,6 +23,10 @@ def self.windows?
      return /mswin|mingw|bccwin/ =~ RUBY_PLATFORM
    end
  
@@ -13,7 +13,7 @@ index 10c4aadadf..6165c42d57 100644
    def write_file(filename, content)
      File.open(filename, "w") {|f|
        f << content
-@@ -321,7 +325,11 @@ def test_execopts_env
+@@ -320,7 +324,11 @@ def test_execopts_env
      end
      cmd << '-e' << 'puts ENV.keys.map{|e|e.upcase}'
      IO.popen(cmd) {|io|
@@ -26,7 +26,7 @@ index 10c4aadadf..6165c42d57 100644
      }
  
      IO.popen([{"FOO"=>"BAR"}, *ENVCOMMAND]) {|io|
-@@ -445,10 +453,19 @@ def test_execopts_unsetenv_others
+@@ -444,10 +452,19 @@ def test_execopts_unsetenv_others
      h = {}
      MANDATORY_ENVS.each {|k| e = ENV[k] and h[k] = e}
      IO.popen([h, *ENVCOMMAND, :unsetenv_others=>true]) {|io|
