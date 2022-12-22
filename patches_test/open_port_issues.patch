@@ -34,7 +34,7 @@ index 945cc7c48e..05f216f747 100644
          ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port, "127.0.0.1", random_port, context: ctx)
          ssl.sync_close = true
 diff --git a/test/socket/test_addrinfo.rb b/test/socket/test_addrinfo.rb
-index 832a1f8d05..749c732017 100644
+index 832a1f8d05..595f6fefb4 100644
 --- a/test/socket/test_addrinfo.rb
 +++ b/test/socket/test_addrinfo.rb
 @@ -360,22 +360,28 @@ def test_family_addrinfo
@@ -42,7 +42,7 @@ index 832a1f8d05..749c732017 100644
    end
  
 -  def random_port
-+  def get_random_port(host = '127.0.0.1')
++  def random_port(host = '127.0.0.1')
      # IANA suggests dynamic port for 49152 to 65535
      # http://www.iana.org/assignments/port-numbers
 -    case RUBY_PLATFORM
@@ -64,7 +64,7 @@ index 832a1f8d05..749c732017 100644
 +  rescue Errno::EADDRINUSE, Errno::EACCES
 +    true
    end
-+  private :port_in_use?, :get_random_port
++  private :port_in_use?, :random_port
  
    def errors_addrinuse
 -    errs = [Errno::EADDRINUSE]
@@ -77,10 +77,10 @@ index 832a1f8d05..749c732017 100644
  
    def test_connect_from
 diff --git a/test/socket/test_socket.rb b/test/socket/test_socket.rb
-index e3ce2b920e..cf9bae11d7 100644
+index e3ce2b920e..ec5ae0d0b2 100644
 --- a/test/socket/test_socket.rb
 +++ b/test/socket/test_socket.rb
-@@ -156,30 +156,34 @@ def test_tcp_cloexec
+@@ -156,26 +156,30 @@ def test_tcp_cloexec
            s2.close
          end
        }
@@ -89,7 +89,7 @@ index e3ce2b920e..cf9bae11d7 100644
    end
  
 -  def random_port
-+  def get_random_port(host = '127.0.0.1')
++  def random_port(host = '127.0.0.1')
      # IANA suggests dynamic port for 49152 to 65535
      # http://www.iana.org/assignments/port-numbers
 -    case RUBY_PLATFORM
@@ -111,7 +111,7 @@ index e3ce2b920e..cf9bae11d7 100644
 +  rescue Errno::EADDRINUSE, Errno::EACCES
 +    true
    end
-+  private :port_in_use?, :get_random_port
++  private :port_in_use?, :random_port
  
    def errors_addrinuse
 -    errs = [Errno::EADDRINUSE]
@@ -123,8 +123,3 @@ index e3ce2b920e..cf9bae11d7 100644
    end
  
    def test_tcp_server_sockets
--    port = random_port
-+    port = get_random_port
-     begin
-       sockets = Socket.tcp_server_sockets(port)
-     rescue *errors_addrinuse
