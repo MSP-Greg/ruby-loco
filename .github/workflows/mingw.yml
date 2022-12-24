@@ -35,7 +35,7 @@ jobs:
         timeout-minutes: 8
         uses: ruby/setup-ruby-pkgs@v1
         with:
-          ruby-version: 3.1
+          ruby-version: '3.0'
           mingw: clang
 
       - name: Install/Update Rust
