@@ -39,6 +39,17 @@ jobs:
         with:
           ruby-version: mswin
 
+      - name: Install/Update Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: x86_64-pc-windows-msvc-stable
+          components: rustfmt
+
+      - name: Configure bindgen
+        run: |
+          echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
+          echo "BINDGEN_EXTRA_CLANG_ARGS=$((gcm clang).source -replace "bin\clang.exe","include")" >> $env:GITHUB_ENV
+
       - name: Cache - .downloaded-cache
         uses: actions/cache@v3
         with:

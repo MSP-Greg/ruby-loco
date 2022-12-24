@@ -33,12 +33,19 @@ jobs:
 
       - name: Set up Ruby & MSYS2
         timeout-minutes: 8
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby-pkgs@v1
         with:
           ruby-version: 3.1
+          mingw: clang
 
-      - name: install rust
-        run: pacman -S --noconfirm --noprogressbar --needed mingw-w64-ucrt-x86_64-rust
+      - name: Install/Update Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: x86_64-pc-windows-gnu-stable
+          components: rustfmt
+
+#      - name: install rust
+#        run: pacman -S --noconfirm --noprogressbar --needed mingw-w64-ucrt-x86_64-rust
 
       - name: Cache - .downloaded-cache
         uses: actions/cache@v3
