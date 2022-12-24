@@ -41,7 +41,7 @@ jobs:
       - name: Install/Update Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: x86_64-pc-windows-gnu-stable
+          toolchain: stable-x86_64-pc-windows-gnu
           components: rustfmt
 
 #      - name: install rust
