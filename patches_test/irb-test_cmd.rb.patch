@@ -1,32 +1,42 @@
-Change asserts to use install folder. not build folder
 diff --git a/test/irb/test_cmd.rb b/test/irb/test_cmd.rb
-index 719a2bbf8f..ffa10bcb73 100644
+index b909de56e5..28a44fb0f2 100644
 --- a/test/irb/test_cmd.rb
 +++ b/test/irb/test_cmd.rb
-@@ -664,7 +664,7 @@ def test_edit_with_constant
-         )
+@@ -7,6 +7,10 @@
  
-         assert_empty err
--        assert_match(/path: .*\/lib\/irb\.rb/, out)
-+        assert_includes out, "path: #{RbConfig::CONFIG['rubylibdir']}/irb.rb"
-         assert_match("command: ': code'", out)
-       end
+ module TestIRB
+   class CommandTestCase < TestCase
++  
++    # used for running tests from install folder
++    LIB_PATH = RbConfig::CONFIG['rubylibdir']
++      
+     def setup
+       @pwd = Dir.pwd
+       @tmpdir = File.join(Dir.tmpdir, "test_reline_config_#{$$}")
+@@ -680,7 +684,7 @@ def test_edit_with_constant
+       )
  
-@@ -674,7 +674,7 @@ def test_edit_with_class_method
-         )
- 
-         assert_empty err
--        assert_match(/path: .*\/lib\/irb\.rb/, out)
-+        assert_includes out, "path: #{RbConfig::CONFIG['rubylibdir']}/irb.rb"
-         assert_match("command: ': code'", out)
-       end
- 
-@@ -684,7 +684,7 @@ def test_edit_with_instance_method
-         )
- 
-         assert_empty err
--        assert_match(/path: .*\/lib\/irb\.rb/, out)
-+        assert_includes out, "path: #{RbConfig::CONFIG['rubylibdir']}/irb.rb"
-         assert_match("command: ': code'", out)
-       end
+       assert_empty err
+-      assert_match(/path: .*\/lib\/irb\.rb/, out)
++      assert_include out, "path: #{LIB_PATH}/irb.rb"
+       assert_match("command: ': code'", out)
      end
+ 
+@@ -690,7 +694,7 @@ def test_edit_with_class_method
+       )
+ 
+       assert_empty err
+-      assert_match(/path: .*\/lib\/irb\.rb/, out)
++      assert_include out, "path: #{LIB_PATH}/irb.rb"
+       assert_match("command: ': code'", out)
+     end
+ 
+@@ -700,7 +704,7 @@ def test_edit_with_instance_method
+       )
+ 
+       assert_empty err
+-      assert_match(/path: .*\/lib\/irb\.rb/, out)
++      assert_include out, "path: #{LIB_PATH}/irb.rb"
+       assert_match("command: ': code'", out)
+     end
+   end
