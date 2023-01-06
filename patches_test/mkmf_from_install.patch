@@ -1,12 +1,11 @@
 diff --git a/test/mkmf/base.rb b/test/mkmf/base.rb
-index ec42bca100..b0702aeb9c 100644
+index ec42bca100..192a6f7dd3 100644
 --- a/test/mkmf/base.rb
 +++ b/test/mkmf/base.rb
-@@ -1,24 +1,16 @@
+@@ -1,14 +1,12 @@
  # frozen_string_literal: false
 -$extmk = true
-+
- require 'rbconfig'
+-require 'rbconfig'
 -RbConfig.fire_update!("top_srcdir", File.expand_path("../..", __dir__))
 -File.foreach(RbConfig::CONFIG["topdir"]+"/Makefile") do |line|
 -  if /^CC_WRAPPER\s*=\s*/ =~ line
@@ -19,16 +18,8 @@ index ec42bca100..b0702aeb9c 100644
 +rescue LoadError
  end
  
++$extmk = true
++require 'rbconfig'
  require 'test/unit'
  require 'mkmf'
  require 'tmpdir'
- 
--$extout = '$(topdir)/'+RbConfig::CONFIG["EXTOUT"]
--RbConfig::CONFIG['topdir'] = CONFIG['topdir'] = File.expand_path(CONFIG['topdir'])
--RbConfig::CONFIG["extout"] = CONFIG["extout"] = $extout
--$INCFLAGS << " -I."
--$extout_prefix = "$(extout)$(target_prefix)/"
--
- class TestMkmf < Test::Unit::TestCase
-   module Base
-     MKMFLOG = proc {File.read("mkmf.log") rescue ""}
