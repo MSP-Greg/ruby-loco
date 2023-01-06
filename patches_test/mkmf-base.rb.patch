@@ -1,0 +1,20 @@
+diff --git a/test/mkmf/base.rb b/test/mkmf/base.rb
+index ec42bca100..ce6fd0fe7d 100644
+--- a/test/mkmf/base.rb
++++ b/test/mkmf/base.rb
+@@ -1,6 +1,7 @@
+ # frozen_string_literal: false
+ $extmk = true
+ require 'rbconfig'
++=begin
+ RbConfig.fire_update!("top_srcdir", File.expand_path("../..", __dir__))
+ File.foreach(RbConfig::CONFIG["topdir"]+"/Makefile") do |line|
+   if /^CC_WRAPPER\s*=\s*/ =~ line
+@@ -8,6 +9,7 @@
+     break
+   end
+ end
++=end
+ 
+ require 'test/unit'
+ require 'mkmf'
