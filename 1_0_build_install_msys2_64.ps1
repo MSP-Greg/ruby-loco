@@ -181,6 +181,7 @@ Files-Unhide $files
 
 Run "make install-nodoc" {
   make install-nodoc
+  Check-Exit "'make install-nodoc' failure"
   cd $d_repo
   ruby 1_2_post_install.rb
   Check-Exit "'ruby 1_2_post_install.rb' failure"
