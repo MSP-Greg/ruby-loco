@@ -154,18 +154,21 @@ if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") {
   # echo "SOURCE_DATE_EPOCH = $env:SOURCE_DATE_EPOCH"
 }
 
-# Run "sh -c `"autoreconf -fi`"" { sh -c "autoreconf -fi" }
-
-Run "sh -c ./autogen.sh" { sh -c "./autogen.sh" }
-
-cd $d_build
 Time-Log "start"
 
-$config_args = "--build=$chost --host=$chost --target=$chost"
-Run "sh -c `"../ruby/configure --disable-install-doc --prefix=$d_install $config_args`"" {
-  sh -c "../ruby/configure --disable-install-doc --prefix=$d_install $config_args"
+if ($env:RL_NO_CONFIG -and (Test-Path -Path "$d_build/config.status" -PathType Leaf)) {
+  cd $d_build  
+} else {
+  Run "sh -c ./autogen.sh" { sh -c "./autogen.sh" }
+
+  cd $d_build
+
+  $config_args = "--build=$chost --host=$chost --target=$chost"
+  Run "sh -c `"../ruby/configure --disable-install-doc --prefix=$d_install $config_args`"" {
+    sh -c "../ruby/configure --disable-install-doc --prefix=$d_install $config_args"
+  }
+  Time-Log "configure"
 }
-Time-Log "configure"
 
 # below sets some directories to normal in case they're set to read-only
 Remove-Read-Only $d_ruby
@@ -209,9 +212,11 @@ Time-Log "make install-nodoc"
 
 #Time-Log "post install processing"
 
-Strip-Build
-Strip-Install
-Time-Log "strip build & install binary files"
+if (!$env:RL_NO_STRIP) {
+  Strip-Build
+  Strip-Install
+  Time-Log "strip build & install binary files"
+}
 
 Print-Time-Log
 
