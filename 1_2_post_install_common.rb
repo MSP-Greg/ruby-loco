@@ -18,7 +18,7 @@ module PostInstall2Common
       D_INSTALL = File.join __dir__, 'ruby-mingw'
     end
     D_MSYS2 = ENV['D_MSYS2']
-    D_SSL_CNF = "#{D_MSYS2}#{ENV['MINGW_PREFIX']}/ssl"
+    D_SSL_CNF = "#{D_MSYS2}#{ENV['MINGW_PREFIX']}/etc/ssl"
   end
 
   D_RI2   = File.join __dir__, 'rubyinstaller2'
