@@ -7,9 +7,9 @@ index 8fd6e6cb77..ce311d2fe1 100644
 @@ -1,3 +1,11 @@
 +begin
 +  require 'rbconfig' unless defined?(RbConfig)
-+  ENV['SSL_CERT_FILE'] = "#{RbConfig::TOPDIR}/ssl/cert.pem"
-+  ENV['SSL_CERT_DIR']  = "#{RbConfig::TOPDIR}/ssl/certs"
-+  ENV['OPENSSL_CONF']  = "#{RbConfig::TOPDIR}/ssl/openssl.cnf"
++  ENV['SSL_CERT_FILE'] = "#{RbConfig::TOPDIR}/etc/ssl/cert.pem"
++  ENV['SSL_CERT_DIR']  = "#{RbConfig::TOPDIR}/etc/ssl/certs"
++  ENV['OPENSSL_CONF']  = "#{RbConfig::TOPDIR}/etc/ssl/openssl.cnf"
 +rescue LoadError => e
 +end
 +
