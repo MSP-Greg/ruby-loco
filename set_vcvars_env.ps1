@@ -7,6 +7,7 @@ May sure to set $vcvars to match you local system
 # Runs MSFT vcvars.bat and changes Powershell env
 function Set-VCVars-Env() {
   $vcvars = "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+#  $vcvars = "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 
   $data = $(iex "cmd.exe /c '`"$vcvars`" && echo QWERTY && set'")
 
@@ -29,3 +30,4 @@ function Set-VCVars-Env() {
 }
 
 Set-VCVars-Env
+$env:MAKE = 'nmake.exe'
