@@ -1,5 +1,5 @@
 diff --git a/test/irb/test_cmd.rb b/test/irb/test_cmd.rb
-index 900d9d8982..d9bd92d24d 100644
+index c2d952cc44..54b4c6e1d2 100644
 --- a/test/irb/test_cmd.rb
 +++ b/test/irb/test_cmd.rb
 @@ -7,6 +7,10 @@
@@ -13,7 +13,7 @@ index 900d9d8982..d9bd92d24d 100644
      def setup
        @pwd = Dir.pwd
        @tmpdir = File.join(Dir.tmpdir, "test_reline_config_#{$$}")
-@@ -693,7 +697,7 @@ def test_edit_with_constant
+@@ -805,7 +809,7 @@ def test_edit_with_constant
        )
  
        assert_empty err
@@ -22,7 +22,7 @@ index 900d9d8982..d9bd92d24d 100644
        assert_match("command: ': code'", out)
      end
  
-@@ -703,7 +707,7 @@ def test_edit_with_class_method
+@@ -815,7 +819,7 @@ def test_edit_with_class_method
        )
  
        assert_empty err
@@ -31,7 +31,7 @@ index 900d9d8982..d9bd92d24d 100644
        assert_match("command: ': code'", out)
      end
  
-@@ -713,7 +717,7 @@ def test_edit_with_instance_method
+@@ -825,7 +829,7 @@ def test_edit_with_instance_method
        )
  
        assert_empty err
