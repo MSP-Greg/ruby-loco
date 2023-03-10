@@ -1,24 +1,27 @@
 Patch by MSP-Greg
 uses gemspecs in ruby under test, not srcdir
 diff --git a/test/ruby/test_default_gems.rb b/test/ruby/test_default_gems.rb
-index 467e5ecf83..2f87463f00 100644
+index c1c81bfec0..2172c7f22d 100644
 --- a/test/ruby/test_default_gems.rb
 +++ b/test/ruby/test_default_gems.rb
-@@ -4,9 +4,14 @@
- class TestDefaultGems < Test::Unit::TestCase
- 
-   def test_validate_gemspec
--    omit "git not found" unless system("git", "rev-parse", %i[out err]=>IO::NULL)
--    srcdir = File.expand_path('../../..', __FILE__)
--    Dir.glob("#{srcdir}/{lib,ext}/**/*.gemspec").map do |src|
-+    omit "git not found" unless system("git", "--version", %i[out err]=>IO::NULL)
-+    if Dir.exist?(dflt_dir = Gem.default_specifications_dir)
-+      spec_glob = "#{dflt_dir}/*.gemspec"
-+    else
-+      srcdir = File.expand_path('../../..', __FILE__)
-+      spec_glob = "#{srcdir}/{lib,ext}/**/*.gemspec"
-+    end
-+    Dir.glob(spec_glob).map do |src|
-       assert_nothing_raised do
-         raise("invalid spec in #{src}") unless Gem::Specification.load(src)
+@@ -7,10 +7,18 @@ def test_validate_gemspec
+     srcdir = File.expand_path('../../..', __FILE__)
+     specs = 0
+     Dir.chdir(srcdir) do
+-      unless system("git", "rev-parse", %i[out err]=>IO::NULL)
++      unless system("git", "--version", %i[out err]=>IO::NULL)
+         omit "git not found"
        end
+-      Dir.glob("#{srcdir}/{lib,ext}/**/*.gemspec").map do |src|
++
++      spec_glob = if Dir.exist?(dflt_dir = Gem.default_specifications_dir)
++        "#{dflt_dir}/*.gemspec"
++      else
++        srcdir = File.expand_path('../../..', __FILE__)
++        "#{srcdir}/{lib,ext}/**/*.gemspec"
++      end
++
++      Dir.glob(spec_glob).map do |src|
+         specs += 1
+         assert_nothing_raised do
+           raise("invalid spec in #{src}") unless Gem::Specification.load(src)
