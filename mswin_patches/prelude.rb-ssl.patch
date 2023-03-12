@@ -1,15 +1,16 @@
 # Adds SSL related ENV variables for mswin builds
 # MSYS2 OpenSSL is patched to reference the exe folder, vcpkg OpenSSL is not
 diff --git a/prelude.rb b/prelude.rb
-index 8fd6e6cb77..ce311d2fe1 100644
+diff --git a/prelude.rb b/prelude.rb
+index ee78b44cc5..ea5ce43dc3 100644
 --- a/prelude.rb
 +++ b/prelude.rb
 @@ -1,3 +1,11 @@
 +begin
 +  require 'rbconfig' unless defined?(RbConfig)
-+  ENV['SSL_CERT_FILE'] = "#{RbConfig::TOPDIR}/etc/ssl/cert.pem"
-+  ENV['SSL_CERT_DIR']  = "#{RbConfig::TOPDIR}/etc/ssl/certs"
-+  ENV['OPENSSL_CONF']  = "#{RbConfig::TOPDIR}/etc/ssl/openssl.cnf"
++  ENV['SSL_CERT_FILE'] = "#{RbConfig::TOPDIR}/bin/etc/ssl/cert.pem"
++  ENV['SSL_CERT_DIR']  = "#{RbConfig::TOPDIR}/bin/etc/ssl/certs"
++  ENV['OPENSSL_CONF']  = "#{RbConfig::TOPDIR}/bin/etc/ssl/openssl.cnf"
 +rescue LoadError => e
 +end
 +
