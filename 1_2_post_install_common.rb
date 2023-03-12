@@ -42,21 +42,21 @@ module PostInstall2Common
         require_relative "rubyinstaller2/lib/ruby_installer/build/gem_version.rb"
         ca_file = RubyInstaller::Build::CaCertFile.new
         File.binwrite("resources/ssl/cacert.pem", ca_file.content)
-        Dir.mkdir "#{D_INSTALL}/etc" unless Dir.exist? "#{D_INSTALL}/etc"
-        Dir.mkdir "#{D_INSTALL}/etc/ssl" unless Dir.exist? "#{D_INSTALL}/etc/ssl"
-        Dir.mkdir "#{D_INSTALL}/etc/ssl/certs" unless Dir.exist? "#{D_INSTALL}/etc/ssl/certs"
-        cp "./resources/ssl/cacert.pem", "#{D_INSTALL}/etc/ssl/cert.pem"
+        Dir.mkdir "#{D_INSTALL}/bin/etc" unless Dir.exist? "#{D_INSTALL}/bin/etc"
+        Dir.mkdir "#{D_INSTALL}/bin/etc/ssl" unless Dir.exist? "#{D_INSTALL}/bin/etc/ssl"
+        Dir.mkdir "#{D_INSTALL}/bin/etc/ssl/certs" unless Dir.exist? "#{D_INSTALL}/bin/etc/ssl/certs"
+        cp "./resources/ssl/cacert.pem", "#{D_INSTALL}/bin/etc/ssl/cert.pem"
         puts "#{'installing ssl files:'.ljust(COL_WID)}cert.pem"
 
         src = File.join D_SSL_CNF, "openssl.cnf"
         if File.exist?(src)
-          cp src, "#{D_INSTALL}/etc/ssl/openssl.cnf"
+          cp src, "#{D_INSTALL}/bin/etc/ssl/openssl.cnf"
           puts "#{COL_SPACE}openssl.cnf"
         end
 
-        cp "./resources/ssl/README-SSL.md", "#{D_INSTALL}/etc/ssl/README-SSL.md"
+        cp "./resources/ssl/README-SSL.md", "#{D_INSTALL}/bin/etc/ssl/README-SSL.md"
         puts "#{COL_SPACE}README-SSL.md"
-        cp "./resources/ssl/c_rehash.rb", "#{D_INSTALL}/etc/ssl/c_rehash.rb"
+        cp "./resources/ssl/c_rehash.rb", "#{D_INSTALL}/bin/etc/ssl/c_rehash.rb"
         puts "#{COL_SPACE}certs\\c_rehash.rb"
       }
     end
