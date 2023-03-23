@@ -59,6 +59,46 @@ index 02dd57f660..4fed0a99f0 100644
      assert_equal "--no-document",      arguments.shift
      assert_equal "--previous-version", arguments.shift
      assert_equal Gem::VERSION,         arguments.shift
+diff --git a/test/rubygems/test_gem_ext_builder.rb b/test/rubygems/test_gem_ext_builder.rb
+index 01b40445c5..e4941dcd2b 100644
+--- a/test/rubygems/test_gem_ext_builder.rb
++++ b/test/rubygems/test_gem_ext_builder.rb
+@@ -105,7 +105,7 @@ def test_custom_make_with_options
+   end
+ 
+   def test_build_extensions
+-    pend if RUBY_PLATFORM.include?("mswin") && ENV.key?("GITHUB_ACTIONS") # not working from the beginning
++#    pend if RUBY_PLATFORM.include?("mswin") && ENV.key?("GITHUB_ACTIONS") # not working from the beginning
+     @spec.extensions << "ext/extconf.rb"
+ 
+     ext_dir = File.join @spec.gem_dir, "ext"
+@@ -141,7 +141,7 @@ def test_build_extensions
+   end
+ 
+   def test_build_extensions_with_gemhome_with_space
+-    pend if RUBY_PLATFORM.include?("mswin") && ENV.key?("GITHUB_ACTIONS") # not working from the beginning
++#    pend if RUBY_PLATFORM.include?("mswin") && ENV.key?("GITHUB_ACTIONS") # not working from the beginning
+     new_gemhome = File.join @tempdir, "gem home"
+     File.rename(@gemhome, new_gemhome)
+     @gemhome = new_gemhome
+@@ -162,7 +162,7 @@ def Gem.install_extension_in_lib
+         false
+       end
+     end
+-    pend if RUBY_PLATFORM.include?("mswin") && ENV.key?("GITHUB_ACTIONS") # not working from the beginning
++#    pend if RUBY_PLATFORM.include?("mswin") && ENV.key?("GITHUB_ACTIONS") # not working from the beginning
+ 
+     @spec.extensions << "ext/extconf.rb"
+ 
+@@ -250,7 +250,7 @@ def test_build_extensions_extconf_bad
+     gem_make_out = File.join @spec.extension_dir, "gem_make.out"
+     cmd_make_out = File.read(gem_make_out)
+ 
+-    assert_match %r{#{Regexp.escape Gem.ruby} .* extconf\.rb}, cmd_make_out
++    assert_match %r{/bin/ruby.exe( .*)? extconf\.rb}, cmd_make_out
+     assert_match %r{: No such file}, cmd_make_out
+ 
+     assert_path_not_exist @spec.gem_build_complete_path
 diff --git a/test/rubygems/test_require.rb b/test/rubygems/test_require.rb
 index 84b31d6a02..9465f68949 100644
 --- a/test/rubygems/test_require.rb
