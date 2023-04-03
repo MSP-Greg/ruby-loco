@@ -1,0 +1,12 @@
+diff --git a/test/rubygems/test_gem_ext_cargo_builder.rb b/test/rubygems/test_gem_ext_cargo_builder.rb
+index 614ae9eeaf..dc77f3f048 100644
+--- a/test/rubygems/test_gem_ext_cargo_builder.rb
++++ b/test/rubygems/test_gem_ext_cargo_builder.rb
+@@ -145,6 +145,7 @@ def skip_unsupported_platforms!
+     system(@rust_envs, "cargo", "-V", out: IO::NULL, err: [:child, :out])
+     pend "cargo not present" unless $?.success?
+     pend "ruby.h is not provided by ruby repo" if ruby_repo?
++    pend "Windows MinGW fails, see https://bugs.ruby-lang.org/issues/19568" if RUBY_DESCRIPTION.include? 'mingw'
+   end
+ 
+   def assert_ffi_handle(bundle, name)
