@@ -290,8 +290,8 @@ $m_start = Get-Date
 EchoC $($dash * 92) yel
 ruby -ropenssl -e "puts RUBY_DESCRIPTION, OpenSSL::OPENSSL_LIBRARY_VERSION"
 
-EchoC "$dash_hdr Install `'tz`' gems" yel
-gem install `"timezone:>=1.3.16`" `"tzinfo:>=2.0.4`" `"tzinfo-data:>=1.2022.1`" --no-document --conservative --norc --no-user-install
+EchoC "$dash_hdr Install `'tz`' and `'rb_sys`' gems" yel
+gem install `"timezone:>=1.3.16`" `"tzinfo:>=2.0.4`" `"tzinfo-data:>=1.2022.1`" `"rb_sys:>=0.9.70`" --no-document --conservative --norc --no-user-install
 
 # CLI-Test
 EchoC "$dash_hdr CLI Test" yel
@@ -331,5 +331,7 @@ MSpec
 if (Test-Path -Path $d_install/lib/ruby/$abi/$rarch/readline.so -PathType Leaf ) {
   ren "$d_install/lib/ruby/$abi/$rarch/readline.so" "readline.so_"
 }
+
+gem uninstall `"rb_sys:>=0.9.70`" -x
 
 Finish
