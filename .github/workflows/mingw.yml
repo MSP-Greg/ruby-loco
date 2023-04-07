@@ -36,16 +36,28 @@ jobs:
         uses: ruby/setup-ruby-pkgs@v1
         with:
           ruby-version: mingw
-          mingw: clang
+          mingw: clang-15
 
       - name: Install/Update Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable-x86_64-pc-windows-gnu
-          components: rustfmt
 
-#      - name: install rust
-#        run: pacman -S --noconfirm --noprogressbar --needed mingw-w64-x86_64-rust
+      - name: Configure bindgen
+        run: |
+          # Configure bindgen for msys2
+          if ($env:MSYSTEM -eq "MINGW64") {
+            $msys_root = "c:/msys64/mingw64"
+          } elseif ($env:MSYSTEM -eq "UCRT64") {
+            $msys_root = "c:/msys64/ucrt64"
+          } else {
+            echo "Unknown MSYSTEM: $env:MSYSTEM, cannot configure bindgen"
+            exit 1
+          }
+          # We can't use llvm-16 just yet due to backwards compatibility issues, so we have to workaround for now
+          echo "MSYS_ROOT=$msys_root" >> $env:GITHUB_ENV
+          echo "LIBCLANG_PATH=$msys_root/opt/llvm-15/bin" >> $env:GITHUB_ENV
+          echo "BINDGEN_EXTRA_CLANG_ARGS=`"--target=stable-x86_64-pc-windows-gnu --sysroot=$msys_root`"" >> $env:GITHUB_ENV
 
       - name: Cache - .downloaded-cache
         uses: actions/cache@v3
