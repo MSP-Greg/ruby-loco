@@ -46,10 +46,11 @@ jobs:
       - name: Configure bindgen
         run: |
           # Configure bindgen for msys2
-          if ($env:MSYSTEM -eq "MINGW64") {
-            $msys_root = "c:/msys64/mingw64"
-          } elseif ($env:MSYSTEM -eq "UCRT64") {
-            $msys_root = "c:/msys64/ucrt64"
+          $msys_root = $env:GHCUP_MSYS2.replace('\', '/')
+          if ($env:MSYSTEM -eq 'MINGW64') {
+            $msys_root += '/mingw64'
+          } elseif ($env:MSYSTEM -eq 'UCRT64') {
+            $msys_root += '/ucrt64'
           } else {
             echo "Unknown MSYSTEM: $env:MSYSTEM, cannot configure bindgen"
             exit 1
