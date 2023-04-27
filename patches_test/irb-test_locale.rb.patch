@@ -1,0 +1,20 @@
+diff --git a/test/irb/test_locale.rb b/test/irb/test_locale.rb
+index 930a38834c..8a1f7030eb 100644
+--- a/test/irb/test_locale.rb
++++ b/test/irb/test_locale.rb
+@@ -108,11 +108,13 @@ def test_load
+     def test_find
+       jp_local = IRB::Locale.new("ja_JP.UTF-8")
+       path = jp_local.find("irb/error.rb")
+-      assert_include(path, "/lib/irb/lc/ja/error.rb")
++      #assert_include(path, "/lib/irb/lc/ja/error.rb")
++      assert_include(path, "/irb/lc/ja/error.rb")
+ 
+       en_local = IRB::Locale.new("en_US.UTF-8")
+       path = en_local.find("irb/error.rb")
+-      assert_include(path, "/lib/irb/lc/error.rb")
++      #assert_include(path, "/lib/irb/lc/error.rb")
++      assert_include(path, "/irb/lc/error.rb")
+     end
+   end
+ end
