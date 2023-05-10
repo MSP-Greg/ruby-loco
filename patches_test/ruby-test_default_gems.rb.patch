@@ -1,27 +1,25 @@
 Patch by MSP-Greg
 uses gemspecs in ruby under test, not srcdir
 diff --git a/test/ruby/test_default_gems.rb b/test/ruby/test_default_gems.rb
-index c1c81bfec0..2172c7f22d 100644
+index d8e8226253..1a74924b08 100644
 --- a/test/ruby/test_default_gems.rb
 +++ b/test/ruby/test_default_gems.rb
-@@ -7,10 +7,18 @@ def test_validate_gemspec
-     srcdir = File.expand_path('../../..', __FILE__)
+@@ -13,10 +13,16 @@ def self.load(file)
+   end
+ 
+   def test_validate_gemspec
+-    srcdir = File.expand_path('../../..', __FILE__)
++    if File.exist?(srcdir = File.absolute_path(File.join Gem.default_specifications_dir, '..'))
++      glob = "**/*.gemspec"
++    else
++      srcdir = File.expand_path('../../..', __FILE__)
++      glob = "{lib,ext}/**/*.gemspec"
++    end
++
      specs = 0
      Dir.chdir(srcdir) do
--      unless system("git", "rev-parse", %i[out err]=>IO::NULL)
-+      unless system("git", "--version", %i[out err]=>IO::NULL)
-         omit "git not found"
-       end
--      Dir.glob("#{srcdir}/{lib,ext}/**/*.gemspec").map do |src|
-+
-+      spec_glob = if Dir.exist?(dflt_dir = Gem.default_specifications_dir)
-+        "#{dflt_dir}/*.gemspec"
-+      else
-+        srcdir = File.expand_path('../../..', __FILE__)
-+        "#{srcdir}/{lib,ext}/**/*.gemspec"
-+      end
-+
-+      Dir.glob(spec_glob).map do |src|
+-      all_assertions_foreach(nil, *Dir["{lib,ext}/**/*.gemspec"]) do |src|
++      all_assertions_foreach(nil, *Dir[glob]) do |src|
          specs += 1
-         assert_nothing_raised do
-           raise("invalid spec in #{src}") unless Gem::Specification.load(src)
+         assert_kind_of(Gem::Specification, self.class.load(src), "invalid spec in #{src}")
+       end
