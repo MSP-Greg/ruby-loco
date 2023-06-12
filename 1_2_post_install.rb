@@ -67,8 +67,8 @@ module PostInstall2
       dll_dirs.each { |d|
         src = File.join D_MINGW, "lib", d
         if Dir.exist?(src)
-          dest = File.join D_INSTALL, "lib", d
-          Dir.mkdir dest unless Dir.exist? dest
+          dest = File.join D_INSTALL, 'bin', 'lib', d
+          FileUtils.mkdir_p dest unless Dir.exist? dest
           `xcopy /s /q #{src.gsub('/', '\\')} #{dest.gsub('/', '\\')}`
           puts "#{COL_SPACE}Copy dir #{d}"
         else
