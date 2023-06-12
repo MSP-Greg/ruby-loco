@@ -84,6 +84,9 @@ Run "nmake 'DESTDIR=' install-nodoc" {
 
   Copy-Item $d_repo/mswin/ruby_builtin_dlls.manifest
 
+  cd $d_install\bin\lib\ossl-modules
+  Copy-Item $d_vcpkg_install/bin/legacy.dll
+
   cd $d_repo
   del $d_install\lib\x64-vcruntime140-ruby$ruby_abi-static.lib
   # below can't run from built Ruby, as it needs valid cert files

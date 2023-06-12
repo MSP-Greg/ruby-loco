@@ -318,6 +318,8 @@ function Create-Folders {
 
   New-Item -Path $d_build   -ItemType Directory 1> $null
   New-Item -Path $d_install/bin/ruby_builtin_dlls -ItemType Directory 1> $null
+  New-Item -Path $d_install/bin/lib               -ItemType Directory 1> $null
+  New-Item -Path $d_install/bin/lib/ossl-modules  -ItemType Directory 1> $null
 }
 
 #————————————————————————————————————————————————————————————————— Files-Hide
