@@ -1,7 +1,7 @@
 Patch by MSP-Greg
 Attempts to fix issues when run on 'busy' CI systems
 diff --git a/bootstraptest/runner.rb b/bootstraptest/runner.rb
-index f9b3e919b8..a5111614c1 100755
+index c8ba824407..100f73b18a 100755
 --- a/bootstraptest/runner.rb
 +++ b/bootstraptest/runner.rb
 @@ -688,9 +688,15 @@ def assert_finish(timeout_seconds, testsrc, message = '')
@@ -33,10 +33,10 @@ index 666e5a011b..7efb535ec4 100644
    t1 = Thread.new { r.sysread(1) }
    t2 = Thread.new { r.sysread(1) }
 diff --git a/bootstraptest/test_thread.rb b/bootstraptest/test_thread.rb
-index 5361828403..32ba739165 100644
+index 0c163d0db0..e650df7be4 100644
 --- a/bootstraptest/test_thread.rb
 +++ b/bootstraptest/test_thread.rb
-@@ -335,7 +335,7 @@ def m
+@@ -336,7 +336,7 @@ def m
  
  assert_normal_exit %q{
    Thread.new("foo", &Object.method(:class_eval)).join
