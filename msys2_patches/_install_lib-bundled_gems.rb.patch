@@ -1,0 +1,12 @@
+diff --git a/lib/bundled_gems.rb b/lib/bundled_gems.rb
+index 2623e1e96f..a6dc5d5f67 100644
+--- a/lib/bundled_gems.rb
++++ b/lib/bundled_gems.rb
+@@ -67,6 +67,7 @@ def self.warning?(name)
+     return unless gem = find_gem(path)
+     caller, = caller_locations(3, 1)
+     return if find_gem(caller&.absolute_path)
++    name = name[%r[\A[^/]+]]
+     return if WARNED[name]
+     WARNED[name] = true
+     if gem == true
