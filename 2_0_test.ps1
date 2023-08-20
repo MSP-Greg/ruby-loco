@@ -5,9 +5,6 @@ time, so if a test freezes, it can be stopped.
 
 $exit_code = 0
 
-$enc_input  = [Console]::InputEncoding
-$enc_output = [Console]::OutputEncoding
-
 #————————————————————————————————————————————————————————————————————— Kill-Proc
 # Kills a process by first looping thru child & grandchild processes and
 # stopping them, then stops passed process
@@ -66,11 +63,6 @@ function Run-Proc {
   $start = Get-Date
   $status = ''
 
-  if ($is_actions) {
-    [Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding('IBM437')
-    [Console]::InputEncoding  = [System.Text.Encoding]::GetEncoding('IBM437')
-  }
-
   $proc = Start-Process $exe -ArgumentList $e_args `
     -RedirectStandardOutput $d_logs/$StdOut `
     -RedirectStandardError  $d_logs/$StdErr `
@@ -88,11 +80,6 @@ function Run-Proc {
   }
   $diff = New-TimeSpan -Start $start -End $(Get-Date)
   $msg = "Test Time  {0,8:n1}" -f @($diff.TotalSeconds)
-
-  if ($is_actions) {
-    [Console]::OutputEncoding = $enc_output
-    [Console]::InputEncoding  = $enc_input
-  }
 
   Write-Host $msg -NoNewLine
   if ($proc.ExitCode -eq 0) {
@@ -127,9 +114,6 @@ function Finish {
   }
 
   $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
-
-  # AppVeyor seems to be needed for proper dash encoding in 2_1_test_script.rb
-  [Console]::OutputEncoding = New-Object -typename System.Text.UTF8Encoding
 
   # used in 2_1_test_script.rb
   $env:PS_ENC = [Console]::OutputEncoding.WebName.toUpper()
