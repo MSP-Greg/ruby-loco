@@ -1,19 +1,19 @@
 diff --git a/test/irb/test_cmd.rb b/test/irb/test_cmd.rb
-index dcea020b1e..a6c8f5b4bc 100644
+index 670078679f..b011b8bfac 100644
 --- a/test/irb/test_cmd.rb
 +++ b/test/irb/test_cmd.rb
-@@ -7,6 +7,10 @@
+@@ -902,6 +902,10 @@ def test_show_doc_without_rdoc
+   end
  
- module TestIRB
-   class CommandTestCase < TestCase
-+  
+   class EditTest < CommandTestCase
++
 +    # used for running tests from install folder
 +    LIB_PATH = RbConfig::CONFIG['rubylibdir']
-+      
++
      def setup
-       @pwd = Dir.pwd
-       @tmpdir = File.join(Dir.tmpdir, "test_reline_config_#{$$}")
-@@ -965,7 +969,7 @@ def test_edit_with_constant
+       @original_visual = ENV["VISUAL"]
+       @original_editor = ENV["EDITOR"]
+@@ -951,7 +955,7 @@ def test_edit_with_constant
        )
  
        assert_empty err
@@ -22,7 +22,7 @@ index dcea020b1e..a6c8f5b4bc 100644
        assert_match("command: ': code'", out)
      end
  
-@@ -975,7 +979,7 @@ def test_edit_with_class_method
+@@ -961,7 +965,7 @@ def test_edit_with_class_method
        )
  
        assert_empty err
@@ -31,7 +31,7 @@ index dcea020b1e..a6c8f5b4bc 100644
        assert_match("command: ': code'", out)
      end
  
-@@ -985,7 +989,7 @@ def test_edit_with_instance_method
+@@ -971,7 +975,7 @@ def test_edit_with_instance_method
        )
  
        assert_empty err
@@ -39,4 +39,4 @@ index dcea020b1e..a6c8f5b4bc 100644
 +      assert_include out, "path: #{LIB_PATH}/irb.rb"
        assert_match("command: ': code'", out)
      end
-   end
+ 
