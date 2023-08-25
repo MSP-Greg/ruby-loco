@@ -76,7 +76,7 @@ Run "nmake 'DESTDIR=' install-nodoc" {
 
   cd $d_install\bin\ruby_builtin_dlls
   echo "installing dll files:               From $d_vcpkg_install/bin"
-  $dlls = @('libcrypto-3-x64', 'libssl-3-x64', 'libffi', 'readline', 'yaml', 'zlib1')
+  $dlls = @('libcrypto-3-x64', 'libssl-3-x64', 'ffi-8', 'readline', 'yaml', 'zlib1')
   foreach ($dll in $dlls) {
     Copy-Item $d_vcpkg_install/bin/$dll.dll
     echo "                                    $dll.dll"
