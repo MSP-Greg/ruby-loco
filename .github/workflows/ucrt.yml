@@ -23,7 +23,7 @@ jobs:
           git config --system core.eol lf
 
       - name: Checkout ruby-loco
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: get ruby and rubyinstaller2
         timeout-minutes: 5
