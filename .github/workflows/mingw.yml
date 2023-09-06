@@ -57,7 +57,6 @@ jobs:
             exit 1
           }
           echo "MSYS_ROOT=$msys_root" >> $env:GITHUB_ENV
-          echo "LIBCLANG_PATH=$msys_root/bin" >> $env:GITHUB_ENV
           echo "BINDGEN_EXTRA_CLANG_ARGS=`"--target=$env:RUST_TC --sysroot=$msys_root`"" >> $env:GITHUB_ENV
 
       - name: Cache - .downloaded-cache
