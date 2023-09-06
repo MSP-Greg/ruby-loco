@@ -37,7 +37,7 @@ jobs:
         uses: ruby/setup-ruby-pkgs@v1
         with:
           ruby-version: 3.2
-          mingw: clang-15
+          mingw: clang
 
       - name: Install/Update Rust
         uses: dtolnay/rust-toolchain@stable
@@ -56,9 +56,7 @@ jobs:
             echo "Unknown MSYSTEM: $env:MSYSTEM, cannot configure bindgen"
             exit 1
           }
-          # We can't use llvm-16 just yet due to backwards compatibility issues, so we have to workaround for now
           echo "MSYS_ROOT=$msys_root" >> $env:GITHUB_ENV
-          echo "LIBCLANG_PATH=$msys_root/opt/llvm-15/bin" >> $env:GITHUB_ENV
           echo "BINDGEN_EXTRA_CLANG_ARGS=`"--target=$env:RUST_TC --sysroot=$msys_root`"" >> $env:GITHUB_ENV
 
       - name: Cache - .downloaded-cache
