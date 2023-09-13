@@ -162,9 +162,14 @@ cd $d_build
 Time-Log "start"
 
 $config_args = "--build=$chost --host=$chost --target=$chost"
+
+# disable since Ruby adds Actions collapsible sections, can't nest them
+$actual_github_actions = $is_actions
+$is_actions = $false
 Run "sh -c `"../ruby/configure --disable-install-doc --prefix=$d_install $config_args`"" {
   sh -c "../ruby/configure --disable-install-doc --prefix=$d_install $config_args"
 }
+$is_actions = $actual_github_actions
 Time-Log "configure"
 
 # below sets some directories to normal in case they're set to read-only
