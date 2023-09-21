@@ -37,7 +37,7 @@ jobs:
         uses: ruby/setup-ruby-pkgs@v1
         with:
           ruby-version: 3.2
-          mingw: clang-15
+          mingw: clang
 
       - name: Install/Update Rust
         uses: dtolnay/rust-toolchain@stable
