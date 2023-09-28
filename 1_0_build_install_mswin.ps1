@@ -88,7 +88,10 @@ Run "nmake 'DESTDIR=' install-nodoc" {
   Copy-Item $d_vcpkg_install/bin/legacy.dll
 
   cd $d_repo
-  del $d_install\lib\x64-vcruntime140-ruby$ruby_abi-static.lib
+  
+  if (Test-Path -Path $d_install/lib/x64-vcruntime140-ruby$ruby_abi-static.lib -PathType Leaf ) {
+    del $d_install\lib\x64-vcruntime140-ruby$ruby_abi-static.lib
+  }
   # below can't run from built Ruby, as it needs valid cert files
   ruby 1_2_post_install_common.rb run
 }
