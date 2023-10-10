@@ -63,9 +63,7 @@ jobs:
 
       - name: build & install
         timeout-minutes: 30
-        run: |
-          $env:Path = "C:/hostedtoolcache/windows/Ruby/3.1.4/x64/bin;$env:Path"
-          ./1_0_build_install_mswin.ps1
+        run:  ./1_0_build_install_mswin.ps1
 
       - name: test
         timeout-minutes: 70
