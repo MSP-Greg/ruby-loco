@@ -1,5 +1,5 @@
 <# Code by MSP-Greg
-Script for building & installing MinGW Ruby for CI
+Script for building & installing MSWIN Ruby for CI
 Assumes a Ruby exe is in path
 Assumes 'Git for Windows' is installed at $env:ProgramFiles\Git
 Assumes '7z             ' is installed at $env:ProgramFiles\7-Zip
