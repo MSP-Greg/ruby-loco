@@ -25,21 +25,21 @@ jobs:
       - name: Checkout ruby-loco
         uses: actions/checkout@v4
 
-      - name: Get Ruby and RubyInstaller2
-        timeout-minutes: 5
-        run: |
-          $gh = 'https://github.com'
-          git clone -q --depth=1 --no-tags --branch=master  $gh/oneclick/rubyinstaller2.git ./rubyinstaller2
-          git clone -q --depth=1 --no-tags --branch=master  $gh/ruby/ruby.git               ./ruby
-          cd  ruby
-          git log -n1 --pretty=format:"%nRuby Commit%n%H%n  %cd%n  %s"
-
       - name: Set up Ruby & MSYS2
         timeout-minutes: 8
         uses: ruby/setup-ruby-pkgs@v1
         with:
           ruby-version: mingw
           mingw: clang
+
+      - name: Get Ruby and RubyInstaller2 repos
+        timeout-minutes: 5
+        run: |
+          $gh = 'https://github.com'
+          git clone -q --depth=1 --no-tags --branch=master  $gh/oneclick/rubyinstaller2.git ./rubyinstaller2
+          git clone -q --depth=1 --no-tags --branch=master  $gh/ruby/ruby.git               ./ruby
+          cd ruby
+          ruby ../git_log_utc.rb
 
       - name: Install/Update Rust
         uses: dtolnay/rust-toolchain@stable
