@@ -1,30 +1,31 @@
-# rubygems tests generate files in test/tmp, including
-# causes errors with parallel testing
 diff --git a/test/ruby/test_ast.rb b/test/ruby/test_ast.rb
-index c3de36b4fb..f4c3e356d5 100644
+index c8617d50f0..6c22fcab62 100644
 --- a/test/ruby/test_ast.rb
 +++ b/test/ruby/test_ast.rb
-@@ -115,6 +115,7 @@ def validate_not_cared0(node)
+@@ -115,24 +115,22 @@ def validate_not_cared0(node)
    SRCDIR = File.expand_path("../../..", __FILE__)
  
    Dir.glob("test/**/*.rb", base: SRCDIR).each do |path|
-+    next if path.include? 'test/tmp/'
++    next if path.start_with? 'test/tmp/'
++
      define_method("test_ranges:#{path}") do
        helper = Helper.new("#{SRCDIR}/#{path}")
        helper.validate_range
-@@ -124,6 +125,7 @@ def validate_not_cared0(node)
-   end
  
-   Dir.glob("test/**/*.rb", base: SRCDIR).each do |path|
-+    next if path.include? 'test/tmp/'
+       assert_equal([], helper.errors)
+     end
+-  end
+ 
+-  Dir.glob("test/**/*.rb", base: SRCDIR).each do |path|
      define_method("test_not_cared:#{path}") do
        helper = Helper.new("#{SRCDIR}/#{path}")
        helper.validate_not_cared
-@@ -133,6 +135,7 @@ def validate_not_cared0(node)
-   end
  
-   Dir.glob("test/**/*.rb", base: SRCDIR).each do |path|
-+    next if path.include? 'test/tmp/'
+       assert_equal([], helper.errors)
+     end
+-  end
+ 
+-  Dir.glob("test/**/*.rb", base: SRCDIR).each do |path|
      define_method("test_all_tokens:#{path}") do
        node = RubyVM::AbstractSyntaxTree.parse_file("#{SRCDIR}/#{path}", keep_tokens: true)
        tokens = node.all_tokens.sort_by { [_1.last[0], _1.last[1]] }
