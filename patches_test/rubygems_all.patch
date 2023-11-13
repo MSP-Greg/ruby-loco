@@ -1,5 +1,5 @@
 diff --git a/test/rubygems/bundler_test_gem.rb b/test/rubygems/bundler_test_gem.rb
-index 3cd6e7acc5..886b7cac65 100644
+index 319112bac8..aee638b1ad 100644
 --- a/test/rubygems/bundler_test_gem.rb
 +++ b/test/rubygems/bundler_test_gem.rb
 @@ -409,6 +409,8 @@ def with_local_bundler_at(path)
@@ -12,7 +12,7 @@ index 3cd6e7acc5..886b7cac65 100644
        target_gemspec_location = "#{path}/specifications/bundler-#{Bundler::VERSION}.gemspec"
  
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index 3efc2ddb69..d56503fd18 100644
+index 6537afad2a..d7049fec2d 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
 @@ -946,7 +946,7 @@ def test_self_platforms
@@ -60,10 +60,10 @@ index 02dd57f660..4fed0a99f0 100644
      assert_equal "--previous-version", arguments.shift
      assert_equal Gem::VERSION,         arguments.shift
 diff --git a/test/rubygems/test_gem_ext_builder.rb b/test/rubygems/test_gem_ext_builder.rb
-index 03d40fa400..5152dbf3df 100644
+index 927e2f45e4..e6f09cf187 100644
 --- a/test/rubygems/test_gem_ext_builder.rb
 +++ b/test/rubygems/test_gem_ext_builder.rb
-@@ -250,7 +250,7 @@ def test_build_extensions_extconf_bad
+@@ -240,7 +240,7 @@ def test_build_extensions_extconf_bad
      gem_make_out = File.join @spec.extension_dir, "gem_make.out"
      cmd_make_out = File.read(gem_make_out)
  
@@ -73,7 +73,7 @@ index 03d40fa400..5152dbf3df 100644
  
      assert_path_not_exist @spec.gem_build_complete_path
 diff --git a/test/rubygems/test_require.rb b/test/rubygems/test_require.rb
-index 95bae66e21..bf894071df 100644
+index fc5f219490..c2c457d62a 100644
 --- a/test/rubygems/test_require.rb
 +++ b/test/rubygems/test_require.rb
 @@ -450,7 +450,7 @@ def test_realworld_default_gem
@@ -85,12 +85,13 @@ index 95bae66e21..bf894071df 100644
      assert $?.success?
      refute_empty output
    end
-@@ -470,7 +470,7 @@ def test_realworld_upgraded_default_gem
+@@ -470,7 +470,8 @@ def test_realworld_upgraded_default_gem
      RUBY
      File.write(path, code)
  
 -    output = Gem::Util.popen({ "GEM_HOME" => @gemhome }, *ruby_with_rubygems_in_load_path, path).strip
++    #output = Gem::Util.popen({ "GEM_HOME" => @gemhome }, *ruby_with_rubygems_in_load_path, path).strip
 +    output = Gem::Util.popen({ "GEM_HOME" => @gemhome }, "ruby", path).strip
-     assert $?.success?
      refute_empty output
      assert_equal "999.99.9", output.lines[0].chomp
+     # Make sure only files from the newer json gem are loaded, and no files from the default json gem
