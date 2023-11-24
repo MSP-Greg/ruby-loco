@@ -1,6 +1,6 @@
-fixup timing for mingw, no failures locally
+Add delay to test_session_reuse_but_expire on Windows mingw/ucrt Rubies
 diff --git a/test/net/http/test_https.rb b/test/net/http/test_https.rb
-index 2fb895a8ae..08bbcd197e 100644
+index 2fb895a8ae..9741f19212 100644
 --- a/test/net/http/test_https.rb
 +++ b/test/net/http/test_https.rb
 @@ -177,6 +177,11 @@ def test_session_reuse_but_expire
@@ -8,7 +8,7 @@ index 2fb895a8ae..08bbcd197e 100644
      http.finish
  
 +    if RUBY_PLATFORM.start_with? 'x64-mingw'
-+      sleep 0.001
++      sleep 0.1
 +      Thread.pass
 +    end
 +
