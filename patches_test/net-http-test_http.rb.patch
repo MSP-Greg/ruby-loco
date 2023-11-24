@@ -1,0 +1,17 @@
+fixup timing for mingw, no failures locally
+diff --git a/test/net/http/test_https.rb b/test/net/http/test_https.rb
+index 2fb895a8ae..08bbcd197e 100644
+--- a/test/net/http/test_https.rb
++++ b/test/net/http/test_https.rb
+@@ -177,6 +177,11 @@ def test_session_reuse_but_expire
+     http.get("/")
+     http.finish
+ 
++    if RUBY_PLATFORM.start_with? 'x64-mingw'
++      sleep 0.001
++      Thread.pass
++    end
++
+     http.start
+     http.get("/")
+ 
