@@ -384,7 +384,11 @@ function Run($e_msg, $exec) {
   if ($is_actions) {
     echo "##[group]$(color $e_msg yel)"
   } else {
-    $e_str = "$($dash * 55) $e_msg"
+    if ($e_msg.length -lt 35) {
+      $e_str = "$($dash * 55) $e_msg"
+    } else {
+      $e_str = "$($dash * 80)`n  $e_msg"
+    }
     echo "$(color $e_str yel)"
   }
 
