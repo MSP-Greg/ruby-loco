@@ -1,8 +1,8 @@
 diff --git a/test/net/http/test_https.rb b/test/net/http/test_https.rb
-index 2fb895a8ae..8bc768ea7f 100644
+index 89d500118d..8bc768ea7f 100644
 --- a/test/net/http/test_https.rb
 +++ b/test/net/http/test_https.rb
-@@ -164,7 +164,7 @@ def test_session_reuse
+@@ -164,20 +164,45 @@ def test_session_reuse
      http.finish
    end
  
@@ -10,8 +10,9 @@ index 2fb895a8ae..8bc768ea7f 100644
 +  def test_session_reuse_with_timeout
      # FIXME: The new_session_cb is known broken for clients in OpenSSL 1.1.0h.
      omit if OpenSSL::OPENSSL_LIBRARY_VERSION.include?('OpenSSL 1.1.0h')
+-    omit if OpenSSL::OPENSSL_LIBRARY_VERSION.include?('OpenSSL 3.2.0')
  
-@@ -172,11 +172,37 @@ def test_session_reuse_but_expire
+     http = Net::HTTP.new(HOST, config("port"))
      http.use_ssl = true
      http.cert_store = TEST_STORE
  
