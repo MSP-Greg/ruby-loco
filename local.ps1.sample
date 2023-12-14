@@ -1,12 +1,20 @@
-$global:d_msys2   = "C:/msys64"
+# below should be set to folder locations on local system
+
+$global:msys2_parent = 'C:'
+$global:d_msys2      = "$msys2_parent/msys64"
+
 $global:d_git     =  "$env:ProgramFiles/Git"
-$global:d_vcpkg   =  "C:/vcpkg"
+$global:d_ruby_repo = "C:/ruby_build/ruby"
+$global:d_rubyinstaller2_repo = "C:/ruby_build/rubyinstaller2"
 # below is used by GitHub Actions and locally
 $env:VCPKG_INSTALLATION_ROOT = "C:/vcpkg"
+$global:d_vcpkg   =  $env:VCPKG_INSTALLATION_ROOT
 $global:7z        =  "$env:ProgramFiles/7-Zip/7z.exe".replace('\', '/')
 
 # limits parallel jobs to no more than 6
 $global:jobs = (([int]$env:NUMBER_OF_PROCESSORS, 6) | Measure-Object -Minimum).Minimum
+
+$global:d_repo   = $PSScriptRoot.replace('\', '/')
 
 $global:orig_path = $env:Path
 
@@ -21,8 +29,12 @@ if ($build_sys -eq "msys2") {
     echo "File:`n$vcvars`ndoes not exist, please fix"
     exit 1
   }
-  Set-VCVars-Env
+
+  # These env changes are done with setup-ruby when using GitHub Actions
+  if (get-command Set-VCVars-Env -erroraction silentlycontinue) {
+    Set-VCVars-Env
+  }
+
   $global:base_path    = $env:Path.replace('\', '/')
   $global:no_ruby_path = $base_path -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
 }
-
