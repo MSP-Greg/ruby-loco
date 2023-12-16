@@ -24,19 +24,6 @@ index 6537afad2a..d7049fec2d 100644
    end
  
    def test_self_prefix_libdir
-diff --git a/test/rubygems/test_gem_command.rb b/test/rubygems/test_gem_command.rb
-index d50f3d2c79..aa1a32edec 100644
---- a/test/rubygems/test_gem_command.rb
-+++ b/test/rubygems/test_gem_command.rb
-@@ -401,7 +401,7 @@ def test_show_lookup_failure_suggestions_remote
-   end
- 
-   def test_show_defaulting_to_user_install_when_appropriate
--    omit "this test doesn't work with ruby-core setup" if ruby_repo?
-+    omit "this test doesn't work with ruby-core setup"
- 
-     Gem.stub(:default_dir, "/this-directory-does-not-exist") do
-       # Replace `Gem.paths` with a new instance, so `Gem.paths.auto_user_install`
 diff --git a/test/rubygems/test_gem_commands_environment_command.rb b/test/rubygems/test_gem_commands_environment_command.rb
 index f527574c07..3d39f091f3 100644
 --- a/test/rubygems/test_gem_commands_environment_command.rb
