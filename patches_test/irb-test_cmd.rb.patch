@@ -1,8 +1,40 @@
+diff --git a/lib/mkmf.rb b/lib/mkmf.rb
+index 6da7dde5f1..8486915432 100644
+--- a/lib/mkmf.rb
++++ b/lib/mkmf.rb
+@@ -228,6 +228,10 @@ def map_dir(dir, map = nil)
+   elsif File.exist?(($hdrdir = ($top_srcdir ||= topdir) + "/include")  + "/ruby.h")
+     $topdir ||= RbConfig::CONFIG["topdir"]
+     $arch_hdrdir = "$(extout)/include/$(arch)"
++  elsif File.exist?(($hdrdir = RbConfig::CONFIG["rubyhdrdir"]) + "/ruby/ruby.h")
++    $extmk = false
++    $topdir = $top_srcdir = $hdrdir
++    $arch_hdrdir = RbConfig::CONFIG["rubyarchhdrdir"]
+   else
+     abort <<MESSAGE
+ mkmf.rb can't find header files for ruby at #{$hdrdir}/ruby.h
+diff --git a/prelude.rb b/prelude.rb
+index ee78b44cc5..f9e93880fa 100644
+--- a/prelude.rb
++++ b/prelude.rb
+@@ -1,3 +1,12 @@
++begin
++  require 'rbconfig' unless defined?(RbConfig)
++  ENV['SSL_CERT_FILE']  = "#{RbConfig::TOPDIR}/bin/etc/ssl/cert.pem"
++  ENV['SSL_CERT_DIR']   = "#{RbConfig::TOPDIR}/bin/etc/ssl/certs"
++  ENV['OPENSSL_CONF']   = "#{RbConfig::TOPDIR}/bin/etc/ssl/openssl.cnf"
++  ENV['OPENSSL_MODULES'] = "#{RbConfig::TOPDIR}/bin/lib/ossl-modules"
++rescue LoadError => e
++end
++
+ class Binding
+   # :nodoc:
+   def irb
 diff --git a/test/irb/test_cmd.rb b/test/irb/test_cmd.rb
-index 345f04bcf2..3655400ce1 100644
+index d99ac05c5d..db997fa403 100644
 --- a/test/irb/test_cmd.rb
 +++ b/test/irb/test_cmd.rb
-@@ -802,6 +802,10 @@ def test_show_doc_without_rdoc
+@@ -824,6 +824,10 @@ def test_show_doc_without_rdoc
    end
  
    class EditTest < CommandTestCase
@@ -13,7 +45,7 @@ index 345f04bcf2..3655400ce1 100644
      def setup
        @original_visual = ENV["VISUAL"]
        @original_editor = ENV["EDITOR"]
-@@ -851,7 +855,7 @@ def test_edit_with_constant
+@@ -873,7 +877,7 @@ def test_edit_with_constant
        )
  
        assert_empty err
@@ -22,7 +54,7 @@ index 345f04bcf2..3655400ce1 100644
        assert_match("command: ': code'", out)
      end
  
-@@ -861,7 +865,7 @@ def test_edit_with_class_method
+@@ -883,7 +887,7 @@ def test_edit_with_class_method
        )
  
        assert_empty err
@@ -31,7 +63,7 @@ index 345f04bcf2..3655400ce1 100644
        assert_match("command: ': code'", out)
      end
  
-@@ -871,7 +875,7 @@ def test_edit_with_instance_method
+@@ -893,7 +897,7 @@ def test_edit_with_instance_method
        )
  
        assert_empty err
