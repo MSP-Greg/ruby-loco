@@ -1,5 +1,5 @@
 diff --git a/bootstraptest/runner.rb b/bootstraptest/runner.rb
-index 6b5851e67a..801ed729a6 100755
+index a34527d2fa..230fc044c4 100755
 --- a/bootstraptest/runner.rb
 +++ b/bootstraptest/runner.rb
 @@ -693,9 +693,15 @@ def assert_finish(timeout_seconds, testsrc, message = '')
@@ -31,10 +31,10 @@ index 666e5a011b..7efb535ec4 100644
    t1 = Thread.new { r.sysread(1) }
    t2 = Thread.new { r.sysread(1) }
 diff --git a/bootstraptest/test_thread.rb b/bootstraptest/test_thread.rb
-index 18b4fcd2e9..629cd870ce 100644
+index a4d46e2f10..5db8b61bb5 100644
 --- a/bootstraptest/test_thread.rb
 +++ b/bootstraptest/test_thread.rb
-@@ -350,7 +350,7 @@ def m
+@@ -349,7 +349,7 @@ def m
  
  assert_normal_exit %q{
    Thread.new("foo", &Object.method(:class_eval)).join

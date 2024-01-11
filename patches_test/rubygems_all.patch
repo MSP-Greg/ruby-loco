@@ -1,5 +1,5 @@
 diff --git a/test/rubygems/bundler_test_gem.rb b/test/rubygems/bundler_test_gem.rb
-index 319112bac8..aee638b1ad 100644
+index ca2980e04b..d730c74081 100644
 --- a/test/rubygems/bundler_test_gem.rb
 +++ b/test/rubygems/bundler_test_gem.rb
 @@ -409,6 +409,8 @@ def with_local_bundler_at(path)
@@ -12,7 +12,7 @@ index 319112bac8..aee638b1ad 100644
        target_gemspec_location = "#{path}/specifications/bundler-#{Bundler::VERSION}.gemspec"
  
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index 6537afad2a..d7049fec2d 100644
+index d4c307978e..0e84b8cc46 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
 @@ -946,7 +946,7 @@ def test_self_platforms
@@ -25,27 +25,29 @@ index 6537afad2a..d7049fec2d 100644
  
    def test_self_prefix_libdir
 diff --git a/test/rubygems/test_gem_commands_environment_command.rb b/test/rubygems/test_gem_commands_environment_command.rb
-index f527574c07..3d39f091f3 100644
+index 48252d84d4..e4f130936e 100644
 --- a/test/rubygems/test_gem_commands_environment_command.rb
 +++ b/test/rubygems/test_gem_commands_environment_command.rb
-@@ -29,7 +29,11 @@ def test_execute
+@@ -29,7 +29,13 @@ def test_execute
                   @ui.output)
      assert_match(/USER INSTALLATION DIRECTORY: #{Regexp.escape Gem.user_dir}/,
                   @ui.output)
 -    assert_match(/RUBYGEMS PREFIX: /, @ui.output)
++
 +    if Gem.prefix.nil?
 +      refute_match(/RUBYGEMS PREFIX: /, @ui.output)
 +    else
 +      assert_match(/RUBYGEMS PREFIX: /, @ui.output)
 +    end
-     assert_match(/RUBY EXECUTABLE:.*#{RbConfig::CONFIG['ruby_install_name']}/,
++
+     assert_match(/RUBY EXECUTABLE:.*#{RbConfig::CONFIG["ruby_install_name"]}/,
                   @ui.output)
      assert_match(/GIT EXECUTABLE: #{@cmd.send(:git_path)}/, @ui.output)
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
-index 02dd57f660..4fed0a99f0 100644
+index 2683840f2e..18ee958e4e 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
-@@ -731,8 +731,11 @@ def test_update_rubygems_arguments
+@@ -753,8 +753,11 @@ def test_update_rubygems_arguments
  
      arguments = @cmd.update_rubygems_arguments
  
@@ -60,7 +62,7 @@ index 02dd57f660..4fed0a99f0 100644
      assert_equal "--previous-version", arguments.shift
      assert_equal Gem::VERSION,         arguments.shift
 diff --git a/test/rubygems/test_gem_ext_builder.rb b/test/rubygems/test_gem_ext_builder.rb
-index 927e2f45e4..e6f09cf187 100644
+index 493aaa1b53..aa9d4dd5ae 100644
 --- a/test/rubygems/test_gem_ext_builder.rb
 +++ b/test/rubygems/test_gem_ext_builder.rb
 @@ -240,7 +240,7 @@ def test_build_extensions_extconf_bad
