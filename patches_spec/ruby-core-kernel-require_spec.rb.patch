@@ -1,15 +1,15 @@
 diff --git a/spec/ruby/core/kernel/require_spec.rb b/spec/ruby/core/kernel/require_spec.rb
-index 896afb840a..89f6a19d1f 100644
+index 4029e68725..86080b7eab 100644
 --- a/spec/ruby/core/kernel/require_spec.rb
 +++ b/spec/ruby/core/kernel/require_spec.rb
 @@ -26,7 +26,9 @@
      features = out.lines.map { |line| File.basename(line.chomp, '.*') }
  
      # Ignore CRuby internals
--    features -= %w[encdb transdb windows_1252]
+-    features -= %w[encdb transdb windows_1252 windows_31j]
 +    # mswin will load rbconfig
 +    features -= RUBY_PLATFORM.include?('mswin') ?
-+      %w[encdb transdb windows_1252 rbconfig] : %w[encdb transdb windows_1252]
++      %w[encdb transdb windows_1252 windows_31j rbconfig] : %w[encdb transdb windows_1252 windows_31j]
      features.reject! { |feature| feature.end_with?('-fake') }
  
      features.sort.should == provided.sort
