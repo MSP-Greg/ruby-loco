@@ -64,7 +64,7 @@ jobs:
           echo "BINDGEN_EXTRA_CLANG_ARGS=`"--target=$env:RUST_TC --sysroot=$msys_root`"" >> $env:GITHUB_ENV
 
       - name: Cache - .downloaded-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .downloaded-cache
           key: dl-cache-win-mingw-${{ hashFiles('ruby/gems/bundled_gems') }}
