@@ -147,6 +147,9 @@ cd $d_repo
 ruby 1_1_pre_build.rb 64
 
 cd $d_ruby
+
+(Get-Content gems/bundled_gems -raw) -replace '(?m)^syslog.+\n', '' | Set-Content gems/bundled_gems -NoNewline
+
 # set time stamp for reproducible build
 $ts = $(git log -1 --format=%at).Trim()
 if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") {

@@ -19,6 +19,8 @@ function Set-Variables-Local {
 #——————————————————————————————————————————————————————————————————— start build
 cd $PSScriptRoot
 
+(Get-Content ruby/gems/bundled_gems -raw) -replace '(?m)^syslog.+\n', '' | Set-Content ruby/gems/bundled_gems -NoNewline
+
 $global:build_sys = 'mswin'
 
 . ./0_common.ps1 mswin
