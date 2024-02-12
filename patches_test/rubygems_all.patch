@@ -62,10 +62,10 @@ index 2683840f2e..18ee958e4e 100644
      assert_equal "--previous-version", arguments.shift
      assert_equal Gem::VERSION,         arguments.shift
 diff --git a/test/rubygems/test_gem_ext_builder.rb b/test/rubygems/test_gem_ext_builder.rb
-index 493aaa1b53..aa9d4dd5ae 100644
+index baf6140468..1eab504cd7 100644
 --- a/test/rubygems/test_gem_ext_builder.rb
 +++ b/test/rubygems/test_gem_ext_builder.rb
-@@ -240,7 +240,7 @@ def test_build_extensions_extconf_bad
+@@ -242,7 +242,7 @@ def test_build_extensions_extconf_bad
      gem_make_out = File.join @spec.extension_dir, "gem_make.out"
      cmd_make_out = File.read(gem_make_out)
  
@@ -75,7 +75,7 @@ index 493aaa1b53..aa9d4dd5ae 100644
  
      assert_path_not_exist @spec.gem_build_complete_path
 diff --git a/test/rubygems/test_require.rb b/test/rubygems/test_require.rb
-index fc5f219490..c2c457d62a 100644
+index 30a4a477f9..4bbcdd3cf4 100644
 --- a/test/rubygems/test_require.rb
 +++ b/test/rubygems/test_require.rb
 @@ -450,7 +450,7 @@ def test_realworld_default_gem

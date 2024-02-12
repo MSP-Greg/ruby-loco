@@ -1,18 +1,3 @@
-diff --git a/lib/mkmf.rb b/lib/mkmf.rb
-index 6da7dde5f1..8486915432 100644
---- a/lib/mkmf.rb
-+++ b/lib/mkmf.rb
-@@ -228,6 +228,10 @@ def map_dir(dir, map = nil)
-   elsif File.exist?(($hdrdir = ($top_srcdir ||= topdir) + "/include")  + "/ruby.h")
-     $topdir ||= RbConfig::CONFIG["topdir"]
-     $arch_hdrdir = "$(extout)/include/$(arch)"
-+  elsif File.exist?(($hdrdir = RbConfig::CONFIG["rubyhdrdir"]) + "/ruby/ruby.h")
-+    $extmk = false
-+    $topdir = $top_srcdir = $hdrdir
-+    $arch_hdrdir = RbConfig::CONFIG["rubyarchhdrdir"]
-   else
-     abort <<MESSAGE
- mkmf.rb can't find header files for ruby at #{$hdrdir}/ruby.h
 diff --git a/prelude.rb b/prelude.rb
 index ee78b44cc5..f9e93880fa 100644
 --- a/prelude.rb
@@ -31,10 +16,10 @@ index ee78b44cc5..f9e93880fa 100644
    # :nodoc:
    def irb
 diff --git a/test/irb/test_cmd.rb b/test/irb/test_cmd.rb
-index d99ac05c5d..db997fa403 100644
+index 7d7353281e..8bdb14b844 100644
 --- a/test/irb/test_cmd.rb
 +++ b/test/irb/test_cmd.rb
-@@ -824,6 +824,10 @@ def test_show_doc_without_rdoc
+@@ -826,6 +826,10 @@ def test_show_doc_without_rdoc
    end
  
    class EditTest < CommandTestCase
@@ -45,7 +30,7 @@ index d99ac05c5d..db997fa403 100644
      def setup
        @original_visual = ENV["VISUAL"]
        @original_editor = ENV["EDITOR"]
-@@ -873,7 +877,7 @@ def test_edit_with_constant
+@@ -875,7 +879,7 @@ def test_edit_with_constant
        )
  
        assert_empty err
@@ -54,7 +39,7 @@ index d99ac05c5d..db997fa403 100644
        assert_match("command: ': code'", out)
      end
  
-@@ -883,7 +887,7 @@ def test_edit_with_class_method
+@@ -885,7 +889,7 @@ def test_edit_with_class_method
        )
  
        assert_empty err
@@ -63,7 +48,7 @@ index d99ac05c5d..db997fa403 100644
        assert_match("command: ': code'", out)
      end
  
-@@ -893,7 +897,7 @@ def test_edit_with_instance_method
+@@ -895,7 +899,7 @@ def test_edit_with_instance_method
        )
  
        assert_empty err
