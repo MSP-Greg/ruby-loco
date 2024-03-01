@@ -62,10 +62,10 @@ index 2683840f2e..18ee958e4e 100644
      assert_equal "--previous-version", arguments.shift
      assert_equal Gem::VERSION,         arguments.shift
 diff --git a/test/rubygems/test_gem_ext_builder.rb b/test/rubygems/test_gem_ext_builder.rb
-index baf6140468..1eab504cd7 100644
+index d5812da2aa..77ea4f9445 100644
 --- a/test/rubygems/test_gem_ext_builder.rb
 +++ b/test/rubygems/test_gem_ext_builder.rb
-@@ -242,7 +242,7 @@ def test_build_extensions_extconf_bad
+@@ -247,7 +247,7 @@ def test_build_extensions_extconf_bad
      gem_make_out = File.join @spec.extension_dir, "gem_make.out"
      cmd_make_out = File.read(gem_make_out)
  

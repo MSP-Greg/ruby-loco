@@ -1,10 +1,10 @@
 Patch by MSP-Greg
 uses gemspecs in ruby under test, not srcdir
 diff --git a/test/ruby/test_default_gems.rb b/test/ruby/test_default_gems.rb
-index d8e8226253..1a74924b08 100644
+index b9de33cc78..7b93d71585 100644
 --- a/test/ruby/test_default_gems.rb
 +++ b/test/ruby/test_default_gems.rb
-@@ -13,10 +13,16 @@ def self.load(file)
+@@ -15,10 +15,16 @@ def self.load(file)
    end
  
    def test_validate_gemspec
