@@ -29,6 +29,7 @@ module CopyBashScripts
 
       # all files in bin folder
       bins = Dir["#{BIN_DIR}/*"].select { |fn| File.file? fn }
+        .reject { |fn| File.basename(fn, ".*") == 'ridk' }
 
       bash_bins = bins.select { |fn| File.extname(fn).empty? }
 
