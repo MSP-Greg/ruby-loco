@@ -19,7 +19,7 @@ index 7ef184d639..3b2b9ea7cd 100644
      IO.popen(cmd) {|io|
 -      assert_equal("PATH\n", io.read)
 +      if mswin?
-+      assert_includes(io.read, "PATH\n")
++        assert_includes(io.read, "PATH\n")
 +      else
 +        assert_equal("PATH\n", io.read)
 +      end
