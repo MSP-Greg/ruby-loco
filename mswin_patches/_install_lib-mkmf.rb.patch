@@ -2,10 +2,10 @@ Patch by MSP-Greg
 Allows using mkmf.rb when running test-all tests from install.
 mkmf.rb creates several global variables
 diff --git a/lib/mkmf.rb b/lib/mkmf.rb
-index f59c19c554..fcf1ad64ba 100644
+index 73459ffeb9..e9a92703e0 100644
 --- a/lib/mkmf.rb
 +++ b/lib/mkmf.rb
-@@ -231,6 +231,10 @@ def map_dir(dir, map = nil)
+@@ -248,6 +248,10 @@ def map_dir(dir, map = nil)
    elsif File.exist?(($hdrdir = ($top_srcdir ||= topdir) + "/include")  + "/ruby.h")
      $topdir ||= RbConfig::CONFIG["topdir"]
      $arch_hdrdir = "$(extout)/include/$(arch)"
