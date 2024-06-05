@@ -50,7 +50,7 @@ cd $d_build
 
 Time-Log "start"
 
-$cmd_config = "..\ruby\win32\configure.bat --disable-install-doc --prefix=$d_install --without-ext=+,dbm,gdbm --with-opt-dir=$d_vcpkg_install"
+$cmd_config = "..\ruby\win32\configure.bat --disable-install-doc --prefix=$d_install --without-ext=+,dbm,gdbm --with-opt-dir=$d_vcpkg_install --with-gmp"
 Run $cmd_config { cmd.exe /c "$cmd_config" }
 Time-Log "configure"
 
@@ -78,7 +78,12 @@ Run "nmake 'DESTDIR=' install-nodoc" {
 
   cd $d_install\bin\ruby_builtin_dlls
   echo "installing dll files:               From $d_vcpkg_install/bin"
-  $dlls = @('libcrypto-3-x64', 'libssl-3-x64', 'ffi-8', 'readline', 'yaml', 'zlib1')
+
+  # Changes here requires changes to mswin/ruby_builtin_dlls.manifest and
+  # mswin/ruby-exe.xml, update version in the below
+  # <assemblyIdentity type="win32" name="ruby_builtin_dlls" version="1.0.0.4"/>
+  $dlls = @('gmp-10', 'gmpxx-4', 'libcrypto-3-x64', 'libssl-3-x64', 'ffi-8', 'readline', 'yaml', 'zlib1')
+
   foreach ($dll in $dlls) {
     Copy-Item $d_vcpkg_install/bin/$dll.dll
     echo "                                    $dll.dll"
