@@ -1,13 +1,12 @@
 diff --git a/win32/setup.mak b/win32/setup.mak
-index 3b822a33c0..afc53e1d4a 100644
+index 3b822a33c0..3b618826b0 100644
 --- a/win32/setup.mak
 +++ b/win32/setup.mak
-@@ -210,7 +210,11 @@ echo TEENY = RUBY_VERSION_TEENY
+@@ -210,7 +210,10 @@ echo TEENY = RUBY_VERSION_TEENY
  echo ABI_VERSION = RUBY_ABI_VERSION
  #endif
  set /a MSC_VER = _MSC_VER
 -#if _MSC_VER >= 1920
-+# allow using previous VS version if Ruby is compiled with VS 2022 or later
 +#if _MSC_VER >= 1940
 +set /a MSC_VER_LOWER = (MSC_VER-20)/20*20+0
 +set /a MSC_VER_UPPER = MSC_VER/20*20+19
