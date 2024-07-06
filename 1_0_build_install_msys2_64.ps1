@@ -139,7 +139,8 @@ $files = "$d_msys2$env:MINGW_PREFIX/lib/libz.dll.a",
 
 Files-Hide $files
 
-Run-Patches @('msys2_patches')
+Run-Patches @('patches_install_all')
+Run-Patches @('patches_install_msys2')
 
 Create-Folders
 
