@@ -1,8 +1,8 @@
 diff --git a/bootstraptest/runner.rb b/bootstraptest/runner.rb
-index 764c4898dd..fdabd2c5c4 100755
+index 2e2a3611de..095f207a3f 100755
 --- a/bootstraptest/runner.rb
 +++ b/bootstraptest/runner.rb
-@@ -710,9 +710,15 @@ def assert_finish(timeout_seconds, testsrc, message = '')
+@@ -762,9 +762,15 @@ def assert_finish(timeout_seconds, testsrc, message = '')
          end
          if io.respond_to?(:read_nonblock)
            if IO.select([io], nil, nil, diff)
@@ -20,7 +20,7 @@ index 764c4898dd..fdabd2c5c4 100755
              end while true
            end
 diff --git a/bootstraptest/test_io.rb b/bootstraptest/test_io.rb
-index 666e5a011b..7efb535ec4 100644
+index 4e5d6d59c9..547dbc2305 100644
 --- a/bootstraptest/test_io.rb
 +++ b/bootstraptest/test_io.rb
 @@ -1,5 +1,5 @@
@@ -31,10 +31,10 @@ index 666e5a011b..7efb535ec4 100644
    t1 = Thread.new { r.sysread(1) }
    t2 = Thread.new { r.sysread(1) }
 diff --git a/bootstraptest/test_thread.rb b/bootstraptest/test_thread.rb
-index a4d46e2f10..5db8b61bb5 100644
+index 4040b68a27..87d09d5f64 100644
 --- a/bootstraptest/test_thread.rb
 +++ b/bootstraptest/test_thread.rb
-@@ -349,7 +349,7 @@ def m
+@@ -347,7 +347,7 @@ def m
  
  assert_normal_exit %q{
    Thread.new("foo", &Object.method(:class_eval)).join
