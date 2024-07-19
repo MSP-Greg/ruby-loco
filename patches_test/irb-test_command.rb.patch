@@ -1,8 +1,8 @@
 diff --git a/test/irb/test_command.rb b/test/irb/test_command.rb
-index 30c3f5ca2c..8a18a39591 100644
+index 567c3216cc..31a188c65e 100644
 --- a/test/irb/test_command.rb
 +++ b/test/irb/test_command.rb
-@@ -783,6 +783,10 @@ def test_show_doc_without_rdoc
+@@ -780,6 +780,10 @@ def test_show_doc_without_rdoc
    end
  
    class EditTest < CommandTestCase
@@ -13,7 +13,7 @@ index 30c3f5ca2c..8a18a39591 100644
      def setup
        @original_visual = ENV["VISUAL"]
        @original_editor = ENV["EDITOR"]
-@@ -842,7 +846,7 @@ def test_edit_with_constant
+@@ -839,7 +843,7 @@ def test_edit_with_constant
        )
  
        assert_empty err
@@ -22,7 +22,7 @@ index 30c3f5ca2c..8a18a39591 100644
        assert_match("command: ': code'", out)
      end
  
-@@ -852,7 +856,7 @@ def test_edit_with_class_method
+@@ -849,7 +853,7 @@ def test_edit_with_class_method
        )
  
        assert_empty err
@@ -31,7 +31,7 @@ index 30c3f5ca2c..8a18a39591 100644
        assert_match("command: ': code'", out)
      end
  
-@@ -862,7 +866,7 @@ def test_edit_with_instance_method
+@@ -859,7 +863,7 @@ def test_edit_with_instance_method
        )
  
        assert_empty err
