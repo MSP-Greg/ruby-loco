@@ -1,8 +1,8 @@
 diff --git a/test/ruby/test_ast.rb b/test/ruby/test_ast.rb
-index 234c7af219..6bb151a2cb 100644
+index ebef14c14b..f8beaf72a3 100644
 --- a/test/ruby/test_ast.rb
 +++ b/test/ruby/test_ast.rb
-@@ -115,24 +115,26 @@ def validate_not_cared0(node)
+@@ -116,24 +116,26 @@ def validate_not_cared0(node)
    SRCDIR = File.expand_path("../../..", __FILE__)
  
    Dir.glob("test/**/*.rb", base: SRCDIR).each do |path|
@@ -33,7 +33,7 @@ index 234c7af219..6bb151a2cb 100644
      define_method("test_all_tokens:#{path}") do
        node = RubyVM::AbstractSyntaxTree.parse_file("#{SRCDIR}/#{path}", keep_tokens: true)
        tokens = node.all_tokens.sort_by { [_1.last[0], _1.last[1]] }
-@@ -157,6 +159,7 @@ def validate_not_cared0(node)
+@@ -158,6 +160,7 @@ def validate_not_cared0(node)
            assert_equal(0, beg_pos[1], "#{token_0}. #{token_1}")
          end
        end
