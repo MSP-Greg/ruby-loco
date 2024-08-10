@@ -200,7 +200,7 @@ function Run-Patches($ary_dir) {
   if ($is_actions) {
     echo "##[group]$(color "Apply Patches" $all_clr)"
   } else {
-    echo "all_clr $all_clr"
+    # echo "all_clr $all_clr"
     $e_str = "$dash_hdr Apply Patches"
     echo $(color $e_str $all_clr)
   }
