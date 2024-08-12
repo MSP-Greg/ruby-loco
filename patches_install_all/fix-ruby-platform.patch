@@ -1,0 +1,32 @@
+From f9461058b2827aee29532f3980e7e6a040c47e51 Mon Sep 17 00:00:00 2001
+From: Lars Kanis <lars.kanis@sincnovation.com>
+Date: Mon, 12 Aug 2024 13:12:29 +0200
+Subject: [PATCH] Revert change of "mingw-ucrt" platform string
+
+... of commit 00176cd40fe9f385231e9c20b956fc4a84d240b9 .
+
+The reverted change was made only for constistency, as discussed in
+  https://github.com/ruby/ruby/pull/11358#issuecomment-2282222369
+
+But the platform string "mingw-ucrt" should not be changed.
+It is used as RUBY_PLATFORM and as the rubygems platform, so that there should be a good reason to change the name of an established platform.
+"mingw-ucrt" was introduced intentionally in commit 576b2e64cdc5ea42ad345dd3c1c215e006c06fca .
+
+Related to #11358
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 91d33cef4dfe59..be5adca8427565 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -4424,7 +4424,7 @@ AS_IF([test "${universal_binary-no}" = yes ], [
+     AC_DEFINE_UNQUOTED(RUBY_PLATFORM, "universal." RUBY_PLATFORM_CPU "-" RUBY_PLATFORM_OS)
+ ], [
+     AS_IF([test "${target_os}-${rb_cv_msvcrt}" = "mingw32-ucrt" ], [
+-        arch="${target_cpu}-${target_os}-ucrt"
++        arch="${target_cpu}-mingw-ucrt"
+     ], [
+         arch="${target_cpu}-${target_os}"
+     ])
