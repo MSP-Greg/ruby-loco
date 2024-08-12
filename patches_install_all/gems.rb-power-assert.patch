@@ -1,6 +1,5 @@
-Fix install of power_assert
 diff --git a/gems/bundled_gems b/gems/bundled_gems
-index 2dfeb32886..bcc779593a 100644
+index def8460a6c..bd1c6650d7 100644
 --- a/gems/bundled_gems
 +++ b/gems/bundled_gems
 @@ -7,7 +7,7 @@
@@ -11,4 +10,4 @@ index 2dfeb32886..bcc779593a 100644
 +power_assert    2.0.4dev https://github.com/ruby/power_assert 901599e63b5fd326f3acf406e2f5c6d5b9f91ae5
  rake            13.2.1  https://github.com/ruby/rake
  test-unit       3.6.2   https://github.com/test-unit/test-unit
- rexml           3.3.2   https://github.com/ruby/rexml
+ rexml           3.3.5   https://github.com/ruby/rexml
