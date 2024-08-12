@@ -71,7 +71,7 @@ function Set-Variables {
         $script:install = [string]::IsNullOrWhiteSpace($env:PRE) ? "ruby-ucrt" : $env:PRE
         $env:MINGW_PREFIX = "/ucrt64"
         $env:MINGW_PACKAGE_PREFIX = "mingw-w64-ucrt-x86_64"
-        $script:march = "x86-64" ; $script:carch = "x86_64" ; $script:rarch = "x64-mingw32-ucrt"
+        $script:march = "x86-64" ; $script:carch = "x86_64" ; $script:rarch = "x64-mingw-ucrt"
       }
       "MINGW32" {
         $script:install = [string]::IsNullOrWhiteSpace($env:PRE) ? "ruby-mingw32" : $env:PRE
