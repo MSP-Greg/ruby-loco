@@ -35,8 +35,8 @@ $files = 'C:/Windows/System32/libcrypto-1_1-x64.dll',
 
 Files-Hide $files
 
-Run-Patches @('patches_install_all')
-Run-Patches @('patches_install_mswin')
+Run-Patches @('rubyinstaller2', 'patches_ri2')
+Run-Patches @('ruby', 'patches_install_all', 'patches_install_mswin')
 
 Create-Folders
 

@@ -1,0 +1,76 @@
+diff --git a/lib/ruby_installer/build/msys2_installation.rb b/lib/ruby_installer/build/msys2_installation.rb
+index 19438ca..7077e73 100644
+--- a/lib/ruby_installer/build/msys2_installation.rb
++++ b/lib/ruby_installer/build/msys2_installation.rb
+@@ -23,18 +23,18 @@ module Build # Use for: Build, Runtime
+       @mingwdir = nil
+       @mingwarch = mingwarch || (
+           case RUBY_PLATFORM
+-            when /x64.*ucrt/ then 'ucrt64'
+-            when /x64.*mingw32/ then 'mingw64'
+-            when /i386.*mingw32/ then 'mingw32'
+-            else raise "unsupported ruby platform #{RUBY_PLATFORM.inspect}"
++          when /x64.*ucrt/ then 'ucrt64'
++          when /x64.*mingw32/ then 'mingw64'
++          when /i386.*mingw32/ then 'mingw32'
++          else raise "unsupported ruby platform #{RUBY_PLATFORM.inspect}"
+           end
+         )
+       @mingw_package_prefix = mingw_package_prefix || begin
+         case @mingwarch
+-          when 'mingw32' then "mingw-w64-i686"
+-          when 'mingw64' then "mingw-w64-x86_64"
+-          when 'ucrt64'  then "mingw-w64-ucrt-x86_64"
+-          else raise "unknown mingwarch #{@mingwarch.inspect}"
++        when 'mingw32' then "mingw-w64-i686"
++        when 'mingw64' then "mingw-w64-x86_64"
++        when 'ucrt64'  then "mingw-w64-ucrt-x86_64"
++        else raise "unknown mingwarch #{@mingwarch.inspect}"
+         end
+       end
+ 
+@@ -164,25 +164,25 @@ module Build # Use for: Build, Runtime
+       end
+ 
+       case mingwarch
+-        when 'mingw32'
+-          vars['MSYSTEM_PREFIX'] = '/mingw32'
+-          vars['MSYSTEM_CARCH'] = 'i686'
+-          vars['MSYSTEM_CHOST'] = 'i686-w64-mingw32'
+-          vars['MINGW_CHOST'] = vars['MSYSTEM_CHOST']
+-          vars['MINGW_PREFIX'] = vars['MSYSTEM_PREFIX']
+-        when 'mingw64'
+-          vars['MSYSTEM_PREFIX'] = '/mingw64'
+-          vars['MSYSTEM_CARCH'] = 'x86_64'
+-          vars['MSYSTEM_CHOST'] = 'x86_64-w64-mingw32'
+-          vars['MINGW_CHOST'] = vars['MSYSTEM_CHOST']
+-          vars['MINGW_PREFIX'] = vars['MSYSTEM_PREFIX']
+-        when 'ucrt64'
+-          vars['MSYSTEM_PREFIX'] = '/ucrt64'
+-          vars['MSYSTEM_CARCH'] = 'x86_64'
+-          vars['MSYSTEM_CHOST'] = 'x86_64-w64-mingw32'
+-          vars['MINGW_CHOST'] = vars['MSYSTEM_CHOST']
+-          vars['MINGW_PREFIX'] = vars['MSYSTEM_PREFIX']
+-        else raise "unknown mingwarch #{@mingwarch.inspect}"
++      when 'mingw32'
++        vars['MSYSTEM_PREFIX'] = '/mingw32'
++        vars['MSYSTEM_CARCH'] = 'i686'
++        vars['MSYSTEM_CHOST'] = 'i686-w64-mingw32'
++        vars['MINGW_CHOST'] = vars['MSYSTEM_CHOST']
++        vars['MINGW_PREFIX'] = vars['MSYSTEM_PREFIX']
++      when 'mingw64'
++        vars['MSYSTEM_PREFIX'] = '/mingw64'
++        vars['MSYSTEM_CARCH'] = 'x86_64'
++        vars['MSYSTEM_CHOST'] = 'x86_64-w64-mingw32'
++        vars['MINGW_CHOST'] = vars['MSYSTEM_CHOST']
++        vars['MINGW_PREFIX'] = vars['MSYSTEM_PREFIX']
++      when 'ucrt64'
++        vars['MSYSTEM_PREFIX'] = '/ucrt64'
++        vars['MSYSTEM_CARCH'] = 'x86_64'
++        vars['MSYSTEM_CHOST'] = 'x86_64-w64-mingw32'
++        vars['MINGW_CHOST'] = vars['MSYSTEM_CHOST']
++        vars['MINGW_PREFIX'] = vars['MSYSTEM_PREFIX']
++      else raise "unknown mingwarch #{@mingwarch.inspect}"
+       end
+ 
+       begin

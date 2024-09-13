@@ -186,11 +186,12 @@ function Enc-Info {
 
 # Runs Apply-Patches from folder contained in array parameter
 #————————————————————————————————————————————————————————————————— Run-Patches
-function Run-Patches($ary_dir) {
+function Run-Patches($ary_temp) {
+  $apply_dir, $ary_dir = $ary_temp
   $all_log = ''
   $all_clr = 'grn'
   foreach ($patch_dir in $ary_dir) {
-    $log, $p_clr = Apply-Patches($patch_dir)
+    $log, $p_clr = Apply-Patches($patch_dir, $apply_dir)
     if ($log -ne $null) { $all_log += $log }
     if ($p_clr -eq 'red') { $all_clr = 'red' }
     if ($p_clr -eq 'yel' -and $p_clr -ne 'red') {
@@ -198,10 +199,10 @@ function Run-Patches($ary_dir) {
     }
   }
   if ($is_actions) {
-    echo "##[group]$(color "Apply Patches" $all_clr)"
+    echo "##[group]$(color "Apply Patches $apply_dir" $all_clr)"
   } else {
     # echo "all_clr $all_clr"
-    $e_str = "$dash_hdr Apply Patches"
+    $e_str = "$dash_hdr Apply Patches $apply_dir"
     echo $(color $e_str $all_clr)
   }
   echo $all_log.TrimEnd()
@@ -210,7 +211,8 @@ function Run-Patches($ary_dir) {
 
 #————————————————————————————————————————————————————————————————— Apply-Patches
 # Applies patches
-function Apply-Patches($p_dir) {
+function Apply-Patches($temp) {
+  $p_dir, $apply_dir = $temp
   if (Test-Path -Path $p_dir -PathType Container ) {
     $patch_exe = "$d_msys2/usr/bin/patch.exe"
     Push-Location "$d_repo/$p_dir"
@@ -219,7 +221,7 @@ function Apply-Patches($p_dir) {
     Pop-Location
     $fix = 'grn'
     if ($patches.length -ne 0) {
-      Push-Location "$d_ruby"
+      Push-Location "$d_repo/$apply_dir"
       foreach ($p in $patches) {
         if ($p.StartsWith("__")) { continue }
         $patch_log = $(&$patch_exe -p1 -N --no-backup-if-mismatch -i "$d_repo/$p_dir/$p" 2>&1) -replace '^', "`n  "

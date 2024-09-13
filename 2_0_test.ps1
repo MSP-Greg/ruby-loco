@@ -251,7 +251,7 @@ cd $PSScriptRoot
 Set-Variables
 
 # apply patches for testing
-Run-Patches @('patches_basic_boot', 'patches_spec', 'patches_test')
+Run-Patches @('ruby', 'patches_basic_boot', 'patches_spec', 'patches_test')
 
 $ruby_exe  = "$d_install/bin/ruby.exe"
 $abi       = &$ruby_exe -e "print RbConfig::CONFIG['ruby_version']"
