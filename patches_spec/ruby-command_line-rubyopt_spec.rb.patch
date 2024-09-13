@@ -1,0 +1,32 @@
+diff --git a/gems/bundled_gems b/gems/bundled_gems
+index 853e6bd2db..135c64ea1d 100644
+--- a/gems/bundled_gems
++++ b/gems/bundled_gems
+@@ -7,7 +7,7 @@
+ #   if `revision` is not given, "v"+`version` or `version` will be used.
+ 
+ minitest        5.25.1  https://github.com/minitest/minitest
+-power_assert    2.0.3   https://github.com/ruby/power_assert 84e85124c5014a139af39161d484156cfe87a9ed
++power_assert    2.0.4dev https://github.com/ruby/power_assert 901599e63b5fd326f3acf406e2f5c6d5b9f91ae5
+ rake            13.2.1  https://github.com/ruby/rake
+ test-unit       3.6.2   https://github.com/test-unit/test-unit
+ rexml           3.3.7   https://github.com/ruby/rexml
+diff --git a/spec/ruby/command_line/rubyopt_spec.rb b/spec/ruby/command_line/rubyopt_spec.rb
+index 18a5959b18..734db8d519 100644
+--- a/spec/ruby/command_line/rubyopt_spec.rb
++++ b/spec/ruby/command_line/rubyopt_spec.rb
+@@ -25,12 +25,12 @@
+   guard -> { not CROSS_COMPILING } do
+     it "prints the version number for '-v'" do
+       ENV["RUBYOPT"] = '-v'
+-      ruby_exe("")[/\A.*/].should == RUBY_DESCRIPTION.sub("+PRISM ", "")
++      ruby_exe("")[/\A.*/].should == RUBY_DESCRIPTION
+     end
+ 
+     it "ignores whitespace around the option" do
+       ENV["RUBYOPT"] = ' -v '
+-      ruby_exe("")[/\A.*/].should == RUBY_DESCRIPTION.sub("+PRISM ", "")
++      ruby_exe("")[/\A.*/].should == RUBY_DESCRIPTION
+     end
+   end
+ 
