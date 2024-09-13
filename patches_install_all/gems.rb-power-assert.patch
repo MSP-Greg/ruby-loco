@@ -1,5 +1,5 @@
 diff --git a/gems/bundled_gems b/gems/bundled_gems
-index f18336eb9f..a0fa773400 100644
+index 853e6bd2db..b4d43c604f 100644
 --- a/gems/bundled_gems
 +++ b/gems/bundled_gems
 @@ -7,7 +7,7 @@
@@ -10,4 +10,10 @@ index f18336eb9f..a0fa773400 100644
 +power_assert    2.0.4dev https://github.com/ruby/power_assert 901599e63b5fd326f3acf406e2f5c6d5b9f91ae5
  rake            13.2.1  https://github.com/ruby/rake
  test-unit       3.6.2   https://github.com/test-unit/test-unit
- rexml           3.3.5   https://github.com/ruby/rexml
+ rexml           3.3.7   https://github.com/ruby/rexml
+@@ -32,5 +32,4 @@ resolv-replace  0.1.1   https://github.com/ruby/resolv-replace
+ rinda           0.2.0   https://github.com/ruby/rinda
+ drb             2.2.1   https://github.com/ruby/drb
+ nkf             0.2.0   https://github.com/ruby/nkf
+-syslog          0.1.2   https://github.com/ruby/syslog
+ csv             3.3.0   https://github.com/ruby/csv
