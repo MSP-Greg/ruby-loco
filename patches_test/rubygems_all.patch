@@ -12,10 +12,10 @@ index ca2980e04b..d730c74081 100644
        target_gemspec_location = "#{path}/specifications/bundler-#{Bundler::VERSION}.gemspec"
  
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index e8a294d65c..0607a14a64 100644
+index 0d048b08b7..d52d40a1a3 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
-@@ -949,7 +949,7 @@ def test_self_platforms
+@@ -947,7 +947,7 @@ def test_self_platforms
    end
  
    def test_self_prefix
@@ -44,7 +44,7 @@ index 48252d84d4..e4f130936e 100644
                   @ui.output)
      assert_match(/GIT EXECUTABLE: #{@cmd.send(:git_path)}/, @ui.output)
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
-index 194ebb030a..1954b21cf2 100644
+index 642a62a373..df3d9883e8 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
 @@ -761,8 +761,11 @@ def test_update_rubygems_arguments
@@ -62,7 +62,7 @@ index 194ebb030a..1954b21cf2 100644
      assert_equal "--previous-version", arguments.shift
      assert_equal Gem::VERSION,         arguments.shift
 diff --git a/test/rubygems/test_gem_ext_builder.rb b/test/rubygems/test_gem_ext_builder.rb
-index d5812da2aa..77ea4f9445 100644
+index 34f85e6b75..e45ab6544c 100644
 --- a/test/rubygems/test_gem_ext_builder.rb
 +++ b/test/rubygems/test_gem_ext_builder.rb
 @@ -247,7 +247,7 @@ def test_build_extensions_extconf_bad
@@ -75,10 +75,10 @@ index d5812da2aa..77ea4f9445 100644
  
      assert_path_not_exist @spec.gem_build_complete_path
 diff --git a/test/rubygems/test_require.rb b/test/rubygems/test_require.rb
-index 30a4a477f9..4bbcdd3cf4 100644
+index f15e9b6243..3db4556119 100644
 --- a/test/rubygems/test_require.rb
 +++ b/test/rubygems/test_require.rb
-@@ -450,7 +450,7 @@ def test_realworld_default_gem
+@@ -466,7 +466,7 @@ def test_realworld_default_gem
        require "json"
        puts Gem.loaded_specs["json"]
      RUBY
@@ -87,7 +87,7 @@ index 30a4a477f9..4bbcdd3cf4 100644
      assert $?.success?
      refute_empty output
    end
-@@ -470,7 +470,8 @@ def test_realworld_upgraded_default_gem
+@@ -486,7 +486,8 @@ def test_realworld_upgraded_default_gem
      RUBY
      File.write(path, code)
  
