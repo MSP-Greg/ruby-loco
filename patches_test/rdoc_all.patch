@@ -1,6 +1,6 @@
 # without this, intermittent failures in CI
 diff --git a/test/rdoc/support/test_case.rb b/test/rdoc/support/test_case.rb
-index 36009111e2..7617fc8471 100644
+index d98dbe0d7b..6cdde617e9 100644
 --- a/test/rdoc/support/test_case.rb
 +++ b/test/rdoc/support/test_case.rb
 @@ -13,7 +13,7 @@
@@ -12,8 +12,22 @@ index 36009111e2..7617fc8471 100644
  
  ##
  # RDoc::TestCase is an abstract TestCase to provide common setup and teardown
+diff --git a/test/rdoc/test_rdoc_generator_json_index.rb b/test/rdoc/test_rdoc_generator_json_index.rb
+index 62d1ccec95..58925a8424 100644
+--- a/test/rdoc/test_rdoc_generator_json_index.rb
++++ b/test/rdoc/test_rdoc_generator_json_index.rb
+@@ -95,7 +95,8 @@ def test_generate
+     assert_file 'js/navigation.js'
+     assert_file 'js/search_index.js'
+ 
+-    srcdir = File.expand_path('lib/rdoc', @pwd)
++    #srcdir = File.expand_path('lib/rdoc', @pwd)
++    srcdir = "#{RbConfig::CONFIG['rubylibdir']}/rdoc"
+     if !File.directory? srcdir
+       # for Ruby core repository
+       srcdir = File.expand_path("../../../lib/rdoc", __FILE__)
 diff --git a/test/rdoc/test_rdoc_markdown.rb b/test/rdoc/test_rdoc_markdown.rb
-index dd6f312fa9..0dc621fe54 100644
+index 72587caf46..ff508e57ee 100644
 --- a/test/rdoc/test_rdoc_markdown.rb
 +++ b/test/rdoc/test_rdoc_markdown.rb
 @@ -2,8 +2,8 @@
@@ -28,7 +42,7 @@ index dd6f312fa9..0dc621fe54 100644
  class TestRDocMarkdown < RDoc::TestCase
  
 diff --git a/test/rdoc/test_rdoc_markdown_test.rb b/test/rdoc/test_rdoc_markdown_test.rb
-index d4f894c924..0ecd000136 100644
+index 193d648253..4def1a101f 100644
 --- a/test/rdoc/test_rdoc_markdown_test.rb
 +++ b/test/rdoc/test_rdoc_markdown_test.rb
 @@ -2,8 +2,8 @@
