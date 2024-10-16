@@ -1,0 +1,14 @@
+diff --git a/test/rdoc/test_rdoc_generator_json_index.rb b/test/rdoc/test_rdoc_generator_json_index.rb
+index 62d1ccec95..e31567172a 100644
+--- a/test/rdoc/test_rdoc_generator_json_index.rb
++++ b/test/rdoc/test_rdoc_generator_json_index.rb
+@@ -95,7 +95,8 @@ def test_generate
+     assert_file 'js/navigation.js'
+     assert_file 'js/search_index.js'
+ 
+-    srcdir = File.expand_path('lib/rdoc', @pwd)
++    #srcdir = File.expand_path('lib/rdoc', @pwd)
++    srcdir = "#{RbConfig::TOPDIR}/lib/ruby/#{RbConfig::CONFIG['ruby_version']}/rdoc"
+     if !File.directory? srcdir
+       # for Ruby core repository
+       srcdir = File.expand_path("../../../lib/rdoc", __FILE__)
