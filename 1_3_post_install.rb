@@ -51,7 +51,6 @@ class << self
     add_ri2_site_ruby
     generate_version_file
     update_gems
-    add_bash_bin
   end
 
   private
@@ -132,12 +131,15 @@ class << self
     File.binwrite(dest, f_str)
   end
 
-  # for trunk/master, only adds bundler
+  # No changes to trunk/master
   def update_gems
     require 'rubygems'
     require 'rubygems/gem_runner'
     suffix = %w[--no-document --env-shebang --silent --norc]
-    if /master/ !~ RUBY_DESCRIPTION
+    if RUBY_DESCRIPTION.include? 'master'
+      # added as of r65509
+      # Gem::GemRunner.new.run(%w[install bundler] + suffix)
+    else
       # Gem::GemRunner.new.run %w[uninstall rubygems-update -x]
       # rdoc won't update without UI confirmation of bin directory file replacement ?
       Gem::GemRunner.new.run(%w[update minitest power_assert rake rdoc test-unit] + suffix)
@@ -150,32 +152,10 @@ class << self
       if RUBY_VERSION < "2.6"
         Gem::GemRunner.new.run(%w[install bundler] + suffix)
       end
-    else
-      # added as of r65509
-      # Gem::GemRunner.new.run(%w[install bundler] + suffix)
     end
     # clean empty gem folders, needed as of 2019-10-20
     ary = Dir["#{Gem.dir}/gems/*"]
     ary.each { |d| Dir.rmdir(d) if Dir.empty?(d) }
-  end
-
-  def add_bash_bin
-    # fix bundled gems bash scripts first
-    Dir.chdir BINDIR do
-      bash_bins = Dir["*"].select { |fn| !Dir.exist?(fn) && File.extname(fn).empty? }
-      bash_bins.each { |fn|
-        str = File.read(fn, mode: 'rb:UTF-8').sub(/.+?^#![^\n]+/m, '#!/usr/bin/env ruby')
-        File.write fn, str, mode: 'wb:UTF-8'
-      }
-    end
-    # copy ruby/bin bash scripts & fix
-    Dir.chdir "#{D_RUBY}/bin" do
-      bash_bins = Dir["*"]
-      bash_bins.each { |fn|
-        str = File.read(fn, mode: 'rb:UTF-8').sub(/\A#![^\n]+ruby$/, '#!/usr/bin/env ruby')
-        File.write "#{BINDIR}/#{fn}", str, mode: 'wb:UTF-8'
-      }
-    end
   end
 
 end
