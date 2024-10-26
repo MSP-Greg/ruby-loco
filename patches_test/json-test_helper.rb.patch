@@ -1,20 +1,20 @@
 diff --git a/test/json/test_helper.rb b/test/json/test_helper.rb
-index 4955a02c9d..f0e80fce12 100644
+index e8bba16f84..93763fa96f 100644
 --- a/test/json/test_helper.rb
 +++ b/test/json/test_helper.rb
 @@ -1,12 +1,12 @@
  case ENV['JSON']
  when 'pure'
--  $:.unshift File.join(__dir__, '../../lib')
-+  #  $:.unshift File.join(__dir__, '../../lib')
+-  $LOAD_PATH.unshift(File.expand_path('../../../lib', __FILE__))
++  # $LOAD_PATH.unshift(File.expand_path('../../../lib', __FILE__))
    require 'json/pure'
  when 'ext'
--  $:.unshift File.join(__dir__, '../../ext'), File.join(__dir__, '../../lib')
-+  # $:.unshift File.join(__dir__, '../../ext'), File.join(__dir__, '../../lib')
+-  $LOAD_PATH.unshift(File.expand_path('../../../ext', __FILE__), File.expand_path('../../../lib', __FILE__))
++  # $LOAD_PATH.unshift(File.expand_path('../../../ext', __FILE__), File.expand_path('../../../lib', __FILE__))
    require 'json/ext'
  else
--  $:.unshift File.join(__dir__, '../../ext'), File.join(__dir__, '../../lib')
-+  # $:.unshift File.join(__dir__, '../../ext'), File.join(__dir__, '../../lib')
+-  $LOAD_PATH.unshift(File.expand_path('../../../ext', __FILE__), File.expand_path('../../../lib', __FILE__))
++  # $LOAD_PATH.unshift(File.expand_path('../../../ext', __FILE__), File.expand_path('../../../lib', __FILE__))
    require 'json'
  end
  
