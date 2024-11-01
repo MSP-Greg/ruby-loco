@@ -1,20 +1,22 @@
 diff --git a/test/json/test_helper.rb b/test/json/test_helper.rb
-index e8bba16f84..93763fa96f 100644
+index 7bff9b3391..809ae0a0bf 100644
 --- a/test/json/test_helper.rb
 +++ b/test/json/test_helper.rb
-@@ -1,12 +1,12 @@
+@@ -1,14 +1,14 @@
  case ENV['JSON']
  when 'pure'
 -  $LOAD_PATH.unshift(File.expand_path('../../../lib', __FILE__))
 +  # $LOAD_PATH.unshift(File.expand_path('../../../lib', __FILE__))
+   $stderr.puts("Testing JSON::Pure")
    require 'json/pure'
  when 'ext'
+   $stderr.puts("Testing JSON::Ext")
 -  $LOAD_PATH.unshift(File.expand_path('../../../ext', __FILE__), File.expand_path('../../../lib', __FILE__))
 +  # $LOAD_PATH.unshift(File.expand_path('../../../ext', __FILE__), File.expand_path('../../../lib', __FILE__))
    require 'json/ext'
  else
 -  $LOAD_PATH.unshift(File.expand_path('../../../ext', __FILE__), File.expand_path('../../../lib', __FILE__))
 +  # $LOAD_PATH.unshift(File.expand_path('../../../ext', __FILE__), File.expand_path('../../../lib', __FILE__))
+   $stderr.puts("Testing JSON")
    require 'json'
  end
- 
