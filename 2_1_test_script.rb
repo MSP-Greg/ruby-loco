@@ -316,7 +316,7 @@ module TestScript
     end
 
     def faults_final(log)
-      str = ''.dup
+      str = String.new
       faults = []
       log.scan(/^ *\d+\) Failure:\n([^\n]+?) \[([^\n]+?):(\d+)\]:\n(.+?)\n\n/m) { |test, file, line, msg|
         file.sub!(__dir__, '')
