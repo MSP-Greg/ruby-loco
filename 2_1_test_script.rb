@@ -108,13 +108,13 @@ module TestScript
 
       puts results_str
 
-      File.binwrite File.join(D_LOGS, "Summary_Test_Results.log"), results_str
+      File.write File.join(D_LOGS, "Summary_Test_Results.log"), results_str
 
       unless sum_test_all.empty?
         puts "\n#{YELLOW}#{DASH * PUTS_LEN} Summary test-all#{RESET}"
         puts sum_test_all
         sum_test_all = sum_test_all.gsub(/^\e\[\d\dm|\e\[0m$/, '')
-        File.binwrite(File.join(D_LOGS, "Summary_test-all.log"), sum_test_all)
+        File.write(File.join(D_LOGS, "Summary_test-all.log"), sum_test_all)
       end
 
       Dir.chdir __dir__
@@ -140,14 +140,14 @@ module TestScript
     def clean_file(fn)
       @real_ruby ||= File.dirname File.realpath(File.join(__dir__, "ruby"))
 
-      str = File.binread(fn).dup
+      str = File.read(fn).dup
       if /\Atest_m?spec(_err)?\.log/ =~ fn
         str.gsub!(/\r\[[^\r\n]+\[0m /, '')
       end
       str.gsub!("\r"      , '')
       str.gsub!( __dir__  , '')
       str.gsub!( @real_ruby, '')
-      File.binwrite fn, str
+      File.write fn, str
       str
     end
 
@@ -177,8 +177,8 @@ module TestScript
             skips_shown += 1
             ''
           }
-          File.binwrite(File.join(D_LOGS, "test_all.log") , no_skips)
-          File.binwrite(File.join(D_LOGS, "test_all_skips.log"), skips)
+          File.write(File.join(D_LOGS, "test_all.log") , no_skips)
+          File.write(File.join(D_LOGS, "test_all_skips.log"), skips)
 
           results << ", #{skips_shown} skips shown"
         else
