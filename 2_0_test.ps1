@@ -184,10 +184,10 @@ function Test-All {
   $env:TEST_SSL = '1'
 
   if ($build_sys -ne 'mswin') {
-    $args = "--disable=gems -rdevkit ./runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `
+    $args = "--disable=gems -rdevkit ./runner.rb -X ./.excludes -n !/memory_leak/ -j $jobs" + `
       " -v --show-skip --retry --job-status=normal --timeout-scale=1.5"
   } else {
-    $args = "--disable=gems ./runner.rb -X ./excludes -n !/memory_leak/ -j $jobs" + `
+    $args = "--disable=gems ./runner.rb -X ./.excludes -n !/memory_leak/ -j $jobs" + ``
       " -v --show-skip --retry --job-status=normal --timeout-scale=1.5"
   }
 
@@ -291,8 +291,16 @@ if ($build_sys -ne 'mswin') {
   echo "ridk   version:"
   ridk version
 }
-
 echo ''
+
+# Encoding
+EchoC "$dash_hdr Encoding" yel
+echo "Encoding.find('external')  : $(ruby -e `"puts Encoding.find('external')`")"
+echo "Encoding.find('filesystem'): $(ruby -e `"puts Encoding.find('filesystem')`")"
+echo "Encoding.find('locale')    : $(ruby -e `"puts Encoding.find('locale')`")"
+echo "Encoding.default_external  : $(ruby -e `"puts Encoding.default_external`")"
+echo ''
+
 EchoC "$dash_hdr Run Tests" yel
 
 BasicTest
