@@ -187,7 +187,7 @@ function Test-All {
     $args = "--disable=gems -rdevkit ./runner.rb -X ./.excludes -n !/memory_leak/ -j $jobs" + `
       " -v --show-skip --retry --job-status=normal --timeout-scale=1.5"
   } else {
-    $args = "--disable=gems ./runner.rb -X ./.excludes -n !/memory_leak/ -j $jobs" + ``
+    $args = "--disable=gems ./runner.rb -X ./.excludes -n !/memory_leak/ -j $jobs" + `
       " -v --show-skip --retry --job-status=normal --timeout-scale=1.5"
   }
 
