@@ -71,7 +71,7 @@ module TestScript
       sum_test_all = ''
       logs.each do |fn|
         str = clean_file fn
-
+        str.force_encoding(Encoding::UTF_8)
         case fn
         when 'test_all.log'           ; r[0], sum_test_all = log_test_all(str)
         when 'test_mspec.log'         ; r[2] = log_mspec(str)
