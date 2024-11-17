@@ -1,8 +1,8 @@
 diff --git a/win32/setup.mak b/win32/setup.mak
-index 3660e5f060..670edca327 100644
+index c99ac0ba72..76feec7fb4 100644
 --- a/win32/setup.mak
 +++ b/win32/setup.mak
-@@ -224,7 +224,10 @@ echo TEENY = RUBY_VERSION_TEENY
+@@ -188,7 +188,10 @@ echo TEENY = RUBY_VERSION_TEENY
  echo ABI_VERSION = RUBY_ABI_VERSION
  #endif
  set /a MSC_VER = _MSC_VER
