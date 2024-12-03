@@ -1,0 +1,15 @@
+diff --git a/win32/configure.bat b/win32/configure.bat
+index bad09cd3f5..2659b06181 100755
+--- a/win32/configure.bat
++++ b/win32/configure.bat
+@@ -248,8 +248,8 @@ goto :loop ;
+   for %%I in (%opt:;= %) do (
+     set d=%%I
+     call pushd %%d:/=\%% && (
+-      call set XINCFLAGS=%%XINCFLAGS%% -I%%CD:\=/%%/include
+-      call set XLDFLAGS=%%XLDFLAGS%% -libpath:%%CD:\=/%%/lib
++      call set XINCFLAGS=%XINCFLAGS% -I%CD:\=/%/include
++      call set XLDFLAGS=%XLDFLAGS% -libpath:%CD:\=/%/lib
+       popd
+     )
+   )
