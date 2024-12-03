@@ -51,7 +51,7 @@ cd $d_build
 
 Time-Log "start"
 
-$cmd_config = "..\ruby\win32\configure.bat --disable-install-doc --prefix=$d_install --with-opt-dir=$d_vcpkg_install --with-gmp-dir=$d_vcpkg_install"
+$cmd_config = "..\ruby\win32\configure.bat --disable-install-doc --prefix=$d_install --with-opt-dir=$d_vcpkg_install"
 Run $cmd_config { cmd.exe /c "$cmd_config" }
 Time-Log "configure"
 
