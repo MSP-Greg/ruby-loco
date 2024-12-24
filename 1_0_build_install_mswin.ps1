@@ -29,6 +29,7 @@ Set-Variables
 
 Set-Variables-Local
 $env:Path = "$ruby_path;$d_repo/git/cmd;$env:Path;$d_msys2/usr/bin;$d_mingw;"
+$env:PKG_CONFIG = "d_vcpkg_install/tools/pkgconf/pkgconf.exe"
 
 $files = 'C:/Windows/System32/libcrypto-1_1-x64.dll',
          'C:/Windows/System32/libssl-1_1-x64.dll'
@@ -47,17 +48,18 @@ if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") {
   # echo "SOURCE_DATE_EPOCH = $env:SOURCE_DATE_EPOCH"
 }
 
+# below sets some directories to normal in case they're set to read-only
+Remove-Read-Only $d_ruby
+Remove-Read-Only $d_build
+
 cd $d_build
 
 Time-Log "start"
 
-$cmd_config = "..\ruby\win32\configure.bat --disable-install-doc --prefix=$d_install --with-opt-dir=$d_vcpkg_install"
+$cmd_config = "..\ruby\win32\configure.bat --disable-install-doc --prefix=$d_install --with-opt-dir=$d_vcpkg_install --with-gmp"
 Run $cmd_config { cmd.exe /c "$cmd_config" }
+cat ./Makefile
 Time-Log "configure"
-
-# below sets some directories to normal in case they're set to read-only
-Remove-Read-Only $d_ruby
-Remove-Read-Only $d_build
 
 Run "nmake incs" { nmake incs }
 Time-Log "make incs"
