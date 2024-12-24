@@ -1,7 +1,16 @@
 diff --git a/win32/setup.mak b/win32/setup.mak
-index c99ac0ba72..76feec7fb4 100644
+index 275ccda3bb..738ac3cbcf 100644
 --- a/win32/setup.mak
 +++ b/win32/setup.mak
+@@ -22,7 +22,7 @@ MAKE = $(MAKE) -f $(MAKEFILE)
+ MAKEFILE = Makefile
+ !endif
+ CPU = PROCESSOR_LEVEL
+-CC = $(CC) -nologo
++CC = $(CC) -nologo $(XINCFLAGS)
+ CPP = $(CC) -EP
+ 
+ all: -prologue- -generic- -epilogue-
 @@ -188,7 +188,10 @@ echo TEENY = RUBY_VERSION_TEENY
  echo ABI_VERSION = RUBY_ABI_VERSION
  #endif
