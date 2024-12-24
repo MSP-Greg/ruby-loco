@@ -1,15 +1,32 @@
 diff --git a/win32/configure.bat b/win32/configure.bat
-index bad09cd3f5..2659b06181 100755
+index bad09cd3f5..1e37fc0859 100755
 --- a/win32/configure.bat
 +++ b/win32/configure.bat
-@@ -248,8 +248,8 @@ goto :loop ;
+@@ -8,8 +8,8 @@ for %%I in (%0) do if /%%~dpI/ == /%CD%\/ (
+     exit /b 999
+ )
+ 
+-set XINCFLAGS=
+-set XLDFLAGS=
++set XINCFLAGS=-I%CD:\=/%/include
++set XLDFLAGS=-libpath:%CD:\=/%/lib
+ 
+ set conf=%0
+ set pathlist=
+@@ -245,13 +245,10 @@ goto :loop ;
+ :gmp-dir
+ :opt-dir
+   set opt=%~2
++  set opt=%opt:\=/%
    for %%I in (%opt:;= %) do (
-     set d=%%I
-     call pushd %%d:/=\%% && (
+-    set d=%%I
+-    call pushd %%d:/=\%% && (
 -      call set XINCFLAGS=%%XINCFLAGS%% -I%%CD:\=/%%/include
 -      call set XLDFLAGS=%%XLDFLAGS%% -libpath:%%CD:\=/%%/lib
-+      call set XINCFLAGS=%XINCFLAGS% -I%CD:\=/%/include
-+      call set XLDFLAGS=%XLDFLAGS% -libpath:%CD:\=/%/lib
-       popd
-     )
+-      popd
+-    )
++    set XINCFLAGS=%XINCFLAGS% -I%%I/include
++    set XLDFLAGS=%XLDFLAGS% -libpath:%%I/lib
    )
+ :witharg
+   echo>>%confargs%  %1=%2\
