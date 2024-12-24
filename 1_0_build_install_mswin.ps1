@@ -58,8 +58,8 @@ Time-Log "start"
 
 $cmd_config = "..\ruby\win32\configure.bat --disable-install-doc --prefix=$d_install --with-opt-dir=$d_vcpkg_install --with-gmp"
 Run $cmd_config { cmd.exe /c "$cmd_config" }
-cat ./Makefile
 Time-Log "configure"
+Run "Makefile" { cat ./Makefile }
 
 Run "nmake incs" { nmake incs }
 Time-Log "make incs"
