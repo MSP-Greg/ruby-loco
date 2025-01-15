@@ -198,15 +198,17 @@ function Run-Patches($ary_temp) {
       $all_clr = 'yel'
     }
   }
-  if ($is_actions) {
-    echo "##[group]$(color "Apply Patches $apply_dir" $all_clr)"
-  } else {
-    # echo "all_clr $all_clr"
-    $e_str = "$dash_hdr Apply Patches $apply_dir"
-    echo $(color $e_str $all_clr)
+  if ($all_log  -ne '') {
+    if ($is_actions) {
+      echo "##[group]$(color "Apply Patches $apply_dir" $all_clr)"
+    } else {
+      # echo "all_clr $all_clr"
+      $e_str = "$dash_hdr Apply Patches $apply_dir"
+      echo $(color $e_str $all_clr)
+    }
+    echo $all_log.TrimEnd()
+    if ($is_actions) { echo ::[endgroup] } else { echo '' }
   }
-  echo $all_log.TrimEnd()
-  if ($is_actions) { echo ::[endgroup] } else { echo '' }
 }
 
 #————————————————————————————————————————————————————————————————— Apply-Patches
