@@ -1,0 +1,44 @@
+diff --git a/test/irb/command/test_custom_command.rb b/test/irb/command/test_custom_command.rb
+index 13f412c210..671b27a686 100644
+--- a/test/irb/command/test_custom_command.rb
++++ b/test/irb/command/test_custom_command.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: true
+-require "irb"
++# require "irb"
+ 
+ require_relative "../helper"
+ 
+diff --git a/test/irb/command/test_disable_irb.rb b/test/irb/command/test_disable_irb.rb
+index 14a20043d5..1a3f3a3cab 100644
+--- a/test/irb/command/test_disable_irb.rb
++++ b/test/irb/command/test_disable_irb.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'irb'
++# require 'irb'
+ 
+ require_relative "../helper"
+ 
+diff --git a/test/irb/command/test_force_exit.rb b/test/irb/command/test_force_exit.rb
+index 191a786872..0f0a831337 100644
+--- a/test/irb/command/test_force_exit.rb
++++ b/test/irb/command/test_force_exit.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'irb'
++# require 'irb'
+ 
+ require_relative "../helper"
+ 
+diff --git a/test/irb/command/test_show_source.rb b/test/irb/command/test_show_source.rb
+index a4227231e4..1ae6c1250f 100644
+--- a/test/irb/command/test_show_source.rb
++++ b/test/irb/command/test_show_source.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: false
+-require 'irb'
++# require 'irb'
+ 
+ require_relative "../helper"
+ 
