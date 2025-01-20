@@ -203,7 +203,7 @@ function Test-All {
     -StdErr "test_all_err.log" `
     -Title  "test-all" `
     -Dir    "$test_dir" `
-    -TimeLimit 3000
+    -TimeLimit 900
 
   # comment out below to allow full testing of Appveyor artifact
   # Remove-Item -Path "$d_install/lib/ruby/$abi/$rarch/-test-" -Recurse
