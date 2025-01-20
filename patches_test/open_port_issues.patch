@@ -1,8 +1,8 @@
 diff --git a/test/openssl/test_ssl.rb b/test/openssl/test_ssl.rb
-index 07dc9a343c..36dbee24fc 100644
+index c9cc7a02e7..60e46c88af 100644
 --- a/test/openssl/test_ssl.rb
 +++ b/test/openssl/test_ssl.rb
-@@ -97,11 +97,29 @@ def test_socket_open_with_context
+@@ -127,11 +127,29 @@ def test_socket_open_with_context
      }
    end
  
@@ -77,7 +77,7 @@ index c61764d76d..e99a901dd7 100644
  
    def test_connect_from
 diff --git a/test/socket/test_socket.rb b/test/socket/test_socket.rb
-index cdc9929bb6..891c8a1fbc 100644
+index 4d75caab50..b3a8931a84 100644
 --- a/test/socket/test_socket.rb
 +++ b/test/socket/test_socket.rb
 @@ -156,26 +156,30 @@ def test_tcp_cloexec
