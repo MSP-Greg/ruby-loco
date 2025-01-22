@@ -1,8 +1,8 @@
 diff --git a/test/openssl/test_ssl.rb b/test/openssl/test_ssl.rb
-index c9cc7a02e7..60e46c88af 100644
+index c705f78794..92d079d6b6 100644
 --- a/test/openssl/test_ssl.rb
 +++ b/test/openssl/test_ssl.rb
-@@ -127,11 +127,29 @@ def test_socket_open_with_context
+@@ -126,11 +126,29 @@ def test_socket_open_with_context
      }
    end
  
