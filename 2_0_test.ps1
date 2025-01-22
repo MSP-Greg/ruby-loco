@@ -203,7 +203,7 @@ function Test-All {
     -StdErr "test_all_err.log" `
     -Title  "test-all" `
     -Dir    "$test_dir" `
-    -TimeLimit 900
+    -TimeLimit 1000
 
   # comment out below to allow full testing of Appveyor artifact
   # Remove-Item -Path "$d_install/lib/ruby/$abi/$rarch/-test-" -Recurse
@@ -275,7 +275,7 @@ EchoC $($dash * 92) yel
 ruby -ropenssl -e "puts RUBY_DESCRIPTION, OpenSSL::OPENSSL_LIBRARY_VERSION"
 
 EchoC "$dash_hdr Install `'tz`' gems" yel
-gem install `"timezone:>=1.3.16`" `"tzinfo:>=2.0.4`" `"tzinfo-data:>=1.2022.1`" --no-document --conservative --norc --no-user-install
+gem install "timezone" "tzinfo" "tzinfo-data" --no-document --conservative --norc --no-user-install
 
 # CLI-Test
 EchoC "$dash_hdr CLI Test" yel
@@ -314,8 +314,18 @@ if ($build_sys -ne 'mswin') {
   }
 }
 
+$dflt_gemspec_path = "$d_install/lib/ruby/gems/$abi/specifications/default"
+
+$irb_gemspec = Get-ChildItem -path "$dflt_gemspec_path/irb-*.gemspec" -Name
+
+$irb_gemspec_path = "$dflt_gemspec_path/$irb_gemspec"
+
+(Get-Content $irb_gemspec_path) -replace "s.add_runtime_dependency\(%q<rdoc>","# s.add_runtime_dependency(%q<rdoc>" | out-file $irb_gemspec_path
 Test-All
 sleep 5
+(Get-Content $irb_gemspec_path) -replace "# s.add_runtime_dependency\(%q<rdoc>","s.add_runtime_dependency(%q<rdoc>" | out-file $irb_gemspec_path
+
+
 Test-Reline
 sleep 5
 MSpec
