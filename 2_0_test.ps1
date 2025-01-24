@@ -318,8 +318,11 @@ if ($build_sys -ne 'mswin') {
 Test-All
 sleep 5
 
-Test-Reline
-sleep 5
+if (Test-Path -Path $d_install/lib/ruby/$abi/reline.rb -PathType Leaf ) {
+  Test-Reline
+  sleep 5
+}
+
 MSpec
 
 if (Test-Path -Path $d_install/lib/ruby/$abi/$rarch/readline.so -PathType Leaf ) {
