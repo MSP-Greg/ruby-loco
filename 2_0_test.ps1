@@ -305,6 +305,7 @@ EchoC "$dash_hdr Run Tests" yel
 
 BasicTest
 sleep 2
+
 BootStrapTest
 sleep 2
 
@@ -314,17 +315,8 @@ if ($build_sys -ne 'mswin') {
   }
 }
 
-$dflt_gemspec_path = "$d_install/lib/ruby/gems/$abi/specifications/default"
-
-$irb_gemspec = Get-ChildItem -path "$dflt_gemspec_path/irb-*.gemspec" -Name
-
-$irb_gemspec_path = "$dflt_gemspec_path/$irb_gemspec"
-
-(Get-Content $irb_gemspec_path -raw) -replace "s.add_runtime_dependency\(%q<rdoc>","# s.add_runtime_dependency(%q<rdoc>" | out-file $irb_gemspec_path -nonewline
 Test-All
 sleep 5
-(Get-Content $irb_gemspec_path -raw) -replace "# s.add_runtime_dependency\(%q<rdoc>","s.add_runtime_dependency(%q<rdoc>" | out-file $irb_gemspec_path -nonewline
-
 
 Test-Reline
 sleep 5
