@@ -1,0 +1,13 @@
+diff --git a/lib/erb.gemspec b/lib/erb.gemspec
+index 94a8fd5c3e..7546b73d6c 100644
+--- a/lib/erb.gemspec
++++ b/lib/erb.gemspec
+@@ -34,5 +34,7 @@
+     spec.extensions = ['ext/erb/escape/extconf.rb']
+   end
+ 
+-  spec.add_dependency 'cgi', '>= 0.3.3'
++  if RUBY_VERSION < '3.5'
++    spec.add_dependency 'cgi', '>= 0.3.3'
++  end
+ end
