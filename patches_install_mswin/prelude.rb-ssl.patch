@@ -16,4 +16,4 @@ index ee78b44cc5..f9e93880fa 100644
 +
  class Binding
    # :nodoc:
-   def irb
+   def irb(...)
