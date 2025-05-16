@@ -257,7 +257,7 @@ $ruby_exe  = "$d_install/bin/ruby.exe"
 $abi       = &$ruby_exe -e "print RbConfig::CONFIG['ruby_version']"
 $script:time_info = ''
 
-$env:PATH = "$d_install/bin;$no_ruby_path"
+$env:PATH = "$d_install/bin;$base_path"
 
 if ($env:DESTDIR) { Remove-Item env:\DESTDIR }
 if ($env:BUNDLER_VERSION) { Remove-Item env:\BUNDLER_VERSION }

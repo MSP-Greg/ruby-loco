@@ -112,7 +112,7 @@ function Set-Variables {
     $script:d_git     = "$env:ProgramFiles/Git"
     $script:d_vcpkg   =  $env:VCPKG_INSTALLATION_ROOT.replace('\', '/')
     $env:TMPDIR       =  $env:RUNNER_TEMP
-    $script:base_path =  $env:Path -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby|Strawberry)[^;]*;', ''
+    $script:base_path =  $env:Path -replace '[^;]+?(Chocolatey|CMake|OpenSSL|Ruby[^\/\\]+\\bin|Strawberry)[^;]*;', ''
     $script:jobs      = 3
 
     if (Test-Path -Path "$env:ProgramFiles/7-Zip/7z.exe" -PathType Leaf ) {
@@ -216,7 +216,7 @@ function Run-Patches($ary_temp) {
 function Apply-Patches($temp) {
   $p_dir, $apply_dir = $temp
   if (Test-Path -Path $p_dir -PathType Container ) {
-    $patch_exe = "$d_msys2/usr/bin/patch.exe"
+    $patch_exe = "$d_git/usr/bin/patch.exe"
     Push-Location "$d_repo/$p_dir"
     [string[]]$patches = Get-ChildItem -Include *.patch -Path . -Recurse |
       select -expand name
@@ -251,7 +251,7 @@ function Apply-Patches($temp) {
 function Apply-Install-Patches($p_dir) {
   if (Test-Path -Path $p_dir -PathType Container ) {
     EchoC "$dash_hdr $p_dir" yel
-    $patch_exe = "$d_msys2/usr/bin/patch.exe"
+    $patch_exe = "$d_git/usr/bin/patch.exe"
     Push-Location "$d_repo/$p_dir"
     [string[]]$patches = Get-ChildItem -Include *.patch -Path . -Recurse |
       select -expand name

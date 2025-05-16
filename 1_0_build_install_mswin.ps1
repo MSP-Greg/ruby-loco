@@ -118,7 +118,7 @@ Print-Time-Log
 
 # below needs to run from built/installed Ruby
 cd $d_repo
-$env:Path = "$d_install\bin;$no_ruby_path"
+$env:Path = "$d_install\bin;$base_path"
 &"$d_install/bin/ruby.exe" 1_4_post_install_bin_files.rb
 
 if (Test-Path Env:\SOURCE_DATE_EPOCH ) { Remove-Item Env:\SOURCE_DATE_EPOCH }
