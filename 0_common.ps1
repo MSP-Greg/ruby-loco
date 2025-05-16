@@ -108,7 +108,7 @@ function Set-Variables {
 
   if ($env:GITHUB_ACTIONS -eq 'true') {
     $script:is_actions = $true
-    $script:d_msys2   = "C:/msys64"
+    $script:d_msys2   =  $env:RI_DEVKIT
     $script:d_git     = "$env:ProgramFiles/Git"
     $script:d_vcpkg   =  $env:VCPKG_INSTALLATION_ROOT.replace('\', '/')
     $env:TMPDIR       =  $env:RUNNER_TEMP
