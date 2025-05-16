@@ -160,7 +160,7 @@ if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") {
 
 # Run "sh -c `"autoreconf -fi`"" { sh -c "autoreconf -fi" }
 
-Run "sh -c ./autogen.sh" { sh -c "./autogen.sh"sh -c "./autogen.sh"; echo (Get-Content -Path "./configure" | Select-Object -First 4) }
+Run "sh -c ./autogen.sh" { sh -c "./autogen.sh"sh -c "./autogen.sh"; Get-Content -Path "./configure" | Select-Object -First 4 }
 
 echo (Get-Content -Path "./configure" | Select-Object -First 4)
 
