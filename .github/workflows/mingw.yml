@@ -29,6 +29,7 @@ jobs:
         timeout-minutes: 8
         uses: ruby/setup-ruby-pkgs@v1
         with:
+          setup-ruby-ref: ruby/setup-ruby/bc48263cbb5883
           ruby-version: mingw
           mingw: clang
 

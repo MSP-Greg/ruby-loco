@@ -28,8 +28,9 @@ jobs:
 
       - name: load ruby
         timeout-minutes: 12
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby-pkgs@v1
         with:
+          setup-ruby-ref: ruby/setup-ruby/bc48263cbb5883
           ruby-version: mswin
 
       # cert file is created with RubyInstaller2
