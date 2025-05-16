@@ -210,7 +210,13 @@ Run "make install-nodoc" {
   $env:Path = "$d_install/bin;$d_mingw;$d_repo/git/cmd;$d_msys2/usr/bin;$base_path"
   ruby 1_3_post_install.rb
   Check-Exit "'ruby 1_3_post_install.rb' failure"
-  
+
+  # fix up RbConfig - CONFIG["INSTALL"], CONFIG["MAKEDIRS"], CONFIG["MKDIR_P"]
+  $rubyPath = ruby.exe -e 'print "#{RbConfig::TOPDIR}/lib/ruby/#{RbConfig::CONFIG["ruby_version"]}/#{RUBY_PLATFORM}"'
+  $rbconfig = "$rubyPath/rbconfig.rb"
+  (Get-Content $rbconfig) | ForEach-Object { $_ -replace '\/[cd]\/ruby-[a-z]+\/msys64', '' } | Out-File -FilePath $rbconfig -Encoding UTF8
+  (Get-Content $rbconfig -raw).Replace("`r", "") | Out-File -FilePath $rbconfig -Encoding UTF8 -NoNewline
+
   ruby 1_4_post_install_bin_files.rb
   Check-Exit "'ruby 1_4_post_install_bin_files.rb' failure"
 }
