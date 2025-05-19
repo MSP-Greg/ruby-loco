@@ -162,8 +162,6 @@ if ($ts -match '\A\d+\z' -and $ts -gt "1540000000") {
 
 Run "sh -c ./autogen.sh" { sh -c "./autogen.sh"sh -c "./autogen.sh"; Get-Content -Path "./configure" | Select-Object -First 4 }
 
-echo (Get-Content -Path "./configure" | Select-Object -First 4)
-
 cd $d_build
 Time-Log "start"
 
