@@ -11,9 +11,9 @@ jobs:
   mswin:
     strategy:
       matrix:
-        vs: [2022]
+        os: [2025]
       fail-fast: false
-    runs-on: windows-${{ matrix.vs }}
+    runs-on: windows-${{ matrix.os }}
     env:
       PRE: ruby-mswin
 
