@@ -12,7 +12,7 @@ index ca2980e04b..d730c74081 100644
        target_gemspec_location = "#{path}/specifications/bundler-#{Bundler::VERSION}.gemspec"
  
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index 0d048b08b7..d52d40a1a3 100644
+index cdc3479e37..c6f53b07cd 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
 @@ -947,7 +947,7 @@ def test_self_platforms
@@ -44,7 +44,7 @@ index 48252d84d4..e4f130936e 100644
                   @ui.output)
      assert_match(/GIT EXECUTABLE: #{@cmd.send(:git_path)}/, @ui.output)
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
-index 642a62a373..df3d9883e8 100644
+index 3b106e4581..8774df1d9c 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
 @@ -761,8 +761,11 @@ def test_update_rubygems_arguments
@@ -74,8 +74,22 @@ index 34f85e6b75..e45ab6544c 100644
      assert_match(/: No such file/, cmd_make_out)
  
      assert_path_not_exist @spec.gem_build_complete_path
+diff --git a/test/rubygems/test_gem_ext_cargo_builder.rb b/test/rubygems/test_gem_ext_cargo_builder.rb
+index b970e442c2..e97bcf10be 100644
+--- a/test/rubygems/test_gem_ext_cargo_builder.rb
++++ b/test/rubygems/test_gem_ext_cargo_builder.rb
+@@ -201,7 +201,8 @@ def skip_unsupported_platforms!
+     system(@rust_envs, "cargo", "-V", out: IO::NULL, err: [:child, :out])
+     pend "cargo not present" unless $?.success?
+     pend "ruby.h is not provided by ruby repo" if ruby_repo?
+-    pend "rust toolchain of mingw is broken" if mingw_windows?
++    # ruby-loco pend "rust toolchain of mingw is broken" if mingw_windows?
++    pend "rust toolchains of mingw and msvc are broken" if mingw_windows? || vc_windows?
+   end
+ 
+   def assert_ffi_handle(bundle, name)
 diff --git a/test/rubygems/test_require.rb b/test/rubygems/test_require.rb
-index f15e9b6243..3db4556119 100644
+index f63c23c315..58c2326cc0 100644
 --- a/test/rubygems/test_require.rb
 +++ b/test/rubygems/test_require.rb
 @@ -466,7 +466,7 @@ def test_realworld_default_gem
