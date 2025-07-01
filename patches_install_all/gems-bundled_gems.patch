@@ -1,13 +1,13 @@
 diff --git a/gems/bundled_gems b/gems/bundled_gems
-index 93049f93a6..920939fcaf 100644
+index d1832335fd..96c7e22be9 100644
 --- a/gems/bundled_gems
 +++ b/gems/bundled_gems
 @@ -7,7 +7,7 @@
  #   if `revision` is not given, "v"+`version` or `version` will be used.
  
  minitest            5.25.5  https://github.com/minitest/minitest
--power_assert        2.0.5   https://github.com/ruby/power_assert a7dab941153b233d3412e249d25da52a6c5691de
-+power_assert        2.0.6dev  https://github.com/ruby/power_assert a7dab941153b233d3412e249d25da52a6c5691de
+-power_assert        2.0.5   https://github.com/ruby/power_assert f88e406e7c9e0810cc149869582afbae1fb84c4a
++power_assert        3.0.0.dev  https://github.com/MSP-Greg/power_assert 3948a8816fc70b827133e1942be6bcdfeef9e88f
  rake                13.3.0  https://github.com/ruby/rake
  test-unit           3.6.8   https://github.com/test-unit/test-unit
  rexml               3.4.1   https://github.com/ruby/rexml
