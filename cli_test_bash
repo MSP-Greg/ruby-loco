@@ -40,6 +40,14 @@ printf "rdoc --version: "
 rdoc --version
 error=$((error + $?))
 
+printf "test-unit --version: "
+test-unit --version
+error=$((error + $?))
+
+printf "typeprof --version: "
+typeprof --version
+error=$((error + $?))
+
 ruby -v
 
 if [ "$error" != 0 ]; then exit 1; fi

@@ -287,6 +287,8 @@ echo "rake --version: $(rake --version)" ; $exit_code += [int](0 + $LastExitCode
 echo "rbs  --version: $(rbs --version)"  ; $exit_code += [int](0 + $LastExitCode)
 echo "rdbg --version: $(rdbg --version)" ; $exit_code += [int](0 + $LastExitCode)
 echo "rdoc --version: $(rdoc --version)" ; $exit_code += [int](0 + $LastExitCode)
+echo "test-unit --version: $(test-unit --version)" ; $exit_code += [int](0 + $LastExitCode)
+echo "typeprof  --version: $(typeprof --version)"  ; $exit_code += [int](0 + $LastExitCode)
 if ($build_sys -ne 'mswin') {
   echo "ridk   version:"
   ridk version
