@@ -5,6 +5,11 @@ inputs:
   ruby_path:
     description: 'path to ruby root folder (TOPDIR)'
     default: ''
+  release_tag:
+    description: 'tag of the release to upload to'
+    default: 'ruby-master'
+    required: true
+
 runs:
   using: 'node20'
   main: 'index.js'
