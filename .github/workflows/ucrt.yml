@@ -22,6 +22,17 @@ jobs:
           git config --system core.autocrlf false
           git config --system core.eol lf
 
+      - name: Remove Strawberry Perl pkg-config
+        # `pkg-config.bat` included in Strawberry Perl is written in
+        # Perl and doesn't work when another msys2 `perl` precede its
+        # own `perl`.
+        #
+        # ```
+        # Can't find C:\Strawberry\perl\bin\pkg-config.bat on PATH, '.' not in PATH.
+        # ```
+        run: |
+          Get-Command pkg-config.bat | % { ren $_.path ($_.path + "~") }
+
       - name: Checkout ruby-loco
         uses: actions/checkout@v4
 
