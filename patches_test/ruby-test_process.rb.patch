@@ -1,5 +1,5 @@
 diff --git a/test/ruby/test_process.rb b/test/ruby/test_process.rb
-index 7ef184d639..3b2b9ea7cd 100644
+index 221ff37c6b..204527e8a9 100644
 --- a/test/ruby/test_process.rb
 +++ b/test/ruby/test_process.rb
 @@ -23,6 +23,10 @@ def self.windows?
@@ -13,7 +13,7 @@ index 7ef184d639..3b2b9ea7cd 100644
    def with_tmpchdir
      Dir.mktmpdir {|d|
        d = File.realpath(d)
-@@ -323,7 +327,11 @@ def test_execopts_env
+@@ -328,7 +332,11 @@ def test_execopts_env
      end
      cmd << '-e' << 'puts ENV.keys.map{|e|e.upcase}'
      IO.popen(cmd) {|io|
@@ -26,7 +26,7 @@ index 7ef184d639..3b2b9ea7cd 100644
      }
  
      IO.popen([{"FOO"=>"BAR"}, *ENVCOMMAND]) {|io|
-@@ -443,10 +451,19 @@ def test_execopts_unsetenv_others
+@@ -448,10 +456,19 @@ def test_execopts_unsetenv_others
      h = {}
      MANDATORY_ENVS.each {|k| e = ENV[k] and h[k] = e}
      IO.popen([h, *ENVCOMMAND, :unsetenv_others=>true]) {|io|
