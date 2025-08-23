@@ -1,8 +1,8 @@
 diff --git a/spec/ruby/core/kernel/require_spec.rb b/spec/ruby/core/kernel/require_spec.rb
-index 4029e68725..86080b7eab 100644
+index 81777c5313..b17482e079 100644
 --- a/spec/ruby/core/kernel/require_spec.rb
 +++ b/spec/ruby/core/kernel/require_spec.rb
-@@ -26,7 +26,9 @@
+@@ -27,7 +27,9 @@
      features = out.lines.map { |line| File.basename(line.chomp, '.*') }
  
      # Ignore CRuby internals
