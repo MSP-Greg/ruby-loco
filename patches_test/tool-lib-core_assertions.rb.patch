@@ -1,8 +1,8 @@
 diff --git a/tool/lib/core_assertions.rb b/tool/lib/core_assertions.rb
-index ece6ca1dc8..42cbb55ef7 100644
+index 47cc6574c8..ebefdd173a 100644
 --- a/tool/lib/core_assertions.rb
 +++ b/tool/lib/core_assertions.rb
-@@ -826,18 +826,22 @@ def assert_all_assertions_foreach(msg = nil, *keys, &block)
+@@ -821,18 +821,22 @@ def assert_all_assertions_foreach(msg = nil, *keys, &block)
        end
        alias all_assertions_foreach assert_all_assertions_foreach
  
