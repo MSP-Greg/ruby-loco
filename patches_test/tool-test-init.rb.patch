@@ -1,13 +1,16 @@
 diff --git a/tool/test/init.rb b/tool/test/init.rb
-index 3a1143d01d..2187fd4386 100644
+index 3fd1419a9c..e780a7ebb9 100644
 --- a/tool/test/init.rb
 +++ b/tool/test/init.rb
-@@ -1,7 +1,7 @@
- # This file includes the settings for "make test-all".
- # Note that this file is loaded not only by test/runner.rb but also by tool/lib/test/unit/parallel.rb.
+@@ -6,9 +6,9 @@
+   # Preserve the gem environment prepared by tool/runruby.rb for test-tool, which uses bundled gems.
+   ENV["BUNDLED_#{gem_env}"] = ENV[gem_env]
  
--ENV["GEM_SKIP"] = ENV["GEM_HOME"] = ENV["GEM_PATH"] = "".freeze
-+# ENV["GEM_SKIP"] = ENV["GEM_HOME"] = ENV["GEM_PATH"] = "".freeze
+-  ENV[gem_env] = "".freeze
++  # ENV[gem_env] = "".freeze
+ end
+-ENV["GEM_SKIP"] = "".freeze
++# ENV["GEM_SKIP"] = "".freeze
+ 
  ENV.delete("RUBY_CODESIGN")
  
- Warning[:experimental] = false
