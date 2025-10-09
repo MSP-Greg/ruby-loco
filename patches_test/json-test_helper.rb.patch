@@ -1,10 +1,10 @@
 diff --git a/test/json/test_helper.rb b/test/json/test_helper.rb
-index d849e28b9b..7469d8250d 100644
+index 24cde4348c..8cde5725f5 100644
 --- a/test/json/test_helper.rb
 +++ b/test/json/test_helper.rb
 @@ -1,4 +1,4 @@
 -$LOAD_PATH.unshift(File.expand_path('../../../ext', __FILE__), File.expand_path('../../../lib', __FILE__))
 +# $LOAD_PATH.unshift(File.expand_path('../../../ext', __FILE__), File.expand_path('../../../lib', __FILE__))
  
- require 'json'
- require 'test/unit'
+ if ENV["JSON_COVERAGE"]
+   # This test helper is loaded inside Ruby's own test suite, so we try to not mess it up.
