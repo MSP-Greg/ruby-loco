@@ -1,5 +1,5 @@
 diff --git a/test/openssl/test_ssl.rb b/test/openssl/test_ssl.rb
-index 4642063f45..2ddd1b88d4 100644
+index 3ec1a71043..d627ae0429 100644
 --- a/test/openssl/test_ssl.rb
 +++ b/test/openssl/test_ssl.rb
 @@ -126,11 +126,29 @@ def test_socket_open_with_context
@@ -77,18 +77,16 @@ index 0c9529090e..10c9e897bf 100644
  
    def test_connect_from
 diff --git a/test/socket/test_socket.rb b/test/socket/test_socket.rb
-index 4b85d43291..dc098f5dbc 100644
+index e746aca101..f033c8147e 100644
 --- a/test/socket/test_socket.rb
 +++ b/test/socket/test_socket.rb
-@@ -156,26 +156,30 @@ def test_tcp_cloexec
-           s2.close
-         end
-       }
--
+@@ -160,25 +160,28 @@ def test_tcp_cloexec
      }
    end
  
 -  def random_port
++  ADDR_RANGE = RUBY_PLATFORM.match?(/mingw|mswin/) ? 50_000..65_535 : 49152..65535
++
 +  def random_port(host = '127.0.0.1')
      # IANA suggests dynamic port for 49152 to 65535
      # http://www.iana.org/assignments/port-numbers
@@ -98,25 +96,27 @@ index 4b85d43291..dc098f5dbc 100644
 -    else
 -      rand(49152..65535)
 -    end
-+    addr_range = RUBY_PLATFORM.match?(/mingw|mswin/) ? 50_000..65_535 : 49152..65535
 +    begin
-+      port = rand addr_range
++      port = rand ADDR_RANGE
 +    end while port_in_use? host, port
 +    port
-+  end
-+
+   end
+ 
 +  def port_in_use?(host, port)
 +    TCPServer.open(host, port).close
 +    false
 +  rescue Errno::EADDRINUSE, Errno::EACCES
 +    true
-   end
++  end
 +  private :port_in_use?, :random_port
- 
++
    def errors_addrinuse
 -    errs = [Errno::EADDRINUSE]
--    # MinGW fails with "Errno::EACCES: Permission denied - bind(2) for 0.0.0.0:49721"
--    errs << Errno::EACCES if /mingw/ =~ RUBY_PLATFORM
+-    # Windows can fail with "Errno::EACCES: Permission denied - bind(2) for 0.0.0.0:49721"
+-    # or "Test::Unit::ProxyError: Permission denied - bind(2) for 0.0.0.0:55333"
+-    if /mswin|mingw/ =~ RUBY_PLATFORM
+-      errs += [Errno::EACCES, Test::Unit::ProxyError]
+-    end
 -    errs
 +    RUBY_PLATFORM.match?(/mingw|mswin/) ?
 +      [Errno::EADDRINUSE, Errno::EACCES] : [Errno::EADDRINUSE]
