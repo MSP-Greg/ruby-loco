@@ -13,7 +13,7 @@ index bad09cd3f5..1e37fc0859 100755
  
  set conf=%0
  set pathlist=
-@@ -245,13 +245,10 @@ goto :loop ;
+@@ -246,13 +246,10 @@ goto :loop ;
  :gmp-dir
  :opt-dir
    set opt=%~2
