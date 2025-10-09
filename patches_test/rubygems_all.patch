@@ -12,10 +12,10 @@ index ca2980e04b..d730c74081 100644
        target_gemspec_location = "#{path}/specifications/bundler-#{Bundler::VERSION}.gemspec"
  
 diff --git a/test/rubygems/test_gem.rb b/test/rubygems/test_gem.rb
-index 49e81fcedb..4018009d54 100644
+index 74c8953904..91c6a5063d 100644
 --- a/test/rubygems/test_gem.rb
 +++ b/test/rubygems/test_gem.rb
-@@ -918,7 +918,7 @@ def test_self_platforms
+@@ -919,7 +919,7 @@ def test_self_platforms
    end
  
    def test_self_prefix
