@@ -35,7 +35,7 @@ jobs:
 
 
       - name: Checkout ruby-loco
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Ruby & MSYS2
         timeout-minutes: 8

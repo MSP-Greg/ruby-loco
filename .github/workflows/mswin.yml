@@ -24,7 +24,7 @@ jobs:
           git config --system core.eol lf
 
       - name: repo checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: load ruby
         timeout-minutes: 12
