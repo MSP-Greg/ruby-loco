@@ -14,7 +14,7 @@ jobs:
     runs-on: windows-2022
     env:
       PRE: ruby-mingw
-      RUST_TC: stable-x86_64-pc-windows-gnu
+      RUST_TC: x86_64-pc-windows-gnu
 
     steps:
       - name: git config
@@ -33,7 +33,6 @@ jobs:
         run: |
           Get-Command pkg-config.bat | % { ren $_.path ($_.path + "~") }
 
-
       - name: Checkout ruby-loco
         uses: actions/checkout@v6
 
@@ -41,8 +40,8 @@ jobs:
         timeout-minutes: 8
         uses: ruby/setup-ruby-pkgs@v1
         with:
-          ruby-version: mingw
-          mingw: clang
+          ruby-version: '3.0'
+          mingw: rust
 
       - name: Get Ruby and RubyInstaller2 repos
         timeout-minutes: 5
@@ -52,28 +51,6 @@ jobs:
           git clone -q --depth=1 --no-tags --branch=master  $gh/ruby/ruby.git               ./ruby
           cd ruby
           ruby ../git_log_utc.rb
-
-      - name: Install/Update Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: ${{ env.RUST_TC }}
-
-      - name: Configure bindgen
-        run: |
-          # Configure bindgen for msys2
-          $msys_root = $env:GHCUP_MSYS2.replace('\', '/')
-          if ($env:MSYSTEM -eq 'MINGW64') {
-            $msys_root += '/mingw64'
-          } elseif ($env:MSYSTEM -eq 'UCRT64') {
-            $msys_root += '/ucrt64'
-          } else {
-            echo "Unknown MSYSTEM: $env:MSYSTEM, cannot configure bindgen"
-            exit 1
-          }
-          # We can't use llvm-16 just yet due to backwards compatibility issues, so we have to workaround for now
-          echo "MSYS_ROOT=$msys_root" >> $env:GITHUB_ENV
-          echo "LIBCLANG_PATH=$msys_root/opt/llvm-15/bin" >> $env:GITHUB_ENV
-          echo "BINDGEN_EXTRA_CLANG_ARGS=`"--target=$env:RUST_TC --sysroot=$msys_root`"" >> $env:GITHUB_ENV
 
       - name: Cache - .downloaded-cache
         uses: actions/cache@v4
