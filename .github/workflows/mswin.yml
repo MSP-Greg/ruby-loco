@@ -48,12 +48,12 @@ jobs:
           toolchain: stable-x86_64-pc-windows-msvc
           components: rustfmt
 
-      - name: Configure bindgen
-        run: |
-          echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
-          echo "BINDGEN_EXTRA_CLANG_ARGS=$((gcm clang).source -replace "bin\clang.exe","include")" >> $env:GITHUB_ENV
-          echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")"
-          echo "BINDGEN_EXTRA_CLANG_ARGS=$((gcm clang).source -replace "bin\clang.exe","include")"
+      #- name: Configure bindgen
+      #  run: |
+      #    echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
+      #    echo "BINDGEN_EXTRA_CLANG_ARGS=$((gcm clang).source -replace "bin\clang.exe","include")" >> $env:GITHUB_ENV
+      #    echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")"
+      #    echo "BINDGEN_EXTRA_CLANG_ARGS=$((gcm clang).source -replace "bin\clang.exe","include")"
 
       - name: Cache - .downloaded-cache
         uses: actions/cache@v4
