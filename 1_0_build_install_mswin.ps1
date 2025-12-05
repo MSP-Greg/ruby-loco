@@ -66,6 +66,8 @@ Time-Log "make incs"
 
 $env:Path = "$d_vcpkg_install\bin;$env:Path"
 
+Run "nmake extract-gems" { nmake extract-gems }
+
 Run "nmake" { nmake }
 Time-Log "nmake"
 
