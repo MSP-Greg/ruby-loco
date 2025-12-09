@@ -32,6 +32,17 @@ jobs:
         with:
           ruby-version: mswin
 
+      - name: Install files
+        run: |
+          $url_main = "https://github.com/MSP-Greg/ruby-loco/releases/download/error_logs
+          $dest_main = "$(($env:RUNNER_TEMP || 'C')[0]):/ruby-mswin/lib/ruby/4.0.0+0"
+          $url  = "$url_main/strscan.rb"
+          $dest = "$dest_main/strscan/strscan.rb"
+          Invoke-WebRequest -Uri $url -OutFile $dest
+          $url  = "$url_main/strscan.so"
+          $dest = "$dest_main/x64-mswin64_140/strscan.so"
+          Invoke-WebRequest -Uri $url -OutFile $dest
+
       # cert file is created with RubyInstaller2
       - name: Get Ruby and RubyInstaller2 repos
         timeout-minutes: 5
