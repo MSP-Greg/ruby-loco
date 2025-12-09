@@ -61,18 +61,25 @@ Run $cmd_config { cmd.exe /c "$cmd_config" }
 Time-Log "configure"
 Run "Makefile" { cat ./Makefile }
 
-Run "nmake incs" { nmake incs }
+Run "nmake incs" {
+  nmake incs
+  Check-Exit "'make incs` failure"
+}
 Time-Log "make incs"
 
 $env:Path = "$d_vcpkg_install\bin;$env:Path"
 
-Run "nmake" { nmake }
+Run "nmake" {
+  nmake
+  Check-Exit "'make` failure"
+}
 Time-Log "nmake"
 
 Files-Unhide $files
 
 Run "nmake 'DESTDIR=' install-nodoc" {
   nmake "DESTDIR=" install-nodoc
+  Check-Exit "'make install-nodoc' failure"
   # generates string like 320, 310, etc
   $ruby_abi = ([regex]'\Aruby (\d+\.\d+)').match($(./miniruby.exe -v)).groups[1].value.replace('.', '') + '0'
   # set correct ABI version for manifest file
