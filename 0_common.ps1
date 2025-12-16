@@ -99,7 +99,7 @@ function Set-Variables {
     # https://github.com/Alexpux/MSYS2-packages/blob/master/pacman/makepkg_mingw32.conf
     $env:CARCH        = $carch
     $env:CHOST        = $chost
-    $env:MAKE         = "make.exe"
+    $env:MAKE         = "make"
   } else {
     $script:install = [string]::IsNullOrWhiteSpace($env:PRE) ? "ruby-mswin" : $env:PRE
     $script:rarch   = "x64-mswin64_140"
