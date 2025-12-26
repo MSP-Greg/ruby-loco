@@ -27,7 +27,7 @@
       <assemblyIdentity type="win32" name="ruby_builtin_dlls" version="1.0.0.4"/>
     </dependentAssembly>
   </dependency>
-  <file name="x64-vcruntime140-ruby400.dll"/>
+  <file name="x64-vcruntime140-ruby410.dll"/>
 </assembly>
 
 
