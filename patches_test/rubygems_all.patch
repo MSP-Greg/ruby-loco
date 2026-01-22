@@ -44,10 +44,10 @@ index 48252d84d4..e4f130936e 100644
                   @ui.output)
      assert_match(/GIT EXECUTABLE: #{@cmd.send(:git_path)}/, @ui.output)
 diff --git a/test/rubygems/test_gem_commands_update_command.rb b/test/rubygems/test_gem_commands_update_command.rb
-index 3b106e4581..8774df1d9c 100644
+index 5ed12ad481..cca2fb5193 100644
 --- a/test/rubygems/test_gem_commands_update_command.rb
 +++ b/test/rubygems/test_gem_commands_update_command.rb
-@@ -761,8 +761,11 @@ def test_update_rubygems_arguments
+@@ -793,8 +793,11 @@ def test_update_rubygems_arguments
  
      arguments = @cmd.update_rubygems_arguments
  
@@ -62,10 +62,10 @@ index 3b106e4581..8774df1d9c 100644
      assert_equal "--previous-version", arguments.shift
      assert_equal Gem::VERSION,         arguments.shift
 diff --git a/test/rubygems/test_gem_ext_builder.rb b/test/rubygems/test_gem_ext_builder.rb
-index 34f85e6b75..e45ab6544c 100644
+index 5fcbc3e2ac..d996092f2f 100644
 --- a/test/rubygems/test_gem_ext_builder.rb
 +++ b/test/rubygems/test_gem_ext_builder.rb
-@@ -247,7 +247,7 @@ def test_build_extensions_extconf_bad
+@@ -298,7 +298,7 @@ def test_build_extensions_extconf_bad
      gem_make_out = File.join @spec.extension_dir, "gem_make.out"
      cmd_make_out = File.read(gem_make_out)
  

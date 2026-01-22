@@ -1,8 +1,8 @@
 diff --git a/test/objspace/test_objspace.rb b/test/objspace/test_objspace.rb
-index 4e09fe1af7..e1d988ed16 100644
+index 78947a095b..f769e28312 100644
 --- a/test/objspace/test_objspace.rb
 +++ b/test/objspace/test_objspace.rb
-@@ -141,7 +141,8 @@ def test_reachable_objects_from
+@@ -131,7 +131,8 @@ def test_reachable_objects_from
    end
  
    def test_reachable_objects_during_iteration
@@ -10,5 +10,5 @@ index 4e09fe1af7..e1d988ed16 100644
 +    omit 'flaky on Visual Studio with: [BUG] Unnormalized Fixnum value' if RUBY_PLATFORM.include?('mswin')
 +    omit 'Skipped on mingw, intermittent failure' if ENV.key?('CI') && RUBY_PLATFORM.include?('mingw')
      opts = %w[--disable-gem --disable=frozen-string-literal -robjspace]
-     assert_separately opts, "#{<<-"begin;"}\n#{<<-'end;'}"
+     assert_ruby_status opts, "#{<<-"begin;"}\n#{<<-'end;'}"
      begin;
