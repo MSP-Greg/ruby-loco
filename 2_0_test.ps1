@@ -230,9 +230,9 @@ function MSpec {
   $env:PATH = "$d_install/bin;$d_repo/git/cmd;$base_path"
 
   if ($build_sys -ne 'mswin') {
-    $args = "-rdevkit ../mspec/bin/mspec -j -fd -I$d_ruby/tool/lib"
+    $args = "-rdevkit ../mspec/bin/mspec -fd -I$d_ruby/tool/lib"
   } else {
-    $args = "../mspec/bin/mspec -j -fd -I$d_ruby/tool/lib"
+    $args = "../mspec/bin/mspec -fd -I$d_ruby/tool/lib"
   }
 
   Run-Proc `
