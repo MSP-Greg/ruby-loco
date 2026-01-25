@@ -1,0 +1,33 @@
+diff --git a/win32/configure.bat b/win32/configure.bat
+index a22630385b..525adda323 100755
+--- a/win32/configure.bat
++++ b/win32/configure.bat
+@@ -19,8 +19,8 @@ call set "WIN32DIR=%%WIN32DIR:%~x0:/:=:/:%%"
+ call set "WIN32DIR=%%WIN32DIR:/%~n0:/:=:/:%%"
+ set "WIN32DIR=%WIN32DIR:~0,-3%"
+ 
+-set XINCFLAGS=
+-set XLDFLAGS=
++set XINCFLAGS=-I%CD:\=/%/include
++set XLDFLAGS=-libpath:%CD:\=/%/lib
+ set pathlist=
+ set config_make=confargs~%RANDOM%.mak
+ set confargs=%config_make:.mak=.c%
+@@ -254,14 +254,10 @@ goto :loop ;
+ goto :loop ;
+ :gmp-dir
+ :opt-dir
+-  set opt=%~2
++  set opt=%opt:\=/%
+   for %%I in (%opt:;= %) do (
+-    set d=%%I
+-    call pushd %%d:/=\%% && (
+-      call set XINCFLAGS=%%XINCFLAGS%% -I%%CD:\=/%%/include
+-      call set XLDFLAGS=%%XLDFLAGS%% -libpath:%%CD:\=/%%/lib
+-      popd
+-    )
++    set XINCFLAGS=%XINCFLAGS% -I%%I/include
++    set XLDFLAGS=%XLDFLAGS% -libpath:%%I/lib
+   )
+ :witharg
+   echo>>%confargs%  %1=%2\
