@@ -89,10 +89,10 @@ index b970e442c2..e97bcf10be 100644
  
    def assert_ffi_handle(bundle, name)
 diff --git a/test/rubygems/test_require.rb b/test/rubygems/test_require.rb
-index f63c23c315..58c2326cc0 100644
+index e5f9d7bed2..20d66c6a24 100644
 --- a/test/rubygems/test_require.rb
 +++ b/test/rubygems/test_require.rb
-@@ -466,7 +466,7 @@ def test_realworld_default_gem
+@@ -482,7 +482,7 @@ def test_realworld_default_gem
        require "json"
        puts Gem.loaded_specs["json"]
      RUBY
@@ -101,7 +101,7 @@ index f63c23c315..58c2326cc0 100644
      assert $?.success?
      refute_empty output
    end
-@@ -486,7 +486,8 @@ def test_realworld_upgraded_default_gem
+@@ -502,7 +502,8 @@ def test_realworld_upgraded_default_gem
      RUBY
      File.write(path, code)
  

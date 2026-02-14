@@ -1,8 +1,8 @@
 diff --git a/bootstraptest/runner.rb b/bootstraptest/runner.rb
-index a8e67f3496..99cf989f2d 100755
+index 04de0c93b9..7b95bd6f18 100755
 --- a/bootstraptest/runner.rb
 +++ b/bootstraptest/runner.rb
-@@ -795,9 +795,15 @@ def assert_finish(timeout_seconds, testsrc, message = '')
+@@ -768,9 +768,15 @@ def assert_finish(timeout_seconds, testsrc, message = '')
          end
          if io.respond_to?(:read_nonblock)
            if IO.select([io], nil, nil, diff)
@@ -20,7 +20,7 @@ index a8e67f3496..99cf989f2d 100755
              end while true
            end
 diff --git a/bootstraptest/test_io.rb b/bootstraptest/test_io.rb
-index 4e5d6d59c9..547dbc2305 100644
+index 4081769a8c..fc11fe2728 100644
 --- a/bootstraptest/test_io.rb
 +++ b/bootstraptest/test_io.rb
 @@ -1,5 +1,5 @@

@@ -1,8 +1,20 @@
+diff --git a/spec/ruby/core/kernel/require_spec.rb b/spec/ruby/core/kernel/require_spec.rb
+index da2f48fb61..a86e84b677 100644
+--- a/spec/ruby/core/kernel/require_spec.rb
++++ b/spec/ruby/core/kernel/require_spec.rb
+@@ -23,6 +23,7 @@
+   end
+   ruby_version_is "4.1" do
+     provided << "monitor"
++    provided << "rbconfig" if RUBY_PLATFORM.include?('mswin')
+   end
+ 
+   it "#{provided.join(', ')} are already required" do
 diff --git a/test/objspace/test_objspace.rb b/test/objspace/test_objspace.rb
-index 78947a095b..f769e28312 100644
+index d631f97d1b..6b2c2ec5cd 100644
 --- a/test/objspace/test_objspace.rb
 +++ b/test/objspace/test_objspace.rb
-@@ -131,7 +131,8 @@ def test_reachable_objects_from
+@@ -135,7 +135,8 @@ def test_reachable_objects_from
    end
  
    def test_reachable_objects_during_iteration
