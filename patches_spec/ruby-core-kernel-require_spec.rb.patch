@@ -1,12 +1,17 @@
 diff --git a/spec/ruby/core/kernel/require_spec.rb b/spec/ruby/core/kernel/require_spec.rb
-index da2f48fb61..a86e84b677 100644
+index c609809df5..f057c71349 100644
 --- a/spec/ruby/core/kernel/require_spec.rb
 +++ b/spec/ruby/core/kernel/require_spec.rb
-@@ -23,6 +23,7 @@
-   end
-   ruby_version_is "4.1" do
-     provided << "monitor"
-+    provided << "rbconfig" if RUBY_PLATFORM.include?('mswin')
-   end
+@@ -22,7 +22,11 @@
+       provided += %w[set pathname]
+     end
+     ruby_version_is "4.1" do
+-      provided += %w[monitor]
++      if RUBY_PLATFORM.include?('mswin')
++        provided += %w[monitor rbconfig]
++      else
++        provided += %w[monitor]
++      end
+     end
  
-   it "#{provided.join(', ')} are already required" do
+     out = ruby_exe("puts $LOADED_FEATURES", options: '--disable-gems --disable-did-you-mean')
