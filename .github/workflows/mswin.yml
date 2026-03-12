@@ -6,6 +6,16 @@ on:
   schedule:
     - cron: '35 1,8,15 * * *'
   workflow_dispatch:
+    inputs:
+      ruby_ref:
+        description: 'branch or tag to checkout in the ruby repo'
+        default: 'master'
+      ruby_repo:
+        description: 'github repo owner/repo where to pull ruby from'
+        default: 'ruby/ruby'
+      release_tag:
+        description: 'tag of the release to upload to'
+        default: 'ruby-master'
 
 jobs:
   mswin:
@@ -16,6 +26,9 @@ jobs:
     runs-on: windows-${{ matrix.os }}
     env:
       PRE: ruby-mswin
+      ruby_ref: master
+      release_tag: ruby-master
+      ruby_repo: 'ruby/ruby'
 
     steps:
       - name: git config
@@ -32,13 +45,20 @@ jobs:
         with:
           ruby-version: mswin
 
+      - name: Handle workflow dispatch inputs
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "ruby_ref=${{ github.event.inputs.ruby_ref}}" >> $env:GITHUB_ENV
+          echo "release_tag=${{ github.event.inputs.release_tag}}" >> $env:GITHUB_ENV
+          echo "ruby_repo=${{ github.event.inputs.ruby_repo}}" >> $env:GITHUB_ENV
+
       # cert file is created with RubyInstaller2
       - name: Get Ruby and RubyInstaller2 repos
         timeout-minutes: 5
         run: |
           $gh = 'https://github.com'
           git clone -q --depth=1 --no-tags --branch=master  $gh/oneclick/rubyinstaller2.git ./rubyinstaller2
-          git clone -q --depth=1 --no-tags --branch=master  $gh/ruby/ruby.git               ./ruby
+          git clone -q --depth=1 --no-tags --branch=${{ env.ruby_ref }}  $gh/${{ env.ruby_repo }}.git ./ruby
           cd ruby
           ruby ../git_log_utc.rb
 
@@ -82,6 +102,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           ruby_path: ./${{ env.PRE }}
+          release_tag: ${{ env.release_tag }}
 
       - name: save log artifact
         if: success() || failure()
