@@ -11,7 +11,7 @@ index ee78b44cc5..f9e93880fa 100644
 +  ENV['SSL_CERT_DIR']    ||= "#{RbConfig::TOPDIR}/bin/etc/ssl/certs"
 +  ENV['OPENSSL_CONF']    ||= "#{RbConfig::TOPDIR}/bin/etc/ssl/openssl.cnf"
 +  ENV['OPENSSL_MODULES'] ||= "#{RbConfig::TOPDIR}/bin/lib/ossl-modules"
-+rescue LoadError => e
++rescue LoadError
 +end
 +
  class Binding
