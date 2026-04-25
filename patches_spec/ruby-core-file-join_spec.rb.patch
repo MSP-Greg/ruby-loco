@@ -1,14 +1,14 @@
 diff --git a/spec/ruby/core/file/join_spec.rb b/spec/ruby/core/file/join_spec.rb
-index 0feedbae93..e5bb2048c4 100644
+index 0feedbae93..f9ed2fff03 100644
 --- a/spec/ruby/core/file/join_spec.rb
 +++ b/spec/ruby/core/file/join_spec.rb
 @@ -66,7 +66,9 @@
  
    it "inserts the separator in between empty strings and arrays" do
      File.join("").should == ""
-+    sleep 0.1 if RUBY_PLATFORM.include?('mswin')
++    sleep 0.1
      File.join("", "").should == "/"
-+    sleep 0.1 if RUBY_PLATFORM.include?('mswin')
++    sleep 0.1
      File.join(["", ""]).should == "/"
      File.join("a", "").should == "a/"
      File.join("", "a").should == "/a"
