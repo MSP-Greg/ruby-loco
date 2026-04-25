@@ -92,7 +92,7 @@ Run "nmake 'DESTDIR=' install-nodoc" {
   # Changes here requires changes to mswin/ruby_builtin_dlls.manifest and
   # mswin/ruby-exe.xml, update version in the below
   # <assemblyIdentity type="win32" name="ruby_builtin_dlls" version="1.0.0.4"/>
-  $dlls = @('gmp-10', 'gmpxx-4', 'libcrypto-3-x64', 'libssl-3-x64', 'ffi-8', 'readline', 'yaml', 'zlib1')
+  $dlls = @('gmp-10', 'gmpxx-4', 'libcrypto-3-x64', 'libssl-3-x64', 'ffi-8', 'readline', 'yaml', 'z')
 
   foreach ($dll in $dlls) {
     Copy-Item $d_vcpkg_install/bin/$dll.dll

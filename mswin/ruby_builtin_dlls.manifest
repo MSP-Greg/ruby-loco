@@ -8,5 +8,5 @@
   <file name='libssl-3-x64.dll'/>
   <file name='readline.dll'/>
   <file name='yaml.dll'/>
-  <file name='zlib1.dll'/>
+  <file name='z.dll'/>
 </assembly>
