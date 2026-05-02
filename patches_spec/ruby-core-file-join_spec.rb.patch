@@ -1,21 +1,80 @@
 diff --git a/spec/ruby/core/file/join_spec.rb b/spec/ruby/core/file/join_spec.rb
-index 0feedbae93..f4e657ef49 100644
+index 0feedbae93..eee440c199 100644
 --- a/spec/ruby/core/file/join_spec.rb
 +++ b/spec/ruby/core/file/join_spec.rb
-@@ -66,11 +66,15 @@
+@@ -64,40 +64,47 @@
+     File.join(["a", ["b", ["c"]]]).should == "a/b/c"
+   end
  
-   it "inserts the separator in between empty strings and arrays" do
-     File.join("").should == ""
-+    sleep 0.1
-     File.join("", "").should == "/"
-+    sleep 0.1
-     File.join(["", ""]).should == "/"
-+    sleep 0.1
-     File.join("a", "").should == "a/"
-+    sleep 0.1
-     File.join("", "a").should == "/a"
+-  it "inserts the separator in between empty strings and arrays" do
+-    File.join("").should == ""
+-    File.join("", "").should == "/"
+-    File.join(["", ""]).should == "/"
+-    File.join("a", "").should == "a/"
+-    File.join("", "a").should == "/a"
 -
-+    sleep 0.1
-     File.join([]).should == ""
-     File.join([], []).should == "/"
-     File.join([[], []]).should == "/"
+-    File.join([]).should == ""
+-    File.join([], []).should == "/"
+-    File.join([[], []]).should == "/"
+-    File.join("a", []).should == "a/"
+-    File.join([], "a").should == "/a"
++  it 'inserts the separator in between empty strings and arrays' do
++    File.join('').should == ''
++    sleep 0.05
++    File.join('', '').should == '/'
++    sleep 0.05
++    File.join(['', '']).should == '/'
++    sleep 0.05
++    File.join('a', '').should == 'a/'
++    sleep 0.05
++    File.join('', 'a').should == '/a'
++    sleep 0.05
++    File.join([]).should == ''
++    File.join([], []).should == '/'
++    File.join([[], []]).should == '/'
++    File.join('a', []).should == 'a/'
++    File.join([], 'a').should == '/a'
+   end
+ 
+-  it "handles leading parts edge cases" do
+-    File.join("/bin")     .should == "/bin"
+-    File.join("", "bin")  .should == "/bin"
+-    File.join("/", "bin") .should == "/bin"
+-    File.join("/", "/bin").should == "/bin"
++  it 'handles leading parts edge cases' do
++    sleep 0.05
++    File.join('/bin')     .should == '/bin'
++    sleep 0.05
++    File.join('', 'bin')  .should == '/bin'
++    sleep 0.05
++    File.join('/', 'bin') .should == '/bin'
++    File.join('/', '/bin').should == '/bin'
+   end
+ 
+-  it "handles trailing parts edge cases" do
+-    File.join("bin", "")  .should == "bin/"
+-    File.join("bin/")     .should == "bin/"
+-    File.join("bin/", "") .should == "bin/"
+-    File.join("bin", "/") .should == "bin/"
+-    File.join("bin/", "/").should == "bin/"
++  it 'handles trailing parts edge cases' do
++    File.join('bin', '')  .should == 'bin/'
++    File.join('bin/')     .should == 'bin/'
++    File.join('bin/', '') .should == 'bin/'
++    File.join('bin', '/') .should == 'bin/'
++    File.join('bin/', '/').should == 'bin/'
+   end
+ 
+-  it "handles middle parts edge cases" do
+-    File.join("usr",   "", "bin") .should == "usr/bin"
+-    File.join("usr/",  "", "bin") .should == "usr/bin"
+-    File.join("usr",   "", "/bin").should == "usr/bin"
+-    File.join("usr/",  "", "/bin").should == "usr/bin"
++  it 'handles middle parts edge cases' do
++    File.join('usr',   '', 'bin') .should == 'usr/bin'
++    File.join('usr/',  '', 'bin') .should == 'usr/bin'
++    File.join('usr',   '', '/bin').should == 'usr/bin'
++    File.join('usr/',  '', '/bin').should == 'usr/bin'
+   end
+ 
+   # TODO: See MRI svn r23306. Add patchlevel when there is a release.
