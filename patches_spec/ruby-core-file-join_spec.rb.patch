@@ -20,15 +20,15 @@ index 0feedbae93..eee440c199 100644
 -    File.join([], "a").should == "/a"
 +  it 'inserts the separator in between empty strings and arrays' do
 +    File.join('').should == ''
-+    sleep 0.05
++    sleep 0.2
 +    File.join('', '').should == '/'
-+    sleep 0.05
++    sleep 0.2
 +    File.join(['', '']).should == '/'
-+    sleep 0.05
++    sleep 0.2
 +    File.join('a', '').should == 'a/'
-+    sleep 0.05
++    sleep 0.2
 +    File.join('', 'a').should == '/a'
-+    sleep 0.05
++    sleep 0.2
 +    File.join([]).should == ''
 +    File.join([], []).should == '/'
 +    File.join([[], []]).should == '/'
@@ -42,11 +42,11 @@ index 0feedbae93..eee440c199 100644
 -    File.join("/", "bin") .should == "/bin"
 -    File.join("/", "/bin").should == "/bin"
 +  it 'handles leading parts edge cases' do
-+    sleep 0.05
++    sleep 0.2
 +    File.join('/bin')     .should == '/bin'
-+    sleep 0.05
++    sleep 0.2
 +    File.join('', 'bin')  .should == '/bin'
-+    sleep 0.05
++    sleep 0.2
 +    File.join('/', 'bin') .should == '/bin'
 +    File.join('/', '/bin').should == '/bin'
    end
