@@ -4,14 +4,14 @@ on:
     branches:
       - '*'
   schedule:
-    - cron: '35 1,8,15 * * *'
+    - cron: '35 2,9,15 * * *'
   workflow_dispatch:
 
 jobs:
   mswin:
     strategy:
       matrix:
-        os: [2025]
+        os: [2025-vs2026]
       fail-fast: false
     runs-on: windows-${{ matrix.os }}
     env:
