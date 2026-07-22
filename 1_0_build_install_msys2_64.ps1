@@ -180,11 +180,11 @@ Time-Log "configure"
 Remove-Read-Only $d_ruby
 Remove-Read-Only $d_build
 
-#Run "make incs -j$jobs 2>&1" {
-#  iex "make incs -j$jobs 2>&1"
-#  Check-Exit "make incs -j$jobs 2>&1 failure"
-#}
-#Time-Log "make incs -j$jobs"
+Run "make incs -j$jobs 2>&1" {
+  iex "make incs -j$jobs 2>&1"
+  Check-Exit "make incs -j$jobs 2>&1 failure"
+}
+Time-Log "make incs -j$jobs"
 
 Run "make -j$jobs 2>&1" {
   iex "make -j$jobs 2>&1"
