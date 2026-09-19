@@ -1,0 +1,12 @@
+diff --git a/test/rubygems/test_require.rb b/test/rubygems/test_require.rb
+index 6816e42bfe..233f3c73f1 100644
+--- a/test/rubygems/test_require.rb
++++ b/test/rubygems/test_require.rb
+@@ -475,6 +475,7 @@ def test_second_gem_require_does_not_resolve_path_manually_before_going_through_
+   end
+ 
+   def test_realworld_default_gem
++    omit "this test can't work under ruby-loco setup"
+     omit "this test can't work under ruby-core setup" if ruby_repo?
+     omit "JRuby on Windows does not register json as a default gem the same way" if Gem.win_platform? && Gem.java_platform?
+ 
