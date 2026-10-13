@@ -1,0 +1,12 @@
+diff --git a/test/ruby/test_ractor.rb b/test/ruby/test_ractor.rb
+index 55598d54c0..58977c655e 100644
+--- a/test/ruby/test_ractor.rb
++++ b/test/ruby/test_ractor.rb
+@@ -1361,6 +1361,7 @@ def test_attached_object_of_unshareable_object
+ 
+   def test_incremental_marking_in_main_and_non_main_ractors
+     omit 'incremental marking gate lives in the default GC' unless GC.config[:implementation] == 'default'
++    omit 'Problems with mswin' if RUBY_PLATFORM.include? 'mswin'
+     assert_separately(%W[-W0 -r-test-/gc/disable -r#{RACTOR_GC_HELPER}], <<~'RUBY', timeout: 120)
+       _blocker = Ractor.new { Ractor.receive }
+ 
