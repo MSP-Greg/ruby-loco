@@ -5,7 +5,7 @@ index ca2980e04b..d730c74081 100644
 @@ -409,6 +409,8 @@ def with_local_bundler_at(path)
  
      # If bundler gemspec exists, pretend it's installed
-     bundler_gemspec = File.expand_path("../../bundler/bundler.gemspec", __dir__)
+     bundler_gemspec = File.expand_path("../../bundler.gemspec", __dir__)
 +    bundler_gemspec = File.expand_path("../../lib/bundler/bundler.gemspec", __dir__) unless File.exist?(bundler_gemspec)
 +
      if File.exist?(bundler_gemspec)
@@ -98,7 +98,7 @@ index e5f9d7bed2..20d66c6a24 100644
      RUBY
 -    output = Gem::Util.popen(*ruby_with_rubygems_in_load_path, "-e", cmd).strip
 +    output = Gem::Util.popen("ruby", "-e", cmd).strip
-     assert $?.success?
+     assert Process.last_status.success?
      refute_empty output
    end
 @@ -502,7 +502,8 @@ def test_realworld_upgraded_default_gem

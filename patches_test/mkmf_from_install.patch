@@ -2,13 +2,15 @@ diff --git a/test/mkmf/base.rb b/test/mkmf/base.rb
 index ec42bca100..b0702aeb9c 100644
 --- a/test/mkmf/base.rb
 +++ b/test/mkmf/base.rb
-@@ -1,24 +1,16 @@
+@@ -1,26 +1,16 @@
  # frozen_string_literal: false
 -$extmk = true
 +
  require 'rbconfig'
 -RbConfig.fire_update!("top_srcdir", File.expand_path("../..", __dir__))
--File.foreach(RbConfig::CONFIG["topdir"]+"/Makefile") do |line|
+-makefile = RbConfig::CONFIG["topdir"]+"/Makefile"
+-makefile = RbConfig::CONFIG["topdir"]+"/GNUmakefile" unless File.exist?(makefile)
+-File.foreach(makefile) do |line|
 -  if /^CC_WRAPPER\s*=\s*/ =~ line
 -    RbConfig.fire_update!('CC_WRAPPER', $'.strip)
 -    break
@@ -31,4 +33,4 @@ index ec42bca100..b0702aeb9c 100644
 -
  class TestMkmf < Test::Unit::TestCase
    module Base
-     MKMFLOG = proc {File.read("mkmf.log") rescue ""}
+     MKMFLOG = proc {File.binread("mkmf.log") rescue ""}

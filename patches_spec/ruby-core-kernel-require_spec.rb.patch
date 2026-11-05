@@ -2,15 +2,12 @@ diff --git a/spec/ruby/core/kernel/require_spec.rb b/spec/ruby/core/kernel/requi
 index c609809df5..f057c71349 100644
 --- a/spec/ruby/core/kernel/require_spec.rb
 +++ b/spec/ruby/core/kernel/require_spec.rb
-@@ -22,7 +22,11 @@
-       provided += %w[set pathname]
+@@ -23,6 +23,9 @@
      end
      ruby_version_is "4.1" do
--      provided += %w[monitor]
+       provided += %w[monitor io/wait]
 +      if RUBY_PLATFORM.include?('mswin')
-+        provided += %w[monitor rbconfig]
-+      else
-+        provided += %w[monitor]
++        provided += %w[rbconfig]
 +      end
      end
  
