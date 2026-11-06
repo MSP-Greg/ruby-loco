@@ -23,8 +23,7 @@ diff --git a/bootstraptest/test_io.rb b/bootstraptest/test_io.rb
 index 4081769a8c..fc11fe2728 100644
 --- a/bootstraptest/test_io.rb
 +++ b/bootstraptest/test_io.rb
-@@ -1,5 +1,5 @@
- /freebsd/ =~ RUBY_PLATFORM or
+@@ -1,4 +1,4 @@
 -assert_finish 5, %q{
 +assert_finish 6, %q{
    r, w = IO.pipe
